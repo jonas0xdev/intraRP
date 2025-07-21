@@ -15,9 +15,42 @@ if (!isset($_SESSION['cirs_user']) || empty($_SESSION['cirs_user'])) {
     header("Location: " . BASE_PATH . "admin/users/editprofile.php");
 }
 
+use App\Helpers\Flash;
+
+// Mitarbeiterprofil anhand der Discord-ID laden
+$mitarbeiter = null;
+if (isset($_SESSION['discordtag']) && !empty($_SESSION['discordtag'])) {
+    $stmt = $pdo->prepare("
+        SELECT 
+            m.fullname, 
+            m.dienstnr, 
+            CASE 
+                WHEN m.geschlecht = 1 THEN dg.name_m 
+                ELSE dg.name_w 
+            END as dienstgrad_name,
+            m.geschlecht
+        FROM intra_mitarbeiter m 
+        LEFT JOIN intra_mitarbeiter_dienstgrade dg ON m.dienstgrad = dg.id 
+        WHERE m.discordtag = ? AND dg.archive = 0
+    ");
+    $stmt->execute([$_SESSION['discordtag']]);
+    $mitarbeiter = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$mitarbeiter) {
+        Flash::set('error', 'Kein Mitarbeiterprofil für Ihre Discord-ID gefunden. Bitte wenden Sie sich an die Administration.');
+        header("Location: " . BASE_PATH . "admin/index.php");
+        exit();
+    }
+} else {
+    Flash::set('error', 'Keine Discord-ID in der Session gefunden. Bitte loggen Sie sich erneut ein.');
+    header("Location: " . BASE_PATH . "admin/index.php");
+    exit();
+}
+
 if (isset($_POST['new']) && $_POST['new'] == 1) {
-    $name_dn = $_REQUEST['name_dn'];
-    $dienstgrad = $_REQUEST['dienstgrad'];
+    // Verwende die Daten aus dem geladenen Mitarbeiterprofil
+    $name_dn = $mitarbeiter['fullname'] . ' (' . $mitarbeiter['dienstnr'] . ')';
+    $dienstgrad = $mitarbeiter['dienstgrad_name'];
     $freitext = $_REQUEST['freitext'];
 
     do {
@@ -43,7 +76,7 @@ if (isset($_POST['new']) && $_POST['new'] == 1) {
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="light">
 
 <head>
     <meta charset="UTF-8" />
@@ -52,11 +85,12 @@ if (isset($_POST['new']) && $_POST['new'] == 1) {
     <title>Anträge &rsaquo; <?php echo SYSTEM_NAME ?></title>
     <!-- Stylesheets -->
     <link rel="stylesheet" href="<?= BASE_PATH ?>assets/css/style.min.css" />
-    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/css/cirs.min.css" />
+    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/css/admin.min.css" />
     <link rel="stylesheet" href="<?= BASE_PATH ?>assets/_ext/lineawesome/css/line-awesome.min.css" />
     <link rel="stylesheet" href="<?= BASE_PATH ?>assets/fonts/mavenpro/css/all.min.css" />
     <!-- Bootstrap -->
     <link rel="stylesheet" href="<?= BASE_PATH ?>vendor/twbs/bootstrap/dist/css/bootstrap.min.css">
+    <script src="<?= BASE_PATH ?>vendor/components/jquery/jquery.min.js"></script>
     <script src="<?= BASE_PATH ?>vendor/twbs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="<?= BASE_PATH ?>assets/favicon/favicon-96x96.png" sizes="96x96" />
@@ -75,61 +109,54 @@ if (isset($_POST['new']) && $_POST['new'] == 1) {
 
 </head>
 
-<body id="antrag">
-    <!-- NAVIGATION -->
-    <nav class="navbar bg-main-color" id="cirs-nav">
-        <div class="container-fluid">
-            <div class="container">
-                <div class="row w-100">
-                    <div class="col d-flex align-items-center justify-content-start">
-                        <a id="sb-logo" href="#">
-                            <img src="<?= BASE_PATH ?>assets/img/schriftzug_stadt_weiss.png" alt="Stadt <?php echo SERVER_CITY ?>" width="auto" height="64px">
-                        </a>
-                    </div>
-                    <div class="col d-flex align-items-center justify-content-end text-light" id="pageTitle">
-                        Antragsmanagement
+<body data-bs-theme="dark" data-page="antrag">
+    <!-- PRELOAD -->
+
+    <?php include __DIR__ . "/../assets/components/navbar.php"; ?>
+    <div class="container-full position-relative" id="mainpageContainer">
+        <!-- ------------ -->
+        <!-- PAGE CONTENT -->
+        <!-- ------------ -->
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <hr class="text-light my-3">
+                    <h1>Beförderungsantrag stellen</h1>
+                    <?php
+                    Flash::render();
+                    ?>
+                    <hr class="text-light my-3">
+                    <div class="row">
+                        <div class="col mx-auto">
+                            <div class="intra__tile p-2">
+                                <form action="" id="cirs-form" method="post">
+                                    <input type="hidden" name="new" value="1" />
+                                    <div class="row">
+                                        <div class="col mb-3">
+                                            <label for="name_dn" class="form-label fw-bold">Name und Dienstnummer</label>
+                                            <input type="text" class="form-control" id="name_dn" name="name_dn"
+                                                value="<?php echo htmlspecialchars($mitarbeiter['fullname'] . ' (' . $mitarbeiter['dienstnr'] . ')'); ?>"
+                                                readonly>
+                                        </div>
+                                        <div class="col mb-3">
+                                            <label for="dienstgrad" class="form-label fw-bold">Aktueller Dienstgrad</label>
+                                            <input type="text" class="form-control" id="dienstgrad" name="dienstgrad"
+                                                value="<?php echo htmlspecialchars($mitarbeiter['dienstgrad_name']); ?>"
+                                                readonly>
+                                        </div>
+                                    </div>
+                                    <hr class="text-light my-3">
+                                    <h5>Schriftlicher Antrag</h5>
+                                    <div class="mb-3">
+                                        <textarea class="form-control" id="freitext" name="freitext" rows="5"></textarea>
+                                    </div>
+                                    <p><input class="mt-4 btn btn-main-color" name="submit" type="submit" value="Absenden" /></p>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </nav>
-    <!-- ------------ -->
-    <!-- PAGE CONTENT -->
-    <!-- ------------ -->
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-2 border-2 border-top border-semigray bg-gray-color" id="cirs-links">
-                <hr class="text-gray-color my-3">
-                <?php include '../assets/components/navbar_antraege.php' ?>
-            </div>
-            <div class="col"></div>
-            <div class="col-6 my-5">
-                <hr class="text-light my-3">
-                <h1>Beförderungsantrag stellen</h1>
-                <hr class="text-light my-3">
-                <form action="" id="cirs-form" method="post">
-                    <input type="hidden" name="new" value="1" />
-                    <div class="row">
-                        <div class="col mb-3">
-                            <label for="name_dn" class="form-label fw-bold">Name und Dienstnummer <span class="text-main-color">*</span></label>
-                            <input type="text" class="form-control" id="name_dn" name="name_dn" placeholder="" required>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col mb-3">
-                            <label for="dienstgrad" class="form-label fw-bold">Aktueller Dienstgrad <span class="text-main-color">*</span></label>
-                            <input type="text" class="form-control" id="dienstgrad" name="dienstgrad" placeholder="" required>
-                        </div>
-                    </div>
-                    <hr class="text-light my-3">
-                    <h5>Schriftlicher Antrag</h5>
-                    <div class="mb-3">
-                        <textarea class="form-control" id="freitext" name="freitext" rows="5"></textarea>
-                    </div>
-                    <p><input class="mt-4 btn btn-main-color" name="submit" type="submit" value="Absenden" /></p>
-                </form>
-            </div>
-            <div class="col"></div>
         </div>
     </div>
 
