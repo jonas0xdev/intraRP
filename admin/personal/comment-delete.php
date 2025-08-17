@@ -21,11 +21,11 @@ if (!Permissions::check(['admin', 'personnel.comment.delete'])) {
 
 $userid = $_SESSION['userid'];
 
-$id = $_GET['id'];
+$logid = $_GET['id'];
 $pid = $_GET['pid'];
 
-$stmt = $pdo->prepare("DELETE FROM personal_kommentare WHERE id = :id");
-$stmt->bindParam(':id', $id);
+$stmt = $pdo->prepare("DELETE FROM intra_mitarbeiter_log WHERE logid = :logid");
+$stmt->bindParam(':logid', $logid);
 $stmt->execute();
 
 $auditlogger = new AuditLogger($pdo);
