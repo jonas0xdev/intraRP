@@ -98,15 +98,25 @@ if (!isset($_SESSION['fahrername']) || !isset($_SESSION['protfzg'])) {
                                         </a>
                                     </div> -->
                                     <?php
-                                    $stmt = $pdo->prepare("SELECT patname, patgebdat, edatum, ezeit, enr, prot_by, freigegeben, pfname  FROM intra_edivi WHERE fzg_transp = :fzg_transp AND freigegeben = 0 OR fzg_na = :fzg_na AND freigegeben = 0");
-                                    $stmt->execute(
-                                        [
-                                            ':fzg_transp' => $_SESSION['protfzg'],
-                                            ':fzg_na' => $_SESSION['protfzg']
-                                        ]
-                                    );
+                                    $stmt = $pdo->prepare("SELECT patname, patgebdat, edatum, ezeit, enr, prot_by, freigegeben, pfname FROM intra_edivi WHERE freigegeben = 0 AND (fzg_transp = :fzg_transp OR fzg_na = :fzg_na) ORDER BY created_at ASC");
+                                    $stmt->bindValue(':fzg_transp', $_SESSION['protfzg'], PDO::PARAM_STR);
+                                    $stmt->bindValue(':fzg_na',     $_SESSION['protfzg'], PDO::PARAM_STR);
+                                    $stmt->execute();
                                     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                                    function protLabelFromIndex(int $i): string
+                                    {
+                                        $repeat  = intdiv($i, 26) + 1;
+                                        $charIdx = $i % 26;
+                                        $letter  = chr(65 + $charIdx);
+                                        return str_repeat($letter, $repeat);
+                                    }
+
+                                    $rank = 0;
+
                                     foreach ($result as $row) {
+                                        $label = protLabelFromIndex($rank++);
+
                                         if (!empty($row['edatum'])) {
                                             $row['edatum'] = (new DateTime($row['edatum']))->format('d.m.Y');
                                         } else {
@@ -138,7 +148,7 @@ if (!isset($_SESSION['fahrername']) || !isset($_SESSION['protfzg'])) {
                                             <div class="edivi__einsatz-container">
                                                 <a href="prot/index.php?enr=<?= $row['enr'] ?>" class="edivi__einsatz-link">
                                                     <div class="row edivi__einsatz edivi__einsatz-set">
-                                                        <div class="col-2 edivi__einsatz-type"><span>E</span></div>
+                                                        <div class="col-2 edivi__einsatz-type"><span><?= htmlspecialchars($label) ?></span></div>
                                                         <div class="col edivi__einsatz-enr"><span>#<?= $row['enr'] ?> <span class="edivi__einsatz-cat">NA</span></span><br><?= $row['edatum'] ?> <?= $row['ezeit'] ?> Uhr</div>
                                                         <div class="col edivi__einsatz-name"><span>Patient:</span><br><?= $row['patname'] ?> * <?= $row['patgebdat'] ?></div>
                                                         <div class="col edivi__einsatz-freigeber"><span>Protokollant:</span><br><?= $row['pfname'] ?></div>
@@ -151,7 +161,7 @@ if (!isset($_SESSION['fahrername']) || !isset($_SESSION['protfzg'])) {
                                             <div class="edivi__einsatz-container">
                                                 <a href="prot/index.php?enr=<?= $row['enr'] ?>" class="edivi__einsatz-link">
                                                     <div class="row edivi__einsatz edivi__einsatz-set">
-                                                        <div class="col-2 edivi__einsatz-type"><span>E</span></div>
+                                                        <div class="col-2 edivi__einsatz-type"><span><?= htmlspecialchars($label) ?></span></div>
                                                         <div class="col edivi__einsatz-enr"><span>#<?= $row['enr'] ?> <span class="edivi__einsatz-cat">RD</span></span><br><?= $row['edatum'] ?> <?= $row['ezeit'] ?> Uhr</div>
                                                         <div class="col edivi__einsatz-name"><span>Patient:</span><br><?= $row['patname'] ?> * <?= $row['patgebdat'] ?></div>
                                                         <div class="col edivi__einsatz-freigeber"><span>Protokollant:</span><br><?= $row['pfname'] ?></div>
