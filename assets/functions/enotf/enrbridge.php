@@ -1,0 +1,126 @@
+<?php
+session_start();
+require_once __DIR__ . '/../../../assets/config/config.php';
+require __DIR__ . '/../../../assets/config/database.php';
+
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $action = $_POST["action"];
+    $enr = $_POST["enr"];
+    $prot_by = isset($_POST["prot_by"]) ? (int)$_POST["prot_by"] : 0;
+    $force_create = isset($_POST["force_create"]) ? (int)$_POST["force_create"] : 0;
+
+    // Prüfen ob bereits ein Protokoll existiert
+    $stmt = $pdo->prepare("SELECT fzg_transp, fzg_na FROM intra_edivi WHERE enr = :enr LIMIT 1");
+    $stmt->execute(['enr' => $enr]);
+    $existing = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Fahrzeugtyp ermitteln
+    $fahrzeugId = $_SESSION['protfzg'] ?? null;
+    $stmtFzg = $pdo->prepare("SELECT identifier, rd_type FROM intra_fahrzeuge WHERE identifier = :id");
+    $stmtFzg->execute(['id' => $fahrzeugId]);
+    $fahrzeug = $stmtFzg->fetch(PDO::FETCH_ASSOC);
+
+    $isDoctorVehicle = ($fahrzeug && $fahrzeug['rd_type'] == 1);
+    $fzgField = $isDoctorVehicle ? 'fzg_na' : 'fzg_transp';
+
+    // Wenn Protokoll existiert und relevantes Feld belegt ist
+    if ($existing && !empty($existing[$fzgField])) {
+        // Wenn force_create nicht gesetzt ist, zum existierenden Protokoll weiterleiten
+        if ($force_create !== 1) {
+            header("Location: " . BASE_PATH . "enotf/prot/index.php?enr=" . urlencode($enr));
+            exit();
+        }
+
+        // force_create ist gesetzt - neue Einsatznummer mit Suffix generieren
+        $originalEnr = $enr;
+        $suffix = 1;
+
+        do {
+            $newEnr = $originalEnr . "_" . $suffix;
+            $checkStmt = $pdo->prepare("SELECT 1 FROM intra_edivi WHERE enr = :enr");
+            $checkStmt->execute(['enr' => $newEnr]);
+            $suffixExists = $checkStmt->rowCount() > 0;
+
+            if ($suffixExists) {
+                $suffix++;
+            }
+        } while ($suffixExists);
+
+        $enr = $newEnr;
+    } elseif ($existing && empty($existing[$fzgField])) {
+        // Protokoll existiert, aber relevantes Feld ist leer - Update statt Insert
+        $fahrer = (!empty($_SESSION['fahrername']) && !empty($_SESSION['fahrerquali']))
+            ? $_SESSION['fahrername'] . " (" . $_SESSION['fahrerquali'] . ")"
+            : null;
+
+        $beifahrer = (!empty($_SESSION['beifahrername']) && !empty($_SESSION['beifahrerquali']))
+            ? $_SESSION['beifahrername'] . " (" . $_SESSION['beifahrerquali'] . ")"
+            : null;
+
+        $persoField1 = $isDoctorVehicle ? 'fzg_na_perso' : 'fzg_transp_perso';
+        $persoField2 = $isDoctorVehicle ? 'fzg_na_perso_2' : 'fzg_transp_perso_2';
+
+        $updateFields = [$fzgField . ' = :fahrzeug'];
+        $params = [':fahrzeug' => $fahrzeugId];
+
+        if ($beifahrer !== null) {
+            $updateFields[] = $persoField1 . ' = :beifahrer';
+            $params[':beifahrer'] = $beifahrer;
+        }
+
+        if ($fahrer !== null) {
+            $updateFields[] = $persoField2 . ' = :fahrer';
+            $params[':fahrer'] = $fahrer;
+        }
+
+        $sql = "UPDATE intra_edivi SET " . implode(", ", $updateFields) . " WHERE enr = :enr";
+        $params[':enr'] = $enr;
+
+        $update = $pdo->prepare($sql);
+        $update->execute($params);
+
+        header("Location: " . BASE_PATH . "enotf/prot/index.php?enr=" . urlencode($enr));
+        exit();
+    }
+
+    // Neues Protokoll erstellen (entweder komplett neu oder mit Suffix)
+    $persoField1 = $isDoctorVehicle ? 'fzg_na_perso' : 'fzg_transp_perso';
+    $persoField2 = $isDoctorVehicle ? 'fzg_na_perso_2' : 'fzg_transp_perso_2';
+
+    $fahrer = (!empty($_SESSION['fahrername']) && !empty($_SESSION['fahrerquali']))
+        ? $_SESSION['fahrername'] . " (" . $_SESSION['fahrerquali'] . ")"
+        : null;
+
+    $beifahrer = (!empty($_SESSION['beifahrername']) && !empty($_SESSION['beifahrerquali']))
+        ? $_SESSION['beifahrername'] . " (" . $_SESSION['beifahrerquali'] . ")"
+        : null;
+
+    $columns = ['enr', 'prot_by', $fzgField];
+    $placeholders = [':enr', ':prot_by', ':fahrzeug'];
+    $params = [
+        ':enr' => $enr,
+        ':prot_by' => $prot_by,
+        ':fahrzeug' => $fahrzeugId
+    ];
+
+    if ($beifahrer !== null) {
+        $columns[] = $persoField1;
+        $placeholders[] = ':beifahrer';
+        $params[':beifahrer'] = $beifahrer;
+    }
+
+    if ($fahrer !== null) {
+        $columns[] = $persoField2;
+        $placeholders[] = ':fahrer';
+        $params[':fahrer'] = $fahrer;
+    }
+
+    $sql = "INSERT INTO intra_edivi (" . implode(", ", $columns) . ")
+            VALUES (" . implode(", ", $placeholders) . ")";
+
+    $insert = $pdo->prepare($sql);
+    $insert->execute($params);
+
+    header("Location: " . BASE_PATH . "enotf/prot/index.php?enr=" . urlencode($enr));
+    exit();
+}
