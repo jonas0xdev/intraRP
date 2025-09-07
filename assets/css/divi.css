@@ -1,3 +1,4 @@
+@charset "UTF-8";
 :root {
   --secondary-color: #011e4a;
   --secondary-color-dimmed: #0a2e5a;
@@ -386,6 +387,114 @@ body {
 #edivi__nidanav > a span {
   position: relative;
   z-index: 1;
+}
+
+[class*=edivi__interactbutton] {
+  padding: 0 !important;
+}
+[class*=edivi__interactbutton] > a,
+[class*=edivi__interactbutton] > label {
+  position: relative;
+  word-wrap: break-word;
+  color: var(--white);
+  background-color: var(--secondary-color);
+  border-radius: 0;
+  padding: 25px 4px;
+  padding-left: 14px;
+  text-decoration: none;
+  font-weight: 600;
+  text-align: start;
+  margin: 0;
+  border: 1px solid #191919;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  background-color: #333333;
+  z-index: 1;
+  overflow: hidden;
+}
+[class*=edivi__interactbutton] > a:hover,
+[class*=edivi__interactbutton] > label:hover {
+  background-color: #5f5f5f;
+  color: var(--white);
+  cursor: pointer;
+}
+[class*=edivi__interactbutton] > a.active,
+[class*=edivi__interactbutton] > label.active {
+  background-color: #5f5f5f;
+  color: var(--white);
+}
+[class*=edivi__interactbutton] > a:before,
+[class*=edivi__interactbutton] > label:before {
+  content: "";
+  display: block;
+  width: 2px;
+  height: 20px;
+  background-color: transparent;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: width 0.3s ease;
+  z-index: 2;
+}
+[class*=edivi__interactbutton] > a.edivi__validation-red:before,
+[class*=edivi__interactbutton] > label.edivi__validation-red:before {
+  background-color: #d91425;
+  top: 8px;
+}
+[class*=edivi__interactbutton] > a.edivi__validation-green:before,
+[class*=edivi__interactbutton] > label.edivi__validation-green:before {
+  background-color: #55b530;
+  top: 28px;
+}
+[class*=edivi__interactbutton] > a.edivi__validation-ignore:before,
+[class*=edivi__interactbutton] > label.edivi__validation-ignore:before {
+  display: none;
+}
+[class*=edivi__interactbutton] > a span,
+[class*=edivi__interactbutton] > label span {
+  position: relative;
+  z-index: 1;
+}
+[class*=edivi__interactbutton] .btn-check {
+  position: absolute !important;
+  clip: rect(0, 0, 0, 0) !important;
+  pointer-events: none !important;
+}
+[class*=edivi__interactbutton] .btn-check:checked + label {
+  background-color: #5f5f5f;
+  color: var(--white);
+}
+[class*=edivi__interactbutton] .btn-check:focus + label {
+  box-shadow: 0 0 0 0.2rem rgba(87, 131, 207, 0.25);
+}
+
+[class*=edivi__interactbutton] > label:after {
+  content: "";
+  font-family: "Line Awesome Free";
+  position: absolute;
+  right: 7px;
+  top: 50%;
+  font-size: 1.5rem;
+  font-weight: 900;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.3);
+  z-index: 0;
+}
+
+[class*=edivi__interactbutton] .btn-check:checked + label:after {
+  content: "";
+}
+
+.edivi__interactbutton-more > a:after {
+  content: "";
+  font-family: "Line Awesome Free";
+  position: absolute;
+  right: 7px;
+  top: 50%;
+  font-size: 1.5rem;
+  font-weight: 900;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.3);
+  z-index: 0;
 }
 
 .edivi__box h5 {

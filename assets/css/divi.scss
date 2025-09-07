@@ -409,6 +409,110 @@ body {
   }
 }
 
+[class*="edivi__interactbutton"] {
+  padding: 0 !important;
+  > a,
+  > label {
+    position: relative;
+    word-wrap: break-word;
+    color: var(--white);
+    background-color: var(--secondary-color);
+    border-radius: 0;
+    padding: 25px 4px;
+    padding-left: 14px;
+    text-decoration: none;
+    font-weight: 600;
+    text-align: start;
+    margin: 0;
+    border: 1px solid #191919;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    background-color: #333333;
+    z-index: 1;
+    overflow: hidden;
+    &:hover {
+      background-color: #5f5f5f;
+      color: var(--white);
+      cursor: pointer;
+    }
+    &.active {
+      background-color: #5f5f5f;
+      color: var(--white);
+    }
+    &:before {
+      content: "";
+      display: block;
+      width: 2px;
+      height: 20px;
+      background-color: transparent;
+      position: absolute;
+      top: 0;
+      left: 0;
+      transition: width 0.3s ease;
+      z-index: 2;
+    }
+    &.edivi__validation-red:before {
+      background-color: #d91425;
+      top: 8px;
+    }
+    &.edivi__validation-green:before {
+      background-color: #55b530;
+      top: 28px;
+    }
+    &.edivi__validation-ignore:before {
+      display: none;
+    }
+    span {
+      position: relative;
+      z-index: 1;
+    }
+  }
+
+  .btn-check {
+    position: absolute !important;
+    clip: rect(0, 0, 0, 0) !important;
+    pointer-events: none !important;
+
+    &:checked + label {
+      background-color: #5f5f5f;
+      color: var(--white);
+    }
+
+    &:focus + label {
+      box-shadow: 0 0 0 0.2rem rgba(87, 131, 207, 0.25);
+    }
+  }
+}
+
+[class*="edivi__interactbutton"] > label:after {
+  content: "\f04d";
+  font-family: "Line Awesome Free";
+  position: absolute;
+  right: 7px;
+  top: 50%;
+  font-size: 1.5rem;
+  font-weight: 900;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.3);
+  z-index: 0;
+}
+
+[class*="edivi__interactbutton"] .btn-check:checked + label:after {
+  content: "\f14a";
+}
+
+.edivi__interactbutton-more > a:after {
+  content: "\f105";
+  font-family: "Line Awesome Free";
+  position: absolute;
+  right: 7px;
+  top: 50%;
+  font-size: 1.5rem;
+  font-weight: 900;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.3);
+  z-index: 0;
+}
+
 .edivi__box h5 {
   font-size: 1.4rem;
 }

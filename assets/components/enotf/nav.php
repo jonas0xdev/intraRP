@@ -5,7 +5,7 @@
     </a>
     <a href="<?= BASE_PATH ?>enotf/prot/anamnese.php?enr=<?= $daten['enr'] ?>" data-page="anamnese" class="edivi__nidanav-nocheck"><span>Anamnese</span></a>
     <a href="<?= BASE_PATH ?>enotf/prot/atemwege.php?enr=<?= $daten['enr'] ?>" data-page="atemwege"
-        data-requires="awfrei_1|awfrei_2|awfrei_3,awsicherung_neu,zyanose_1|zyanose_2">
+        data-requires="awfrei_1,awsicherung_neu,zyanose_1">
         <span>Atemwege</span>
     </a>
     <a href="<?= BASE_PATH ?>enotf/prot/atmung.php?enr=<?= $daten['enr'] ?>" data-page="atmung"

@@ -45,11 +45,8 @@
             });
         }
 
-
-
         window.__dynamicDaten = <?= json_encode($daten) ?>;
         updateNavFillStates(window.__dynamicDaten);
-
 
         function showToast(message, type = 'success') {
             var bgColor = (type === 'success') ? '#28a745' : '#dc3545';
@@ -92,6 +89,8 @@
             clicked.trigger('blur');
         });
 
+        // Ersetze den inputElements change/blur Handler mit diesem korrigierten Code:
+
         inputElements.off('change blur').on('change blur', function(e) {
             const $this = $(this);
             const fieldName = $this.attr('name');
@@ -105,14 +104,16 @@
                 currentValue = $this.val();
             }
 
-            const originalValue = $this.data('original-value');
-
             if ($this.is(':radio')) {
-                const originalGroupValue = $('input[name="' + fieldName + '"]').filter(function() {
-                    return $(this).data('original-value') == $(this).val();
-                }).val();
-                if (currentValue == originalGroupValue) return;
+                const savedValue = window.__dynamicDaten[fieldName];
+                console.log('Radio check:', fieldName, 'currentValue:', currentValue, 'savedValue:', savedValue, 'types:', typeof currentValue, typeof savedValue);
+
+                if (String(currentValue) === String(savedValue)) {
+                    console.log('Radio value unchanged, skipping save');
+                    return;
+                }
             } else {
+                const originalValue = $this.data('original-value');
                 if (!$this.hasClass('btn-check') && currentValue == originalValue) return;
             }
 
@@ -128,6 +129,8 @@
                     labelText = fieldName;
                 }
 
+                console.log('Saving field:', fieldName, 'value:', currentValue);
+
                 $.ajax({
                     url: '<?= BASE_PATH ?>assets/functions/save_fields.php',
                     type: 'POST',
@@ -138,10 +141,11 @@
                     },
                     success: function(response) {
                         showToast("✔️ Feld '" + labelText + "' gespeichert.", 'success');
+
                         $('input[name="' + fieldName + '"]').data('original-value', currentValue);
-                        $this.data('original-value', currentValue);
 
                         window.__dynamicDaten[fieldName] = currentValue;
+                        console.log('Updated __dynamicDaten[' + fieldName + ']:', currentValue);
 
                         updateNavFillStates(window.__dynamicDaten);
                     },

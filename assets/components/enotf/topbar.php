@@ -16,7 +16,7 @@ use App\Auth\Permissions;
             if ($daten['freigegeben'] != 1) :
                 if (ENOTF_PREREG) : ?>
                     <a href="<?= BASE_PATH ?>enotf/schnittstelle/voranmeldung.php?enr=<?= $enr ?>" id="prereg" class="edivi__iconlink">
-                        <i class="las la-hospital"></i><br>
+                        <i class="las la-hospital-alt"></i><br>
                         <small>Voranmeldung</small>
                     </a>
                 <?php endif; ?>
