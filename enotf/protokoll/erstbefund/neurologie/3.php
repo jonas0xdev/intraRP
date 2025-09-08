@@ -90,11 +90,42 @@ $currentDate = date('d.m.Y');
                 <div class="col" id="edivi__content" style="padding-left: 0">
                     <div class="row" style="margin-left: 0">
                         <div class="col-2 d-flex flex-column edivi__interactbutton-more">
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/atemwege/massnahmen/1.php?enr=<?= $daten['enr'] ?>" data-requires="awsicherung_neu">
-                                <span>Atemwegssicherung</span>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/atemwege/index.php?enr=<?= $daten['enr'] ?>" data-requires="awfrei_1,awsicherung_neu,zyanose_1">
+                                <span>Atemwege</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/atemwege/massnahmen/2.php?enr=<?= $daten['enr'] ?>">
-                                <span>Sauerstoffgabe</span>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/atmung/index.php?enr=<?= $daten['enr'] ?>" data-requires="b_symptome,b_auskult">
+                                <span>Atmung</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/index.php?enr=<?= $daten['enr'] ?>" data-requires="c_kreislauf,c_ekg">
+                                <span>Kreislauf</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/neurologie/index.php?enr=<?= $daten['enr'] ?>" data-requires="d_bewusstsein,d_ex_1,d_pupillenw_1,d_pupillenw_2,d_lichtreakt_1,d_lichtreakt_2,d_gcs_1,d_gcs_2,d_gcs_3" class="active">
+                                <span>Neurologie</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/index.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_k,v_muster_t,v_muster_a,v_muster_al,v_muster_bl,v_muster_w">
+                                <span>Erweitern</span>
+                            </a>
+                        </div>
+                        <div class="col-2 d-flex flex-column edivi__interactbutton-more">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/neurologie/1.php?enr=<?= $daten['enr'] ?>" data-requires="d_bewusstsein">
+                                <span>Bewusstseinslage</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/neurologie/2.php?enr=<?= $daten['enr'] ?>" data-requires="d_ex_1">
+                                <span>Extremitätenbewegung</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/neurologie/3.php?enr=<?= $daten['enr'] ?>" data-requires="d_pupillenw_1,d_pupillenw_2,d_lichtreakt_1,d_lichtreakt_2" class="active">
+                                <span>Pupillen</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/neurologie/4.php?enr=<?= $daten['enr'] ?>" data-requires="d_gcs_1,d_gcs_2,d_gcs_3">
+                                <span>GCS</span>
+                            </a>
+                        </div>
+                        <div class="col-2 d-flex flex-column edivi__interactbutton-more">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/neurologie/3_1.php?enr=<?= $daten['enr'] ?>" data-requires="d_pupillenw_1,d_pupillenw_2">
+                                <span>Pupillenweite</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/neurologie/3_2.php?enr=<?= $daten['enr'] ?>" data-requires="d_lichtreakt_1,d_lichtreakt_2">
+                                <span>Lichtreaktion</span>
                             </a>
                         </div>
                     </div>

@@ -90,19 +90,48 @@ $currentDate = date('d.m.Y');
                 <div class="col" id="edivi__content" style="padding-left: 0">
                     <div class="row" style="margin-left: 0">
                         <div class="col-2 d-flex flex-column edivi__interactbutton-more">
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/atemwege/diagnostik/1.php?enr=<?= $daten['enr'] ?>" data-requires="awfrei_1">
-                                <span>Atemwegszustand</span>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/atemwege/index.php?enr=<?= $daten['enr'] ?>" data-requires="awfrei_1,awsicherung_neu,zyanose_1">
+                                <span>Atemwege</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/atemwege/diagnostik/2.php?enr=<?= $daten['enr'] ?>" data-requires="zyanose_1" class="active">
-                                <span>Zyanose</span>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/atmung/index.php?enr=<?= $daten['enr'] ?>" data-requires="b_symptome,b_auskult">
+                                <span>Atmung</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/index.php?enr=<?= $daten['enr'] ?>" data-requires="c_kreislauf,c_ekg">
+                                <span>Kreislauf</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/neurologie/index.php?enr=<?= $daten['enr'] ?>" data-requires="d_bewusstsein,d_ex_1,d_pupillenw_1,d_pupillenw_2,d_lichtreakt_1,d_lichtreakt_2,d_gcs_1,d_gcs_2,d_gcs_3" class="active">
+                                <span>Neurologie</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/index.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_k,v_muster_t,v_muster_a,v_muster_al,v_muster_bl,v_muster_w">
+                                <span>Erweitern</span>
+                            </a>
+                        </div>
+                        <div class="col-2 d-flex flex-column edivi__interactbutton-more">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/neurologie/1.php?enr=<?= $daten['enr'] ?>" data-requires="d_bewusstsein">
+                                <span>Bewusstseinslage</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/neurologie/2.php?enr=<?= $daten['enr'] ?>" data-requires="d_ex_1" class="active">
+                                <span>Extremitätenbewegung</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/neurologie/3.php?enr=<?= $daten['enr'] ?>" data-requires="d_pupillenw_1,d_pupillenw_2,d_lichtreakt_1,d_lichtreakt_2">
+                                <span>Pupillen</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/neurologie/4.php?enr=<?= $daten['enr'] ?>" data-requires="d_gcs_1,d_gcs_2,d_gcs_3">
+                                <span>GCS</span>
                             </a>
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton">
-                            <input type="radio" class="btn-check" id="zyanose_1" name="zyanose_1" value="1" <?php echo ($daten['zyanose_1'] == 1 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="zyanose_1">Nein</label>
+                            <input type="radio" class="btn-check" id="d_ex_1-1" name="d_ex_1" value="1" <?php echo ($daten['d_ex_1'] == 1 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="d_ex_1-1">uneingeschränkt</label>
 
-                            <input type="radio" class="btn-check" id="zyanose_2" name="zyanose_1" value="2" <?php echo ($daten['zyanose_1'] == 2 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="zyanose_2">Ja</label>
+                            <input type="radio" class="btn-check" id="d_ex_1-2" name="d_ex_1" value="2" <?php echo ($daten['d_ex_1'] == 2 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="d_ex_1-2">leicht eingeschränkt</label>
+
+                            <input type="radio" class="btn-check" id="d_ex_1-3" name="d_ex_1" value="3" <?php echo ($daten['d_ex_1'] == 3 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="d_ex_1-3">stark eingeschränkt</label>
+
+                            <input type="radio" class="btn-check" id="d_ex_1-99" name="d_ex_1" value="99" <?php echo ($daten['d_ex_1'] == 99 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="d_ex_1-99">Nicht beurteilbar</label>
                         </div>
                     </div>
                 </div>

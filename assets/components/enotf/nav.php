@@ -3,6 +3,10 @@
         data-requires="patsex,eort,ezeit,eort">
         <span>Rett. Daten</span>
     </a>
+    <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/index.php?enr=<?= $daten['enr'] ?>" data-page="atemwege"
+        data-requires="awfrei_1,awsicherung_neu,zyanose_1,b_symptome,b_auskult,c_kreislauf,c_ekg,d_bewusstsein,d_ex_1,d_pupillenw_1,d_pupillenw_2,d_lichtreakt_1,d_lichtreakt_2,d_gcs_1,d_gcs_2,d_gcs_3,v_muster_k,v_muster_t,v_muster_a,v_muster_al,v_muster_bl,v_muster_w">
+        <span>Erstbefund</span>
+    </a>
     <a href="<?= BASE_PATH ?>enotf/prot/anamnese.php?enr=<?= $daten['enr'] ?>" data-page="anamnese" class="edivi__nidanav-nocheck"><span>Anamnese</span></a>
     <a href="<?= BASE_PATH ?>enotf/prot/atemwege.php?enr=<?= $daten['enr'] ?>" data-page="atemwege"
         data-requires="awfrei_1,awsicherung_neu,zyanose_1">

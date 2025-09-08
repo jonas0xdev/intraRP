@@ -90,62 +90,72 @@ $currentDate = date('d.m.Y');
                 <div class="col" id="edivi__content" style="padding-left: 0">
                     <div class="row" style="margin-left: 0">
                         <div class="col-2 d-flex flex-column edivi__interactbutton-more">
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/atemwege/massnahmen/1.php?enr=<?= $daten['enr'] ?>" data-requires="awsicherung_neu">
-                                <span>Atemwegssicherung</span>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/atemwege/index.php?enr=<?= $daten['enr'] ?>" data-requires="awfrei_1,awsicherung_neu,zyanose_1">
+                                <span>Atemwege</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/atemwege/massnahmen/2.php?enr=<?= $daten['enr'] ?>" class="active">
-                                <span>Sauerstoffgabe</span>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/atmung/index.php?enr=<?= $daten['enr'] ?>" data-requires="b_symptome,b_auskult">
+                                <span>Atmung</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/index.php?enr=<?= $daten['enr'] ?>" data-requires="c_kreislauf,c_ekg">
+                                <span>Kreislauf</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/neurologie/index.php?enr=<?= $daten['enr'] ?>" data-requires="d_bewusstsein,d_ex_1,d_pupillenw_1,d_pupillenw_2,d_lichtreakt_1,d_lichtreakt_2,d_gcs_1,d_gcs_2,d_gcs_3">
+                                <span>Neurologie</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/index.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_k,v_muster_t,v_muster_a,v_muster_al,v_muster_bl,v_muster_w" class="active">
+                                <span>Erweitern</span>
+                            </a>
+                        </div>
+                        <div class="col-2 d-flex flex-column edivi__interactbutton-more">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/1.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_k,v_muster_w,v_muster_t,v_muster_a,v_muster_al,v_muster_bl" class="active">
+                                <span>Verletzungen</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/2.php?enr=<?= $daten['enr'] ?>">
+                                <span>Schmerzen</span>
+                            </a>
+                        </div>
+                        <div class="col-2 d-flex flex-column edivi__interactbutton-more">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/1_1.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_k">
+                                <span>Schädel-Hirn</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/1_2.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_w">
+                                <span>Wirbelsäule</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/1_3.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_t">
+                                <span>Thorax</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/1_4.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_a">
+                                <span>Abdomen</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/1_5.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_al" class="active">
+                                <span>Obere Extremitäten</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/1_6.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_bl">
+                                <span>Untere Extremitäten</span>
                             </a>
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton">
-                            <input type="radio" class="btn-check" id="o2gabe_1" name="o2gabe" value="0" <?php echo ($daten['o2gabe'] === '0' || $daten['o2gabe'] === 0 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="o2gabe_1">Keine</label>
+                            <input type="radio" class="btn-check" id="v_muster_al-1" name="v_muster_al" value="1" <?php echo ($daten['v_muster_al'] == 1 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="v_muster_al-1">keine</label>
 
-                            <input type="radio" class="btn-check" id="o2gabe_2" name="o2gabe" value="1" <?php echo ($daten['o2gabe'] == 1 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="o2gabe_2">1 L</label>
+                            <input type="radio" class="btn-check" id="v_muster_al-2" name="v_muster_al" value="2" <?php echo ($daten['v_muster_al'] == 2 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="v_muster_al-2">leicht</label>
 
-                            <input type="radio" class="btn-check" id="o2gabe_3" name="o2gabe" value="2" <?php echo ($daten['o2gabe'] == 2 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="o2gabe_3">2 L</label>
+                            <input type="radio" class="btn-check" id="v_muster_al-3" name="v_muster_al" value="3" <?php echo ($daten['v_muster_al'] == 3 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="v_muster_al-3">mittel</label>
 
-                            <input type="radio" class="btn-check" id="o2gabe_4" name="o2gabe" value="3" <?php echo ($daten['o2gabe'] == 3 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="o2gabe_4">3 L</label>
+                            <input type="radio" class="btn-check" id="v_muster_al-4" name="v_muster_al" value="4" <?php echo ($daten['v_muster_al'] == 4 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="v_muster_al-4">schwer</label>
 
-                            <input type="radio" class="btn-check" id="o2gabe_5" name="o2gabe" value="4" <?php echo ($daten['o2gabe'] == 4 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="o2gabe_5">4 L</label>
-
-                            <input type="radio" class="btn-check" id="o2gabe_6" name="o2gabe" value="5" <?php echo ($daten['o2gabe'] == 5 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="o2gabe_6">5 L</label>
-
-                            <input type="radio" class="btn-check" id="o2gabe_7" name="o2gabe" value="6" <?php echo ($daten['o2gabe'] == 6 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="o2gabe_7">6 L</label>
-
-                            <input type="radio" class="btn-check" id="o2gabe_8" name="o2gabe" value="7" <?php echo ($daten['o2gabe'] == 7 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="o2gabe_8">7 L</label>
-
-                            <input type="radio" class="btn-check" id="o2gabe_9" name="o2gabe" value="8" <?php echo ($daten['o2gabe'] == 8 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="o2gabe_9">8 L</label>
+                            <input type="radio" class="btn-check" id="v_muster_al-99" name="v_muster_al" value="99" <?php echo ($daten['v_muster_al'] == 99 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="v_muster_al-99">Nicht untersucht</label>
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton">
-                            <input type="radio" class="btn-check" id="o2gabe_10" name="o2gabe" value="9" <?php echo ($daten['o2gabe'] == 9 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="o2gabe_10">9 L</label>
+                            <input type="radio" class="btn-check" id="v_muster_al1-1" name="v_muster_al1" value="1" <?php echo ($daten['v_muster_al1'] == 1 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="v_muster_al1-1">offen</label>
 
-                            <input type="radio" class="btn-check" id="o2gabe_11" name="o2gabe" value="10" <?php echo ($daten['o2gabe'] == 10 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="o2gabe_11">10 L</label>
-
-                            <input type="radio" class="btn-check" id="o2gabe_12" name="o2gabe" value="11" <?php echo ($daten['o2gabe'] == 11 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="o2gabe_12">11 L</label>
-
-                            <input type="radio" class="btn-check" id="o2gabe_13" name="o2gabe" value="12" <?php echo ($daten['o2gabe'] == 12 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="o2gabe_13">12 L</label>
-
-                            <input type="radio" class="btn-check" id="o2gabe_14" name="o2gabe" value="13" <?php echo ($daten['o2gabe'] == 13 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="o2gabe_14">13 L</label>
-
-                            <input type="radio" class="btn-check" id="o2gabe_15" name="o2gabe" value="14" <?php echo ($daten['o2gabe'] == 14 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="o2gabe_15">14 L</label>
-
-                            <input type="radio" class="btn-check" id="o2gabe_16" name="o2gabe" value="15" <?php echo ($daten['o2gabe'] == 15 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="o2gabe_16">15 L</label>
+                            <input type="radio" class="btn-check" id="v_muster_al1-2" name="v_muster_al1" value="2" <?php echo ($daten['v_muster_al1'] == 2 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="v_muster_al1-2">geschlossen</label>
                         </div>
                     </div>
                 </div>

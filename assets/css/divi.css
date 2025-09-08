@@ -140,6 +140,7 @@ body {
 #edivi__container .edivi__box {
   background: #333333;
   margin: 10px 0;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
 }
 
 #edivi__container .edivi__box .edivi__description {
@@ -356,6 +357,10 @@ body {
   background-color: #d91425;
   top: 8px;
 }
+#edivi__nidanav > a.edivi__nidanav-partfilled:before {
+  background-color: #f7ec5d;
+  top: 8px;
+}
 #edivi__nidanav > a.edivi__nidanav-filled:before {
   background-color: #55b530;
   top: 28px;
@@ -371,11 +376,8 @@ body {
   font-size: 2.5rem;
   font-weight: 300;
   transform: translateY(-50%);
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--white);
   z-index: 0;
-}
-#edivi__nidanav > a.active:after {
-  color: rgba(255, 255, 255, 0.4);
 }
 #edivi__nidanav > a.edivi__nidanav-nonumber {
   counter-increment: none;
@@ -440,6 +442,11 @@ body {
   background-color: #d91425;
   top: 8px;
 }
+[class*=edivi__interactbutton] > a.edivi__validation-yellow:before,
+[class*=edivi__interactbutton] > label.edivi__validation-yellow:before {
+  background-color: #f7ec5d;
+  top: 8px;
+}
 [class*=edivi__interactbutton] > a.edivi__validation-green:before,
 [class*=edivi__interactbutton] > label.edivi__validation-green:before {
   background-color: #55b530;
@@ -465,6 +472,21 @@ body {
 }
 [class*=edivi__interactbutton] .btn-check:focus + label {
   box-shadow: 0 0 0 0.2rem rgba(87, 131, 207, 0.25);
+}
+
+[class*=edivi__interactbutton] > label.edivi__interactbutton-text {
+  background: transparent;
+  margin: 25px 4px;
+  margin-left: 14px;
+  text-align: center;
+}
+[class*=edivi__interactbutton] > label.edivi__interactbutton-text:hover {
+  background: transparent;
+  color: var(--white);
+  cursor: default;
+}
+[class*=edivi__interactbutton] > label.edivi__interactbutton-text:after {
+  content: "";
 }
 
 [class*=edivi__interactbutton] > label:after {
@@ -493,7 +515,7 @@ body {
   font-size: 1.5rem;
   font-weight: 900;
   transform: translateY(-50%);
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--white);
   z-index: 0;
 }
 
@@ -503,6 +525,10 @@ body {
 
 #edivi__container .edivi__box .edivi__group-check {
   border-left: 3px solid #d91425;
+}
+
+#edivi__container .edivi__box .edivi__group-partchecked {
+  border-left: 3px solid #f7ec5d;
 }
 
 #edivi__container .edivi__box .edivi__group-checked {
@@ -544,6 +570,13 @@ body {
     max-width: 100%;
   }
 }
+#edivi__content .edivi__overview-container {
+  margin: 10px 5px;
+}
+#edivi__content .edivi__overview-container span.fw-bold {
+  padding-right: 8px;
+}
+
 #edivi__topbar {
   border-bottom: 2px solid var(--main-color);
   color: var(--white);
@@ -706,19 +739,19 @@ body#edivi__print {
   color: #fff;
   padding: 12px 20px;
   margin-top: 10px;
-  border-radius: 4px;
+  border-radius: 0;
   min-width: 250px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   opacity: 0.9;
   animation: fadeInOut 5s forwards;
 }
 
 .toast.success {
-  background-color: #28a745;
+  border: 2px solid #28a745;
 }
 
 .toast.error {
-  background-color: #dc3545;
+  border: 2px solid #dc3545;
 }
 
 @keyframes fadeInOut {

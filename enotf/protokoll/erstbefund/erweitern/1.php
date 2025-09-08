@@ -90,11 +90,48 @@ $currentDate = date('d.m.Y');
                 <div class="col" id="edivi__content" style="padding-left: 0">
                     <div class="row" style="margin-left: 0">
                         <div class="col-2 d-flex flex-column edivi__interactbutton-more">
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/atemwege/diagnostik/1.php?enr=<?= $daten['enr'] ?>" data-requires="awfrei_1">
-                                <span>Atemwegszustand</span>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/atemwege/index.php?enr=<?= $daten['enr'] ?>" data-requires="awfrei_1,awsicherung_neu,zyanose_1">
+                                <span>Atemwege</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/atemwege/diagnostik/2.php?enr=<?= $daten['enr'] ?>" data-requires="zyanose_1">
-                                <span>Zyanose</span>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/atmung/index.php?enr=<?= $daten['enr'] ?>" data-requires="b_symptome,b_auskult">
+                                <span>Atmung</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/index.php?enr=<?= $daten['enr'] ?>" data-requires="c_kreislauf,c_ekg">
+                                <span>Kreislauf</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/neurologie/index.php?enr=<?= $daten['enr'] ?>" data-requires="d_bewusstsein,d_ex_1,d_pupillenw_1,d_pupillenw_2,d_lichtreakt_1,d_lichtreakt_2,d_gcs_1,d_gcs_2,d_gcs_3">
+                                <span>Neurologie</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/index.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_k,v_muster_t,v_muster_a,v_muster_al,v_muster_bl,v_muster_w" class="active">
+                                <span>Erweitern</span>
+                            </a>
+                        </div>
+                        <div class="col-2 d-flex flex-column edivi__interactbutton-more">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/1.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_k,v_muster_w,v_muster_t,v_muster_a,v_muster_al,v_muster_bl" class="active">
+                                <span>Verletzungen</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/2.php?enr=<?= $daten['enr'] ?>">
+                                <span>Schmerzen</span>
+                            </a>
+                        </div>
+                        <div class="col-2 d-flex flex-column edivi__interactbutton-more">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/1_1.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_k">
+                                <span>Schädel-Hirn</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/1_2.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_w">
+                                <span>Wirbelsäule</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/1_3.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_t">
+                                <span>Thorax</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/1_4.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_a">
+                                <span>Abdomen</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/1_5.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_al">
+                                <span>Obere Extremitäten</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/1_6.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_bl">
+                                <span>Untere Extremitäten</span>
                             </a>
                         </div>
                     </div>

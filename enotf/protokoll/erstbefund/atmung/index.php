@@ -90,28 +90,29 @@ $currentDate = date('d.m.Y');
                 <div class="col" id="edivi__content" style="padding-left: 0">
                     <div class="row" style="margin-left: 0">
                         <div class="col-2 d-flex flex-column edivi__interactbutton-more">
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/atemwege/massnahmen/1.php?enr=<?= $daten['enr'] ?>" data-requires="awsicherung_neu" class="active">
-                                <span>Atemwegssicherung</span>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/atemwege/index.php?enr=<?= $daten['enr'] ?>" data-requires="awfrei_1,awsicherung_neu,zyanose_1">
+                                <span>Atemwege</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/atemwege/massnahmen/2.php?enr=<?= $daten['enr'] ?>">
-                                <span>Sauerstoffgabe</span>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/atmung/index.php?enr=<?= $daten['enr'] ?>" data-requires="b_symptome,b_auskult" class="active">
+                                <span>Atmung</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/index.php?enr=<?= $daten['enr'] ?>" data-requires="c_kreislauf,c_ekg">
+                                <span>Kreislauf</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/neurologie/index.php?enr=<?= $daten['enr'] ?>" data-requires="d_bewusstsein,d_ex_1,d_pupillenw_1,d_pupillenw_2,d_lichtreakt_1,d_lichtreakt_2,d_gcs_1,d_gcs_2,d_gcs_3">
+                                <span>Neurologie</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/index.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_k,v_muster_t,v_muster_a,v_muster_al,v_muster_bl,v_muster_w">
+                                <span>Erweitern</span>
                             </a>
                         </div>
-                        <div class="col-2 d-flex flex-column edivi__interactbutton">
-                            <input type="radio" class="btn-check" id="awsicherung_neu_1" name="awsicherung_neu" value="0" <?php echo ($daten['awsicherung_neu'] === '0' || $daten['awsicherung_neu'] === 0 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="awsicherung_neu_1">Keine</label>
-
-                            <input type="radio" class="btn-check" id="awsicherung_neu_2" name="awsicherung_neu" value="1" <?php echo ($daten['awsicherung_neu'] == 1 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="awsicherung_neu_2">Endotrachealtubus</label>
-
-                            <input type="radio" class="btn-check" id="awsicherung_neu_3" name="awsicherung_neu" value="2" <?php echo ($daten['awsicherung_neu'] == 2 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="awsicherung_neu_3">Larynxtubus/-maske</label>
-
-                            <input type="radio" class="btn-check" id="awsicherung_neu_4" name="awsicherung_neu" value="3" <?php echo ($daten['awsicherung_neu'] == 3 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="awsicherung_neu_4">Guedel-/Wendltubus</label>
-
-                            <input type="radio" class="btn-check" id="awsicherung_neu_5" name="awsicherung_neu" value="99" <?php echo ($daten['awsicherung_neu'] == 99 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="awsicherung_neu_5">Sonstige</label>
+                        <div class="col-2 d-flex flex-column edivi__interactbutton-more">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/atmung/1.php?enr=<?= $daten['enr'] ?>" data-requires="b_symptome">
+                                <span>Beurteilung Atmung</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/atmung/2.php?enr=<?= $daten['enr'] ?>" data-requires="b_auskult">
+                                <span>Auskultation</span>
+                            </a>
                         </div>
                     </div>
                 </div>
