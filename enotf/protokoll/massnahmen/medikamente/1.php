@@ -372,26 +372,81 @@ $currentDate = date('d.m.Y');
                 timestamp: new Date().getTime()
             };
 
+            const saveButton = document.getElementById('save-btn');
+            const originalText = saveButton.textContent;
+            saveButton.textContent = 'Speichert...';
+            saveButton.style.pointerEvents = 'none';
+
             fetch('./save_medikament.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
                     },
-                    body: `enr=${enr}&action=add&medikament=${encodeURIComponent(JSON.stringify(medikament))}`
+                    body: `enr=${encodeURIComponent(enr)}&action=add&medikament=${encodeURIComponent(JSON.stringify(medikament))}`
                 })
-                .then(response => response.text())
+                .then(response => {
+                    saveButton.textContent = originalText;
+                    saveButton.style.pointerEvents = '';
+
+                    if (!response.ok) {
+                        return response.text().then(errorText => {
+                            throw new Error(`HTTP ${response.status}: ${errorText}`);
+                        });
+                    }
+                    return response.text();
+                })
                 .then(data => {
                     if (data.includes('erfolgreich')) {
                         resetForm();
                         loadMedikamente();
                         showMedikamentToast('Medikament erfolgreich hinzugefügt.', 'success');
+                        clearKeineMedikamenteState();
                     } else {
                         showMedikamentToast('Fehler beim Speichern: ' + data, 'error');
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    showMedikamentToast('Fehler beim Speichern des Medikaments.', 'error');
+                    showMedikamentToast('Fehler beim Speichern: ' + error.message, 'error');
+                });
+        }
+
+        function clearKeineMedikamenteState() {
+            // This function should uncheck the "Keine Medikamente" checkbox on the parent page
+            // Since we're on a different page, we can't directly access it, but we could:
+            // 1. Store a flag to clear it when returning to the main page
+            // 2. Make an AJAX call to update the state
+            // 3. Handle it when the user navigates back
+
+            // For now, we'll just add a note that medications have been added
+            console.log('Medications added - "Keine Medikamente" state should be cleared on return to main page');
+        }
+
+        function loadMedikamente() {
+            const enr = new URLSearchParams(window.location.search).get('enr');
+
+            const listContainer = document.getElementById('medis-list');
+            listContainer.innerHTML = '<div class="text-center text-muted p-4"><i class="las la-spinner la-spin" style="font-size: 2em;"></i><div class="mt-2">Medikamente werden geladen...</div></div>';
+
+            fetch('./load_medikamente.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `enr=${encodeURIComponent(enr)}`
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    displayMedikamente(data);
+                })
+                .catch(error => {
+                    console.error('Error loading medikamente:', error);
+                    listContainer.innerHTML = '<div class="text-center text-danger p-4"><i class="las la-exclamation-triangle" style="font-size: 2em;"></i><div class="mt-2">Fehler beim Laden der Medikamente:<br>' + error.message + '</div></div>';
                 });
         }
 
