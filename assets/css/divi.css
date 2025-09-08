@@ -981,7 +981,7 @@ body[data-page=freigabe] {
 }
 
 #edivi__login input.form-control,
-select.form-select {
+#edivi__login select.form-select {
   background-color: #333333;
   border-radius: 0;
   color: #fff;
@@ -989,12 +989,12 @@ select.form-select {
   font-size: 1.2rem;
 }
 #edivi__login input.form-control:focus,
-select.form-select:focus {
+#edivi__login select.form-select:focus {
   box-shadow: 0 0 0 1px #5783cf !important;
 }
 #edivi__login input.form-control[readonly], #edivi__login input.form-control[disabled],
-select.form-select[readonly],
-select.form-select[disabled] {
+#edivi__login select.form-select[readonly],
+#edivi__login select.form-select[disabled] {
   box-shadow: none !important;
   caret-color: transparent;
   user-select: none;
@@ -1002,7 +1002,7 @@ select.form-select[disabled] {
   cursor: default;
 }
 #edivi__login input.form-control > option,
-select.form-select > option {
+#edivi__login select.form-select > option {
   background-color: #191919;
   color: #fff;
   padding: 10px;
