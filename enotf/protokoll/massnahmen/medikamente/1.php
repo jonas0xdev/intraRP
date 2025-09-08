@@ -79,46 +79,6 @@ $currentDate = date('d.m.Y');
     <meta property="og:title" content="[#<?= $daten['enr'] ?>] &rsaquo; eNOTF &rsaquo; <?php echo SYSTEM_NAME ?>" />
     <meta property="og:image" content="https://<?php echo SYSTEM_URL ?>/assets/img/aelrd.png" />
     <meta property="og:description" content="Verwaltungsportal der <?php echo RP_ORGTYPE . " " .  SERVER_CITY ?>" />
-
-    <style>
-        .medikament-item {
-            transition: all 0.2s ease;
-        }
-
-        #medis-list {
-            overflow-y: auto;
-            max-height: 60vh;
-        }
-
-        #medis-list::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        #medis-list::-webkit-scrollbar-track {
-            background: #222;
-        }
-
-        #medis-list::-webkit-scrollbar-thumb {
-            background: #666;
-            border-radius: 4px;
-        }
-
-        #medis-list::-webkit-scrollbar-thumb:hover {
-            background: #888;
-        }
-
-        #medis-select,
-        #medis-time,
-        #medis-unit,
-        #medis-admission,
-        #medis-concentration {
-            font-size: 1.75rem !important;
-        }
-
-        #medis-list {
-            font-size: 1.5rem;
-        }
-    </style>
 </head>
 
 <body>
