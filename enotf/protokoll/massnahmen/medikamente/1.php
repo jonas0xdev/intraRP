@@ -412,13 +412,6 @@ $currentDate = date('d.m.Y');
         }
 
         function clearKeineMedikamenteState() {
-            // This function should uncheck the "Keine Medikamente" checkbox on the parent page
-            // Since we're on a different page, we can't directly access it, but we could:
-            // 1. Store a flag to clear it when returning to the main page
-            // 2. Make an AJAX call to update the state
-            // 3. Handle it when the user navigates back
-
-            // For now, we'll just add a note that medications have been added
             console.log('Medications added - "Keine Medikamente" state should be cleared on return to main page');
         }
 

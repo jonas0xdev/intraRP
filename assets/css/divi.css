@@ -148,9 +148,6 @@ body {
   padding: 0 0.5rem !important;
 }
 
-#edivi__container input.form-control,
-#edivi__container select.form-select,
-#edivi__container textarea.form-control,
 #edivi__container .edivi__box input.form-control,
 #edivi__container .edivi__box select.form-select,
 #edivi__container .edivi__box textarea.form-control {
@@ -160,25 +157,42 @@ body {
   border: 0;
   font-size: 1.2rem;
 }
-#edivi__container input.form-control:focus,
-#edivi__container select.form-select:focus,
-#edivi__container textarea.form-control:focus,
 #edivi__container .edivi__box input.form-control:focus,
 #edivi__container .edivi__box select.form-select:focus,
 #edivi__container .edivi__box textarea.form-control:focus {
   box-shadow: 0 0 0 1px #5783cf !important;
 }
-#edivi__container input.form-control[readonly], #edivi__container input.form-control[disabled],
-#edivi__container select.form-select[readonly],
-#edivi__container select.form-select[disabled],
-#edivi__container textarea.form-control[readonly],
-#edivi__container textarea.form-control[disabled],
-#edivi__container .edivi__box input.form-control[readonly],
-#edivi__container .edivi__box input.form-control[disabled],
+#edivi__container .edivi__box input.form-control[readonly], #edivi__container .edivi__box input.form-control[disabled],
 #edivi__container .edivi__box select.form-select[readonly],
 #edivi__container .edivi__box select.form-select[disabled],
 #edivi__container .edivi__box textarea.form-control[readonly],
 #edivi__container .edivi__box textarea.form-control[disabled] {
+  box-shadow: none !important;
+  caret-color: transparent;
+  user-select: none;
+  pointer-events: none;
+  cursor: default;
+}
+
+#edivi__container .edivi__medikamente input.form-control,
+#edivi__container .edivi__medikamente select.form-select,
+#edivi__container .edivi__medikamente textarea.form-control {
+  background: transparent;
+  border-radius: 0;
+  color: #fff;
+  border: 0;
+  font-size: 1.2rem;
+}
+#edivi__container .edivi__medikamente input.form-control:focus,
+#edivi__container .edivi__medikamente select.form-select:focus,
+#edivi__container .edivi__medikamente textarea.form-control:focus {
+  box-shadow: 0 0 0 1px #5783cf !important;
+}
+#edivi__container .edivi__medikamente input.form-control[readonly], #edivi__container .edivi__medikamente input.form-control[disabled],
+#edivi__container .edivi__medikamente select.form-select[readonly],
+#edivi__container .edivi__medikamente select.form-select[disabled],
+#edivi__container .edivi__medikamente textarea.form-control[readonly],
+#edivi__container .edivi__medikamente textarea.form-control[disabled] {
   box-shadow: none !important;
   caret-color: transparent;
   user-select: none;

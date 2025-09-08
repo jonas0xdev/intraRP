@@ -154,12 +154,35 @@ body {
   padding: 0 0.5rem !important;
 }
 
-#edivi__container input.form-control,
-#edivi__container select.form-select,
-#edivi__container textarea.form-control,
 #edivi__container .edivi__box input.form-control,
 #edivi__container .edivi__box select.form-select,
 #edivi__container .edivi__box textarea.form-control {
+  background: transparent;
+  border-radius: 0;
+  color: #fff;
+  border: 0;
+  font-size: 1.2rem;
+  //border-bottom: 1px solid #a2a2a2;
+  //border-left: 1px solid #a2a2a2;
+  //border-right: 1px solid #a2a2a2;
+
+  &:focus {
+    box-shadow: 0 0 0 1px #5783cf !important;
+  }
+
+  &[readonly],
+  &[disabled] {
+    box-shadow: none !important;
+    caret-color: transparent;
+    user-select: none;
+    pointer-events: none;
+    cursor: default;
+  }
+}
+
+#edivi__container .edivi__medikamente input.form-control,
+#edivi__container .edivi__medikamente select.form-select,
+#edivi__container .edivi__medikamente textarea.form-control {
   background: transparent;
   border-radius: 0;
   color: #fff;
