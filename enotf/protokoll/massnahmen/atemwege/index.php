@@ -78,7 +78,7 @@ $currentDate = date('d.m.Y');
     <meta property="og:description" content="Verwaltungsportal der <?php echo RP_ORGTYPE . " " .  SERVER_CITY ?>" />
 </head>
 
-<body data-page="erstbefund">
+<body data-page="massnahmen">
     <?php
     include __DIR__ . '/../../../../assets/components/enotf/topbar.php';
     ?>
@@ -90,72 +90,23 @@ $currentDate = date('d.m.Y');
                 <div class="col" id="edivi__content" style="padding-left: 0">
                     <div class="row" style="margin-left: 0">
                         <div class="col-2 d-flex flex-column edivi__interactbutton-more">
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/atemwege/index.php?enr=<?= $daten['enr'] ?>" data-requires="awfrei_1,awsicherung_neu,zyanose_1">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/atemwege/index.php?enr=<?= $daten['enr'] ?>" data-requires="awsicherung_neu" class="active">
                                 <span>Atemwege</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/atmung/index.php?enr=<?= $daten['enr'] ?>" data-requires="b_symptome,b_auskult">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/atmung/index.php?enr=<?= $daten['enr'] ?>" data-requires="b_beatmung">
                                 <span>Atmung</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/index.php?enr=<?= $daten['enr'] ?>" data-requires="c_kreislauf,c_ekg">
-                                <span>Kreislauf</span>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/index.php?enr=<?= $daten['enr'] ?>" data-requires="c_zugang">
+                                <span>Zugang</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/neurologie/index.php?enr=<?= $daten['enr'] ?>" data-requires="d_bewusstsein,d_ex_1,d_pupillenw_1,d_pupillenw_2,d_lichtreakt_1,d_lichtreakt_2,d_gcs_1,d_gcs_2,d_gcs_3">
-                                <span>Neurologie</span>
-                            </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/index.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_k,v_muster_t,v_muster_a,v_muster_al,v_muster_bl,v_muster_w" class="active">
-                                <span>Erweitern</span>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/medikamente/index.php?enr=<?= $daten['enr'] ?>" data-requires="medis">
+                                <span>Medikamente</span>
                             </a>
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton-more">
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/1.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_k,v_muster_w,v_muster_t,v_muster_a,v_muster_al,v_muster_bl" class="active">
-                                <span>Verletzungen</span>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/atemwege/1.php?enr=<?= $daten['enr'] ?>" data-requires="awsicherung_neu">
+                                <span>Atemwegssicherung</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/2.php?enr=<?= $daten['enr'] ?>">
-                                <span>Schmerzen</span>
-                            </a>
-                        </div>
-                        <div class="col-2 d-flex flex-column edivi__interactbutton-more">
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/1_1.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_k">
-                                <span>Schädel-Hirn</span>
-                            </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/1_2.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_w">
-                                <span>Wirbelsäule</span>
-                            </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/1_3.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_t">
-                                <span>Thorax</span>
-                            </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/1_4.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_a">
-                                <span>Abdomen</span>
-                            </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/1_5.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_al" class="active">
-                                <span>Obere Extremitäten</span>
-                            </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/1_6.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_bl">
-                                <span>Untere Extremitäten</span>
-                            </a>
-                        </div>
-                        <div class="col-2 d-flex flex-column edivi__interactbutton">
-                            <input type="radio" class="btn-check" id="v_muster_al-1" name="v_muster_al" value="1" <?php echo ($daten['v_muster_al'] == 1 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="v_muster_al-1">keine</label>
-
-                            <input type="radio" class="btn-check" id="v_muster_al-2" name="v_muster_al" value="2" <?php echo ($daten['v_muster_al'] == 2 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="v_muster_al-2">leicht</label>
-
-                            <input type="radio" class="btn-check" id="v_muster_al-3" name="v_muster_al" value="3" <?php echo ($daten['v_muster_al'] == 3 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="v_muster_al-3">mittel</label>
-
-                            <input type="radio" class="btn-check" id="v_muster_al-4" name="v_muster_al" value="4" <?php echo ($daten['v_muster_al'] == 4 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="v_muster_al-4">schwer</label>
-
-                            <input type="radio" class="btn-check" id="v_muster_al-99" name="v_muster_al" value="99" <?php echo ($daten['v_muster_al'] == 99 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="v_muster_al-99">Nicht untersucht</label>
-                        </div>
-                        <div class="col-2 d-flex flex-column edivi__interactbutton">
-                            <input type="radio" class="btn-check" id="v_muster_al1-1" name="v_muster_al1" value="1" <?php echo ($daten['v_muster_al1'] == 1 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="v_muster_al1-1">offen</label>
-
-                            <input type="radio" class="btn-check" id="v_muster_al1-2" name="v_muster_al1" value="2" <?php echo ($daten['v_muster_al1'] == 2 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="v_muster_al1-2">geschlossen</label>
                         </div>
                     </div>
                 </div>

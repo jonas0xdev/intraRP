@@ -78,7 +78,7 @@ $currentDate = date('d.m.Y');
     <meta property="og:description" content="Verwaltungsportal der <?php echo RP_ORGTYPE . " " .  SERVER_CITY ?>" />
 </head>
 
-<body data-page="atemwege">
+<body data-page="erstbefund">
     <?php
     include __DIR__ . '/../../../assets/components/enotf/topbar.php';
     ?>

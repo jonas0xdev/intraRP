@@ -148,25 +148,25 @@ body {
   padding: 0 0.5rem !important;
 }
 
-#edivi__container .edivi__box input.form-control,
-#edivi__container .edivi__box select.form-select,
-#edivi__container .edivi__box textarea.form-control {
+#edivi__container input.form-control,
+#edivi__container select.form-select,
+#edivi__container textarea.form-control {
   background: transparent;
   border-radius: 0;
   color: #fff;
   border: 0;
   font-size: 1.2rem;
 }
-#edivi__container .edivi__box input.form-control:focus,
-#edivi__container .edivi__box select.form-select:focus,
-#edivi__container .edivi__box textarea.form-control:focus {
+#edivi__container input.form-control:focus,
+#edivi__container select.form-select:focus,
+#edivi__container textarea.form-control:focus {
   box-shadow: 0 0 0 1px #5783cf !important;
 }
-#edivi__container .edivi__box input.form-control[readonly], #edivi__container .edivi__box input.form-control[disabled],
-#edivi__container .edivi__box select.form-select[readonly],
-#edivi__container .edivi__box select.form-select[disabled],
-#edivi__container .edivi__box textarea.form-control[readonly],
-#edivi__container .edivi__box textarea.form-control[disabled] {
+#edivi__container input.form-control[readonly], #edivi__container input.form-control[disabled],
+#edivi__container select.form-select[readonly],
+#edivi__container select.form-select[disabled],
+#edivi__container textarea.form-control[readonly],
+#edivi__container textarea.form-control[disabled] {
   box-shadow: none !important;
   caret-color: transparent;
   user-select: none;
@@ -474,6 +474,49 @@ body {
   box-shadow: 0 0 0 0.2rem rgba(87, 131, 207, 0.25);
 }
 
+[class*=edivi__interactbutton] .btn-check:checked + label.edivi__zugang-G24 {
+  background: linear-gradient(to bottom, #333, #b9b900);
+}
+[class*=edivi__interactbutton] > label.edivi__zugang-G24 {
+  background: linear-gradient(to bottom, #333, yellow);
+}
+[class*=edivi__interactbutton] .btn-check:checked + label.edivi__zugang-G22 {
+  background: linear-gradient(to bottom, #333, #0000b9);
+}
+[class*=edivi__interactbutton] > label.edivi__zugang-G22 {
+  background: linear-gradient(to bottom, #333, blue);
+}
+[class*=edivi__interactbutton] .btn-check:checked + label.edivi__zugang-G20 {
+  background: linear-gradient(to bottom, #333, #c7969e);
+}
+[class*=edivi__interactbutton] > label.edivi__zugang-G20 {
+  background: linear-gradient(to bottom, #333, pink);
+}
+[class*=edivi__interactbutton] .btn-check:checked + label.edivi__zugang-G18 {
+  background: linear-gradient(to bottom, #333, #005a00);
+}
+[class*=edivi__interactbutton] > label.edivi__zugang-G18 {
+  background: linear-gradient(to bottom, #333, green);
+}
+[class*=edivi__interactbutton] .btn-check:checked + label.edivi__zugang-G17 {
+  background: linear-gradient(to bottom, #333, #b9b9b9);
+}
+[class*=edivi__interactbutton] > label.edivi__zugang-G17 {
+  background: linear-gradient(to bottom, #333, white);
+}
+[class*=edivi__interactbutton] .btn-check:checked + label.edivi__zugang-G16 {
+  background: linear-gradient(to bottom, #333, #5a5a5a);
+}
+[class*=edivi__interactbutton] > label.edivi__zugang-G16 {
+  background: linear-gradient(to bottom, #333, gray);
+}
+[class*=edivi__interactbutton] .btn-check:checked + label.edivi__zugang-G14 {
+  background: linear-gradient(to bottom, #333, #b97900);
+}
+[class*=edivi__interactbutton] > label.edivi__zugang-G14 {
+  background: linear-gradient(to bottom, #333, orange);
+}
+
 [class*=edivi__interactbutton] > label.edivi__interactbutton-text {
   background: transparent;
   margin: 25px 4px;
@@ -498,7 +541,7 @@ body {
   font-size: 1.5rem;
   font-weight: 900;
   transform: translateY(-50%);
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--white);
   z-index: 0;
 }
 

@@ -7,7 +7,7 @@ if (isset($_POST['enr']) && isset($_POST['field']) && isset($_POST['value'])) {
     $field = $_POST['field'];
     $value = $_POST['value'];
 
-    $allowedFields = ['patname', 'patgebdat', 'patsex', 'edatum', 'ezeit', 'eort', 'awfrei_1', 'awfrei_2', 'awfrei_3', 'awsicherung_neu', 'zyanose_1', 'zyanose_2', 'o2gabe', 'b_symptome', 'b_auskult', 'b_beatmung', 'spo2', 'atemfreq', 'etco2', 'c_zugang_gr_1', 'c_zugang_gr_2', 'c_zugang_gr_3', 'c_zugang_art_1', 'c_zugang_art_2', 'c_zugang_art_3', 'c_zugang_ort_1', 'c_zugang_ort_2', 'c_zugang_ort_3', 'c_kreislauf', 'c_ekg', 'rrsys', 'rrdias', 'herzfreq', 'medis', 'd_bewusstsein', 'd_ex_1', 'd_pupillenw_1', 'd_pupillenw_2', 'd_lichtreakt_1', 'd_lichtreakt_2', 'd_gcs_1', 'd_gcs_2', 'd_gcs_3', 'v_muster_k', 'v_muster_k1', 'v_muster_t', 'v_muster_t1', 'v_muster_a', 'v_muster_a1', 'v_muster_al', 'v_muster_al1', 'v_muster_bl', 'v_muster_bl1', 'v_muster_w', 'v_muster_w1', 'sz_nrs', 'sz_toleranz_1', 'sz_toleranz_2', 'bz', 'temp', 'anmerkungen', 'diagnose', 'fzg_transp', 'fzg_transp_perso', 'fzg_transp_perso_2', 'fzg_na', 'fzg_na_perso', 'fzg_na_perso_2', 'fzg_sonst', 'transportziel', 'pfname', 'prot_by'];
+    $allowedFields = ['patname', 'patgebdat', 'patsex', 'edatum', 'ezeit', 'eort', 'awfrei_1', 'awsicherung_neu', 'zyanose_1', 'o2gabe', 'b_symptome', 'b_auskult', 'b_beatmung', 'spo2', 'atemfreq', 'etco2', 'c_zugang', 'c_kreislauf', 'c_ekg', 'rrsys', 'rrdias', 'herzfreq', 'medis', 'd_bewusstsein', 'd_ex_1', 'd_pupillenw_1', 'd_pupillenw_2', 'd_lichtreakt_1', 'd_lichtreakt_2', 'd_gcs_1', 'd_gcs_2', 'd_gcs_3', 'v_muster_k', 'v_muster_k1', 'v_muster_t', 'v_muster_t1', 'v_muster_a', 'v_muster_a1', 'v_muster_al', 'v_muster_al1', 'v_muster_bl', 'v_muster_bl1', 'v_muster_w', 'v_muster_w1', 'sz_nrs', 'sz_toleranz_1', 'bz', 'temp', 'anmerkungen', 'diagnose', 'fzg_transp', 'fzg_transp_perso', 'fzg_transp_perso_2', 'fzg_na', 'fzg_na_perso', 'fzg_na_perso_2', 'fzg_sonst', 'transportziel', 'pfname', 'prot_by'];
 
     if ($field === 'freigeber') {
         if (empty($value)) {
@@ -24,15 +24,94 @@ if (isset($_POST['enr']) && isset($_POST['field']) && isset($_POST['value'])) {
         exit();
     }
 
-    if (in_array($field, $allowedFields)) {
-        $query = "UPDATE intra_edivi SET $field = :value, last_edit = NOW() WHERE enr = :enr";
-        $stmt = $pdo->prepare($query);
-        $stmt->execute(['value' => $value, 'enr' => $enr]);
+    if ($field === 'c_zugang') {
+        if ($value === '0' || empty($value)) {
+        } else {
+            $decoded = json_decode($value, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                http_response_code(400);
+                echo "Ungültiges JSON-Format";
+                exit();
+            }
 
-        echo "Field updated";
+            $zugaengeToValidate = [];
+            if (isset($decoded['art'])) {
+                $zugaengeToValidate = [$decoded];
+            } else if (is_array($decoded)) {
+                $zugaengeToValidate = $decoded;
+            } else {
+                http_response_code(400);
+                echo "Ungültige Datenstruktur";
+                exit();
+            }
+
+            $seenLocations = [];
+            foreach ($zugaengeToValidate as $zugang) {
+                $requiredFields = ['art', 'groesse', 'ort', 'seite'];
+                foreach ($requiredFields as $requiredField) {
+                    if (!isset($zugang[$requiredField]) || empty($zugang[$requiredField])) {
+                        http_response_code(400);
+                        echo "Pflichtfeld fehlt: $requiredField";
+                        exit();
+                    }
+                }
+
+                $locationKey = $zugang['art'] . '-' . $zugang['ort'] . '-' . $zugang['seite'];
+                if (in_array($locationKey, $seenLocations)) {
+                    http_response_code(400);
+                    echo "Doppelter Zugang an gleicher Position nicht erlaubt";
+                    exit();
+                }
+                $seenLocations[] = $locationKey;
+
+                $allowedArts = ['pvk', 'zvk', 'io'];
+                $allowedGroessen = ['G24', 'G22', 'G20', 'G18', 'G17', 'G16', 'G14', '15mm', '25mm', '45mm'];
+                $allowedSeiten = ['links', 'rechts'];
+
+                if (!in_array($zugang['art'], $allowedArts)) {
+                    http_response_code(400);
+                    echo "Ungültige Zugangsart: " . $zugang['art'];
+                    exit();
+                }
+
+                if (!in_array($zugang['groesse'], $allowedGroessen)) {
+                    http_response_code(400);
+                    echo "Ungültige Zugangsgröße: " . $zugang['groesse'];
+                    exit();
+                }
+
+                if (!in_array($zugang['seite'], $allowedSeiten)) {
+                    http_response_code(400);
+                    echo "Ungültige Seite: " . $zugang['seite'];
+                    exit();
+                }
+            }
+        }
+    }
+
+    if (in_array($field, $allowedFields)) {
+        try {
+            $query = "UPDATE intra_edivi SET $field = :value, last_edit = NOW() WHERE enr = :enr";
+            $stmt = $pdo->prepare($query);
+            $stmt->execute(['value' => $value, 'enr' => $enr]);
+
+            if ($field === 'c_zugang') {
+                if ($value === '0' || empty($value)) {
+                    echo "Zugang auf 'Kein Zugang' gesetzt";
+                } else {
+                    echo "Zugang erfolgreich gespeichert";
+                }
+            } else {
+                echo "Field updated";
+            }
+        } catch (PDOException $e) {
+            http_response_code(500);
+            echo "Datenbankfehler";
+            error_log("Database error in save_fields.php: " . $e->getMessage());
+        }
     } else {
         http_response_code(400);
-        echo "Invalid field";
+        echo "Invalid field: $field";
     }
 } else {
     http_response_code(400);

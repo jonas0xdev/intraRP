@@ -2,15 +2,19 @@
 <script>
     $(document).ready(function() {
         const enr = <?= json_encode($enr) ?>;
-        const inputElements = $("form[name='form'] input:not([readonly]):not([disabled]), form[name='form'] select:not([readonly]):not([disabled]), form[name='form'] textarea:not([readonly]):not([disabled])");
+        const inputElements = $(
+            "form[name='form'] input:not([readonly]):not([disabled]):not(.medikament-field-ignore):not([data-ignore-autosave]), " +
+            "form[name='form'] select:not([readonly]):not([disabled]):not(.medikament-field-ignore):not([data-ignore-autosave]), " +
+            "form[name='form'] textarea:not([readonly]):not([disabled]):not(.medikament-field-ignore):not([data-ignore-autosave])"
+        );
         const activeRequests = {};
 
         const zeroIsValid = [
             'patsex', 'awsicherung_neu', 'b_symptome',
-            'b_auskult', 'b_beatmung', 'c_kreislauf', 'c_ekg',
+            'b_auskult', 'b_beatmung', 'c_kreislauf', 'c_ekg', 'c_zugang',
             'd_bewusstsein', 'd_ex_1', 'd_pupillenw_1', 'd_pupillenw_2',
             'd_lichtreakt_1', 'd_lichtreakt_2', 'd_gcs_1', 'd_gcs_2', 'd_gcs_3', 'v_muster_k', 'v_muster_t',
-            'v_muster_a', 'v_muster_al', 'v_muster_bl', 'v_muster_w', 'transportziel'
+            'v_muster_a', 'v_muster_al', 'v_muster_bl', 'v_muster_w', 'transportziel', 'medis'
         ];
 
         inputElements.each(function() {
@@ -153,6 +157,8 @@
             }, 4000);
         }
 
+        window.showToast = showToast;
+
         $('input.btn-check[type="checkbox"]').on('change', function() {
             const clicked = $(this);
             const clickedId = clicked.attr('id');
@@ -176,6 +182,16 @@
         inputElements.off('change blur').on('change blur', function(e) {
             const $this = $(this);
             const fieldName = $this.attr('name');
+            const elementId = $this.attr('id');
+
+            if (elementId === 'c_zugang-0') {
+                return;
+            }
+
+            if ($this.hasClass('zugang-checkbox')) {
+                return;
+            }
+
             let currentValue;
 
             if ($this.is(':radio')) {

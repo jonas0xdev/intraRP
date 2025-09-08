@@ -3,7 +3,7 @@
         data-requires="patsex,eort,ezeit,eort">
         <span>Rett. Daten</span>
     </a>
-    <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/index.php?enr=<?= $daten['enr'] ?>" data-page="atemwege"
+    <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/index.php?enr=<?= $daten['enr'] ?>" data-page="erstbefund"
         data-requires="awfrei_1,awsicherung_neu,zyanose_1,b_symptome,b_auskult,c_kreislauf,c_ekg,d_bewusstsein,d_ex_1,d_pupillenw_1,d_pupillenw_2,d_lichtreakt_1,d_lichtreakt_2,d_gcs_1,d_gcs_2,d_gcs_3,v_muster_k,v_muster_t,v_muster_a,v_muster_al,v_muster_bl,v_muster_w">
         <span>Erstbefund</span>
     </a>
@@ -27,6 +27,10 @@
     <a href="<?= BASE_PATH ?>enotf/prot/erweitern.php?enr=<?= $daten['enr'] ?>" data-page="erweitern"
         data-requires="v_muster_k,v_muster_t,v_muster_a,v_muster_al,v_muster_bl,v_muster_w">
         <span>Erweitern</span>
+    </a>
+    <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/index.php?enr=<?= $daten['enr'] ?>" data-page="massnahmen"
+        data-requires="awsicherung_neu,b_beatmung,c_zugang,medis">
+        <span>Maßnahmen</span>
     </a>
     <a href="<?= BASE_PATH ?>enotf/prot/verlauf.php?enr=<?= $daten['enr'] ?>" data-page="verlauf"
         class="edivi__nidanav-nocheck edivi__nidanav-nonumber">
