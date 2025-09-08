@@ -561,6 +561,11 @@ body {
   content: "";
 }
 
+@media (max-width: 1001px) {
+  [class*=edivi__interactbutton] > *:after {
+    display: none;
+  }
+}
 .edivi__interactbutton-more > a:after {
   content: "";
   font-family: "Line Awesome Free";
