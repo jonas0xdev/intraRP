@@ -131,7 +131,7 @@ $currentDate = date('d.m.Y');
                             <label for="c_ekg-5">AV-Block II°/III°</label>
 
                             <input type="radio" class="btn-check" id="c_ekg-6" name="c_ekg" value="6" <?php echo ($daten['c_ekg'] == 6 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="c_ekg-6">Astystolie</label>
+                            <label for="c_ekg-6">Asystolie</label>
 
                             <input type="radio" class="btn-check" id="c_ekg-98" name="c_ekg" value="98" <?php echo ($daten['c_ekg'] == 98 ? 'checked' : '') ?> autocomplete="off">
                             <label for="c_ekg-98">Nicht beurteilbar</label>
