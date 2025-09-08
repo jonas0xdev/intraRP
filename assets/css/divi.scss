@@ -1345,6 +1345,7 @@ body[data-page="verlauf"] {
   input[type="number"].form-control.edivi__vitalparam,
   input[type="number"].form-control.edivi__vitalparam-shared {
     -moz-appearance: textfield;
+    appearance: textfield;
     &::-webkit-outer-spin-button,
     &::-webkit-inner-spin-button {
       -webkit-appearance: none;

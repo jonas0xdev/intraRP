@@ -1262,6 +1262,7 @@ body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam-shared
 body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam,
 body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam-shared {
   -moz-appearance: textfield;
+  appearance: textfield;
 }
 body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam::-webkit-outer-spin-button, body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam::-webkit-inner-spin-button,
 body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam-shared::-webkit-outer-spin-button,
