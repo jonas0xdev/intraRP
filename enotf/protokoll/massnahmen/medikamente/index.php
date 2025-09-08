@@ -108,7 +108,7 @@ $currentDate = date('d.m.Y');
                                 <span>Medikamente auswählen</span>
                             </a>
                             <input type="checkbox" class="btn-check" id="medis-0" name="medis" value="0"
-                                <?php echo (isset($daten['medis']) && $daten['medis'] === '0') ? 'checked' : '' ?>
+                                <?php echo (isset($daten['medis']) && $daten['medis'] === '0' || isset($daten['medis']) && $daten['medis'] === '1') ? 'checked' : '' ?>
                                 autocomplete="off">
                             <label for="medis-0">Keine Medikamente</label>
                         </div>
