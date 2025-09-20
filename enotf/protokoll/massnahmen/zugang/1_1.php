@@ -196,7 +196,7 @@ function hasAnyZugang($zugangJson)
                                 <span>Unterarm</span>
                             </a>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1_3.php?enr=<?= $daten['enr'] ?>">
-                                <span>Ellenbeuge</span>
+                                <span>Ellbeuge</span>
                             </a>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1_4.php?enr=<?= $daten['enr'] ?>">
                                 <span>Fuß</span>

@@ -107,37 +107,77 @@ function removeZugang($zugaenge, $art, $ort, $seite)
 
 $currentZugaenge = getCurrentZugaenge($daten['c_zugang'] ?? '');
 
+function normalize_groesse_pretty(string $raw): string
+{
+    $v = strtoupper(str_replace(' ', '', trim($raw)));
+    $suffixKurz = false;
+
+    if (str_ends_with($v, '_KURZ')) {
+        $suffixKurz = true;
+        $v = substr($v, 0, -5);
+    }
+
+    if (preg_match('/^(\d{2})G$/', $v, $m)) {
+        $core = $m[1] . 'G';
+    } elseif (preg_match('/^G(\d{2})$/', $v, $m)) {
+        $core = $m[1] . 'G';
+    } elseif (preg_match('/^(15|25|45)MM$/', $v, $m)) {
+        return $m[1] . ' mm';
+    } else {
+        $core = $v;
+    }
+
+    $labels = [
+        '24G' => '24 G',
+        '22G' => '22 G',
+        '20G' => '20 G',
+        '18G' => '18 G',
+        '17G' => '17 G',
+        '16G' => '16 G',
+        '14G' => '14 G',
+    ];
+
+    $pretty = $labels[$core] ?? $raw;
+
+    if ($suffixKurz) {
+        $pretty .= ' kurz';
+    }
+    return $pretty;
+}
+
 function displayAllZugaenge($zugangJson)
 {
     if (!isset($zugangJson) || $zugangJson === null) {
         return '<em>Nicht gesetzt</em>';
     }
-
     if ($zugangJson === '0') {
         return 'Kein Zugang';
     }
 
     $zugaenge = getCurrentZugaenge($zugangJson);
-
     if (empty($zugaenge)) {
         return '<em>Keine gültigen Zugänge</em>';
     }
 
+    usort($zugaenge, function ($a, $b) {
+        return [$a['art'], $a['ort'], $a['seite']] <=> [$b['art'], $b['ort'], $b['seite']];
+    });
+
+    $artNames = ['pvk' => 'PVK', 'zvk' => 'ZVK', 'io' => 'i.o.'];
     $displays = [];
+
     foreach ($zugaenge as $zugang) {
-        $artNames = ['pvk' => 'PVK', 'zvk' => 'ZVK', 'io' => 'i.o.'];
-        $artName = $artNames[$zugang['art']] ?? $zugang['art'];
-        $displays[] = sprintf(
-            '%s %s %s %s',
-            $artName,
-            $zugang['groesse'],
-            $zugang['ort'],
-            $zugang['seite']
-        );
+        $artName   = $artNames[$zugang['art']] ?? $zugang['art'];
+        $groesse   = normalize_groesse_pretty($zugang['groesse'] ?? '');
+        $ort       = $zugang['ort']   ?? '';
+        $seite     = $zugang['seite'] ?? '';
+
+        $displays[] = sprintf('%s %s %s %s', $artName, $groesse, $ort, $seite);
     }
 
     return implode('<br>', $displays);
 }
+
 
 function hasAnyZugang($zugangJson)
 {
@@ -185,7 +225,6 @@ function displayAllMedikamente($medikamenteJson)
 
     $displays = [];
     foreach ($medikamente as $med) {
-        // Einheit für Anzeige konvertieren
         $displayEinheit = $med['einheit'];
         if ($displayEinheit === 'mcg') {
             $displayEinheit = '&micro;g';

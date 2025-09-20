@@ -563,47 +563,78 @@ body {
   box-shadow: 0 0 0 0.2rem rgba(87, 131, 207, 0.25);
 }
 
-[class*=edivi__interactbutton] .btn-check:checked + label.edivi__zugang-G24 {
-  background: linear-gradient(to bottom, #333, #b9b900);
+[class*=edivi__interactbutton] > label.edivi__zugang-24G:after,
+[class*=edivi__interactbutton] .btn-check:checked + label.edivi__zugang-24G:after {
+  content: "";
+  height: 0.8rem;
+  width: 0.8rem;
+  border-radius: 50%;
+  background: yellow;
+  right: 10px;
 }
-[class*=edivi__interactbutton] > label.edivi__zugang-G24 {
-  background: linear-gradient(to bottom, #333, yellow);
+[class*=edivi__interactbutton] > label.edivi__zugang-22G:after,
+[class*=edivi__interactbutton] .btn-check:checked + label.edivi__zugang-22G:after {
+  content: "";
+  height: 0.8rem;
+  width: 0.8rem;
+  border-radius: 50%;
+  background: blue;
+  right: 10px;
 }
-[class*=edivi__interactbutton] .btn-check:checked + label.edivi__zugang-G22 {
-  background: linear-gradient(to bottom, #333, #0000b9);
+[class*=edivi__interactbutton] > label.edivi__zugang-20G:after,
+[class*=edivi__interactbutton] .btn-check:checked + label.edivi__zugang-20G:after {
+  content: "";
+  height: 0.8rem;
+  width: 0.8rem;
+  border-radius: 50%;
+  background: pink;
+  right: 10px;
 }
-[class*=edivi__interactbutton] > label.edivi__zugang-G22 {
-  background: linear-gradient(to bottom, #333, blue);
+[class*=edivi__interactbutton] > label.edivi__zugang-18G:after,
+[class*=edivi__interactbutton] .btn-check:checked + label.edivi__zugang-18G:after {
+  content: "";
+  height: 0.8rem;
+  width: 0.8rem;
+  border-radius: 50%;
+  background: green;
+  right: 10px;
 }
-[class*=edivi__interactbutton] .btn-check:checked + label.edivi__zugang-G20 {
-  background: linear-gradient(to bottom, #333, #c7969e);
+[class*=edivi__interactbutton] > label.edivi__zugang-18G_kurz:after,
+[class*=edivi__interactbutton] .btn-check:checked + label.edivi__zugang-18G_kurz:after {
+  content: "";
+  height: 0.8rem;
+  width: 0.8rem;
+  border-radius: 50%;
+  background: green;
+  box-shadow: 0 0 0 2px #fff inset, 0 0 0 2px green;
+  right: 10px;
 }
-[class*=edivi__interactbutton] > label.edivi__zugang-G20 {
-  background: linear-gradient(to bottom, #333, pink);
+[class*=edivi__interactbutton] > label.edivi__zugang-17G:after,
+[class*=edivi__interactbutton] .btn-check:checked + label.edivi__zugang-17G:after {
+  content: "";
+  height: 0.8rem;
+  width: 0.8rem;
+  border-radius: 50%;
+  background: white;
+  right: 10px;
 }
-[class*=edivi__interactbutton] .btn-check:checked + label.edivi__zugang-G18 {
-  background: linear-gradient(to bottom, #333, #005a00);
+[class*=edivi__interactbutton] > label.edivi__zugang-16G:after,
+[class*=edivi__interactbutton] .btn-check:checked + label.edivi__zugang-16G:after {
+  content: "";
+  height: 0.8rem;
+  width: 0.8rem;
+  border-radius: 50%;
+  background: gray;
+  right: 10px;
 }
-[class*=edivi__interactbutton] > label.edivi__zugang-G18 {
-  background: linear-gradient(to bottom, #333, green);
-}
-[class*=edivi__interactbutton] .btn-check:checked + label.edivi__zugang-G17 {
-  background: linear-gradient(to bottom, #333, #b9b9b9);
-}
-[class*=edivi__interactbutton] > label.edivi__zugang-G17 {
-  background: linear-gradient(to bottom, #333, white);
-}
-[class*=edivi__interactbutton] .btn-check:checked + label.edivi__zugang-G16 {
-  background: linear-gradient(to bottom, #333, #5a5a5a);
-}
-[class*=edivi__interactbutton] > label.edivi__zugang-G16 {
-  background: linear-gradient(to bottom, #333, gray);
-}
-[class*=edivi__interactbutton] .btn-check:checked + label.edivi__zugang-G14 {
-  background: linear-gradient(to bottom, #333, #b97900);
-}
-[class*=edivi__interactbutton] > label.edivi__zugang-G14 {
-  background: linear-gradient(to bottom, #333, orange);
+[class*=edivi__interactbutton] > label.edivi__zugang-14G:after,
+[class*=edivi__interactbutton] .btn-check:checked + label.edivi__zugang-14G:after {
+  content: "";
+  height: 0.8rem;
+  width: 0.8rem;
+  border-radius: 50%;
+  background: orange;
+  right: 10px;
 }
 
 [class*=edivi__interactbutton] > label.edivi__interactbutton-text {
@@ -1361,6 +1392,9 @@ body[data-page=verlauf] textarea.form-control.edivi__vitalparam {
 body[data-page=verlauf] textarea.form-control.edivi__vitalparam::placeholder {
   color: #5f5f5f !important;
 }
+body[data-page=verlauf] textarea.form-control.edivi__vitalparam:active, body[data-page=verlauf] textarea.form-control.edivi__vitalparam:focus {
+  background: #333333 !important;
+}
 body[data-page=verlauf] input[type=text].form-control.edivi__vitalparam,
 body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam {
   position: relative;
@@ -1377,7 +1411,12 @@ body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam {
 }
 body[data-page=verlauf] input[type=text].form-control.edivi__vitalparam::placeholder,
 body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam::placeholder {
-  color: #333333 !important;
+  color: #808080 !important;
+}
+body[data-page=verlauf] input[type=text].form-control.edivi__vitalparam:active, body[data-page=verlauf] input[type=text].form-control.edivi__vitalparam:focus,
+body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam:active,
+body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam:focus {
+  background: #333333 !important;
 }
 body[data-page=verlauf] input[type=text].form-control.edivi__vitalparam-shared,
 body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam-shared {
@@ -1394,7 +1433,12 @@ body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam-shared
 }
 body[data-page=verlauf] input[type=text].form-control.edivi__vitalparam-shared::placeholder,
 body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam-shared::placeholder {
-  color: #333333 !important;
+  color: #808080 !important;
+}
+body[data-page=verlauf] input[type=text].form-control.edivi__vitalparam-shared:active, body[data-page=verlauf] input[type=text].form-control.edivi__vitalparam-shared:focus,
+body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam-shared:active,
+body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam-shared:focus {
+  background: #333333 !important;
 }
 body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam,
 body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam-shared {

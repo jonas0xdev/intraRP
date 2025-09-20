@@ -7,7 +7,7 @@ if (isset($_POST['enr']) && isset($_POST['field']) && isset($_POST['value'])) {
     $field = $_POST['field'];
     $value = $_POST['value'];
 
-    $allowedFields = ['patname', 'patgebdat', 'patsex', 'edatum', 'ezeit', 'eort', 'awfrei_1', 'awsicherung_neu', 'zyanose_1', 'o2gabe', 'b_symptome', 'b_auskult', 'b_beatmung', 'spo2', 'atemfreq', 'etco2', 'c_zugang', 'c_kreislauf', 'c_ekg', 'rrsys', 'rrdias', 'herzfreq', 'medis', 'd_bewusstsein', 'd_ex_1', 'd_pupillenw_1', 'd_pupillenw_2', 'd_lichtreakt_1', 'd_lichtreakt_2', 'd_gcs_1', 'd_gcs_2', 'd_gcs_3', 'v_muster_k', 'v_muster_k1', 'v_muster_t', 'v_muster_t1', 'v_muster_a', 'v_muster_a1', 'v_muster_al', 'v_muster_al1', 'v_muster_bl', 'v_muster_bl1', 'v_muster_w', 'v_muster_w1', 'sz_nrs', 'sz_toleranz_1', 'bz', 'temp', 'anmerkungen', 'diagnose', 'fzg_transp', 'fzg_transp_perso', 'fzg_transp_perso_2', 'fzg_na', 'fzg_na_perso', 'fzg_na_perso_2', 'fzg_sonst', 'transportziel', 'pfname', 'prot_by'];
+    $allowedFields = ['patname', 'patgebdat', 'patsex', 'edatum', 'ezeit', 'eort', 'awfrei_1', 'awsicherung_neu', 'zyanose_1', 'o2gabe', 'b_symptome', 'b_auskult', 'b_beatmung', 'spo2', 'atemfreq', 'etco2', 'c_zugang', 'c_kreislauf', 'c_ekg', 'rrsys', 'rrdias', 'herzfreq', 'medis', 'd_bewusstsein', 'd_ex_1', 'd_pupillenw_1', 'd_pupillenw_2', 'd_lichtreakt_1', 'd_lichtreakt_2', 'd_gcs_1', 'd_gcs_2', 'd_gcs_3', 'v_muster_k', 'v_muster_k1', 'v_muster_t', 'v_muster_t1', 'v_muster_a', 'v_muster_a1', 'v_muster_al', 'v_muster_al1', 'v_muster_bl', 'v_muster_bl1', 'v_muster_w', 'v_muster_w1', 'sz_nrs', 'sz_toleranz_1', 'bz', 'temp', 'anmerkungen', 'diagnose', 'fzg_transp', 'fzg_transp_perso', 'fzg_transp_perso_2', 'fzg_na', 'fzg_na_perso', 'fzg_na_perso_2', 'fzg_sonst', 'transportziel', 'pfname', 'prot_by', 'spo2', 'atemfreq', 'etco2', 'rrsys', 'rrdias', 'herzfreq', 'bz', 'temp'];
 
     if ($field === 'freigeber') {
         if (empty($value)) {
@@ -65,7 +65,7 @@ if (isset($_POST['enr']) && isset($_POST['field']) && isset($_POST['value'])) {
                 $seenLocations[] = $locationKey;
 
                 $allowedArts = ['pvk', 'zvk', 'io'];
-                $allowedGroessen = ['G24', 'G22', 'G20', 'G18', 'G17', 'G16', 'G14', '15mm', '25mm', '45mm'];
+                $allowedGroessen = ['24G', '22G', '20G', '18G', '18G_kurz', '17G', '16G', '14G', '15mm', '25mm', '45mm'];
                 $allowedSeiten = ['links', 'rechts'];
 
                 if (!in_array($zugang['art'], $allowedArts)) {
