@@ -1501,6 +1501,11 @@ body[data-page="verlauf"] {
     &:focus {
       background: #333333 !important;
     }
+
+    &.edivi__vitalparam-required {
+      border-color: rgba(220, 53, 69, 0.8) !important;
+      background-color: rgba(220, 53, 69, 0.3) !important;
+    }
   }
 
   input[type="text"].form-control.edivi__vitalparam-shared,
@@ -1523,6 +1528,11 @@ body[data-page="verlauf"] {
     &:active,
     &:focus {
       background: #333333 !important;
+    }
+
+    &.edivi__vitalparam-required {
+      border-color: rgba(220, 53, 69, 0.8) !important;
+      background-color: rgba(220, 53, 69, 0.3) !important;
     }
   }
 

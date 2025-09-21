@@ -196,7 +196,6 @@ $currentDateTime = date('Y-m-d\TH:i');
     <script>
         let keypadCurrentField = null;
 
-        // Feld-Namen Mapping für Anzeige
         const fieldNames = {
             'spo2': 'SpO₂ (%)',
             'atemfreq': 'Atemfrequenz (/min)',
@@ -208,9 +207,47 @@ $currentDateTime = date('Y-m-d\TH:i');
             'temp': 'Temperatur (°C)'
         };
 
-        // Event Listener für Eingabefelder - nach dem DOM geladen ist
+        const requiredFields = ['spo2', 'atemfreq', 'herzfreq', 'rrsys', 'bz'];
+
+        function isFieldEmpty(field) {
+            const value = (field.value || '').trim();
+            return value === '';
+        }
+
+        function updateRequiredClass(field) {
+            const fieldId = field.id || field.name;
+
+            if (!requiredFields.includes(fieldId)) {
+                return;
+            }
+
+            if (isFieldEmpty(field)) {
+                field.classList.add('edivi__vitalparam-required');
+            } else {
+                field.classList.remove('edivi__vitalparam-required');
+            }
+        }
+
+        function initializeRequiredFields() {
+            requiredFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    updateRequiredClass(field);
+
+                    field.addEventListener('input', function() {
+                        updateRequiredClass(this);
+                    });
+
+                    field.addEventListener('blur', function() {
+                        updateRequiredClass(this);
+                    });
+                }
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
-            // Keypad Event Listener
+            initializeRequiredFields();
+
             const keypadInputs = document.querySelectorAll('.keypad-input');
             keypadInputs.forEach(input => {
                 input.addEventListener('focus', function() {
@@ -221,7 +258,6 @@ $currentDateTime = date('Y-m-d\TH:i');
                 });
             });
 
-            // Bestehende Validierung für Vitalparameter - funktioniert für alle Eingabearten
             const vitalInputs = document.querySelectorAll('.edivi__vitalparam, .edivi__vitalparam-shared');
             vitalInputs.forEach(input => {
                 input.addEventListener('input', function() {
@@ -237,17 +273,15 @@ $currentDateTime = date('Y-m-d\TH:i');
         });
 
         function validateField(field) {
-            // Rohwert holen und normalisieren
             const raw = ((field && field.value) ? String(field.value) : '').trim();
             const lower = raw.toLowerCase();
 
-            // Klassen zurücksetzen
             field.classList.remove('text-warning', 'text-danger', 'text-success', 'text-info');
 
-            // Leeres Feld: keine Farbe
+            updateRequiredClass(field);
+
             if (raw === '') return;
 
-            // Zahlenwert (Komma erlaubt)
             const value = parseFloat(raw.replace(',', '.'));
             if (Number.isNaN(value)) return;
 
@@ -304,41 +338,32 @@ $currentDateTime = date('Y-m-d\TH:i');
             else if (isSuccess) field.classList.add('text-success');
         }
 
-
-        // Feld auswählen
         function selectField(field) {
-            // Alle aktiven Markierungen entfernen
             document.querySelectorAll('.keypad-input').forEach(input => {
                 input.classList.remove('active-field');
-                // Zurück zu number type setzen
                 if (input.dataset.originalType) {
                     input.type = input.dataset.originalType;
                     delete input.dataset.originalType;
                 }
             });
 
-            // Neues Feld markieren
             field.classList.add('active-field');
             keypadCurrentField = field;
 
-            // Field type auf text setzen um Kommas zu erlauben
             if (field.type === 'number') {
                 field.dataset.originalType = 'number';
                 field.type = 'text';
             }
 
-            // Cursor ans Ende setzen
             setTimeout(() => {
                 const length = field.value.length;
                 field.setSelectionRange(length, length);
                 field.focus();
             }, 0);
 
-            // Feld-Info aktualisieren
             updateFieldInfo();
         }
 
-        // Feld-Info aktualisieren
         function updateFieldInfo() {
             const info = document.getElementById('fieldInfo');
             if (keypadCurrentField && info) {
@@ -357,7 +382,6 @@ $currentDateTime = date('Y-m-d\TH:i');
             keypadUpdateFieldValue('ng');
         }
 
-        // Ziffer direkt hinzufügen - sofortige Übertragung
         function keypadAddDigit(digit) {
             if (!keypadCurrentField) {
                 alert('Bitte wählen Sie zuerst ein Eingabefeld aus.');
@@ -366,10 +390,9 @@ $currentDateTime = date('Y-m-d\TH:i');
 
             let currentValue = keypadCurrentField.value || '';
 
-            // Komma-Behandlung
             if (digit === ',') {
                 if (currentValue.includes(',')) {
-                    return; // Nur ein Komma erlaubt
+                    return;
                 }
                 if (currentValue === '') {
                     currentValue = '0,';
@@ -377,34 +400,27 @@ $currentDateTime = date('Y-m-d\TH:i');
                     currentValue += ',';
                 }
             } else {
-                // Normale Ziffer hinzufügen
                 if (currentValue.includes(',')) {
-                    // Es gibt bereits ein Komma
                     const parts = currentValue.split(',');
                     const nachKomma = parts[1] || '';
 
                     if (nachKomma.length >= 2) {
-                        return; // Maximal 2 Nachkommastellen
+                        return;
                     }
 
-                    // Ziffer nach dem Komma hinzufügen
                     currentValue = parts[0] + ',' + nachKomma + digit;
                 } else {
-                    // Kein Komma vorhanden
                     if (currentValue.length >= 3) {
-                        return; // Maximal 3 Stellen vor dem Komma
+                        return;
                     }
 
-                    // Ziffer vor dem Komma hinzufügen
                     currentValue += digit;
                 }
             }
 
-            // Sofort ins Feld übertragen
             keypadUpdateFieldValue(currentValue);
         }
 
-        // Rückgängig/Löschen - sofortige Übertragung
         function keypadBackspace() {
             if (!keypadCurrentField) {
                 return;
@@ -417,7 +433,6 @@ $currentDateTime = date('Y-m-d\TH:i');
             }
         }
 
-        // Aktuelles Feld komplett löschen
         function keypadClearField() {
             if (keypadCurrentField) {
                 keypadUpdateFieldValue('');
@@ -447,9 +462,6 @@ $currentDateTime = date('Y-m-d\TH:i');
                 field.dispatchEvent(new Event('input', {
                     bubbles: true
                 }));
-                // field.dispatchEvent(new Event('change', {
-                //     bubbles: true
-                // }));
                 validateField(field);
                 return;
             }
@@ -487,11 +499,40 @@ $currentDateTime = date('Y-m-d\TH:i');
                 field.dispatchEvent(new Event('input', {
                     bubbles: true
                 }));
-                // field.dispatchEvent(new Event('change', {
-                //     bubbles: true
-                // }));
                 validateField(field);
             }
+        }
+
+        function checkAllRequiredFields() {
+            let allFilled = true;
+            const emptyFields = [];
+
+            requiredFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field && isFieldEmpty(field)) {
+                    allFilled = false;
+                    emptyFields.push(fieldNames[fieldId] || fieldId);
+                }
+            });
+
+            return {
+                allFilled: allFilled,
+                emptyFields: emptyFields
+            };
+        }
+
+        function validateBeforeSave() {
+            const result = checkAllRequiredFields();
+
+            if (!result.allFilled) {
+                const message = `Folgende Pflichtfelder sind noch nicht ausgefüllt:\n${result.emptyFields.join('\n')}`;
+
+                if (!confirm(message + '\n\nTrotzdem speichern?')) {
+                    return false;
+                }
+            }
+
+            return true;
         }
     </script>
     <script>
@@ -501,7 +542,6 @@ $currentDateTime = date('Y-m-d\TH:i');
             const endpoint = '<?= BASE_PATH ?>assets/functions/save_fields.php';
 
             async function postField(field, value) {
-                // Komma → Punkt normalisieren (für numerische DB-Felder)
                 const normalized = String(value).replace(',', '.').trim();
                 if (normalized === '') return;
 
@@ -533,14 +573,13 @@ $currentDateTime = date('Y-m-d\TH:i');
                     if (!el) continue;
 
                     const raw = (el.value ?? '').toString().trim();
-                    // Marker bestimmen:
                     let toSend;
                     if (raw.toLowerCase() === 'ng') {
                         toSend = raw;
                     } else if (raw === '') {
                         toSend = raw;
                     } else {
-                        toSend = raw.replace(',', '.'); // normale Zahl
+                        toSend = raw.replace(',', '.');
                     }
 
                     const body = new URLSearchParams();
@@ -565,8 +604,11 @@ $currentDateTime = date('Y-m-d\TH:i');
                 (window.showToast ? window.showToast('Vitalparameter gespeichert.', 'success') : alert('Vitalparameter gespeichert.'));
             }
 
-
             document.getElementById('saveVitalsBtn')?.addEventListener('click', function() {
+                if (!validateBeforeSave()) {
+                    return;
+                }
+
                 saveAll().catch(err => {
                     console.error(err);
                     (window.showToast ? window.showToast('Speichern fehlgeschlagen: ' + err.message, 'error') : alert('Speichern fehlgeschlagen: ' + err.message));
@@ -632,7 +674,6 @@ $currentDateTime = date('Y-m-d\TH:i');
             });
         })();
     </script>
-
 </body>
 
 </html>

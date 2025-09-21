@@ -1418,6 +1418,11 @@ body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam:active
 body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam:focus {
   background: #333333 !important;
 }
+body[data-page=verlauf] input[type=text].form-control.edivi__vitalparam.edivi__vitalparam-required,
+body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam.edivi__vitalparam-required {
+  border-color: rgba(220, 53, 69, 0.8) !important;
+  background-color: rgba(220, 53, 69, 0.3) !important;
+}
 body[data-page=verlauf] input[type=text].form-control.edivi__vitalparam-shared,
 body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam-shared {
   position: relative;
@@ -1439,6 +1444,11 @@ body[data-page=verlauf] input[type=text].form-control.edivi__vitalparam-shared:a
 body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam-shared:active,
 body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam-shared:focus {
   background: #333333 !important;
+}
+body[data-page=verlauf] input[type=text].form-control.edivi__vitalparam-shared.edivi__vitalparam-required,
+body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam-shared.edivi__vitalparam-required {
+  border-color: rgba(220, 53, 69, 0.8) !important;
+  background-color: rgba(220, 53, 69, 0.3) !important;
 }
 body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam,
 body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam-shared {
