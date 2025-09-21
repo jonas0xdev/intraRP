@@ -524,13 +524,13 @@ $currentDateTime = date('Y-m-d\TH:i');
         function validateBeforeSave() {
             const result = checkAllRequiredFields();
 
-            if (!result.allFilled) {
-                const message = `Folgende Pflichtfelder sind noch nicht ausgefüllt:\n${result.emptyFields.join('\n')}`;
+            // if (!result.allFilled) {
+            //     const message = `Folgende Pflichtfelder sind noch nicht ausgefüllt:\n${result.emptyFields.join('\n')}`;
 
-                if (!confirm(message + '\n\nTrotzdem speichern?')) {
-                    return false;
-                }
-            }
+            //     if (!confirm(message + '\n\nTrotzdem speichern?')) {
+            //         return false;
+            //     }
+            // }
 
             return true;
         }

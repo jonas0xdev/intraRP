@@ -21,7 +21,7 @@ use App\Auth\Permissions;
                     </a>
                 <?php endif; ?>
 
-                <a href="<?= BASE_PATH ?>enotf/prot/update_type.php?enr=<?= $enr ?>" id="modify" class="edivi__iconlink">
+                <a href="<?= BASE_PATH ?>enotf/protokoll/protokollart.php?enr=<?= $enr ?>" id="modify" class="edivi__iconlink">
                     <i class="las la-sync"></i><br>
                     <small>Protokollart ändern</small>
                 </a>
