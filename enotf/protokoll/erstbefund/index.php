@@ -274,10 +274,22 @@ $currentDate = date('d.m.Y');
                                 <div class="col border border-end-0 border-light py-1"><span class="fw-bold">Intensität</span> <?= $sz_nrs_labels[$daten['sz_nrs']] ?? '' ?></div>
                                 <div class="col border border-light py-1"><span class="fw-bold">Toleranz</span> <?= $sz_toleranz_1_labels[$daten['sz_toleranz_1']] ?? '' ?></div>
                             </div>
+                            <div class="row edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/messwerte/index.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
+                                <h6 class="fw-bold pt-1 pb-0">Vitalparameter</h6>
+                                <div class="col border border-end-0 border-light py-1"><span class="fw-bold">SpO<sub>2</sub></span> <?= $daten['spo2'] ?? '' ?></div>
+                                <div class="col border border-end-0 border-light py-1"><span class="fw-bold">AF</span> <?= $daten['atemfreq'] ?? '' ?></div>
+                                <div class="col border border-end-0 border-light py-1"><span class="fw-bold">etCO<sub>2</sub></span> <?= $daten['etco2'] ?? '' ?></div>
+                                <div class="col border border-end-0 border-light py-1"><span class="fw-bold">HF</span> <?= $daten['herzfreq'] ?? '' ?></div>
+                                <div class="col border border-end-0 border-light py-1"><span class="fw-bold">RR<sub>sys</sub></span> <?= $daten['rrsys'] ?? '' ?></div>
+                                <div class="col border border-end-0 border-light py-1"><span class="fw-bold">RR<sub>dia</sub></span> <?= $daten['rrdias'] ?? '' ?></div>
+                                <div class="col border border-end-0 border-light py-1"><span class="fw-bold">BZ</span> <?= $daten['bz'] ?? '' ?></div>
+                                <div class="col border border-light py-1"><span class="fw-bold">Temp</span> <?= $daten['temp'] ?? '' ?></div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
     </form>
     <?php
     include __DIR__ . '/../../../assets/functions/enotf/notify.php';

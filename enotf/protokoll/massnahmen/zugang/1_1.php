@@ -219,7 +219,7 @@ function hasAnyZugang($zugangJson)
                         url: '<?= BASE_PATH ?>assets/functions/save_fields.php',
                         type: 'POST',
                         data: {
-                            enr: <?= $enr ?>,
+                            enr: '<?= $enr ?>',
                             field: 'c_zugang',
                             value: '0'
                         },

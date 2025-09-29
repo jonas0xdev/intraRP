@@ -299,7 +299,7 @@ function hasAnyZugang($zugangJson)
                         url: '<?= BASE_PATH ?>assets/functions/save_fields.php',
                         type: 'POST',
                         data: {
-                            enr: <?= $enr ?>,
+                            enr: '<?= $enr ?>',
                             field: 'c_zugang',
                             value: '0'
                         },
@@ -330,7 +330,7 @@ function hasAnyZugang($zugangJson)
                         url: '<?= BASE_PATH ?>assets/functions/save_fields.php',
                         type: 'POST',
                         data: {
-                            enr: <?= $enr ?>,
+                            enr: '<?= $enr ?>',
                             field: 'c_zugang',
                             value: null
                         },
@@ -403,7 +403,7 @@ function hasAnyZugang($zugangJson)
                     url: '<?= BASE_PATH ?>assets/functions/save_fields.php',
                     type: 'POST',
                     data: {
-                        enr: <?= $enr ?>,
+                        enr: '<?= $enr ?>',
                         field: 'c_zugang',
                         value: dbValue
                     },
