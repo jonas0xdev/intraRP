@@ -54,10 +54,11 @@ if (!isset($_SESSION['fahrername']) || !isset($_SESSION['protfzg'])) {
 </head>
 
 <body style="overflow-x:hidden" id="edivi__login">
-    <form name="form" method="post" action="<?= BASE_PATH ?>assets/functions/enrbridge.php" id="enrForm">
+    <form name="form" method="post" action="<?= BASE_PATH ?>assets/functions/enotf/enrbridge.php" id="enrForm">
         <input type="hidden" name="new" value="1" />
         <input type="hidden" name="action" value="openOrCreate" />
         <input type="hidden" name="prot_by" id="prot_by" value="" />
+        <input type="hidden" name="force_create" id="force_create" value="0" />
         <div class="container-fluid" id="edivi__container">
             <div class="row h-100">
                 <div class="col" id="edivi__content">
@@ -85,32 +86,104 @@ if (!isset($_SESSION['fahrername']) || !isset($_SESSION['protfzg'])) {
                 </div>
             </div>
     </form>
+
+    <!-- Konflikt Modal -->
+    <div class="modal fade" id="conflictModal" tabindex="-1" aria-labelledby="conflictModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="conflictModalLabel">Protokoll bereits vorhanden</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="conflictMessage"></p>
+                    <p><strong>Möchten Sie trotzdem ein neues Protokoll für diese Einsatznummer erstellen?</strong></p>
+                    <p class="text-muted small">Das neue Protokoll wird mit einer Nummerierung versehen (z.B. _1, _2, etc.)</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+                    <button type="button" class="btn btn-primary" id="confirmCreate">Trotzdem erstellen</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         function setProtBy(value) {
             document.getElementById('prot_by').value = value;
         }
-    </script>
-    <script>
+
+        function checkForConflict(enr, protBy) {
+            return fetch('<?= BASE_PATH ?>assets/functions/enotf/check_conflict.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'enr=' + encodeURIComponent(enr) + '&prot_by=' + encodeURIComponent(protBy)
+                })
+                .then(response => response.json());
+        }
+
         document.getElementById('enr').addEventListener('input', function() {
             this.value = this.value.replace(/[^0-9_]/g, '');
         });
-    </script>
-    <script>
+
         document.getElementById('enrForm').addEventListener('submit', function(e) {
             const protBy = document.getElementById('prot_by').value;
+            const enr = document.getElementById('enr').value;
+            const forceCreate = document.getElementById('force_create').value;
+
             if (protBy !== '0' && protBy !== '1') {
                 e.preventDefault();
                 alert("Bitte wähle ein Protokoll aus (RD oder NA).");
+                return;
             }
+
+            if (!enr) {
+                e.preventDefault();
+                alert("Bitte gib eine Einsatznummer ein.");
+                return;
+            }
+
+            // Wenn force_create gesetzt ist, normale Weiterleitung
+            if (forceCreate === '1') {
+                return;
+            }
+
+            // Konfliktprüfung
+            e.preventDefault();
+            checkForConflict(enr, protBy)
+                .then(result => {
+                    if (result.conflict) {
+                        // Konflikt gefunden - Modal anzeigen
+                        document.getElementById('conflictMessage').textContent = result.message;
+                        const modal = new bootstrap.Modal(document.getElementById('conflictModal'));
+                        modal.show();
+                    } else {
+                        // Kein Konflikt - normal weiterleiten
+                        document.getElementById('enrForm').submit();
+                    }
+                })
+                .catch(error => {
+                    console.error('Fehler bei der Konfliktprüfung:', error);
+                    // Bei Fehler normal weiterleiten
+                    document.getElementById('enrForm').submit();
+                });
         });
-    </script>
-    <script>
+
+        document.getElementById('confirmCreate').addEventListener('click', function() {
+            document.getElementById('force_create').value = '1';
+            document.getElementById('enrForm').submit();
+        });
+
         var modalCloseButton = document.querySelector('#myModal4 .btn-close');
         var freigeberInput = document.getElementById('freigeber');
 
-        modalCloseButton.addEventListener('click', function() {
-            freigeberInput.value = '';
-        });
+        if (modalCloseButton && freigeberInput) {
+            modalCloseButton.addEventListener('click', function() {
+                freigeberInput.value = '';
+            });
+        }
     </script>
 </body>
 

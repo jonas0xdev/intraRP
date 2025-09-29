@@ -145,12 +145,10 @@ $migrationFiles = [
     // 06.07.2025
     'update_intra_edivi_06072025.php',
     'create_intra_edivi_vitalparameter_einzelwerte_06072025.php',
-    // 11.07.2025
-    'create_intra_bewerbung_11072025.php',
-    'create_intra_bewerbung_messages_11072025.php',
-    'create_intra_bewerbung_statuslog_11072025.php',
     // 03.09.2025
-    'alter_intra_edivi_03092025.php'
+    'alter_intra_edivi_03092025.php',
+    // 08.09.2025
+    'alter_intra_edivi_08092025.php'
 ];
 
 $executed = 0;

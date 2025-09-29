@@ -2,10 +2,10 @@
 require __DIR__ . '/../assets/config/config.php';
 require __DIR__ . '/../assets/config/database.php';
 ini_set('session.gc_maxlifetime', 604800);
-ini_set('session.cookie_path', '/');  // Set the cookie path to the root directory
-ini_set('session.cookie_domain', SYSTEM_URL);  // Set the cookie domain to your domain
-ini_set('session.cookie_lifetime', 604800);  // Set the cookie lifetime (in seconds)
-ini_set('session.cookie_secure', true);  // Set to true if using HTTPS, false otherwise
+ini_set('session.cookie_path', '/');
+ini_set('session.cookie_domain', SYSTEM_URL);
+ini_set('session.cookie_lifetime', 604800);
+ini_set('session.cookie_secure', true);
 
 session_start();
 
@@ -44,22 +44,33 @@ if (isset($_SESSION['userid']) && isset($_SESSION['permissions'])) {
     <meta property="og:description" content="Verwaltungsportal der <?php echo RP_ORGTYPE . " " .  SERVER_CITY ?>" />
 </head>
 
-<body data-bs-theme="dark" id="dashboard" class="container-full position-relative">
-    <div class="container d-flex justify-content-center align-items-center h-100">
-        <div class="row">
-            <div class="col">
-                <div class="card px-4 py-3">
+<body data-bs-theme="dark" id="alogin" class="container-full position-relative">
+    <div id="video-background">
+        <iframe
+            src="https://www.youtube.com/embed/9z1qetAaiBA?autoplay=1&mute=1&loop=1&playlist=9z1qetAaiBA&controls=0&showinfo=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&fs=0"
+            frameborder="0"
+            allow="autoplay; encrypted-media"
+            allowfullscreen>
+        </iframe>
+    </div>
+
+    <div class="container d-flex justify-content-center align-items-center flex-column h-100">
+        <div class="row" style="width:30%">
+            <div class="col text-center">
+                <img src="https://dev.intrarp.de/assets/img/defaultLogo.webp" alt="intraRP Logo" class="mb-4" width="75%" height="auto">
+                <div class="card px-4 py-3 text-center">
                     <h1 id="loginHeader"><?php echo SYSTEM_NAME ?></h1>
                     <p class="subtext">Das Intranet der Stadt <?php echo SERVER_CITY ?>!</p>
 
                     <div class="text-center mb-3">
-                        <a href="<?= BASE_PATH ?>auth/discord.php" class="btn btn-primary btn-lg w-100"><i class="lab la-discord la-2x mb-2"></i><br>Mit Discord anmelden</a>
+                        <a href="<?= BASE_PATH ?>auth/discord.php" class="btn btn-primary btn-lg w-100"><i class="lab la-discord"></i> Login</a>
                     </div>
                 </div>
             </div>
         </div>
+        <p class="mt-3 small text-center">Hintergrundvideo: <a href="https://www.youtube.com/watch?v=9z1qetAaiBA" target="_blank" rel="nofollow">Rosenbauer Group: "Alles für diesen Moment. - Rosenbauer" (YouTube)</a><br>
+            &copy; <?php echo date("Y") ?> <a href="https://intrarp.de">intraRP</a> | Alle Rechte vorbehalten</p>
     </div>
-    <?php include __DIR__ . "/../assets/components/footer.php"; ?>
 </body>
 
 </html>

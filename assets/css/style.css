@@ -167,6 +167,76 @@ body#dashboard {
   position: relative;
 }
 
+body#alogin {
+  height: 100vh;
+  width: 100vw;
+  overflow-x: hidden;
+  background-color: #002a32;
+  position: relative;
+}
+
+#video-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+  filter: blur(12px);
+}
+
+#video-background::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1;
+}
+
+#video-background iframe {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200vw;
+  height: 200vh;
+  transform: translate(-50%, -50%);
+}
+
+body#alogin .card {
+  background: rgba(0, 0, 0, 0.4) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+}
+
+body#alogin img,
+body#alogin .card {
+  transition: all 0.3s;
+}
+
+body#alogin img:hover,
+body#alogin .card:hover {
+  transform: scale(1.05);
+}
+
+body#alogin p {
+  --bs-link-color-rgb: 255, 255, 255;
+  color: var(--white);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+  --bs-link-opacity: 0.7;
+  opacity: 0.7;
+}
+body#alogin p > a:hover,
+body#alogin p > span > a:hover {
+  --bs-link-color-rgb: 255, 255, 255;
+  --bs-link-opacity: 0.9;
+}
+
 body#dashboard::before {
   content: "";
   position: absolute;
@@ -215,7 +285,7 @@ body#dashboard h1#loginHeader {
 p.subtext {
   text-align: center;
   font-size: 0.9rem;
-  opacity: 0.5;
+  opacity: 0.9;
   font-weight: 400;
   margin-top: -10px;
 }

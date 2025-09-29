@@ -29,31 +29,39 @@
 
     function checkGroupStatus() {
         const groupHeadings = document.querySelectorAll('h5.edivi__group-check');
-
         groupHeadings.forEach(groupHeading => {
             const groupContainer = groupHeading.closest('.edivi__box');
             if (!groupContainer) return;
 
             const groupInputs = groupContainer.querySelectorAll('.edivi__input-check');
+            let filledCount = 0;
+            let totalCount = groupInputs.length;
 
-            let allFilled = true;
             groupInputs.forEach(input => {
+                let isFilled = false;
+
                 if (input.tagName === 'SELECT') {
                     const selectedOption = input.querySelector('option:checked');
-                    if (!selectedOption || selectedOption.disabled) {
-                        allFilled = false;
+                    if (selectedOption && !selectedOption.disabled) {
+                        isFilled = true;
                     }
-                } else if (input.value.trim() === '') {
-                    allFilled = false;
+                } else if (input.value.trim() !== '') {
+                    isFilled = true;
+                }
+
+                if (isFilled) {
+                    filledCount++;
                 }
 
                 input.style.borderLeft = '0';
             });
 
-            if (allFilled) {
+            groupHeading.classList.remove('edivi__group-checked', 'edivi__group-partchecked');
+
+            if (filledCount === totalCount && totalCount > 0) {
                 groupHeading.classList.add('edivi__group-checked');
-            } else {
-                groupHeading.classList.remove('edivi__group-checked');
+            } else if (filledCount > 0) {
+                groupHeading.classList.add('edivi__group-partchecked');
             }
         });
     }
@@ -67,4 +75,14 @@
     });
 
     document.addEventListener('DOMContentLoaded', checkGroupStatus);
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const clickableBoxes = document.querySelectorAll('.edivi__box-clickable');
+
+        clickableBoxes.forEach(function(box) {
+            box.addEventListener('click', function() {
+                window.location.href = this.getAttribute('data-href');
+            });
+        });
+    });
 </script>

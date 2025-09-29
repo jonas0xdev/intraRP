@@ -146,7 +146,7 @@ if (!isset($_SESSION['fahrername']) || !isset($_SESSION['protfzg'])) {
                                         if ($row['prot_by'] == 1) {
                                     ?>
                                             <div class="edivi__einsatz-container">
-                                                <a href="prot/index.php?enr=<?= $row['enr'] ?>" class="edivi__einsatz-link">
+                                                <a href="protokoll/index.php?enr=<?= $row['enr'] ?>" class="edivi__einsatz-link">
                                                     <div class="row edivi__einsatz edivi__einsatz-set">
                                                         <div class="col-2 edivi__einsatz-type"><span><?= htmlspecialchars($label) ?></span></div>
                                                         <div class="col edivi__einsatz-enr"><span>#<?= $row['enr'] ?> <span class="edivi__einsatz-cat">NA</span></span><br><?= $row['edatum'] ?> <?= $row['ezeit'] ?> Uhr</div>
@@ -159,7 +159,7 @@ if (!isset($_SESSION['fahrername']) || !isset($_SESSION['protfzg'])) {
                                         } else {
                                         ?>
                                             <div class="edivi__einsatz-container">
-                                                <a href="prot/index.php?enr=<?= $row['enr'] ?>" class="edivi__einsatz-link">
+                                                <a href="protokoll/index.php?enr=<?= $row['enr'] ?>" class="edivi__einsatz-link">
                                                     <div class="row edivi__einsatz edivi__einsatz-set">
                                                         <div class="col-2 edivi__einsatz-type"><span><?= htmlspecialchars($label) ?></span></div>
                                                         <div class="col edivi__einsatz-enr"><span>#<?= $row['enr'] ?> <span class="edivi__einsatz-cat">RD</span></span><br><?= $row['edatum'] ?> <?= $row['ezeit'] ?> Uhr</div>
