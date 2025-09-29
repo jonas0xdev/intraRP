@@ -2,10 +2,10 @@
 require_once __DIR__ . '/../../assets/config/config.php';
 require __DIR__ . '/../../assets/config/database.php';
 
-if (isset($_POST['enr']) && isset($_POST['field']) && isset($_POST['value'])) {
+if (isset($_POST['enr']) && isset($_POST['field'])) {
     $enr = $_POST['enr'];
     $field = $_POST['field'];
-    $value = $_POST['value'];
+    $value = array_key_exists('value', $_POST) ? $_POST['value'] : null;
 
     $allowedFields = ['patname', 'patgebdat', 'patsex', 'edatum', 'ezeit', 'eort', 'awfrei_1', 'awsicherung_neu', 'zyanose_1', 'o2gabe', 'b_symptome', 'b_auskult', 'b_beatmung', 'spo2', 'atemfreq', 'etco2', 'c_zugang', 'c_kreislauf', 'c_ekg', 'rrsys', 'rrdias', 'herzfreq', 'medis', 'd_bewusstsein', 'd_ex_1', 'd_pupillenw_1', 'd_pupillenw_2', 'd_lichtreakt_1', 'd_lichtreakt_2', 'd_gcs_1', 'd_gcs_2', 'd_gcs_3', 'v_muster_k', 'v_muster_k1', 'v_muster_t', 'v_muster_t1', 'v_muster_a', 'v_muster_a1', 'v_muster_al', 'v_muster_al1', 'v_muster_bl', 'v_muster_bl1', 'v_muster_w', 'v_muster_w1', 'sz_nrs', 'sz_toleranz_1', 'bz', 'temp', 'anmerkungen', 'diagnose', 'fzg_transp', 'fzg_transp_perso', 'fzg_transp_perso_2', 'fzg_na', 'fzg_na_perso', 'fzg_na_perso_2', 'fzg_sonst', 'transportziel', 'pfname', 'prot_by', 'spo2', 'atemfreq', 'etco2', 'rrsys', 'rrdias', 'herzfreq', 'bz', 'temp'];
 
@@ -25,7 +25,8 @@ if (isset($_POST['enr']) && isset($_POST['field']) && isset($_POST['value'])) {
     }
 
     if ($field === 'c_zugang') {
-        if ($value === '0' || empty($value)) {
+        if ($value === '0') {
+        } else if ($value === null || $value === '') {
         } else {
             $decoded = json_decode($value, true);
             if (json_last_error() !== JSON_ERROR_NONE) {
@@ -49,7 +50,7 @@ if (isset($_POST['enr']) && isset($_POST['field']) && isset($_POST['value'])) {
             foreach ($zugaengeToValidate as $zugang) {
                 $requiredFields = ['art', 'groesse', 'ort', 'seite'];
                 foreach ($requiredFields as $requiredField) {
-                    if (!isset($zugang[$requiredField]) || empty($zugang[$requiredField])) {
+                    if (!isset($zugang[$requiredField]) || $zugang[$requiredField] === '') {
                         http_response_code(400);
                         echo "Pflichtfeld fehlt: $requiredField";
                         exit();
@@ -96,8 +97,10 @@ if (isset($_POST['enr']) && isset($_POST['field']) && isset($_POST['value'])) {
             $stmt->execute(['value' => $value, 'enr' => $enr]);
 
             if ($field === 'c_zugang') {
-                if ($value === '0' || empty($value)) {
+                if ($value === '0') {
                     echo "Zugang auf 'Kein Zugang' gesetzt";
+                } else if ($value === null || $value === '') {
+                    echo "Zugang zurückgesetzt";
                 } else {
                     echo "Zugang erfolgreich gespeichert";
                 }
