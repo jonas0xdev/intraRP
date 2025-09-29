@@ -5,9 +5,9 @@ if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
 }
 
 session_start();
-require_once __DIR__ . '/../../assets/config/config.php';
-require_once __DIR__ . '/../../vendor/autoload.php';
-require __DIR__ . '/../../assets/config/database.php';
+require_once __DIR__ . '/../../../assets/config/config.php';
+require_once __DIR__ . '/../../../vendor/autoload.php';
+require __DIR__ . '/../../../assets/config/database.php';
 
 use App\Auth\Permissions;
 
@@ -58,9 +58,9 @@ try {
         echo 'Fehler beim Löschen';
     }
 } catch (PDOException $e) {
-    error_log('Database error in verlauf_delete.php: ' . $e->getMessage());
+    error_log('Database error in delete.php: ' . $e->getMessage());
     echo 'Datenbankfehler';
 } catch (Exception $e) {
-    error_log('General error in verlauf_delete.php: ' . $e->getMessage());
+    error_log('General error in delete.php: ' . $e->getMessage());
     echo 'Unbekannter Fehler';
 }

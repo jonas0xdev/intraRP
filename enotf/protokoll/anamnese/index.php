@@ -5,9 +5,9 @@ if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
 }
 
 session_start();
-require_once __DIR__ . '/../../assets/config/config.php';
-require_once __DIR__ . '/../../vendor/autoload.php';
-require __DIR__ . '/../../assets/config/database.php';
+require_once __DIR__ . '/../../../assets/config/config.php';
+require_once __DIR__ . '/../../../vendor/autoload.php';
+require __DIR__ . '/../../../assets/config/database.php';
 
 use App\Auth\Permissions;
 
@@ -39,7 +39,7 @@ $daten['last_edit'] = !empty($daten['last_edit']) ? (new DateTime($daten['last_e
 
 $enr = $daten['enr'];
 
-$prot_url = "https://" . SYSTEM_URL . "/enotf/prot/index.php?enr=" . $enr;
+$prot_url = "https://" . SYSTEM_URL . "/enotf/protokoll/index.php?enr=" . $enr;
 
 date_default_timezone_set('Europe/Berlin');
 $currentTime = date('H:i');
@@ -80,37 +80,31 @@ $currentDate = date('d.m.Y');
 
 <body data-page="anamnese">
     <?php
-    include __DIR__ . '/../../assets/components/enotf/topbar.php';
+    include __DIR__ . '/../../../assets/components/enotf/topbar.php';
     ?>
     <form name="form" method="post" action="">
         <input type="hidden" name="new" value="1" />
         <div class="container-fluid" id="edivi__container">
             <div class="row h-100">
-                <?php include __DIR__ . '/../../assets/components/enotf/nav.php'; ?>
-                <div class="col" id="edivi__content">
-                    <div class=" row">
-                        <div class="col">
-                            <div class="row edivi__box">
-                                <h5 class="text-light px-2 py-1">Notfallsituation, SAMPLER(+S), Bemerkungen</h5>
-                                <div class="col">
-                                    <div class="row my-2">
-                                        <div class="col">
-                                            <textarea name="anmerkungen" id="anmerkungen" rows="20" class="w-100 form-control" style="resize: none" placeholder="..."><?= $daten['anmerkungen'] ?></textarea>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                <?php include __DIR__ . '/../../../assets/components/enotf/nav.php'; ?>
+                <div class="col" id="edivi__content" style="padding-left: 0">
+                    <div class="row" style="margin-left: 0">
+                        <div class="col-2 d-flex flex-column edivi__interactbutton-more">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/anamnese/1.php?enr=<?= $daten['enr'] ?>">
+                                <span>Anamnese</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/anamnese/2.php?enr=<?= $daten['enr'] ?>" data-requires="diagnose">
+                                <span>Diagnose</span>
+                            </a>
                         </div>
-                        <div class="col">
-                            <div class="row edivi__box">
-                                <h5 class="text-light px-2 py-1">Verdachts-/Erstdiagnose</h5>
-                                <div class="col">
-                                    <div class="row my-2">
-                                        <div class="col">
-                                            <textarea name="diagnose" id="diagnose" rows="3" class="w-100 form-control" style="resize: none" placeholder="..."><?= $daten['diagnose'] ?></textarea>
-                                        </div>
-                                    </div>
-                                </div>
+                        <div class="col edivi__overview-container">
+                            <div class="row edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/anamnese/1.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
+                                <h6 class="fw-bold pt-1 pb-0">Anamnese</h6>
+                                <div class="col border border-light py-1" style="min-height: 30vh;"><?= $daten['anmerkungen'] ?? '' ?></div>
+                            </div>
+                            <div class="row edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/anamnese/2.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
+                                <h6 class="fw-bold pt-1 pb-0">Verdachts-/Erstdiagnose</h6>
+                                <div class="col border border-light py-1" style="min-height: 15vh;"><?= $daten['diagnose'] ?? '' ?></div>
                             </div>
                         </div>
                     </div>
@@ -118,9 +112,9 @@ $currentDate = date('d.m.Y');
             </div>
     </form>
     <?php
-    include __DIR__ . '/../../assets/functions/enotf/notify.php';
-    include __DIR__ . '/../../assets/functions/enotf/field_checks.php';
-    include __DIR__ . '/../../assets/functions/enotf/clock.php';
+    include __DIR__ . '/../../../assets/functions/enotf/notify.php';
+    include __DIR__ . '/../../../assets/functions/enotf/field_checks.php';
+    include __DIR__ . '/../../../assets/functions/enotf/clock.php';
     ?>
     <?php if ($ist_freigegeben) : ?>
         <script>

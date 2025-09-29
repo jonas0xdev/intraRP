@@ -7,9 +7,9 @@ if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
 }
 
 session_start();
-require_once __DIR__ . '/../../assets/config/config.php';
-require_once __DIR__ . '/../../vendor/autoload.php';
-require __DIR__ . '/../../assets/config/database.php';
+require_once __DIR__ . '/../../../assets/config/config.php';
+require_once __DIR__ . '/../../../vendor/autoload.php';
+require __DIR__ . '/../../../assets/config/database.php';
 
 use App\Auth\Permissions;
 
@@ -330,11 +330,11 @@ $prot_url = "https://" . SYSTEM_URL . "/enotf/prot/index.php?enr=" . $enr;
 </head>
 
 <body data-page="verlauf">
-    <?php include __DIR__ . '/../../assets/components/enotf/topbar.php'; ?>
+    <?php include __DIR__ . '/../../../assets/components/enotf/topbar.php'; ?>
 
     <div class="container-fluid" id="edivi__container">
         <div class="row h-100">
-            <?php include __DIR__ . '/../../assets/components/enotf/nav.php'; ?>
+            <?php include __DIR__ . '/../../../assets/components/enotf/nav.php'; ?>
             <div class="col" id="edivi__content">
                 <div class="my-3"></div>
                 <!-- Erfolg/Fehler-Meldung -->
@@ -468,9 +468,9 @@ $prot_url = "https://" . SYSTEM_URL . "/enotf/prot/index.php?enr=" . $enr;
     </div>
 
     <?php
-    include __DIR__ . '/../../assets/functions/enotf/notify.php';
-    include __DIR__ . '/../../assets/functions/enotf/field_checks.php';
-    include __DIR__ . '/../../assets/functions/enotf/clock.php';
+    include __DIR__ . '/../../../assets/functions/enotf/notify.php';
+    include __DIR__ . '/../../../assets/functions/enotf/field_checks.php';
+    include __DIR__ . '/../../../assets/functions/enotf/clock.php';
     ?>
 </body>
 

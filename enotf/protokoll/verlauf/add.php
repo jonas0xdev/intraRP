@@ -5,9 +5,9 @@ if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
 }
 
 session_start();
-require_once __DIR__ . '/../../assets/config/config.php';
-require_once __DIR__ . '/../../vendor/autoload.php';
-require __DIR__ . '/../../assets/config/database.php';
+require_once __DIR__ . '/../../../assets/config/config.php';
+require_once __DIR__ . '/../../../vendor/autoload.php';
+require __DIR__ . '/../../../assets/config/database.php';
 
 use App\Auth\Permissions;
 
@@ -38,7 +38,7 @@ if ($daten['freigegeben'] == 1) {
 
 // Prüfung ob freigegeben
 if ($ist_freigegeben) {
-    header("Location: verlauf.php?enr=" . $_GET['enr']);
+    header("Location: index.php?enr=" . $_GET['enr']);
     exit();
 }
 
@@ -105,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_vitals'])) {
         }
 
         if ($gespeicherte_werte > 0) {
-            header("Location: verlauf.php?enr=" . $enr);
+            header("Location: index.php?enr=" . $enr);
             exit();
         } else {
             $message = 'Keine Werte zum Speichern gefunden oder Fehler beim Speichern.';
@@ -216,7 +216,7 @@ $currentDateTime = date('Y-m-d\TH:i');
                             </div>
                             <div class="row edivi__vitalparam-mainbuttons">
                                 <div class="col">
-                                    <a href="verlauf.php?enr=<?= $enr ?>">Abbrechen</a>
+                                    <a href="index.php?enr=<?= $enr ?>">Abbrechen</a>
                                 </div>
                                 <div class="col" style="border-left: 2px solid #191919;">
                                     <button type="submit" form="vitalsForm">

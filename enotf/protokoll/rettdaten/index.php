@@ -5,9 +5,9 @@ if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
 }
 
 session_start();
-require_once __DIR__ . '/../../assets/config/config.php';
-require_once __DIR__ . '/../../vendor/autoload.php';
-require __DIR__ . '/../../assets/config/database.php';
+require_once __DIR__ . '/../../../assets/config/config.php';
+require_once __DIR__ . '/../../../vendor/autoload.php';
+require __DIR__ . '/../../../assets/config/database.php';
 
 use App\Auth\Permissions;
 
@@ -80,13 +80,13 @@ $currentDate = date('d.m.Y');
 
 <body data-page="stammdaten">
     <?php
-    include __DIR__ . '/../../assets/components/enotf/topbar.php';
+    include __DIR__ . '/../../../assets/components/enotf/topbar.php';
     ?>
     <form name="form" method="post" action="">
         <input type="hidden" name="new" value="1" />
         <div class="container-fluid" id="edivi__container">
             <div class="row h-100">
-                <?php include __DIR__ . '/../../assets/components/enotf/nav.php'; ?>
+                <?php include __DIR__ . '/../../../assets/components/enotf/nav.php'; ?>
                 <div class="col" id="edivi__content">
                     <div class=" row">
                         <div class="col">
@@ -168,9 +168,9 @@ $currentDate = date('d.m.Y');
             </div>
     </form>
     <?php
-    include __DIR__ . '/../../assets/functions/enotf/notify.php';
-    include __DIR__ . '/../../assets/functions/enotf/field_checks.php';
-    include __DIR__ . '/../../assets/functions/enotf/clock.php';
+    include __DIR__ . '/../../../assets/functions/enotf/notify.php';
+    include __DIR__ . '/../../../assets/functions/enotf/field_checks.php';
+    include __DIR__ . '/../../../assets/functions/enotf/clock.php';
     ?>
     <?php if ($ist_freigegeben) : ?>
         <script>

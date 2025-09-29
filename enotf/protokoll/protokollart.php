@@ -37,7 +37,7 @@ if ($daten['freigegeben'] == 1) {
 }
 
 if ($ist_freigegeben) {
-    header("Location: " . BASE_PATH . "enotf/prot/index.php?enr=" . $daten['enr']);
+    header("Location: " . BASE_PATH . "enotf/protokoll/index.php?enr=" . $daten['enr']);
     exit();
 }
 
@@ -45,8 +45,8 @@ $daten['last_edit'] = !empty($daten['last_edit']) ? (new DateTime($daten['last_e
 
 $enr = $daten['enr'];
 
-$prot_url = "https://" . SYSTEM_URL . "/enotf/prot/index.php?enr=" . $enr;
-$defaultUrl = BASE_PATH . "enotf/prot/index.php?enr=" . $daten['enr'];
+$prot_url = "https://" . SYSTEM_URL . "/enotf/protokoll/index.php?enr=" . $enr;
+$defaultUrl = BASE_PATH . "enotf/protokoll/index.php?enr=" . $daten['enr'];
 
 date_default_timezone_set('Europe/Berlin');
 $currentTime = date('H:i');

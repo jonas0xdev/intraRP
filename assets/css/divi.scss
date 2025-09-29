@@ -154,6 +154,10 @@ body {
   padding: 0 0.5rem !important;
 }
 
+#edivi__container .edivi__overview-container .edivi__box textarea.form-control {
+  border: 1px solid #a2a2a2 !important;
+}
+
 #edivi__container .edivi__box input.form-control,
 #edivi__container .edivi__box select.form-select,
 #edivi__container .edivi__box textarea.form-control {

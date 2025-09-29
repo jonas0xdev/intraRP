@@ -39,7 +39,7 @@ $daten['last_edit'] = !empty($daten['last_edit']) ? (new DateTime($daten['last_e
 
 $enr = $daten['enr'];
 
-$prot_url = "https://" . SYSTEM_URL . "/enotf/prot/index.php?enr=" . $enr;
+$prot_url = "https://" . SYSTEM_URL . "/enotf/protokoll/index.php?enr=" . $enr;
 
 date_default_timezone_set('Europe/Berlin');
 $currentTime = date('H:i');
@@ -78,7 +78,7 @@ $currentDate = date('d.m.Y');
     <meta property="og:description" content="Verwaltungsportal der <?php echo RP_ORGTYPE . " " .  SERVER_CITY ?>" />
 </head>
 
-<body data-page="erstbefund">
+<body data-page="anamnese">
     <?php
     include __DIR__ . '/../../../assets/components/enotf/topbar.php';
     ?>
@@ -87,66 +87,24 @@ $currentDate = date('d.m.Y');
         <div class="container-fluid" id="edivi__container">
             <div class="row h-100">
                 <?php include __DIR__ . '/../../../assets/components/enotf/nav.php'; ?>
-                <div class="col" id="edivi__content">
-                    <div class="row">
-                        <div class="col">
-                            <div class="row edivi__box edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/atemwege/diagnostik/index.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
-                                <h5 class="text-light px-2 py-1 edivi__group-check">Diagnostik Atemwege</h5>
-                                <div class="col">
-                                    <div class="row mt-2 mb-4">
-                                        <div class="col">
-                                            <div class="row">
-                                                <div class="col">
-                                                    <?php
-                                                    $awfrei_labels = [
-                                                        1 => 'frei',
-                                                        2 => 'gefährdet',
-                                                        3 => 'verlegt'
-                                                    ];
-                                                    ?>
-                                                    <label class="edivi__description">Atemwegszustand</label>
-                                                    <input type="text" class="w-100 form-control edivi__input-check" readonly value="<?= $awfrei_labels[$daten['awfrei_1']] ?? '' ?>">
-                                                </div>
-                                                <div class="col">
-                                                    <?php
-                                                    $zyanose_labels = [
-                                                        1 => 'Nein',
-                                                        2 => 'Ja'
-                                                    ];
-                                                    ?>
-                                                    <label class="edivi__description">Zyanose</label><br>
-                                                    <input type="text" class="w-100 form-control edivi__input-check" readonly value="<?= $zyanose_labels[$daten['zyanose_1']] ?? '' ?>">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                <div class="col" id="edivi__content" style="padding-left: 0">
+                    <div class="row" style="margin-left: 0">
+                        <div class="col-2 d-flex flex-column edivi__interactbutton-more">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/anamnese/1.php?enr=<?= $daten['enr'] ?>" class="active">
+                                <span>Anamnese</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/anamnese/2.php?enr=<?= $daten['enr'] ?>" data-requires="diagnose">
+                                <span>Diagnose</span>
+                            </a>
                         </div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="row edivi__box edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/atemwege/massnahmen/index.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
-                        <h5 class="text-light px-2 py-1">Maßnahmen Atemwege</h5>
-                        <div class="col">
-                            <div class="row mt-2 mb-4">
+                        <div class="col-6 edivi__overview-container" style="margin:0; padding:0;">
+                            <div class="row edivi__box" style="margin:0;">
+                                <h5 class="text-light px-2 py-1">Notfallsituation, Anamnese, SAMPLER(+S), Bemerkungen</h5>
                                 <div class="col">
-                                    <?php
-                                    $awsicherung_labels = [
-                                        0 => 'Keine',
-                                        1 => 'Endotrachealtubus',
-                                        2 => 'Larynxtubus/-maske',
-                                        3 => 'Guedel-/Wendltubus',
-                                        99 => 'Sonstige'
-                                    ];
-                                    ?>
-                                    <label class="edivi__description">Atemwegssicherung</label><br>
-                                    <input type="text" class="w-100 form-control edivi__input-check" readonly value="<?= $awsicherung_labels[$daten['awsicherung_neu']] ?? '' ?>">
-                                </div>
-                                <div class="col">
-                                    <label class="edivi__description">Sauerstoffgabe</label>
-                                    <div class="row">
-                                        <div class="col"><input class="w-100 vitalparam form-control" type="text" value="<?= $daten['o2gabe'] ?>" style="display:inline" readonly> <small>L/min</small></div>
+                                    <div class="row my-2">
+                                        <div class="col">
+                                            <textarea name="anmerkungen" id="anmerkungen" rows="20" class="w-100 form-control" style="resize: none" placeholder="..."><?= $daten['anmerkungen'] ?></textarea>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

@@ -135,7 +135,7 @@ if (!Permissions::check(['admin', 'edivi.view'])) {
                                     echo "<td><span style='display:none'>" . $row['sendezeit'] . "</span>" . $date . "</td>";
                                     echo "<td>" . $row['pfname'] . " " . $freigabe_status . "</td>";
                                     echo "<td>" . $status . "</td>";
-                                    echo "<td><a title='Protokoll ansehen' href='" . BASE_PATH . "enotf/prot/index.php?enr={$row['enr']}' class='btn btn-sm btn-primary' target='_blank'><i class='las la-eye'></i></a> {$actions}</td>";
+                                    echo "<td><a title='Protokoll ansehen' href='" . BASE_PATH . "enotf/protokoll/index.php?enr={$row['enr']}' class='btn btn-sm btn-primary' target='_blank'><i class='las la-eye'></i></a> {$actions}</td>";
                                     echo "</tr>";
                                 }
                                 ?>

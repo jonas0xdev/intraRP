@@ -5,9 +5,9 @@ if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
 }
 
 session_start();
-require_once __DIR__ . '/../../assets/config/config.php';
-require_once __DIR__ . '/../../vendor/autoload.php';
-require __DIR__ . '/../../assets/config/database.php';
+require_once __DIR__ . '/../../../assets/config/config.php';
+require_once __DIR__ . '/../../../vendor/autoload.php';
+require __DIR__ . '/../../../assets/config/database.php';
 
 use App\Auth\Permissions;
 
@@ -241,17 +241,17 @@ $totalVitals = $stmtCount->fetch(PDO::FETCH_ASSOC)['count'];
 </head>
 
 <body data-page="verlauf">
-    <?php include __DIR__ . '/../../assets/components/enotf/topbar.php'; ?>
+    <?php include __DIR__ . '/../../../assets/components/enotf/topbar.php'; ?>
 
     <div class="container-fluid" id="edivi__container">
         <div class="row h-100">
-            <?php include __DIR__ . '/../../assets/components/enotf/nav.php'; ?>
+            <?php include __DIR__ . '/../../../assets/components/enotf/nav.php'; ?>
             <div class="col" id="edivi__content">
                 <div class="row my-3">
                     <div class="col">
                         <div class="d-flex justify-content-between align-items-center">
                             <div class="d-flex gap-2">
-                                <a href="verlauf_list.php?enr=<?= $enr ?>&action=manage" class="btn btn-outline-light">
+                                <a href="list.php?enr=<?= $enr ?>&action=manage" class="btn btn-outline-light">
                                     <i class="las la-list"></i> Verlauf bearbeiten
                                 </a>
                             </div>
@@ -312,9 +312,9 @@ $totalVitals = $stmtCount->fetch(PDO::FETCH_ASSOC)['count'];
     </div>
 
     <?php
-    include __DIR__ . '/../../assets/functions/enotf/notify.php';
-    include __DIR__ . '/../../assets/functions/enotf/field_checks.php';
-    include __DIR__ . '/../../assets/functions/enotf/clock.php';
+    include __DIR__ . '/../../../assets/functions/enotf/notify.php';
+    include __DIR__ . '/../../../assets/functions/enotf/field_checks.php';
+    include __DIR__ . '/../../../assets/functions/enotf/clock.php';
     ?>
 
     <script>
@@ -623,7 +623,7 @@ $totalVitals = $stmtCount->fetch(PDO::FETCH_ASSOC)['count'];
         // Werte hinzufügen
         function addValues() {
             <?php if (!$ist_freigegeben): ?>
-                window.location.href = 'verlauf_add.php?enr=<?= $enr ?>';
+                window.location.href = 'add.php?enr=<?= $enr ?>';
             <?php else: ?>
                 alert('Diese Dokumentation ist bereits freigegeben und kann nicht mehr bearbeitet werden.');
             <?php endif; ?>
