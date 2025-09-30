@@ -12,6 +12,7 @@ if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
 
 if (!isset($_SESSION['cirs_user']) || empty($_SESSION['cirs_user'])) {
     header("Location: " . BASE_PATH . "admin/users/editprofile.php");
+    exit();
 }
 
 use App\Helpers\Flash;
@@ -21,21 +22,93 @@ $caseid = $_GET['antrag'] ?? null;
 
 if (!$caseid) {
     Flash::set('error', 'Keine Antragsnummer angegeben.');
-    header("Location: " . BASE_PATH . "dashboard.php");
+    header("Location: " . BASE_PATH . "admin/index.php");
     exit();
 }
 
-$stmt = $pdo->prepare("SELECT * FROM intra_antrag_bef WHERE uniqueid = ?");
+// Zuerst in neuen dynamischen Anträgen suchen
+$stmt = $pdo->prepare("
+    SELECT a.*, at.name as typ_name, at.icon as typ_icon, at.tabelle_name
+    FROM intra_antraege a
+    JOIN intra_antrag_typen at ON a.antragstyp_id = at.id
+    WHERE a.uniqueid = ?
+");
 $stmt->execute([$caseid]);
-$row = $stmt->fetch();
+$antrag = $stmt->fetch(PDO::FETCH_ASSOC);
 
-if (!$row) {
+// Wenn nicht gefunden, in Beförderungsanträgen suchen
+if (!$antrag) {
+    $stmt = $pdo->prepare("
+        SELECT 
+            uniqueid,
+            name_dn,
+            dienstgrad,
+            time_added,
+            freitext,
+            cirs_manager,
+            cirs_time,
+            cirs_status,
+            cirs_text,
+            discordid
+        FROM intra_antrag_bef 
+        WHERE uniqueid = ?
+    ");
+    $stmt->execute([$caseid]);
+    $bef_antrag = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($bef_antrag) {
+        // Beförderungsantrag in einheitliches Format konvertieren
+        $antrag = [
+            'uniqueid' => $bef_antrag['uniqueid'],
+            'name_dn' => $bef_antrag['name_dn'],
+            'dienstgrad' => $bef_antrag['dienstgrad'],
+            'time_added' => $bef_antrag['time_added'],
+            'cirs_manager' => $bef_antrag['cirs_manager'],
+            'cirs_time' => $bef_antrag['cirs_time'],
+            'cirs_status' => $bef_antrag['cirs_status'],
+            'cirs_text' => $bef_antrag['cirs_text'],
+            'discordid' => $bef_antrag['discordid'],
+            'typ_name' => 'Beförderungsantrag',
+            'typ_icon' => 'las la-angle-double-up',
+            'tabelle_name' => 'intra_antrag_bef',
+            'is_bef' => true,
+            'freitext' => $bef_antrag['freitext']
+        ];
+    }
+}
+
+if (!$antrag) {
     Flash::set('error', 'Antrag nicht gefunden.');
-    header("Location: " . BASE_PATH . "dashboard.php");
+    header("Location: " . BASE_PATH . "admin/index.php");
     exit();
 }
 
-// Status-Mapping für bessere Lesbarkeit
+// Sicherheit: Benutzer darf nur eigene Anträge sehen (außer Admin)
+if (!Permissions::check(['admin', 'application.view'])) {
+    if ($antrag['discordid'] !== $_SESSION['discordtag']) {
+        Flash::set('error', 'Sie haben keine Berechtigung, diesen Antrag anzusehen.');
+        header("Location: " . BASE_PATH . "admin/index.php");
+        exit();
+    }
+}
+
+// Felddaten laden (nur für dynamische Anträge)
+$felder_daten = [];
+if (!isset($antrag['is_bef'])) {
+    $stmt = $pdo->prepare("
+        SELECT af.*, ad.wert
+        FROM intra_antrag_felder af
+        LEFT JOIN intra_antraege_daten ad ON af.feldname = ad.feldname AND ad.antrag_id = (
+            SELECT id FROM intra_antraege WHERE uniqueid = ?
+        )
+        WHERE af.antragstyp_id = ?
+        ORDER BY af.sortierung ASC
+    ");
+    $stmt->execute([$caseid, $antrag['antragstyp_id']]);
+    $felder_daten = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// Status-Mapping
 $statusMapping = [
     0 => ['class' => 'info', 'text' => 'In Bearbeitung', 'icon' => 'las la-clock'],
     1 => ['class' => 'danger', 'text' => 'Abgelehnt', 'icon' => 'las la-times-circle'],
@@ -43,10 +116,8 @@ $statusMapping = [
     3 => ['class' => 'success', 'text' => 'Angenommen', 'icon' => 'las la-check-circle'],
 ];
 
-$currentStatus = $statusMapping[$row['cirs_status']] ?? ['class' => 'dark', 'text' => 'Unbekannt', 'icon' => 'las la-question-circle'];
-
-// Formatiere Datum für bessere Anzeige
-$createDate = new DateTime($row['createdate'] ?? 'now');
+$currentStatus = $statusMapping[$antrag['cirs_status']] ?? ['class' => 'dark', 'text' => 'Unbekannt', 'icon' => 'las la-question-circle'];
+$createDate = new DateTime($antrag['time_added'] ?? 'now');
 ?>
 
 <!DOCTYPE html>
@@ -57,46 +128,58 @@ $createDate = new DateTime($row['createdate'] ?? 'now');
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Antrag [#<?php echo $caseid ?>] &rsaquo; <?php echo SYSTEM_NAME ?></title>
-    <!-- Stylesheets -->
     <link rel="stylesheet" href="<?= BASE_PATH ?>assets/css/style.min.css" />
     <link rel="stylesheet" href="<?= BASE_PATH ?>assets/css/admin.min.css" />
     <link rel="stylesheet" href="<?= BASE_PATH ?>assets/_ext/lineawesome/css/line-awesome.min.css" />
     <link rel="stylesheet" href="<?= BASE_PATH ?>assets/fonts/mavenpro/css/all.min.css" />
-    <!-- Bootstrap -->
     <link rel="stylesheet" href="<?= BASE_PATH ?>vendor/twbs/bootstrap/dist/css/bootstrap.min.css">
     <script src="<?= BASE_PATH ?>vendor/components/jquery/jquery.min.js"></script>
     <script src="<?= BASE_PATH ?>vendor/twbs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Favicon -->
     <link rel="icon" type="image/png" href="<?= BASE_PATH ?>assets/favicon/favicon-96x96.png" sizes="96x96" />
-    <link rel="icon" type="image/svg+xml" href="<?= BASE_PATH ?>assets/favicon/favicon.svg" />
-    <link rel="shortcut icon" href="<?= BASE_PATH ?>assets/favicon/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="<?= BASE_PATH ?>assets/favicon/apple-touch-icon.png" />
-    <meta name="apple-mobile-web-app-title" content="<?php echo SYSTEM_NAME ?>" />
-    <link rel="manifest" href="<?= BASE_PATH ?>assets/favicon/site.webmanifest" />
-    <!-- Metas -->
     <meta name="theme-color" content="<?php echo SYSTEM_COLOR ?>" />
-    <meta property="og:site_name" content="<?php echo SERVER_NAME ?>" />
-    <meta property="og:url" content="https://<?php echo SYSTEM_URL . BASE_PATH ?>/dashboard.php" />
-    <meta property="og:title" content="<?php echo SYSTEM_NAME ?> - Intranet <?php echo SERVER_CITY ?>" />
-    <meta property="og:image" content="<?php echo META_IMAGE_URL ?>" />
-    <meta property="og:description" content="Verwaltungsportal der <?php echo RP_ORGTYPE . " " .  SERVER_CITY ?>" />
+    <style>
+        .intra__tile {
+            background: rgba(var(--bs-dark-rgb), 0.5);
+            border: 1px solid rgba(var(--bs-light-rgb), 0.1);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+        }
 
+        .field-label {
+            font-weight: 600;
+            color: #aaa;
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .field-value {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            min-height: 2.5rem;
+        }
+
+        .form-control-plaintext {
+            border-bottom: 1px solid var(--bs-border-color);
+            padding-bottom: 0.375rem;
+            min-height: calc(1.5em + 0.75rem + 2px);
+        }
+    </style>
 </head>
 
 <body data-bs-theme="dark" data-page="antrag-view">
-    <!-- PRELOAD -->
-
     <?php include __DIR__ . "/../assets/components/navbar.php"; ?>
+
     <div class="container-full position-relative" id="mainpageContainer">
-        <!-- ------------ -->
-        <!-- PAGE CONTENT -->
-        <!-- ------------ -->
         <div class="container">
             <div class="row">
                 <div class="col">
                     <hr class="text-light my-3">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h1>Beförderungsantrag #<?php echo htmlspecialchars($caseid); ?></h1>
+                        <h1>
+                            <i class="<?= htmlspecialchars($antrag['typ_icon']) ?> me-2"></i>
+                            <?= htmlspecialchars($antrag['typ_name']) ?> #<?= htmlspecialchars($caseid) ?>
+                        </h1>
                     </div>
                     <?php Flash::render(); ?>
                     <hr class="text-light my-3">
@@ -112,13 +195,13 @@ $createDate = new DateTime($row['createdate'] ?? 'now');
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label text-muted small">Name und Dienstnummer</label>
                                         <div class="form-control-plaintext fw-bold">
-                                            <?php echo htmlspecialchars($row['name_dn']); ?>
+                                            <?= htmlspecialchars($antrag['name_dn']) ?>
                                         </div>
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label text-muted small">Aktueller Dienstgrad</label>
                                         <div class="form-control-plaintext fw-bold">
-                                            <?php echo htmlspecialchars($row['dienstgrad']); ?>
+                                            <?= htmlspecialchars($antrag['dienstgrad']) ?>
                                         </div>
                                     </div>
                                 </div>
@@ -127,15 +210,54 @@ $createDate = new DateTime($row['createdate'] ?? 'now');
                             <!-- Antragsinhalt -->
                             <div class="intra__tile p-2 mb-4">
                                 <h5 class="mb-3">
-                                    <i class="las la-file-alt me-2"></i>Schriftlicher Antrag
+                                    <i class="las la-file-alt me-2"></i>Antragsinhalt
                                 </h5>
-                                <div class="bg-dark rounded p-3">
-                                    <?php if (!empty($row['freitext'])): ?>
-                                        <p class="mb-0" style="white-space: pre-line;"><?php echo htmlspecialchars($row['freitext']); ?></p>
-                                    <?php else: ?>
-                                        <p class="text-muted mb-0"><i>Kein Antragstext vorhanden</i></p>
-                                    <?php endif; ?>
-                                </div>
+
+                                <?php if (isset($antrag['is_bef'])): ?>
+                                    <!-- Beförderungsantrag -->
+                                    <div class="bg-dark rounded p-3">
+                                        <?php if (!empty($antrag['freitext'])): ?>
+                                            <p class="mb-0" style="white-space: pre-line;"><?= htmlspecialchars($antrag['freitext']) ?></p>
+                                        <?php else: ?>
+                                            <p class="text-muted mb-0"><i>Kein Antragstext vorhanden</i></p>
+                                        <?php endif; ?>
+                                    </div>
+                                <?php else: ?>
+                                    <!-- Dynamische Felder -->
+                                    <?php
+                                    $current_row = [];
+                                    foreach ($felder_daten as $index => $feld):
+                                        $breite_class = $feld['breite'] === 'half' ? 'col-md-6' : 'col-12';
+
+                                        if (empty($current_row)) {
+                                            echo '<div class="row">';
+                                        }
+
+                                        $current_row[] = $feld['breite'];
+                                    ?>
+                                        <div class="<?= $breite_class ?> mb-3">
+                                            <div class="field-label"><?= htmlspecialchars($feld['label']) ?></div>
+                                            <div class="field-value">
+                                                <?php if ($feld['feldtyp'] === 'checkbox'): ?>
+                                                    <?= $feld['wert'] ? '<i class="las la-check-square text-success"></i> Ja' : '<i class="las la-square text-muted"></i> Nein' ?>
+                                                <?php elseif (empty($feld['wert'])): ?>
+                                                    <span class="text-muted"><i>Keine Angabe</i></span>
+                                                <?php else: ?>
+                                                    <?= nl2br(htmlspecialchars($feld['wert'])) ?>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                    <?php
+                                        $is_last = $index === count($felder_daten) - 1;
+                                        $row_complete = ($feld['breite'] === 'full') || (count($current_row) >= 2) || $is_last;
+
+                                        if ($row_complete) {
+                                            echo '</div>';
+                                            $current_row = [];
+                                        }
+                                    endforeach;
+                                    ?>
+                                <?php endif; ?>
                             </div>
 
                             <!-- Bearbeitung -->
@@ -147,8 +269,8 @@ $createDate = new DateTime($row['createdate'] ?? 'now');
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label text-muted small">Bearbeiter</label>
                                         <div class="form-control-plaintext">
-                                            <?php if (!empty($row['cirs_manager'])): ?>
-                                                <span class="fw-bold"><?php echo htmlspecialchars($row['cirs_manager']); ?></span>
+                                            <?php if (!empty($antrag['cirs_manager'])): ?>
+                                                <span class="fw-bold"><?= htmlspecialchars($antrag['cirs_manager']) ?></span>
                                             <?php else: ?>
                                                 <span class="text-muted"><i>Noch nicht zugewiesen</i></span>
                                             <?php endif; ?>
@@ -157,19 +279,19 @@ $createDate = new DateTime($row['createdate'] ?? 'now');
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label text-muted small">Status</label>
                                         <div class="form-control-plaintext">
-                                            <span class="badge text-bg-<?php echo $currentStatus['class']; ?>">
-                                                <i class="<?php echo $currentStatus['icon']; ?> me-1"></i>
-                                                <?php echo $currentStatus['text']; ?>
+                                            <span class="badge text-bg-<?= $currentStatus['class'] ?>">
+                                                <i class="<?= $currentStatus['icon'] ?> me-1"></i>
+                                                <?= $currentStatus['text'] ?>
                                             </span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <?php if (!empty($row['cirs_text'])): ?>
+                                <?php if (!empty($antrag['cirs_text'])): ?>
                                     <div class="mt-3">
                                         <label class="form-label text-muted small">Bemerkung</label>
                                         <div class="bg-dark rounded p-3">
-                                            <p class="mb-0" style="white-space: pre-line;"><?php echo htmlspecialchars($row['cirs_text']); ?></p>
+                                            <p class="mb-0" style="white-space: pre-line;"><?= htmlspecialchars($antrag['cirs_text']) ?></p>
                                         </div>
                                     </div>
                                 <?php endif; ?>
@@ -185,55 +307,54 @@ $createDate = new DateTime($row['createdate'] ?? 'now');
                                 <div class="small">
                                     <div class="d-flex justify-content-between py-2 border-bottom border-secondary">
                                         <span class="text-muted">Antragsnummer:</span>
-                                        <span class="fw-bold">#<?php echo htmlspecialchars($caseid); ?></span>
+                                        <span class="fw-bold">#<?= htmlspecialchars($caseid) ?></span>
+                                    </div>
+                                    <div class="d-flex justify-content-between py-2 border-bottom border-secondary">
+                                        <span class="text-muted">Typ:</span>
+                                        <span><?= htmlspecialchars($antrag['typ_name']) ?></span>
                                     </div>
                                     <div class="d-flex justify-content-between py-2 border-bottom border-secondary">
                                         <span class="text-muted">Erstellt am:</span>
-                                        <span><?php echo $createDate->format('d.m.Y H:i'); ?></span>
+                                        <span><?= $createDate->format('d.m.Y H:i') ?></span>
                                     </div>
-                                    <div class="d-flex justify-content-between py-2 border-bottom border-secondary">
-                                        <span class="text-muted">Discord-ID:</span>
-                                        <span class="font-monospace small"><?php echo htmlspecialchars($row['discordid'] ?? 'N/A'); ?></span>
+                                    <?php if (!empty($antrag['cirs_time'])): ?>
+                                        <div class="d-flex justify-content-between py-2 border-bottom border-secondary">
+                                            <span class="text-muted">Bearbeitet am:</span>
+                                            <span><?= date('d.m.Y H:i', strtotime($antrag['cirs_time'])) ?></span>
+                                        </div>
+                                    <?php endif; ?>
+                                    <div class="d-flex justify-content-between py-2">
+                                        <span class="text-muted">Status:</span>
+                                        <span class="badge text-bg-<?= $currentStatus['class'] ?>">
+                                            <i class="<?= $currentStatus['icon'] ?> me-1"></i>
+                                            <?= $currentStatus['text'] ?>
+                                        </span>
                                     </div>
                                 </div>
                             </div>
 
-                            <?php if (Permissions::check(['admin', 'application.view'])): ?>
-                                <!-- Aktionen -->
-                                <div class="intra__tile p-2">
-                                    <h6 class="mb-3">
-                                        <i class="las la-tools me-2"></i>Aktionen
-                                    </h6>
-                                    <div class="d-grid gap-2">
-                                        <a href="<?= BASE_PATH ?>admin/antraege/list.php" class="btn btn-secondary">
-                                            <i class="las la-arrow-left me-2"></i>Zurück zur Übersicht
+                            <!-- Aktionen -->
+                            <div class="intra__tile p-2">
+                                <h6 class="mb-3">
+                                    <i class="las la-tools me-2"></i>Aktionen
+                                </h6>
+                                <div class="d-grid gap-2">
+                                    <a href="<?= BASE_PATH ?>admin/index.php" class="btn btn-secondary">
+                                        <i class="las la-arrow-left me-2"></i>Zurück zum Dashboard
+                                    </a>
+                                    <?php if (Permissions::check(['admin', 'application.edit'])): ?>
+                                        <a href="<?= BASE_PATH ?>admin/antraege/view.php?antrag=<?= $caseid ?>" class="btn btn-primary">
+                                            <i class="las la-edit me-2"></i>Bearbeiten (Admin)
                                         </a>
-                                        <?php if (Permissions::check(['admin', 'application.edit'])): ?>
-                                            <a href="<?= BASE_PATH ?>admin/antraege/view.php?antrag=<?php echo $caseid; ?>" class="btn btn-primary">
-                                                <i class="las la-edit me-2"></i>Bearbeiten
-                                            </a>
-                                        <?php endif; ?>
-                                    </div>
+                                    <?php endif; ?>
                                 </div>
-                            <?php endif; ?>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <style>
-        .badge-sm {
-            font-size: 0.7em;
-        }
-
-        .form-control-plaintext {
-            border-bottom: 1px solid var(--bs-border-color);
-            padding-bottom: 0.375rem;
-            min-height: calc(1.5em + 0.75rem + 2px);
-        }
-    </style>
 
     <?php include __DIR__ . "/../assets/components/footer.php"; ?>
 </body>

@@ -1,5 +1,6 @@
 <table class="table table-striped" id="documentTable">
     <thead>
+        <th scope="col">Typ</th>
         <th scope="col">Status</th>
         <th scope="col">#</th>
         <th scope="col">Bearbeiter</th>
@@ -8,19 +9,47 @@
     </thead>
     <tbody>
         <?php
-        $query = "SELECT * FROM intra_antrag_bef WHERE discordid = :discordtag ORDER BY time_added DESC";
+        $query = "
+    SELECT 
+        uniqueid,
+        'Beförderungsantrag' as typ_name,
+        'las la-angle-double-up' as typ_icon,
+        cirs_status,
+        cirs_manager,
+        time_added,
+        'bef' as source
+    FROM intra_antrag_bef 
+    WHERE discordid = ?
+    
+    UNION ALL
+    
+    SELECT 
+        a.uniqueid,
+        at.name as typ_name,
+        at.icon as typ_icon,
+        a.cirs_status,
+        a.cirs_manager,
+        a.time_added,
+        'dynamic' as source
+    FROM intra_antraege a
+    JOIN intra_antrag_typen at ON a.antragstyp_id = at.id
+    WHERE a.discordid = ?
+    
+    ORDER BY time_added DESC
+";
 
         $stmt = $pdo->prepare($query);
-        $stmt->execute(['discordtag' => $_SESSION['discordtag']]);
+        $stmt->execute([$_SESSION['discordtag'], $_SESSION['discordtag']]);
         $appresult = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         if (empty($appresult)) {
-            echo "<tr><td colspan='5' class='text-center'>Es sind keine Anträge hinterlegt.</td></tr>";
+            echo "<tr><td colspan='6' class='text-center'>Es sind keine Anträge hinterlegt.</td></tr>";
         } else {
             foreach ($appresult as $row) {
                 $adddat = date("d.m.Y | H:i", strtotime($row['time_added']));
                 $cirs_state = "Unbekannt";
-                $bgColor = "";
+                $badge_color = "text-bg-dark";
+
                 switch ($row['cirs_status']) {
                     case 0:
                         $cirs_state = "In Bearbeitung";
@@ -29,7 +58,6 @@
                     case 1:
                         $cirs_state = "Abgelehnt";
                         $badge_color = "text-bg-danger";
-                        $badge_text = "Abgelehnt";
                         break;
                     case 2:
                         $cirs_state = "Aufgeschoben";
@@ -39,20 +67,22 @@
                         $cirs_state = "Angenommen";
                         $badge_color = "text-bg-success";
                         break;
-                    default:
-                        $cirs_state = "Unbekannt";
-                        $badge_color = "text-bg-dark";
-                        break;
                 }
 
-
-
                 echo "<tr>
-                <td><span class='badge {$badge_color}'>" . $cirs_state . "</span></td>
-                <td>{$row['uniqueid']}</td>
-                <td>" . (!empty($row['cirs_manager']) ? htmlspecialchars($row['cirs_manager']) : '---') . "</td>
-                <td><span style='display:none'>{$row['time_added']}</span>{$adddat}</td>
-                <td><a class='btn btn-primary btn-sm' href='/antraege/view.php?antrag={$row['uniqueid']}'>Ansehen</a></td>
+                    <td>
+                        <i class='" . htmlspecialchars($row['typ_icon']) . " me-1'></i>
+                        <span class='small'>" . htmlspecialchars($row['typ_name']) . "</span>
+                    </td>
+                    <td><span class='badge {$badge_color}'>" . $cirs_state . "</span></td>
+                    <td><strong>{$row['uniqueid']}</strong></td>
+                    <td>" . (!empty($row['cirs_manager']) ? htmlspecialchars($row['cirs_manager']) : '---') . "</td>
+                    <td><span style='display:none'>{$row['time_added']}</span>{$adddat}</td>
+                    <td>
+                        <a class='btn btn-primary btn-sm' href='" . BASE_PATH . "antraege/view.php?antrag={$row['uniqueid']}'>
+                            <i class='las la-eye me-1'></i>Ansehen
+                        </a>
+                    </td>
                 </tr>";
             }
         }

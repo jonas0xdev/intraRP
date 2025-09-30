@@ -108,7 +108,7 @@ echo "✓ Migration-Verzeichnis: $migrationPath\n";
 
 $migrationFiles = [
     // 07.06.2025
-    'create_intra_antrag_bef_07062025.php',
+    //'create_intra_antrag_bef_07062025.php',
     'create_intra_users_roles_07062025.php',
     'insert_intra_users_roles_07062025.php',
     'create_intra_users_07062025.php',
@@ -153,7 +153,12 @@ $migrationFiles = [
     'update_intra_mitarbeiter_dokumente_30092025_templates.php',
     'insert_system_templates_30092025.php',
     'migrate_existing_documents_30092025.php',
-    'insert_template_fields_30092025.php'
+    'insert_template_fields_30092025.php',
+    'create_intra_antrag_typen_30092025.php',
+    'create_intra_antrag_felder_30092025.php',
+    'insert_intra_dynamic_antraege_30092025.php',
+    'create_intra_antraege_30092025.php',
+    'create_intra_antraege_daten_30092025.php'
 ];
 
 $executed = 0;
