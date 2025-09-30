@@ -220,6 +220,8 @@ if (Permissions::check(['admin', 'personnel.documents.manage'])) {
                     break;
 
                 case 'select':
+                case 'db_dg':
+                case 'db_rdq':
                     html += `<select class="form-select" id="field_${fieldName}" name="${fieldName}" ${required}>
                 <option value="">Bitte wählen</option>`;
                     if (field.field_options) {

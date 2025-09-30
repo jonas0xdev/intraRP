@@ -15,6 +15,13 @@ if (!Permissions::check(['admin'])) {
     Flash::set('error', 'no-permissions');
     header("Location: " . BASE_PATH . "admin/index.php");
 }
+
+// Lade Dienstgrade und RD-Qualifikationen für Auswahlfelder
+$dienstgradeStmt = $pdo->query("SELECT id, name, name_m, name_w FROM intra_mitarbeiter_dienstgrade WHERE archive = 0 ORDER BY priority ASC");
+$dienstgrade = $dienstgradeStmt->fetchAll(PDO::FETCH_ASSOC);
+
+$rdQualisStmt = $pdo->query("SELECT id, name, name_m, name_w FROM intra_mitarbeiter_rdquali WHERE trainable = 1 AND none = 0 ORDER BY priority ASC");
+$rdQualis = $rdQualisStmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -50,7 +57,6 @@ if (!Permissions::check(['admin'])) {
     <meta property="og:description" content="Verwaltungsportal der <?php echo RP_ORGTYPE . " " .  SERVER_CITY ?>" />
     <style>
         .field-item {
-            background: #f8f9fa;
             border: 1px solid #dee2e6;
             border-radius: 0.375rem;
             padding: 1rem;
@@ -75,14 +81,12 @@ if (!Permissions::check(['admin'])) {
         }
 
         .template-preview {
-            background: white;
             border: 1px solid #dee2e6;
             padding: 2rem;
             border-radius: 0.375rem;
         }
 
         .option-item {
-            background: #e9ecef;
             padding: 1rem;
             border-radius: 0.375rem;
         }
@@ -217,7 +221,9 @@ if (!Permissions::check(['admin'])) {
                                 <option value="richtext">Rich-Text Editor</option>
                                 <option value="date">Datum</option>
                                 <option value="number">Zahl</option>
-                                <option value="select">Auswahlfeld</option>
+                                <option value="select">Auswahlfeld (manuell)</option>
+                                <option value="db_dg">Dienstgrad-Auswahl (aus DB)</option>
+                                <option value="db_rdq">RD-Qualifikation (aus DB)</option>
                             </select>
                         </div>
 
@@ -228,17 +234,22 @@ if (!Permissions::check(['admin'])) {
                                     Geschlechtsspezifische Optionen
                                 </label>
                                 <small class="form-text text-muted d-block">
-                                    Aktivieren für männlich/weiblich/neutral Varianten (z.B. Brandmeister/Brandmeisterin)
+                                    Aktivieren für männlich/weiblich/neutral Varianten
                                 </small>
                             </div>
                         </div>
 
                         <div id="optionsContainer" class="mb-3" style="display: none;">
-                            <label class="form-label">Auswahloptionen (mit geschlechtsspezifischen Varianten)</label>
+                            <label class="form-label">Auswahloptionen</label>
                             <div id="optionsList"></div>
                             <button type="button" class="btn btn-sm btn-secondary" id="addOptionBtn">
                                 + Option hinzufügen
                             </button>
+                        </div>
+
+                        <div class="alert alert-info" id="dbFieldInfo" style="display: none;">
+                            <strong>Hinweis:</strong> Dieses Feld wird automatisch mit Daten aus der Datenbank befüllt.
+                            Die geschlechtsspezifischen Varianten werden automatisch berücksichtigt.
                         </div>
 
                         <div class="form-check mb-3">
@@ -259,6 +270,10 @@ if (!Permissions::check(['admin'])) {
 
     <script>
         const BASE_PATH = '<?= BASE_PATH ?>';
+
+        // Datenbank-Daten für Auswahlfelder
+        const DIENSTGRADE = <?= json_encode($dienstgrade) ?>;
+        const RD_QUALIS = <?= json_encode($rdQualis) ?>;
 
         let fields = [];
         let editingFieldIndex = null;
@@ -289,13 +304,20 @@ if (!Permissions::check(['admin'])) {
             const fieldType = document.getElementById('fieldType').value;
             const optionsContainer = document.getElementById('optionsContainer');
             const genderContainer = document.getElementById('genderSpecificContainer');
+            const dbFieldInfo = document.getElementById('dbFieldInfo');
 
             if (fieldType === 'select') {
                 optionsContainer.style.display = 'block';
                 genderContainer.style.display = 'block';
+                dbFieldInfo.style.display = 'none';
+            } else if (fieldType === 'db_dg' || fieldType === 'db_rdq') {
+                optionsContainer.style.display = 'none';
+                genderContainer.style.display = 'none';
+                dbFieldInfo.style.display = 'block';
             } else {
                 optionsContainer.style.display = 'none';
                 genderContainer.style.display = 'none';
+                dbFieldInfo.style.display = 'none';
             }
         }
 
@@ -354,7 +376,23 @@ if (!Permissions::check(['admin'])) {
             }
 
             let options = null;
-            if (fieldType === 'select') {
+
+            // Bei DB-Feldern generiere automatisch Optionen
+            if (fieldType === 'db_dg') {
+                options = DIENSTGRADE.map(dg => ({
+                    value: dg.id,
+                    label: dg.name,
+                    label_m: dg.name_m,
+                    label_w: dg.name_w
+                }));
+            } else if (fieldType === 'db_rdq') {
+                options = RD_QUALIS.map(rd => ({
+                    value: rd.id,
+                    label: rd.name,
+                    label_m: rd.name_m,
+                    label_w: rd.name_w
+                }));
+            } else if (fieldType === 'select') {
                 options = [];
                 const optionContainers = document.querySelectorAll('#optionsList .option-item');
                 optionContainers.forEach(container => {
@@ -367,7 +405,6 @@ if (!Permissions::check(['admin'])) {
                             label
                         };
 
-                        // Nur wenn geschlechtsspezifisch aktiviert ist
                         if (genderSpecific) {
                             const label_m = container.querySelector('[data-option-label-m]').value;
                             const label_w = container.querySelector('[data-option-label-w]').value;
@@ -385,7 +422,7 @@ if (!Permissions::check(['admin'])) {
                 field_name: fieldName,
                 field_type: fieldType,
                 is_required: fieldRequired,
-                gender_specific: genderSpecific,
+                gender_specific: genderSpecific || (fieldType === 'db_dg' || fieldType === 'db_rdq'),
                 field_options: options,
                 sort_order: editingFieldIndex !== null ? fields[editingFieldIndex].sort_order : fields.length
             };
@@ -419,6 +456,7 @@ if (!Permissions::check(['admin'])) {
                     <strong>${field.field_label}</strong>
                     ${field.is_required ? '<span class="badge bg-danger ms-2">Pflichtfeld</span>' : ''}
                     ${field.gender_specific ? '<span class="badge bg-info ms-2">Geschlechtsspezifisch</span>' : ''}
+                    ${(field.field_type === 'db_dg' || field.field_type === 'db_rdq') ? '<span class="badge bg-success ms-2">DB-Feld</span>' : ''}
                 </div>
                 <div class="text-muted small">
                     Typ: ${getFieldTypeLabel(field.field_type)} | 
@@ -475,7 +513,9 @@ if (!Permissions::check(['admin'])) {
                 richtext: 'Rich-Text',
                 date: 'Datum',
                 number: 'Zahl',
-                select: 'Auswahlfeld'
+                select: 'Auswahlfeld',
+                db_dg: 'Dienstgrad (DB)',
+                db_rdq: 'RD-Qualifikation (DB)'
             };
             return types[type] || type;
         }
@@ -486,7 +526,6 @@ if (!Permissions::check(['admin'])) {
             const templateName = document.getElementById('templateName').value;
             let templateFile = document.getElementById('templateFile').value;
 
-            // Generiere template_file automatisch, falls leer
             if (!templateFile) {
                 templateFile = templateName.toLowerCase()
                     .replace(/[^a-z0-9]+/g, '_')
@@ -497,7 +536,7 @@ if (!Permissions::check(['admin'])) {
                 name: templateName,
                 category: document.getElementById('templateCategory').value,
                 description: document.getElementById('templateDescription').value,
-                template_file: templateFile, // NEU
+                template_file: templateFile,
                 fields: fields
             };
 
@@ -585,7 +624,7 @@ if (!Permissions::check(['admin'])) {
                 document.getElementById('templateName').value = template.name;
                 document.getElementById('templateCategory').value = template.category;
                 document.getElementById('templateDescription').value = template.description || '';
-                document.getElementById('templateFile').value = template.template_file || ''; // NEU
+                document.getElementById('templateFile').value = template.template_file || '';
 
                 fields = template.fields || [];
                 renderFields();
@@ -620,7 +659,7 @@ if (!Permissions::check(['admin'])) {
         function resetForm() {
             document.getElementById('templateForm').reset();
             document.getElementById('templateId').value = '';
-            document.getElementById('templateFile').value = ''; // NEU
+            document.getElementById('templateFile').value = '';
             fields = [];
             renderFields();
         }
@@ -659,6 +698,8 @@ if (!Permissions::check(['admin'])) {
                     html += `<input type="number" class="form-control" ${field.is_required ? 'required' : ''}>`;
                     break;
                 case 'select':
+                case 'db_dg':
+                case 'db_rdq':
                     html += `<select class="form-select" ${field.is_required ? 'required' : ''}>
                     <option value="">Bitte wählen</option>`;
                     if (field.field_options) {
@@ -667,6 +708,9 @@ if (!Permissions::check(['admin'])) {
                         });
                     }
                     html += `</select>`;
+                    if (field.field_type !== 'select') {
+                        html += `<small class="text-muted">Daten aus Datenbank</small>`;
+                    }
                     break;
             }
 

@@ -23,7 +23,7 @@ try {
         `template_id` INT NOT NULL,
         `field_name` VARCHAR(100) NOT NULL,
         `field_label` VARCHAR(255) NOT NULL,
-        `field_type` ENUM('text', 'textarea', 'date', 'select', 'number', 'richtext'),
+        `field_type` ENUM('text', 'textarea', 'date', 'select', 'number', 'richtext', 'dbdg', 'dbrd', 'db_dg', 'db_rdq'),
         `field_options` TEXT,
         `is_required` BOOLEAN DEFAULT 0,
         `gender_specific` TINYINT(1) DEFAULT 0,

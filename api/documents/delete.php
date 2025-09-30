@@ -21,6 +21,11 @@ try {
         throw new Exception('Template-ID fehlt');
     }
 
+    // Lösche zuerst die Felder
+    $stmt = $pdo->prepare("DELETE FROM intra_dokument_template_fields WHERE template_id = :id");
+    $stmt->execute(['id' => $id]);
+
+    // Dann das Template
     $manager = new DocumentTemplateManager($pdo);
     $success = $manager->deleteTemplate($id);
 
