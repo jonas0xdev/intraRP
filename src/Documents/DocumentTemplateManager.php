@@ -202,12 +202,12 @@ class DocumentTemplateManager
             $value = $formData[$fieldName] ?? null;
 
             // Pflichtfeld-Prüfung
-            if ($field['is_required'] && empty($value)) {
+            if ($field['is_required'] && ($value === null || $value === '')) {
                 throw new \Exception("Feld '{$field['field_label']}' ist erforderlich");
             }
 
-            // Typ-Validierung
-            if ($value !== null) {
+            // Typ-Validierung NUR wenn Wert vorhanden ist
+            if ($value !== null && $value !== '') {
                 switch ($field['field_type']) {
                     case 'date':
                         if (!strtotime($value)) {
@@ -222,16 +222,20 @@ class DocumentTemplateManager
                         break;
 
                     case 'select':
-                        $options = array_column($field['field_options'], 'value');
-                        if (!in_array($value, $options)) {
-                            throw new \Exception("Ungültiger Wert für '{$field['field_label']}'");
+                    case 'db_dg':
+                    case 'db_rdq':
+                        if (isset($field['field_options'])) {
+                            $options = array_column($field['field_options'], 'value');
+                            if (!in_array($value, $options)) {
+                                throw new \Exception("Ungültiger Wert für '{$field['field_label']}'");
+                            }
                         }
                         break;
                 }
             }
 
             // Custom Validierungsregeln
-            if (isset($field['validation_rules'])) {
+            if (isset($field['validation_rules']) && $value !== null && $value !== '') {
                 $this->applyValidationRules($field, $value);
             }
         }

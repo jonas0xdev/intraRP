@@ -144,8 +144,33 @@ if (Permissions::check(['admin', 'personnel.documents.manage'])) {
             </div>
         </div>
     </div>
-    <script>
+
+    <script type="module">
+        import {
+            ClassicEditor,
+            Essentials,
+            Bold,
+            Italic,
+            Font,
+            Paragraph,
+            List,
+            Link
+        } from '<?= BASE_PATH ?>assets/_ext/ckeditor5/ckeditor5.js';
+
         const BASE_PATH = '<?= BASE_PATH ?>';
+        let editorInstances = {};
+        let currentTemplate = null;
+
+        window.ClassicEditor = ClassicEditor;
+        window.ckEditorConfig = {
+            Essentials,
+            Bold,
+            Italic,
+            Font,
+            Paragraph,
+            List,
+            Link
+        };
 
         document.getElementById('templateSelect')?.addEventListener('change', async function() {
             const templateId = this.value;
@@ -167,13 +192,14 @@ if (Permissions::check(['admin', 'personnel.documents.manage'])) {
                     return;
                 }
 
-                renderTemplateForm(template);
+                currentTemplate = template;
+                await renderTemplateForm(template);
             } catch (error) {
                 formContainer.innerHTML = `<div class="alert alert-danger">Fehler beim Laden: ${error.message}</div>`;
             }
         });
 
-        function renderTemplateForm(template) {
+        async function renderTemplateForm(template) {
             const container = document.getElementById('dynamicTemplateForm');
             let html = '';
 
@@ -188,6 +214,9 @@ if (Permissions::check(['admin', 'personnel.documents.manage'])) {
             });
 
             container.innerHTML = html;
+
+            // Initialisiere CKEditor für alle richtext-Felder
+            await initializeRichTextEditors(template.fields);
         }
 
         function renderField(field) {
@@ -196,7 +225,7 @@ if (Permissions::check(['admin', 'personnel.documents.manage'])) {
             const fieldName = field.field_name;
 
             let html = `<div class="mb-3">
-        <label for="field_${fieldName}" class="form-label">${field.field_label} ${requiredLabel}</label>`;
+                <label for="field_${fieldName}" class="form-label">${field.field_label} ${requiredLabel}</label>`;
 
             switch (field.field_type) {
                 case 'text':
@@ -208,7 +237,7 @@ if (Permissions::check(['admin', 'personnel.documents.manage'])) {
                     break;
 
                 case 'richtext':
-                    html += `<textarea class="form-control" id="field_${fieldName}" name="${fieldName}" rows="6" ${required}></textarea>`;
+                    html += `<textarea class="form-control ckeditor-field" id="field_${fieldName}" name="${fieldName}" rows="6" ${required}></textarea>`;
                     break;
 
                 case 'date':
@@ -223,7 +252,7 @@ if (Permissions::check(['admin', 'personnel.documents.manage'])) {
                 case 'db_dg':
                 case 'db_rdq':
                     html += `<select class="form-select" id="field_${fieldName}" name="${fieldName}" ${required}>
-                <option value="">Bitte wählen</option>`;
+                        <option value="">Bitte wählen</option>`;
                     if (field.field_options) {
                         field.field_options.forEach(opt => {
                             html += `<option value="${opt.value}">${opt.label}</option>`;
@@ -237,8 +266,77 @@ if (Permissions::check(['admin', 'personnel.documents.manage'])) {
             return html;
         }
 
+        async function initializeRichTextEditors(fields) {
+            // Zerstöre alte Instanzen
+            for (let id in editorInstances) {
+                if (editorInstances[id]) {
+                    try {
+                        await editorInstances[id].destroy();
+                    } catch (e) {
+                        console.warn('Fehler beim Zerstören des Editors:', e);
+                    }
+                }
+            }
+            editorInstances = {};
+
+            for (const field of fields) {
+                if (field.field_type === 'richtext') {
+                    const fieldId = `field_${field.field_name}`;
+                    const element = document.getElementById(fieldId);
+
+                    if (element) {
+                        try {
+                            const wasRequired = element.hasAttribute('required');
+                            element.removeAttribute('required');
+
+                            const editor = await ClassicEditor.create(element, {
+                                licenseKey: 'GPL',
+                                plugins: [
+                                    window.ckEditorConfig.Essentials,
+                                    window.ckEditorConfig.Bold,
+                                    window.ckEditorConfig.Italic,
+                                    window.ckEditorConfig.Font,
+                                    window.ckEditorConfig.Paragraph,
+                                    window.ckEditorConfig.List,
+                                    window.ckEditorConfig.Link
+                                ],
+                                toolbar: {
+                                    items: [
+                                        'undo', 'redo',
+                                        '|', 'bold', 'italic',
+                                        '|', 'fontSize', 'fontFamily', 'fontColor',
+                                        '|', 'bulletedList', 'numberedList',
+                                        '|', 'link'
+                                    ]
+                                }
+                            });
+
+                            editorInstances[fieldId] = editor;
+
+                            if (wasRequired) {
+                                editor.isRequired = true;
+                            }
+
+                            console.log(`CKEditor erfolgreich initialisiert für ${fieldId}`);
+                        } catch (error) {
+                            console.error(`CKEditor-Fehler für ${fieldId}:`, error);
+                        }
+                    }
+                }
+            }
+        }
+
         document.getElementById('newDocForm')?.addEventListener('submit', async function(e) {
             e.preventDefault();
+
+            for (let id in editorInstances) {
+                const editor = editorInstances[id];
+                if (editor.isRequired && !editor.getData().trim()) {
+                    const fieldName = id.replace('field_', '');
+                    alert(`Bitte füllen Sie das Pflichtfeld "${fieldName}" aus.`);
+                    return;
+                }
+            }
 
             const formData = new FormData(this);
             const data = {
@@ -251,12 +349,18 @@ if (Permissions::check(['admin', 'personnel.documents.manage'])) {
                 fields: {}
             };
 
-            // WICHTIG: Alle Felder sammeln (inkl. ausstellungsdatum)
             const excludeFields = ['profileid', 'template_id', 'ausstellerid', 'erhalter', 'erhalter_gebdat', 'anrede'];
 
+            // Sammle Daten aus CKEditor-Instanzen
+            for (let id in editorInstances) {
+                const fieldName = id.replace('field_', '');
+                data.fields[fieldName] = editorInstances[id].getData();
+            }
+
+            // Sammle restliche Formularfelder
             for (let [key, value] of formData.entries()) {
-                if (!excludeFields.includes(key)) {
-                    data.fields[key] = value;
+                if (!excludeFields.includes(key) && !data.fields[key]) {
+                    data.fields[key] = (value === '' || value === null) ? null : value;
                 }
             }
 
@@ -281,7 +385,20 @@ if (Permissions::check(['admin', 'personnel.documents.manage'])) {
                 alert('Fehler beim Erstellen: ' + error.message);
             }
         });
+
+        // Cleanup beim Schließen des Modals
+        document.getElementById('modalDokuCreate')?.addEventListener('hidden.bs.modal', async function() {
+            for (let id in editorInstances) {
+                if (editorInstances[id]) {
+                    try {
+                        await editorInstances[id].destroy();
+                    } catch (e) {
+                        console.warn('Fehler beim Cleanup:', e);
+                    }
+                }
+            }
+            editorInstances = {};
+        });
     </script>
-    <script type="module" src="<?= BASE_PATH ?>assets/_ext/ckeditor5/ckeditor5.js"></script>
 <?php } ?>
 <!-- MODAL ENDE -->

@@ -23,7 +23,7 @@ try {
             'name' => $input['name'],
             'category' => $input['category'],
             'description' => $input['description'] ?? null,
-            'template_file' => $input['template_file'] ?? null  // NEU
+            'template_file' => $input['template_file'] ?? null
         ]);
 
         // Lösche alte Felder
@@ -33,11 +33,13 @@ try {
         $templateId = $input['id'];
     } else {
         // Create
+        $templateFile = $input['template_file'] ?? strtolower(str_replace(' ', '_', $input['name'])) . '.html.twig';
+
         $templateId = $manager->createTemplate([
             'name' => $input['name'],
             'category' => $input['category'],
             'description' => $input['description'] ?? null,
-            'template_file' => strtolower(str_replace(' ', '_', $input['name'])) . '.html.twig'
+            'template_file' => $templateFile
         ]);
     }
 
@@ -47,15 +49,22 @@ try {
         $manager->addField($templateId, $field);
     }
 
-    // **NEU: Speichere Config mit geschlechtsspezifischen Labels**
+    // Speichere Config mit geschlechtsspezifischen Labels
     $config = buildTemplateConfig($input['fields']);
     $stmt = $pdo->prepare("UPDATE intra_dokument_templates SET config = ? WHERE id = ?");
     $stmt->execute([json_encode($config), $templateId]);
 
-    // Erstelle Template-Datei
-    createTemplateFile($templateId, $input);
+    // Erstelle Template-Datei NUR wenn sie noch nicht existiert
+    $templateCreated = createTemplateFile($templateId, $input);
 
-    echo json_encode(['success' => true, 'id' => $templateId]);
+    echo json_encode([
+        'success' => true,
+        'id' => $templateId,
+        'template_created' => $templateCreated,
+        'message' => $templateCreated
+            ? 'Template erfolgreich erstellt'
+            : 'Template aktualisiert (bestehende .twig-Datei wurde nicht überschrieben)'
+    ]);
 } catch (Exception $e) {
     echo json_encode(['success' => false, 'error' => $e->getMessage()]);
 }
@@ -70,7 +79,7 @@ function buildTemplateConfig($fields)
                 'type' => 'select',
                 'label' => $field['field_label'],
                 'options' => $field['field_options'],
-                'gender_specific' => $field['gender_specific'] ?? false  // NEU
+                'gender_specific' => $field['gender_specific'] ?? false
             ];
         }
     }
@@ -85,11 +94,19 @@ function createTemplateFile($templateId, $data)
         mkdir($templatePath, 0755, true);
     }
 
-    $filename = strtolower(str_replace(' ', '_', $data['name'])) . '.html.twig';
+    $filename = $data['template_file'] ?? strtolower(str_replace(' ', '_', $data['name'])) . '.html.twig';
     $filepath = $templatePath . $filename;
+
+    // WICHTIG: Prüfe ob Datei bereits existiert
+    if (file_exists($filepath)) {
+        error_log("Template-Datei existiert bereits: {$filepath} - wird nicht überschrieben");
+        return false; // Datei wurde NICHT erstellt/überschrieben
+    }
 
     $twig = generateTwigTemplate($data);
     file_put_contents($filepath, $twig);
+
+    return true; // Datei wurde neu erstellt
 }
 
 function generateTwigTemplate($data)
