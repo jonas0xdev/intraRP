@@ -82,6 +82,7 @@ use App\Auth\Permissions; ?>
                                 <li><a class="dropdown-item" href="<?= BASE_PATH ?>admin/settings/personal/qualifd/index.php">Fachdienste verwalten</a></li>
                                 <?php if (Permissions::check(['admin'])) { ?>
                                     <li><a class="dropdown-item" href="<?= BASE_PATH ?>admin/settings/documents/templates.php">Dokumente verwalten</a></li>
+                                    <li><a class="dropdown-item" href="<?= BASE_PATH ?>admin/settings/antraege/list.php">Antragstypen verwalten</a></li>
                                 <?php } ?>
                                 <li>
                                     <hr class="dropdown-divider">
