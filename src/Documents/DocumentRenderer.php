@@ -1,0 +1,366 @@
+<?php
+
+namespace App\Documents;
+
+use PDO;
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
+
+class DocumentRenderer
+{
+    private PDO $pdo;
+    private Environment $twig;
+    private string $templatePath;
+
+    public function __construct(PDO $pdo, string $templatePath = __DIR__ . '/../../dokumente/templates')
+    {
+        $this->pdo = $pdo;
+        $this->templatePath = $templatePath;
+
+        // Initialisiere Twig Template Engine
+        $loader = new FilesystemLoader($this->templatePath);
+        $this->twig = new Environment($loader, [
+            'cache' => false, // In Produktion auf Cache-Pfad setzen
+            'autoescape' => 'html'
+        ]);
+    }
+
+    /**
+     * Rendert ein Dokument
+     */
+    public function renderDocument(int $docId): string
+    {
+        $stmt = $this->pdo->prepare("
+        SELECT d.*, t.template_file, t.is_system
+        FROM intra_mitarbeiter_dokumente d
+        LEFT JOIN intra_dokument_templates t ON d.template_id = t.id
+        WHERE d.docid = :docid
+    ");
+        $stmt->execute(['docid' => $docId]);
+        $doc = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$doc || !$doc['template_id']) {
+            throw new \Exception("Dokument oder Template nicht gefunden");
+        }
+
+        // Alle Dokumente durch Twig rendern
+        return $this->renderCustomDocument($doc);
+    }
+
+    /**
+     * Rendert Custom-Dokumente aus Templates
+     */
+    private function renderCustomDocument(array $doc): string
+    {
+        $customData = json_decode($doc['custom_data'], true);
+        $issuer = $this->getIssuerData($doc['ausstellerid']);
+
+        $stmt = $this->pdo->prepare("SELECT config FROM intra_dokument_templates WHERE id = ?");
+        $stmt->execute([$doc['template_id']]);
+        $templateConfig = json_decode($stmt->fetchColumn(), true) ?? [];
+
+        // Anrede-Logik
+        $anrede = (int)($doc['anrede'] ?? 0);
+        $anredeText = match ($anrede) {
+            0 => 'Herr',
+            1 => 'Frau',
+            default => 'Divers'
+        };
+
+        $geehrte = match ($anrede) {
+            0 => 'geehrter',
+            1 => 'geehrte',
+            default => 'geehrte/-r'
+        };
+
+        $zum = match ($anrede) {
+            0 => 'zum',
+            1 => 'zur',
+            default => 'zum/zur'
+        };
+
+        $seine_ihre = match ($anrede) {
+            0 => 'seine',
+            1 => 'ihre',
+            default => 'seine/ihre'
+        };
+
+        $ihm_ihr = match ($anrede) {
+            0 => 'ihm',
+            1 => 'ihr',
+            default => 'ihm/ihr'
+        };
+
+        // Suspend-String
+        $suspendstring = 'bis auf unbestimmt';
+        if (isset($customData['suspendtime']) && $customData['suspendtime'] && $customData['suspendtime'] != '0000-00-00') {
+            $suspendstring = 'bis zum ' . date('d.m.Y', strtotime($customData['suspendtime']));
+        }
+
+        // Dienstgrad-Text (für Beförderungs-/Ernennungsurkunden)
+        $dienstgradText = '';
+        if (isset($customData['erhalter_rang'])) {
+            $stmt = $this->pdo->prepare("SELECT name, name_m, name_w FROM intra_mitarbeiter_dienstgrade WHERE id = ?");
+            $stmt->execute([$customData['erhalter_rang']]);
+            $dg = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($dg) {
+                if ($anrede == 0) {
+                    $dienstgradText = $dg['name_m'];
+                } elseif ($anrede == 1) {
+                    $dienstgradText = $dg['name_w'];
+                } else {
+                    $dienstgradText = $dg['name'];
+                }
+            }
+        }
+
+        // Rettungsdienstgrad (für Ausbildungszertifikate)
+        $dienstgrad = '';
+        if (isset($customData['erhalter_rang_rd'])) {
+            $stmt = $this->pdo->prepare("SELECT id, name, name_m, name_w FROM intra_mitarbeiter_rdquali WHERE id = ?");
+            $stmt->execute([$customData['erhalter_rang_rd']]);
+            $rdg = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($rdg) {
+                if ($anrede == 1) {
+                    $dienstgrad = $rdg['name_w'];
+                } elseif ($anrede == 0) {
+                    $dienstgrad = $rdg['name_m'];
+                } else {
+                    $dienstgrad = $rdg['name'];
+                }
+            }
+        }
+
+        // Qualifikation (für Lehrgangszertifikate)
+        $qualifikation = '';
+        if (isset($customData['erhalter_quali'])) {
+            $qualis = [
+                0 => 'Brandmeister/-in',
+                1 => 'Gruppenführer/-in',
+                2 => 'Zugführer/-in',
+                3 => 'Leitstellen-Disponent/-in',
+                4 => 'Sonderfahrzeug-Maschinist/-in',
+                8 => 'HEMS-TC',
+                9 => 'Luftrettungspilot/-in',
+                5 => 'Helfergrundmodul (SEG)',
+                6 => 'SEG-Sanitäter/-in',
+                7 => 'Gruppenführer/-in-BevS',
+            ];
+            $qualisF = [
+                0 => 'Brandmeisterin',
+                1 => 'Gruppenführerin',
+                2 => 'Zugführerin',
+                3 => 'Leitstellen-Disponentin',
+                4 => 'Sonderfahrzeug-Maschinistin',
+                8 => 'HEMS-TC',
+                9 => 'Luftrettungspilotin',
+                5 => 'Helfergrundmodul (SEG)',
+                6 => 'SEG-Sanitäterin',
+                7 => 'Gruppenführerin-BevS',
+            ];
+            $qualisM = [
+                0 => 'Brandmeister',
+                1 => 'Gruppenführer',
+                2 => 'Zugführer',
+                3 => 'Leitstellen-Disponent',
+                4 => 'Sonderfahrzeug-Maschinist',
+                8 => 'HEMS-TC',
+                9 => 'Luftrettungspilot',
+                5 => 'Helfergrundmodul (SEG)',
+                6 => 'SEG-Sanitäter',
+                7 => 'Gruppenführer-BevS',
+            ];
+
+            $dq = $customData['erhalter_quali'];
+            if ($anrede == 1) {
+                $qualifikation = $qualisF[$dq] ?? '';
+            } elseif ($anrede == 0) {
+                $qualifikation = $qualisM[$dq] ?? '';
+            } else {
+                $qualifikation = $qualis[$dq] ?? '';
+            }
+        }
+
+        // Typtext basierend auf Template
+        $typtext = match ($doc['template_file']) {
+            'ausbildung.html.twig' => 'Ausbildungszertifikat',
+            'lehrgang.html.twig', 'fachlehrgang.html.twig' => 'Lehrgangszertifikat',
+            default => ''
+        };
+
+        // Bereite Daten vor
+        $data = array_merge($customData, [
+            'dokument' => $doc, // Für Zertifikate
+            'doc' => $doc,
+            'issuer' => $issuer,
+            'aussteller' => [ // Für Zertifikate
+                'fullname' => $issuer['fullname'] ?? '',
+                'lastname' => $issuer['lastname'] ?? '',
+                'dienstgrad' => $issuer['dienstgrad_text'] ?? '',
+                'badge' => $issuer['dienstgrad_badge'] ?? null,
+                'zusatz' => $issuer['zusatz'] ?? null,
+            ],
+            'anrede' => $anredeText,
+            'anrede_text' => $anredeText,
+            'geehrte' => $geehrte,
+            'zum' => $zum,
+            'seine_ihre' => $seine_ihre,
+            'ihm_ihr' => $ihm_ihr,
+            'suspendstring' => $suspendstring,
+            'dienstgrad_text' => $dienstgradText,
+            'dienstgrad' => $dienstgrad, // Für Ausbildungszertifikat
+            'qualifikation' => $qualifikation, // Für Lehrgangszertifikate
+            'typtext' => $typtext,
+            'erhalter' => $doc['erhalter'],
+            'erhalter_gebdat_formatted' => $this->formatGermanDate($doc['erhalter_gebdat']),
+            'formatted_date' => $this->formatGermanDate($doc['erhalter_gebdat']), // Für Zertifikate
+            'inhalt' => $customData['inhalt'] ?? '',
+            'ausstellungsdatum' => date("d.m.Y", strtotime($doc['ausstellungsdatum'])),
+            'ausstelldatum' => date("d.m.Y", strtotime($doc['ausstellungsdatum'])), // Für Zertifikate
+            'BASE_PATH' => BASE_PATH,
+            'SYSTEM_NAME' => SYSTEM_NAME,
+            'SYSTEM_COLOR' => SYSTEM_COLOR ?? '#000000',
+            'SERVER_CITY' => SERVER_CITY,
+            'RP_ORGTYPE' => RP_ORGTYPE,
+            'RP_STREET' => RP_STREET,
+            'RP_ZIP' => RP_ZIP,
+            'SERVER_NAME' => SERVER_NAME,
+            'META_IMAGE_URL' => META_IMAGE_URL ?? '',
+            'own_url' => 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'],
+        ]);
+
+        $templateFile = $doc['template_file'] ?? 'default.html.twig';
+        return $this->twig->render($templateFile, $data);
+    }
+
+    private function formatGermanDate(?string $date): string
+    {
+        if (!$date) return '';
+
+        $dt = new \DateTime($date);
+        $months = [
+            1 => 'Januar',
+            2 => 'Februar',
+            3 => 'März',
+            4 => 'April',
+            5 => 'Mai',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'August',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Dezember'
+        ];
+
+        return $dt->format('d. ') . $months[(int)$dt->format('m')] . $dt->format(' Y');
+    }
+
+    /**
+     * Rendert alte Legacy-Dokumente
+     */
+    private function renderLegacyDocument(array $doc): string
+    {
+        // Alte Logik für bestehende Dokumente
+        $type = $doc['type'];
+        $legacyFiles = [
+            0 => 'urkunden/ernennung.php',
+            1 => 'urkunden/befoerderung.php',
+            2 => 'urkunden/entlassung.php',
+            5 => 'zertifikate/ausbildung.php',
+            6 => 'zertifikate/lehrgang.php',
+            7 => 'zertifikate/fachlehrgang.php',
+            10 => 'schreiben/abmahnung.php',
+            11 => 'schreiben/dienstenthebung.php',
+            12 => 'schreiben/dienstentfernung.php',
+            13 => 'schreiben/kuendigung.php',
+        ];
+
+        if (!isset($legacyFiles[$type])) {
+            throw new \Exception("Unbekannter Dokumenttyp");
+        }
+
+        // Simuliere altes $_GET
+        $_GET['dok'] = $doc['docid'];
+
+        ob_start();
+        include __DIR__ . '/../../dokumente/' . $legacyFiles[$type];
+        return ob_get_clean();
+    }
+
+    /**
+     * Lädt Aussteller-Daten
+     */
+    private function getIssuerData(int $discordId): array
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT u.*, m.dienstgrad, m.zusatz, m.geschlecht
+            FROM intra_users u
+            LEFT JOIN intra_mitarbeiter m ON u.discord_id = m.discordtag
+            WHERE u.discord_id = :id
+        ");
+        $stmt->execute(['id' => $discordId]);
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($data) {
+            // Lade Dienstgrad-Info
+            if ($data['dienstgrad']) {
+                $stmt = $this->pdo->prepare("
+                    SELECT * FROM intra_mitarbeiter_dienstgrade WHERE id = :id
+                ");
+                $stmt->execute(['id' => $data['dienstgrad']]);
+                $dginfo = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                if ($dginfo) {
+                    if ($data['geschlecht'] == 0) {
+                        $data['dienstgrad_text'] = $dginfo['name_m'];
+                    } elseif ($data['geschlecht'] == 1) {
+                        $data['dienstgrad_text'] = $dginfo['name_w'];
+                    } else {
+                        $data['dienstgrad_text'] = $dginfo['name'];
+                    }
+                    $data['dienstgrad_badge'] = $dginfo['badge'] ?? null;
+                }
+            }
+
+            // Extrahiere Nachnamen
+            $splitname = explode(" ", $data['fullname']);
+            $data['lastname'] = end($splitname);
+        }
+
+        return $data ?? [];
+    }
+
+    /**
+     * Erstellt PDF aus HTML
+     */
+    public function generatePDF(int $docId, ?string $outputPath = null): string
+    {
+        $html = $this->renderDocument($docId);
+
+        // Hier kannst du eine PDF-Library wie TCPDF oder mPDF verwenden
+        // Beispiel mit mPDF:
+
+        // $mpdf = new \Mpdf\Mpdf([
+        //     'format' => 'A4',
+        //     'margin_left' => 15,
+        //     'margin_right' => 15,
+        //     'margin_top' => 16,
+        //     'margin_bottom' => 16,
+        // ]);
+        // 
+        // $mpdf->WriteHTML($html);
+        // 
+        // if ($outputPath) {
+        //     $mpdf->Output($outputPath, 'F');
+        //     return $outputPath;
+        // }
+        // 
+        // return $mpdf->Output('', 'S'); // Als String zurückgeben
+
+        // Für jetzt: Gib nur HTML zurück
+        return $html;
+    }
+}

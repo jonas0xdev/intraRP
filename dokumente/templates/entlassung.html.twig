@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Entlassungsurkunde › {{ SYSTEM_NAME }}</title>
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="{{ BASE_PATH }}assets/css/style.min.css" />
+    <link rel="stylesheet" href="{{ BASE_PATH }}assets/css/dokumente.min.css" />
+    <link rel="stylesheet" href="{{ BASE_PATH }}assets/_ext/lineawesome/css/line-awesome.min.css" />
+    <link rel="stylesheet" href="{{ BASE_PATH }}assets/fonts/mavenpro/css/all.min.css" />
+    <link rel="stylesheet" href="{{ BASE_PATH }}assets/fonts/freehand/css/all.min.css" />
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="{{ BASE_PATH }}vendor/twbs/bootstrap/dist/css/bootstrap.min.css">
+    <script src="{{ BASE_PATH }}vendor/twbs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ BASE_PATH }}assets/favicon/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="{{ BASE_PATH }}assets/favicon/favicon.svg" />
+    <link rel="shortcut icon" href="{{ BASE_PATH }}assets/favicon/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ BASE_PATH }}assets/favicon/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="{{ SYSTEM_NAME }}" />
+    <link rel="manifest" href="{{ BASE_PATH }}assets/favicon/site.webmanifest" />
+    <!-- Metas -->
+    <meta name="theme-color" content="{{ SYSTEM_COLOR }}" />
+    <meta property="og:site_name" content="{{ RP_ORGTYPE }} {{ SERVER_CITY }}" />
+    <meta property="og:url" content="{{ own_url }}" />
+    <meta property="og:title" content="Entlassungsurkunde > {{ erhalter }}" />
+    <meta property="og:image" content="{{ META_IMAGE_URL }}" />
+    <meta property="og:description" content="Entlassungsurkunde {{ erhalter }}" />
+</head>
+<body class="bg-secondary" data-page-amount="1">
+    <div class="page-container">
+        <div class="page shadow mx-auto mt-4 mb-4 bg-light" id="page-urkunde">
+            <table class="docheader">
+                <tbody>
+                    <tr>
+                        <td style="width:20%;padding-left:5px;font-size:8pt"><strong>Version</strong><span class="subtext">1.0</span></td>
+                        <td class="text-center" rowspan="2" style="font-size:12pt"><strong>Entlassungsurkunde</strong><br>{{ RP_ORGTYPE }} {{ SERVER_CITY }}</td>
+                        <td class="text-center" style="width:20%" rowspan="2"><img src="{{ BASE_PATH }}assets/img/wappen_small.png" alt="Berufsfeuerwehr {{ SERVER_CITY }}"></td>
+                    </tr>
+                    <tr>
+                        <td style="width:20%;padding-left:5px;font-size:8pt"><strong>Seite</strong><span class="subtext">1 von 1</span></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h1 class="text-center">URKUNDE</h1>
+            
+            <div class="urkunde-body text-center">
+                <p class="my-5">Im Namen der Stadt {{ SERVER_CITY }}</p>
+                <p>wird {{ anrede_text }}</p>
+                <p class="urkunde-important">{{ erhalter }}</p>
+                <p>» geb. am {{ erhalter_gebdat_formatted }} «</p>
+                <p class="my-5">auf eigenes Verlangen mit sofortiger Wirkung aus dem Beamtenverhältnis sowie aus dem Dienst der {{ RP_ORGTYPE }} {{ SERVER_CITY }} entlassen.</p>
+                <p class="my-5">
+                    Für {{ seine_ihre }} geleisteten Dienste sprechen wir {{ ihm_ihr }} Dank und Anerkennung aus.
+                </p>
+            </div>
+            
+            <hr class="text-light my-5">
+            
+            <p>{{ SERVER_CITY }}, den {{ ausstellungsdatum }}</p>
+            
+            <div class="row signatures">
+                <div class="col">
+                    <table>
+                        <tbody>
+                            <tr class="text-center" style="border-bottom: 2px solid #000">
+                                <td class="signature">{{ issuer.lastname }}</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="fw-bold">{{ issuer.fullname }}</span>
+                                    {% if issuer.dienstgrad_badge %}
+                                        <br><img src="{{ issuer.dienstgrad_badge }}" height="12px" width="auto" alt="Dienstgrad" />
+                                    {% endif %}
+                                    {{ issuer.dienstgrad_text }}
+                                    {% if issuer.zusatz %}
+                                        <br>{{ issuer.zusatz }}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col"></div>
+            </div>
+            
+            <div class="urkunde-disclaimer text-center mt-4">
+                Diese fiktive Urkunde ist lediglich für das GTA Roleplay Projekt „{{ SERVER_NAME }}" ausgelegt. Der Besitz dieser Urkunde befugt in keinster Weise zum Führen einer echten Qualifikation.
+            </div>
+        </div>
+    </div>
+</body>
+</html>

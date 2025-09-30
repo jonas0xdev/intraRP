@@ -148,7 +148,12 @@ $migrationFiles = [
     // 03.09.2025
     'alter_intra_edivi_03092025.php',
     // 08.09.2025
-    'alter_intra_edivi_08092025.php'
+    'alter_intra_edivi_08092025.php',
+    // 30.09.2025
+    'update_intra_mitarbeiter_dokumente_30092025_templates.php',
+    'insert_system_templates_30092025.php',
+    'migrate_existing_documents_30092025.php',
+    'insert_template_fields_30092025.php'
 ];
 
 $executed = 0;
