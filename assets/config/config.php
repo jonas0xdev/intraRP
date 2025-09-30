@@ -1,4 +1,18 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+// Autoloader
+require_once __DIR__ . '/../../vendor/autoload.php';
+
+use App\Auth\Permissions;
+
+// Initialisiere Permissions für eingeloggte User
+if (isset($_SESSION['userid']) && !isset($_SESSION['permissions'])) {
+    require_once __DIR__ . '/database.php'; // Falls noch nicht geladen
+    $_SESSION['permissions'] = Permissions::retrieveFromDatabase($pdo, $_SESSION['userid']);
+}
+
 // BASIS DATEN
 define('SYSTEM_NAME', 'intraRP'); // Eigenname des Intranets
 define('SYSTEM_VERSION', '0.4.4'); // Versionsnummer

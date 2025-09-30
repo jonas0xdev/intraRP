@@ -13,7 +13,26 @@ use App\Auth\Permissions;
     </thead>
     <tbody>
         <?php
-        $query = "SELECT pd.docid, pd.ausstellerid, pd.ausstellungsdatum, pd.type, pd.aussteller_name, u.discord_id AS user_id, u.fullname, u.aktenid FROM intra_mitarbeiter_dokumente pd LEFT JOIN intra_users u ON pd.ausstellerid = u.discord_id WHERE pd.profileid = :profileid ORDER BY pd.ausstellungsdatum DESC";
+        $query = "
+    SELECT 
+        pd.docid, 
+        pd.ausstellerid, 
+        pd.ausstellungsdatum, 
+        pd.type, 
+        pd.template_id,
+        pd.aussteller_name, 
+        u.discord_id AS user_id, 
+        u.fullname, 
+        u.aktenid,
+        t.name as template_name,
+        t.category as template_category,
+        COALESCE(pd.aussteller_name, u.fullname, 'Unbekannt') as ersteller_name
+    FROM intra_mitarbeiter_dokumente pd 
+    LEFT JOIN intra_users u ON pd.ausstellerid = u.discord_id 
+    LEFT JOIN intra_dokument_templates t ON pd.template_id = t.id
+    WHERE pd.profileid = :profileid 
+    ORDER BY pd.ausstellungsdatum DESC
+";
 
         $stmt = $pdo->prepare($query);
         $stmt->execute(['profileid' => $openedID]);
@@ -31,26 +50,45 @@ use App\Auth\Permissions;
             11 => "Vorläufige Dienstenthebung",
             12 => "Dienstentfernung",
             13 => "Außerordentliche Kündigung",
+            99 => "Eigenes Dokument" // Fallback für Template-Dokumente
         ];
 
         foreach ($dokuresult as $doks) {
             $austdatum = date("d.m.Y", strtotime($doks['ausstellungsdatum']));
-            $docart = isset($arten[$doks['type']]) ? $arten[$doks['type']] : '';
+
+            // Dokumenttyp bestimmen
+            if ($doks['type'] == 99 && !empty($doks['template_name'])) {
+                $docart = $doks['template_name'];
+            } else {
+                $docart = isset($arten[$doks['type']]) ? $arten[$doks['type']] : 'Unbekannt';
+            }
+
             $path = BASE_PATH . "assets/functions/docredir.php?docid=" . $doks['docid'];
 
-            if ($doks['type'] <= 3) {
+            // Badge-Farbe bestimmen
+            if ($doks['type'] == 99) {
+                // Farbe nach Template-Kategorie
+                $bg = match ($doks['template_category']) {
+                    'urkunde' => 'text-bg-secondary',
+                    'zertifikat' => 'text-bg-dark',
+                    'schreiben' => 'text-bg-warning',
+                    default => 'text-bg-info'
+                };
+            } elseif ($doks['type'] <= 3) {
                 $bg = "text-bg-secondary";
             } elseif ($doks['type'] == 5 || $doks['type'] == 6 || $doks['type'] == 7) {
                 $bg = "text-bg-dark";
-            } elseif ($doks['type'] >= 10 && $doks['type'] <= 12) {
+            } elseif ($doks['type'] >= 10 && $doks['type'] <= 13) {
                 $bg = "text-bg-danger";
+            } else {
+                $bg = "text-bg-secondary";
             }
 
             echo "<tr>";
-            echo "<td><span class='badge $bg'>" . $docart . "</span></td>";
-            echo "<td>" . $doks['docid'] .  "</td>";
-            echo "<td>" . $doks['aussteller_name'] . "</td>";
-            echo "<td>" . $austdatum . "</td>";
+            echo "<td><span class='badge $bg'>" . htmlspecialchars($docart) . "</span></td>";
+            echo "<td>" . htmlspecialchars($doks['docid']) .  "</td>";
+            echo "<td>" . htmlspecialchars($doks['ersteller_name']) . "</td>";
+            echo "<td>" . htmlspecialchars($austdatum) . "</td>";
             echo "<td>";
             echo "<a href='$path' class='btn btn-sm btn-primary' target='_blank'>Ansehen</a>";
 

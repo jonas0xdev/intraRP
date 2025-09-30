@@ -80,6 +80,9 @@ use App\Auth\Permissions; ?>
                                 <li><a class="dropdown-item" href="<?= BASE_PATH ?>admin/settings/personal/qualifw/index.php">FW Qualifikationen verwalten</a></li>
                                 <li><a class="dropdown-item" href="<?= BASE_PATH ?>admin/settings/personal/qualird/index.php">RD Qualifikationen verwalten</a></li>
                                 <li><a class="dropdown-item" href="<?= BASE_PATH ?>admin/settings/personal/qualifd/index.php">Fachdienste verwalten</a></li>
+                                <?php if (Permissions::check(['admin'])) { ?>
+                                    <li><a class="dropdown-item" href="<?= BASE_PATH ?>admin/settings/documents/templates.php">Dokumente verwalten</a></li>
+                                <?php } ?>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
