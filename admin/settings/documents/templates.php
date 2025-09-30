@@ -1,7 +1,9 @@
 <?php
+session_start();
 require_once __DIR__ . '/../../../assets/config/config.php';
 require_once __DIR__ . '/../../../vendor/autoload.php';
 require __DIR__ . '/../../../assets/config/database.php';
+
 if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
     $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
     header("Location: " . BASE_PATH . "admin/login.php");
@@ -41,6 +43,7 @@ $rdQualis = $rdQualisStmt->fetchAll(PDO::FETCH_ASSOC);
     <script src="<?= BASE_PATH ?>vendor/components/jquery/jquery.min.js"></script>
     <script src="<?= BASE_PATH ?>vendor/twbs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="<?= BASE_PATH ?>vendor/datatables.net/datatables.net-bs5/css/dataTables.bootstrap5.min.css">
+    <script src="<?= BASE_PATH ?>assets/_ext/sortablejs/Sortable.min.js"></script>
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="<?= BASE_PATH ?>assets/favicon/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="<?= BASE_PATH ?>assets/favicon/favicon.svg" />
@@ -89,6 +92,34 @@ $rdQualis = $rdQualisStmt->fetchAll(PDO::FETCH_ASSOC);
         .option-item {
             padding: 1rem;
             border-radius: 0.375rem;
+        }
+
+        .sortable-ghost {
+            opacity: 0.4;
+            background-color: #f8f9fa;
+        }
+
+        .sortable-drag {
+            opacity: 0.8;
+        }
+
+        .drag-handle {
+            cursor: grab;
+            color: #6c757d;
+            margin-right: 0.5rem;
+            user-select: none;
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .field-item {
+            transition: transform 0.2s ease;
+        }
+
+        .field-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
         }
     </style>
 </head>
@@ -278,6 +309,7 @@ $rdQualis = $rdQualisStmt->fetchAll(PDO::FETCH_ASSOC);
         let fields = [];
         let editingFieldIndex = null;
         let templates = [];
+        let sortable = null;
 
         const fieldModal = new bootstrap.Modal(document.getElementById('fieldModal'));
         const previewModal = new bootstrap.Modal(document.getElementById('previewModal'));
@@ -449,30 +481,55 @@ $rdQualis = $rdQualisStmt->fetchAll(PDO::FETCH_ASSOC);
             fields.forEach((field, index) => {
                 const fieldDiv = document.createElement('div');
                 fieldDiv.className = 'field-item';
+                fieldDiv.dataset.index = index; // Wichtig für die Sortierung
                 fieldDiv.innerHTML = `
-                <button type="button" class="btn btn-sm btn-danger btn-remove" onclick="removeField(${index})">×</button>
-                <div class="d-flex align-items-center mb-2">
-                    <span class="drag-handle">☰</span>
-                    <strong>${field.field_label}</strong>
-                    ${field.is_required ? '<span class="badge bg-danger ms-2">Pflichtfeld</span>' : ''}
-                    ${field.gender_specific ? '<span class="badge bg-info ms-2">Geschlechtsspezifisch</span>' : ''}
-                    ${(field.field_type === 'db_dg' || field.field_type === 'db_rdq') ? '<span class="badge bg-success ms-2">DB-Feld</span>' : ''}
-                </div>
-                <div class="text-muted small">
-                    Typ: ${getFieldTypeLabel(field.field_type)} | 
-                    Name: ${field.field_name}
-                </div>
-                <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="editField(${index})">
-                    Bearbeiten
-                </button>
-            `;
+            <button type="button" class="btn btn-sm btn-danger btn-remove" onclick="removeField(${index})">×</button>
+            <div class="d-flex align-items-center mb-2">
+                <span class="drag-handle" style="cursor: grab;">☰</span>
+                <strong>${field.field_label}</strong>
+                ${field.is_required ? '<span class="badge bg-danger ms-2">Pflichtfeld</span>' : ''}
+                ${field.gender_specific ? '<span class="badge bg-info ms-2">Geschlechtsspezifisch</span>' : ''}
+                ${(field.field_type === 'db_dg' || field.field_type === 'db_rdq') ? '<span class="badge bg-success ms-2">DB-Feld</span>' : ''}
+            </div>
+            <div class="text-muted small">
+                Typ: ${getFieldTypeLabel(field.field_type)} | 
+                Name: ${field.field_name}
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="editField(${index})">
+                Bearbeiten
+            </button>
+        `;
                 fieldList.appendChild(fieldDiv);
+            });
+
+            if (sortable) {
+                sortable.destroy();
+            }
+
+            sortable = new Sortable(fieldList, {
+                animation: 150,
+                handle: '.drag-handle',
+                ghostClass: 'sortable-ghost',
+                dragClass: 'sortable-drag',
+                onEnd: function(evt) {
+                    const movedField = fields.splice(evt.oldIndex, 1)[0];
+                    fields.splice(evt.newIndex, 0, movedField);
+
+                    fields.forEach((field, index) => {
+                        field.sort_order = index;
+                    });
+
+                    renderFields();
+                }
             });
         }
 
         function removeField(index) {
             if (confirm('Feld wirklich löschen?')) {
                 fields.splice(index, 1);
+                fields.forEach((field, idx) => {
+                    field.sort_order = idx;
+                });
                 renderFields();
             }
         }

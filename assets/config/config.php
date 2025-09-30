@@ -1,16 +1,15 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
 // Autoloader
 require_once __DIR__ . '/../../vendor/autoload.php';
 
 use App\Auth\Permissions;
 
-// Initialisiere Permissions für eingeloggte User
-if (isset($_SESSION['userid']) && !isset($_SESSION['permissions'])) {
-    require_once __DIR__ . '/database.php'; // Falls noch nicht geladen
-    $_SESSION['permissions'] = Permissions::retrieveFromDatabase($pdo, $_SESSION['userid']);
+if (!session_status() === PHP_SESSION_NONE) {
+    // Initialisiere Permissions für eingeloggte User
+    if (isset($_SESSION['userid']) && !isset($_SESSION['permissions'])) {
+        require_once __DIR__ . '/database.php'; // Falls noch nicht geladen
+        $_SESSION['permissions'] = Permissions::retrieveFromDatabase($pdo, $_SESSION['userid']);
+    }
 }
 
 // BASIS DATEN

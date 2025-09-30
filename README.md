@@ -97,6 +97,7 @@ Admininistrative Ansicht
 - [CKEditor5](https://ckeditor.com/)
 - Beinhaltete Schriftarten von [Google Fonts](https://fonts.google.com/)
 - [Chart.js](https://www.chartjs.org/)
+- [SortableJS](https://github.com/SortableJS/Sortable)
 
 > [!CAUTION]
 > Es handelte sich hierbei um ein **Hobbyprojekt**! Es ist dementsprechend eine Lernerfahrung mit stetigen Anpassungen. Ich garantiere **nicht** für Fehlerfreiheit und Datensicherheit!
