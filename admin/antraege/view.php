@@ -3,9 +3,9 @@ session_start();
 require_once __DIR__ . '/../../assets/config/config.php';
 require_once __DIR__ . '/../../vendor/autoload.php';
 require __DIR__ . '/../../assets/config/database.php';
+
 if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
     $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
-
     header("Location: " . BASE_PATH . "admin/login.php");
     exit();
 }
@@ -17,47 +17,85 @@ use App\Utils\AuditLogger;
 if (!Permissions::check(['admin', 'application.edit'])) {
     Flash::set('error', 'no-permissions');
     header("Location: " . BASE_PATH . "admin/index.php");
+    exit();
 }
 
-$caseid = $_GET['antrag'];
+$caseid = $_GET['antrag'] ?? null;
 
-// MYSQL QUERY
-$stmt = $pdo->prepare("SELECT * FROM intra_antrag_bef WHERE uniqueid = :caseid");
-$stmt->bindParam(':caseid', $caseid);
-$stmt->execute();
-$row = $stmt->fetch();
+if (!$caseid) {
+    Flash::set('error', 'Keine Antragsnummer angegeben.');
+    header("Location: " . BASE_PATH . "admin/antraege/list.php");
+    exit();
+}
 
-if (isset($_POST['new']) && $_POST['new'] == 1) {
-    $id = $_REQUEST['case_id'];
+// Prüfen ob es ein dynamischer Antrag ist
+$stmt = $pdo->prepare("
+    SELECT a.*, at.name as typ_name, at.icon as typ_icon, at.tabelle_name
+    FROM intra_antraege a
+    JOIN intra_antrag_typen at ON a.antragstyp_id = at.id
+    WHERE a.uniqueid = ?
+");
+$stmt->execute([$caseid]);
+$antrag = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$antrag) {
+    Flash::set('error', 'Antrag nicht gefunden.');
+    header("Location: " . BASE_PATH . "admin/antraege/list.php");
+    exit();
+}
+
+// Felddaten laden
+$stmt = $pdo->prepare("
+    SELECT af.*, ad.wert
+    FROM intra_antrag_felder af
+    LEFT JOIN intra_antraege_daten ad ON af.feldname = ad.feldname AND ad.antrag_id = ?
+    WHERE af.antragstyp_id = ?
+    ORDER BY af.sortierung ASC
+");
+$stmt->execute([$antrag['id'], $antrag['antragstyp_id']]);
+$felder_daten = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Formular speichern
+if (isset($_POST['save'])) {
+    $cirs_status = (int)$_POST['cirs_status'];
+    $cirs_text = trim($_POST['cirs_text']);
     $cirs_manager = $_SESSION['cirs_user'] ?? "Fehler Fehler";
-    $cirs_status = $_REQUEST['cirs_status'];
-    $cirs_text = $_REQUEST['cirs_text'];
     $jetzt = date("Y-m-d H:i:s");
 
     $auditLogger = new AuditLogger($pdo);
 
-    if ($row['cirs_manager'] != $cirs_manager) {
-        $auditLogger->log($_SESSION['userid'], 'Bearbeiter geändert [ID: ' . $id . ']', $cirs_manager, 'Anträge',  1);
+    if ($antrag['cirs_manager'] != $cirs_manager) {
+        $auditLogger->log($_SESSION['userid'], 'Bearbeiter geändert [ID: ' . $caseid . ']', $cirs_manager, 'Anträge', 1);
     }
-    if ($row['cirs_status'] != $cirs_status) {
-        $auditLogger->log($_SESSION['userid'], 'Status geändert [ID: ' . $id . ']', 'Neuer Status: ' . $cirs_status, 'Anträge',  1);
+    if ($antrag['cirs_status'] != $cirs_status) {
+        $auditLogger->log($_SESSION['userid'], 'Status geändert [ID: ' . $caseid . ']', 'Neuer Status: ' . $cirs_status, 'Anträge', 1);
     }
-    if ($row['cirs_text'] != $cirs_text) {
-        $auditLogger->log($_SESSION['userid'], 'Bemerkung geändert [ID: ' . $id . ']', '"' . $cirs_text . '"', 'Anträge',  1);
+    if ($antrag['cirs_text'] != $cirs_text) {
+        $auditLogger->log($_SESSION['userid'], 'Bemerkung geändert [ID: ' . $caseid . ']', '"' . $cirs_text . '"', 'Anträge', 1);
     }
 
-    $stmt = $pdo->prepare("UPDATE intra_antrag_bef SET cirs_manager = :cirs_manager, cirs_status = :cirs_status, cirs_text = :cirs_text, cirs_time = :jetzt WHERE id = :id");
-    $stmt->execute([
-        ':cirs_manager' => $cirs_manager,
-        ':cirs_status' => $cirs_status,
-        ':cirs_text' => $cirs_text,
-        ':jetzt' => $jetzt,
-        ':id' => $id
-    ]);
+    $stmt = $pdo->prepare("
+        UPDATE intra_antraege 
+        SET cirs_manager = ?, cirs_status = ?, cirs_text = ?, cirs_time = ?
+        WHERE id = ?
+    ");
+    $stmt->execute([$cirs_manager, $cirs_status, $cirs_text, $jetzt, $antrag['id']]);
 
-    header("Refresh:0");
+    Flash::set('success', 'Antrag erfolgreich aktualisiert');
+    header("Location: " . BASE_PATH . "admin/antraege/view.php?antrag=" . $caseid);
+    exit();
 }
 
+// Status-Mapping
+$statusMapping = [
+    0 => ['class' => 'info', 'text' => 'In Bearbeitung', 'icon' => 'las la-clock'],
+    1 => ['class' => 'danger', 'text' => 'Abgelehnt', 'icon' => 'las la-times-circle'],
+    2 => ['class' => 'warning', 'text' => 'Aufgeschoben', 'icon' => 'las la-pause-circle'],
+    3 => ['class' => 'success', 'text' => 'Angenommen', 'icon' => 'las la-check-circle'],
+];
+
+$currentStatus = $statusMapping[$antrag['cirs_status']] ?? ['class' => 'dark', 'text' => 'Unbekannt', 'icon' => 'las la-question-circle'];
+$createDate = new DateTime($antrag['time_added'] ?? 'now');
 ?>
 
 <!DOCTYPE html>
@@ -65,104 +103,222 @@ if (isset($_POST['new']) && $_POST['new'] == 1) {
 
 <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Anträge &rsaquo; <?php echo SYSTEM_NAME ?></title>
-    <!-- Stylesheets -->
+    <title><?= htmlspecialchars($antrag['typ_name']) ?> bearbeiten [#<?= htmlspecialchars($caseid) ?>] &rsaquo; <?php echo SYSTEM_NAME ?></title>
     <link rel="stylesheet" href="<?= BASE_PATH ?>assets/css/style.min.css" />
     <link rel="stylesheet" href="<?= BASE_PATH ?>assets/css/admin.min.css" />
     <link rel="stylesheet" href="<?= BASE_PATH ?>assets/_ext/lineawesome/css/line-awesome.min.css" />
-    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/fonts/mavenpro/css/all.min.css" />
-    <!-- Bootstrap -->
     <link rel="stylesheet" href="<?= BASE_PATH ?>vendor/twbs/bootstrap/dist/css/bootstrap.min.css">
     <script src="<?= BASE_PATH ?>vendor/components/jquery/jquery.min.js"></script>
     <script src="<?= BASE_PATH ?>vendor/twbs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Favicon -->
     <link rel="icon" type="image/png" href="<?= BASE_PATH ?>assets/favicon/favicon-96x96.png" sizes="96x96" />
-    <link rel="icon" type="image/svg+xml" href="<?= BASE_PATH ?>assets/favicon/favicon.svg" />
-    <link rel="shortcut icon" href="<?= BASE_PATH ?>assets/favicon/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="<?= BASE_PATH ?>assets/favicon/apple-touch-icon.png" />
-    <meta name="apple-mobile-web-app-title" content="<?php echo SYSTEM_NAME ?>" />
-    <link rel="manifest" href="<?= BASE_PATH ?>assets/favicon/site.webmanifest" />
-    <!-- Metas -->
-    <meta name="theme-color" content="<?php echo SYSTEM_COLOR ?>" />
-    <meta property="og:site_name" content="<?php echo SERVER_NAME ?>" />
-    <meta property="og:url" content="https://<?php echo SYSTEM_URL . BASE_PATH ?>/dashboard.php" />
-    <meta property="og:title" content="<?php echo SYSTEM_NAME ?> - Intranet <?php echo SERVER_CITY ?>" />
-    <meta property="og:image" content="<?php echo META_IMAGE_URL ?>" />
-    <meta property="og:description" content="Verwaltungsportal der <?php echo RP_ORGTYPE . " " .  SERVER_CITY ?>" />
+    <style>
+        .intra__tile {
+            background: rgba(var(--bs-dark-rgb), 0.5);
+            border: 1px solid rgba(var(--bs-light-rgb), 0.1);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+        }
 
+        .field-label {
+            font-weight: 600;
+            color: #aaa;
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .field-value {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            min-height: 2.5rem;
+        }
+    </style>
 </head>
 
-<body data-bs-theme="dark" data-page="mitarbeiter">
-    <?php include "../../assets/components/navbar.php"; ?>
+<body data-bs-theme="dark">
+    <?php include __DIR__ . "/../../assets/components/navbar.php"; ?>
+
     <div class="container-full position-relative" id="mainpageContainer">
-        <!-- ------------ -->
-        <!-- PAGE CONTENT -->
-        <!-- ------------ -->
         <div class="container">
             <div class="row">
-                <div class="col mb-5">
+                <div class="col">
                     <hr class="text-light my-3">
-                    <h1>Antrag sichten und bearbeiten</h1>
+                    <h1>
+                        <i class="<?= htmlspecialchars($antrag['typ_icon']) ?> me-2"></i>
+                        <?= htmlspecialchars($antrag['typ_name']) ?> bearbeiten #<?= htmlspecialchars($caseid) ?>
+                    </h1>
+
+                    <?php Flash::render(); ?>
+
                     <hr class="text-light my-3">
-                    <form action="" id="cirs-form" method="post">
-                        <input type="hidden" name="new" value="1" />
-                        <input type="hidden" name="case_id" value="<?= $row['id'] ?>">
-                        <input type="hidden" name="cirs_manger" value="<?= $_SESSION['cirs_user'] ?? "Fehler Fehler" ?>">
-                        <div class="intra__tile py-2 px-3">
-                            <div class="row">
-                                <div class="col mb-3">
-                                    <label for="name_dn" class="form-label fw-bold">Name und Dienstnummer <span class="text-main-color">*</span></label>
-                                    <input type="text" class="form-control" id="name_dn" name="name_dn" placeholder="" value="<?= $row['name_dn'] ?>" required readonly>
+
+                    <form method="post">
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <!-- Antragsteller -->
+                                <div class="intra__tile mb-4">
+                                    <h5 class="mb-3">
+                                        <i class="las la-user me-2"></i>Antragsteller
+                                    </h5>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <div class="field-label">Name und Dienstnummer</div>
+                                            <div class="field-value"><?= htmlspecialchars($antrag['name_dn']) ?></div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="field-label">Dienstgrad</div>
+                                            <div class="field-value"><?= htmlspecialchars($antrag['dienstgrad']) ?></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Antragsinhalt -->
+                                <div class="intra__tile mb-4">
+                                    <h5 class="mb-3">
+                                        <i class="las la-file-alt me-2"></i>Antragsinhalt
+                                    </h5>
+
+                                    <?php
+                                    $current_row = [];
+                                    foreach ($felder_daten as $index => $feld):
+                                        $breite_class = $feld['breite'] === 'half' ? 'col-md-6' : 'col-12';
+
+                                        // Zeile beginnen
+                                        if (empty($current_row)) {
+                                            echo '<div class="row">';
+                                        }
+
+                                        $current_row[] = $feld['breite'];
+                                    ?>
+                                        <div class="<?= $breite_class ?> mb-3">
+                                            <div class="field-label"><?= htmlspecialchars($feld['label']) ?></div>
+                                            <div class="field-value">
+                                                <?php if ($feld['feldtyp'] === 'checkbox'): ?>
+                                                    <?= $feld['wert'] ? '<i class="las la-check-square text-success"></i> Ja' : '<i class="las la-square text-muted"></i> Nein' ?>
+                                                <?php elseif (empty($feld['wert'])): ?>
+                                                    <span class="text-muted"><i>Keine Angabe</i></span>
+                                                <?php else: ?>
+                                                    <?= nl2br(htmlspecialchars($feld['wert'])) ?>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                    <?php
+                                        $is_last = $index === count($felder_daten) - 1;
+                                        $row_complete = ($feld['breite'] === 'full') || (count($current_row) >= 2) || $is_last;
+
+                                        if ($row_complete) {
+                                            echo '</div>';
+                                            $current_row = [];
+                                        }
+                                    endforeach;
+                                    ?>
+                                </div>
+
+                                <!-- Bearbeitung -->
+                                <div class="intra__tile mb-4">
+                                    <h5 class="mb-3">
+                                        <i class="las la-clipboard-check me-2"></i>Bearbeitung
+                                    </h5>
+
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted small">Aktueller Bearbeiter</label>
+                                        <div class="form-control-plaintext">
+                                            <?php if (!empty($antrag['cirs_manager'])): ?>
+                                                <span class="fw-bold"><?= htmlspecialchars($antrag['cirs_manager']) ?></span>
+                                            <?php else: ?>
+                                                <span class="text-muted"><i>Noch nicht zugewiesen</i></span>
+                                            <?php endif; ?>
+                                        </div>
+                                        <small class="text-muted">Wird auf "<?= htmlspecialchars($_SESSION['cirs_user'] ?? "Fehler Fehler") ?>" gesetzt beim Speichern</small>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="cirs_status" class="form-label fw-bold">Status setzen <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="cirs_status" name="cirs_status" required>
+                                            <option value="0" <?= $antrag['cirs_status'] == 0 ? 'selected' : '' ?>>
+                                                In Bearbeitung
+                                            </option>
+                                            <option value="1" <?= $antrag['cirs_status'] == 1 ? 'selected' : '' ?>>
+                                                Abgelehnt
+                                            </option>
+                                            <option value="2" <?= $antrag['cirs_status'] == 2 ? 'selected' : '' ?>>
+                                                Aufgeschoben
+                                            </option>
+                                            <option value="3" <?= $antrag['cirs_status'] == 3 ? 'selected' : '' ?>>
+                                                Angenommen
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="cirs_text" class="form-label fw-bold">Bemerkung durch Bearbeiter</label>
+                                        <textarea class="form-control" id="cirs_text" name="cirs_text" rows="5"
+                                            placeholder="Fügen Sie hier Ihre Bemerkungen zum Antrag hinzu..."><?= htmlspecialchars($antrag['cirs_text'] ?? '') ?></textarea>
+                                        <small class="text-muted">Diese Bemerkung wird dem Antragsteller angezeigt</small>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col mb-3">
-                                    <label for="dienstgrad" class="form-label fw-bold">Aktueller Dienstgrad <span class="text-main-color">*</span></label>
-                                    <input type="text" class="form-control" id="dienstgrad" name="dienstgrad" placeholder="" value="<?= $row['dienstgrad'] ?>" required readonly>
+
+                            <div class="col-lg-4">
+                                <!-- Antragsdetails -->
+                                <div class="intra__tile mb-4">
+                                    <h6 class="mb-3">
+                                        <i class="las la-info-circle me-2"></i>Antragsdetails
+                                    </h6>
+                                    <div class="small">
+                                        <div class="d-flex justify-content-between py-2 border-bottom border-secondary">
+                                            <span class="text-muted">Antragsnummer:</span>
+                                            <span class="fw-bold">#<?= htmlspecialchars($caseid) ?></span>
+                                        </div>
+                                        <div class="d-flex justify-content-between py-2 border-bottom border-secondary">
+                                            <span class="text-muted">Typ:</span>
+                                            <span><?= htmlspecialchars($antrag['typ_name']) ?></span>
+                                        </div>
+                                        <div class="d-flex justify-content-between py-2 border-bottom border-secondary">
+                                            <span class="text-muted">Erstellt am:</span>
+                                            <span><?= $createDate->format('d.m.Y H:i') ?></span>
+                                        </div>
+                                        <div class="d-flex justify-content-between py-2 border-bottom border-secondary">
+                                            <span class="text-muted">Discord-ID:</span>
+                                            <span class="font-monospace small"><?= htmlspecialchars($antrag['discordid'] ?? 'N/A') ?></span>
+                                        </div>
+                                        <?php if (!empty($antrag['cirs_time'])): ?>
+                                            <div class="d-flex justify-content-between py-2 border-bottom border-secondary">
+                                                <span class="text-muted">Letzte Bearbeitung:</span>
+                                                <span><?= date('d.m.Y H:i', strtotime($antrag['cirs_time'])) ?></span>
+                                            </div>
+                                        <?php endif; ?>
+                                        <div class="d-flex justify-content-between py-2">
+                                            <span class="text-muted">Status:</span>
+                                            <span class="badge text-bg-<?= $currentStatus['class'] ?>">
+                                                <i class="<?= $currentStatus['icon'] ?> me-1"></i>
+                                                <?= $currentStatus['text'] ?>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Aktionen -->
+                                <div class="intra__tile">
+                                    <h6 class="mb-3">
+                                        <i class="las la-tools me-2"></i>Aktionen
+                                    </h6>
+                                    <div class="d-grid gap-2">
+                                        <button type="submit" name="save" class="btn btn-success">
+                                            <i class="las la-save me-2"></i>Änderungen speichern
+                                        </button>
+                                        <a href="<?= BASE_PATH ?>admin/antraege/list.php" class="btn btn-secondary">
+                                            <i class="las la-arrow-left me-2"></i>Zurück zur Übersicht
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <hr class="text-light my-3">
-                        <div class="intra__tile py-2 px-3">
-                            <h5>Schriftlicher Antrag</h5>
-                            <div class="mb-3">
-                                <textarea class="form-control" id="freitext" name="freitext" rows="5" readonly><?= $row['freitext'] ?></textarea>
-                            </div>
-                        </div>
-                        <hr class="text-light my-3">
-                        <div class="intra__tile py-2 px-3">
-                            <div class="mb-3">
-                                <?php if ($row['cirs_manager'] != NULL) { ?>
-                                    <h5>Antrag bearbeitet von: <?= $row['cirs_manager'] ?></h5>
-                                <?php } else { ?>
-                                    <h5>Noch kein Bearbeiter festgelegt.</h5>
-                                <?php } ?>
-                            </div>
-                            <hr class="text-light my-3">
-                            <hr class="text-light my-3">
-                            <h5>Bemerkung durch Bearbeiter</h5>
-                            <div class="mb-3">
-                                <textarea class="form-control" id="cirs_text" name="cirs_text" rows="5"><?= $row['cirs_text'] ?></textarea>
-                            </div>
-                            <h5>Status setzen</h5>
-                            <div class="mb-3">
-                                <select class="form-select" id="cirs_status" name="cirs_status" autocomplete="off">
-                                    <option value="0" <?php if ($row['cirs_status'] == "0") echo 'selected'; ?>>in Bearbeitung</option>
-                                    <option value="1" <?php if ($row['cirs_status'] == "1") echo 'selected'; ?>>Abgelehnt</option>
-                                    <option value="2" <?php if ($row['cirs_status'] == "2") echo 'selected'; ?>>Aufgeschoben</option>
-                                    <option value="3" <?php if ($row['cirs_status'] == "3") echo 'selected'; ?>>Angenommen</option>
-                                </select>
-                            </div>
-                        </div>
-                        <p><input class="mt-4 btn btn-main-color" name="submit" type="submit" value="Änderungen speichern" /></p>
                     </form>
                 </div>
             </div>
         </div>
     </div>
-
 
     <?php include __DIR__ . "/../../assets/components/footer.php"; ?>
 </body>

@@ -127,7 +127,7 @@ $rdQualis = $rdQualisStmt->fetchAll(PDO::FETCH_ASSOC);
 <body data-bs-theme="dark" data-page="settings">
     <?php include __DIR__ . "/../../../assets/components/navbar.php"; ?>
     <div class="container-full position-relative" id="mainpageContainer">
-        <div class="container mt-5">
+        <div class="container my-5">
             <h1 class="mb-4">Dokumenten-Templates verwalten</h1>
 
             <div class="row">

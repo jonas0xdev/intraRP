@@ -189,7 +189,14 @@ if (!isset($_SESSION['cirs_user']) || empty($_SESSION['cirs_user'])) {
             </div>
             <div class="row mt-4">
                 <div class="col intra__tile">
-                    <h4 class="mt-2 mb-3">Eigene Anträge</h4>
+                    <div class="row">
+                        <div class="col">
+                            <h4 class="mt-2 mb-3">Eigene Anträge</h4>
+                        </div>
+                        <div class="col d-flex justify-content-end align-items-center">
+                            <a href="<?= BASE_PATH ?>antraege/select.php" class="btn btn-success btn-sm"><i class="las la-plus"></i> Antrag einreichen</a>
+                        </div>
+                    </div>
                     <?php include __DIR__ . '/../assets/components/index/applications.php' ?>
                 </div>
             </div>
