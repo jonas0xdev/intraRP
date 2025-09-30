@@ -80,7 +80,7 @@ $typen = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <div class="col">
                     <hr class="text-light my-3">
                     <h1><i class="las la-file-medical me-2"></i>Neuen Antrag stellen</h1>
-                    <p class="text-muted">Wählen Sie den gewünschten Antragstyp aus</p>
+                    <!-- <p class="text-muted">Wählen Sie den gewünschten Antragstyp aus</p> -->
 
                     <?php Flash::render(); ?>
 
