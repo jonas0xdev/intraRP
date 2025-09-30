@@ -1,3 +1,4 @@
+@charset "UTF-8";
 :root {
   --secondary-color: #011e4a;
   --secondary-color-dimmed: #0a2e5a;
@@ -139,11 +140,16 @@ body {
 #edivi__container .edivi__box {
   background: #333333;
   margin: 10px 0;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
 }
 
 #edivi__container .edivi__box .edivi__description {
   color: #a2a2a2;
   padding: 0 0.5rem !important;
+}
+
+#edivi__container .edivi__overview-container .edivi__box textarea.form-control {
+  border: 1px solid #a2a2a2 !important;
 }
 
 #edivi__container .edivi__box input.form-control,
@@ -170,6 +176,95 @@ body {
   user-select: none;
   pointer-events: none;
   cursor: default;
+}
+
+#edivi__container .edivi__medikamente input.form-control,
+#edivi__container .edivi__medikamente select.form-select,
+#edivi__container .edivi__medikamente textarea.form-control {
+  background: transparent;
+  border-radius: 0;
+  color: #fff;
+  border: 0;
+  font-size: 1.2rem;
+}
+#edivi__container .edivi__medikamente input.form-control:focus,
+#edivi__container .edivi__medikamente select.form-select:focus,
+#edivi__container .edivi__medikamente textarea.form-control:focus {
+  box-shadow: 0 0 0 1px #5783cf !important;
+}
+#edivi__container .edivi__medikamente input.form-control[readonly], #edivi__container .edivi__medikamente input.form-control[disabled],
+#edivi__container .edivi__medikamente select.form-select[readonly],
+#edivi__container .edivi__medikamente select.form-select[disabled],
+#edivi__container .edivi__medikamente textarea.form-control[readonly],
+#edivi__container .edivi__medikamente textarea.form-control[disabled] {
+  box-shadow: none !important;
+  caret-color: transparent;
+  user-select: none;
+  pointer-events: none;
+  cursor: default;
+}
+
+#medis-select,
+#medis-time,
+#medis-unit,
+#medis-admission,
+#medis-concentration {
+  font-size: 1.75rem !important;
+  border-radius: 0;
+  color: #fff;
+  border: 0;
+}
+#medis-select:focus,
+#medis-time:focus,
+#medis-unit:focus,
+#medis-admission:focus,
+#medis-concentration:focus {
+  box-shadow: 0 0 0 1px #5783cf !important;
+}
+#medis-select[readonly], #medis-select[disabled],
+#medis-time[readonly],
+#medis-time[disabled],
+#medis-unit[readonly],
+#medis-unit[disabled],
+#medis-admission[readonly],
+#medis-admission[disabled],
+#medis-concentration[readonly],
+#medis-concentration[disabled] {
+  box-shadow: none !important;
+  caret-color: transparent;
+  user-select: none;
+  pointer-events: none;
+  cursor: default;
+}
+
+.medikament-item {
+  transition: all 0.2s ease;
+}
+
+#medis-list {
+  overflow-y: auto;
+  max-height: 60vh;
+}
+
+#medis-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+#medis-list::-webkit-scrollbar-track {
+  background: #222;
+}
+
+#medis-list::-webkit-scrollbar-thumb {
+  background: #666;
+  border-radius: 4px;
+}
+
+#medis-list::-webkit-scrollbar-thumb:hover {
+  background: #888;
+}
+
+#medis-list {
+  font-size: 1.5rem;
 }
 
 #edivi__container .edivi__box select.form-select {
@@ -355,6 +450,10 @@ body {
   background-color: #d91425;
   top: 8px;
 }
+#edivi__nidanav > a.edivi__nidanav-partfilled:before {
+  background-color: #f7ec5d;
+  top: 8px;
+}
 #edivi__nidanav > a.edivi__nidanav-filled:before {
   background-color: #55b530;
   top: 28px;
@@ -370,11 +469,8 @@ body {
   font-size: 2.5rem;
   font-weight: 300;
   transform: translateY(-50%);
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--white);
   z-index: 0;
-}
-#edivi__nidanav > a.active:after {
-  color: rgba(255, 255, 255, 0.4);
 }
 #edivi__nidanav > a.edivi__nidanav-nonumber {
   counter-increment: none;
@@ -388,12 +484,223 @@ body {
   z-index: 1;
 }
 
+[class*=edivi__interactbutton] {
+  padding: 0 !important;
+}
+[class*=edivi__interactbutton] > a,
+[class*=edivi__interactbutton] > label {
+  position: relative;
+  word-wrap: break-word;
+  color: var(--white);
+  background-color: var(--secondary-color);
+  border-radius: 0;
+  padding: 25px 4px;
+  padding-left: 14px;
+  text-decoration: none;
+  font-weight: 600;
+  text-align: start;
+  margin: 0;
+  border: 1px solid #191919;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  background-color: #333333;
+  z-index: 1;
+  overflow: hidden;
+}
+[class*=edivi__interactbutton] > a:hover,
+[class*=edivi__interactbutton] > label:hover {
+  background-color: #5f5f5f;
+  color: var(--white);
+  cursor: pointer;
+}
+[class*=edivi__interactbutton] > a.active,
+[class*=edivi__interactbutton] > label.active {
+  background-color: #5f5f5f;
+  color: var(--white);
+}
+[class*=edivi__interactbutton] > a:before,
+[class*=edivi__interactbutton] > label:before {
+  content: "";
+  display: block;
+  width: 2px;
+  height: 20px;
+  background-color: transparent;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: width 0.3s ease;
+  z-index: 2;
+}
+[class*=edivi__interactbutton] > a.edivi__validation-red:before,
+[class*=edivi__interactbutton] > label.edivi__validation-red:before {
+  background-color: #d91425;
+  top: 8px;
+}
+[class*=edivi__interactbutton] > a.edivi__validation-yellow:before,
+[class*=edivi__interactbutton] > label.edivi__validation-yellow:before {
+  background-color: #f7ec5d;
+  top: 8px;
+}
+[class*=edivi__interactbutton] > a.edivi__validation-green:before,
+[class*=edivi__interactbutton] > label.edivi__validation-green:before {
+  background-color: #55b530;
+  top: 28px;
+}
+[class*=edivi__interactbutton] > a.edivi__validation-ignore:before,
+[class*=edivi__interactbutton] > label.edivi__validation-ignore:before {
+  display: none;
+}
+[class*=edivi__interactbutton] > a span,
+[class*=edivi__interactbutton] > label span {
+  position: relative;
+  z-index: 1;
+}
+[class*=edivi__interactbutton] .btn-check {
+  position: absolute !important;
+  clip: rect(0, 0, 0, 0) !important;
+  pointer-events: none !important;
+}
+[class*=edivi__interactbutton] .btn-check:checked + label {
+  background-color: #5f5f5f;
+  color: var(--white);
+}
+[class*=edivi__interactbutton] .btn-check:focus + label {
+  box-shadow: 0 0 0 0.2rem rgba(87, 131, 207, 0.25);
+}
+
+[class*=edivi__interactbutton] > label.edivi__zugang-24G:after,
+[class*=edivi__interactbutton] .btn-check:checked + label.edivi__zugang-24G:after {
+  content: "";
+  height: 0.8rem;
+  width: 0.8rem;
+  border-radius: 50%;
+  background: yellow;
+  right: 10px;
+}
+[class*=edivi__interactbutton] > label.edivi__zugang-22G:after,
+[class*=edivi__interactbutton] .btn-check:checked + label.edivi__zugang-22G:after {
+  content: "";
+  height: 0.8rem;
+  width: 0.8rem;
+  border-radius: 50%;
+  background: blue;
+  right: 10px;
+}
+[class*=edivi__interactbutton] > label.edivi__zugang-20G:after,
+[class*=edivi__interactbutton] .btn-check:checked + label.edivi__zugang-20G:after {
+  content: "";
+  height: 0.8rem;
+  width: 0.8rem;
+  border-radius: 50%;
+  background: pink;
+  right: 10px;
+}
+[class*=edivi__interactbutton] > label.edivi__zugang-18G:after,
+[class*=edivi__interactbutton] .btn-check:checked + label.edivi__zugang-18G:after {
+  content: "";
+  height: 0.8rem;
+  width: 0.8rem;
+  border-radius: 50%;
+  background: green;
+  right: 10px;
+}
+[class*=edivi__interactbutton] > label.edivi__zugang-18G_kurz:after,
+[class*=edivi__interactbutton] .btn-check:checked + label.edivi__zugang-18G_kurz:after {
+  content: "";
+  height: 0.8rem;
+  width: 0.8rem;
+  border-radius: 50%;
+  background: green;
+  box-shadow: 0 0 0 2px #fff inset, 0 0 0 2px green;
+  right: 10px;
+}
+[class*=edivi__interactbutton] > label.edivi__zugang-17G:after,
+[class*=edivi__interactbutton] .btn-check:checked + label.edivi__zugang-17G:after {
+  content: "";
+  height: 0.8rem;
+  width: 0.8rem;
+  border-radius: 50%;
+  background: white;
+  right: 10px;
+}
+[class*=edivi__interactbutton] > label.edivi__zugang-16G:after,
+[class*=edivi__interactbutton] .btn-check:checked + label.edivi__zugang-16G:after {
+  content: "";
+  height: 0.8rem;
+  width: 0.8rem;
+  border-radius: 50%;
+  background: gray;
+  right: 10px;
+}
+[class*=edivi__interactbutton] > label.edivi__zugang-14G:after,
+[class*=edivi__interactbutton] .btn-check:checked + label.edivi__zugang-14G:after {
+  content: "";
+  height: 0.8rem;
+  width: 0.8rem;
+  border-radius: 50%;
+  background: orange;
+  right: 10px;
+}
+
+[class*=edivi__interactbutton] > label.edivi__interactbutton-text {
+  background: transparent;
+  margin: 25px 4px;
+  margin-left: 14px;
+  text-align: center;
+}
+[class*=edivi__interactbutton] > label.edivi__interactbutton-text:hover {
+  background: transparent;
+  color: var(--white);
+  cursor: default;
+}
+[class*=edivi__interactbutton] > label.edivi__interactbutton-text:after {
+  content: "";
+}
+
+[class*=edivi__interactbutton] > label:after {
+  content: "";
+  font-family: "Line Awesome Free";
+  position: absolute;
+  right: 7px;
+  top: 50%;
+  font-size: 1.5rem;
+  font-weight: 900;
+  transform: translateY(-50%);
+  color: var(--white);
+  z-index: 0;
+}
+
+[class*=edivi__interactbutton] .btn-check:checked + label:after {
+  content: "";
+}
+
+@media (max-width: 1001px) {
+  [class*=edivi__interactbutton] > *:after {
+    display: none;
+  }
+}
+.edivi__interactbutton-more > a:after {
+  content: "";
+  font-family: "Line Awesome Free";
+  position: absolute;
+  right: 7px;
+  top: 50%;
+  font-size: 1.5rem;
+  font-weight: 900;
+  transform: translateY(-50%);
+  color: var(--white);
+  z-index: 0;
+}
+
 .edivi__box h5 {
   font-size: 1.4rem;
 }
 
 #edivi__container .edivi__box .edivi__group-check {
   border-left: 3px solid #d91425;
+}
+
+#edivi__container .edivi__box .edivi__group-partchecked {
+  border-left: 3px solid #f7ec5d;
 }
 
 #edivi__container .edivi__box .edivi__group-checked {
@@ -435,6 +742,13 @@ body {
     max-width: 100%;
   }
 }
+#edivi__content .edivi__overview-container {
+  margin: 10px 5px;
+}
+#edivi__content .edivi__overview-container span.fw-bold {
+  padding-right: 8px;
+}
+
 #edivi__topbar {
   border-bottom: 2px solid var(--main-color);
   color: var(--white);
@@ -597,19 +911,19 @@ body#edivi__print {
   color: #fff;
   padding: 12px 20px;
   margin-top: 10px;
-  border-radius: 4px;
+  border-radius: 0;
   min-width: 250px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   opacity: 0.9;
   animation: fadeInOut 5s forwards;
 }
 
 .toast.success {
-  background-color: #28a745;
+  border: 2px solid #28a745;
 }
 
 .toast.error {
-  background-color: #dc3545;
+  border: 2px solid #dc3545;
 }
 
 @keyframes fadeInOut {
@@ -784,7 +1098,7 @@ body[data-page=freigabe] {
 }
 
 #edivi__login input.form-control,
-select.form-select {
+#edivi__login select.form-select {
   background-color: #333333;
   border-radius: 0;
   color: #fff;
@@ -792,12 +1106,12 @@ select.form-select {
   font-size: 1.2rem;
 }
 #edivi__login input.form-control:focus,
-select.form-select:focus {
+#edivi__login select.form-select:focus {
   box-shadow: 0 0 0 1px #5783cf !important;
 }
 #edivi__login input.form-control[readonly], #edivi__login input.form-control[disabled],
-select.form-select[readonly],
-select.form-select[disabled] {
+#edivi__login select.form-select[readonly],
+#edivi__login select.form-select[disabled] {
   box-shadow: none !important;
   caret-color: transparent;
   user-select: none;
@@ -805,7 +1119,7 @@ select.form-select[disabled] {
   cursor: default;
 }
 #edivi__login input.form-control > option,
-select.form-select > option {
+#edivi__login select.form-select > option {
   background-color: #191919;
   color: #fff;
   padding: 10px;
@@ -827,7 +1141,7 @@ select.form-select > option {
   color: #fa0002;
   padding: 0 5px;
   outline: 2px solid #fa0002;
-  border-radius: 4px;
+  border-radius: 0;
   font-size: 0.6rem;
   vertical-align: super;
   margin-left: 2px;
@@ -1082,6 +1396,9 @@ body[data-page=verlauf] textarea.form-control.edivi__vitalparam {
 body[data-page=verlauf] textarea.form-control.edivi__vitalparam::placeholder {
   color: #5f5f5f !important;
 }
+body[data-page=verlauf] textarea.form-control.edivi__vitalparam:active, body[data-page=verlauf] textarea.form-control.edivi__vitalparam:focus {
+  background: #333333 !important;
+}
 body[data-page=verlauf] input[type=text].form-control.edivi__vitalparam,
 body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam {
   position: relative;
@@ -1098,7 +1415,17 @@ body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam {
 }
 body[data-page=verlauf] input[type=text].form-control.edivi__vitalparam::placeholder,
 body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam::placeholder {
-  color: #333333 !important;
+  color: #808080 !important;
+}
+body[data-page=verlauf] input[type=text].form-control.edivi__vitalparam:active, body[data-page=verlauf] input[type=text].form-control.edivi__vitalparam:focus,
+body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam:active,
+body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam:focus {
+  background: #333333 !important;
+}
+body[data-page=verlauf] input[type=text].form-control.edivi__vitalparam.edivi__vitalparam-required,
+body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam.edivi__vitalparam-required {
+  border-color: rgba(220, 53, 69, 0.8) !important;
+  background-color: rgba(220, 53, 69, 0.3) !important;
 }
 body[data-page=verlauf] input[type=text].form-control.edivi__vitalparam-shared,
 body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam-shared {
@@ -1115,11 +1442,22 @@ body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam-shared
 }
 body[data-page=verlauf] input[type=text].form-control.edivi__vitalparam-shared::placeholder,
 body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam-shared::placeholder {
-  color: #333333 !important;
+  color: #808080 !important;
+}
+body[data-page=verlauf] input[type=text].form-control.edivi__vitalparam-shared:active, body[data-page=verlauf] input[type=text].form-control.edivi__vitalparam-shared:focus,
+body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam-shared:active,
+body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam-shared:focus {
+  background: #333333 !important;
+}
+body[data-page=verlauf] input[type=text].form-control.edivi__vitalparam-shared.edivi__vitalparam-required,
+body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam-shared.edivi__vitalparam-required {
+  border-color: rgba(220, 53, 69, 0.8) !important;
+  background-color: rgba(220, 53, 69, 0.3) !important;
 }
 body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam,
 body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam-shared {
   -moz-appearance: textfield;
+  appearance: textfield;
 }
 body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam::-webkit-outer-spin-button, body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam::-webkit-inner-spin-button,
 body[data-page=verlauf] input[type=number].form-control.edivi__vitalparam-shared::-webkit-outer-spin-button,

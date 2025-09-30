@@ -146,11 +146,16 @@ body {
 #edivi__container .edivi__box {
   background: #333333;
   margin: 10px 0;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
 }
 
 #edivi__container .edivi__box .edivi__description {
   color: #a2a2a2;
   padding: 0 0.5rem !important;
+}
+
+#edivi__container .edivi__overview-container .edivi__box textarea.form-control {
+  border: 1px solid #a2a2a2 !important;
 }
 
 #edivi__container .edivi__box input.form-control,
@@ -177,6 +182,86 @@ body {
     pointer-events: none;
     cursor: default;
   }
+}
+
+#edivi__container .edivi__medikamente input.form-control,
+#edivi__container .edivi__medikamente select.form-select,
+#edivi__container .edivi__medikamente textarea.form-control {
+  background: transparent;
+  border-radius: 0;
+  color: #fff;
+  border: 0;
+  font-size: 1.2rem;
+  //border-bottom: 1px solid #a2a2a2;
+  //border-left: 1px solid #a2a2a2;
+  //border-right: 1px solid #a2a2a2;
+
+  &:focus {
+    box-shadow: 0 0 0 1px #5783cf !important;
+  }
+
+  &[readonly],
+  &[disabled] {
+    box-shadow: none !important;
+    caret-color: transparent;
+    user-select: none;
+    pointer-events: none;
+    cursor: default;
+  }
+}
+
+#medis-select,
+#medis-time,
+#medis-unit,
+#medis-admission,
+#medis-concentration {
+  font-size: 1.75rem !important;
+  border-radius: 0;
+  color: #fff;
+  border: 0;
+
+  &:focus {
+    box-shadow: 0 0 0 1px #5783cf !important;
+  }
+
+  &[readonly],
+  &[disabled] {
+    box-shadow: none !important;
+    caret-color: transparent;
+    user-select: none;
+    pointer-events: none;
+    cursor: default;
+  }
+}
+
+.medikament-item {
+  transition: all 0.2s ease;
+}
+
+#medis-list {
+  overflow-y: auto;
+  max-height: 60vh;
+}
+
+#medis-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+#medis-list::-webkit-scrollbar-track {
+  background: #222;
+}
+
+#medis-list::-webkit-scrollbar-thumb {
+  background: #666;
+  border-radius: 4px;
+}
+
+#medis-list::-webkit-scrollbar-thumb:hover {
+  background: #888;
+}
+
+#medis-list {
+  font-size: 1.5rem;
 }
 
 #edivi__container .edivi__box select.form-select {
@@ -371,6 +456,10 @@ body {
       background-color: #d91425;
       top: 8px;
     }
+    &.edivi__nidanav-partfilled:before {
+      background-color: #f7ec5d;
+      top: 8px;
+    }
     &.edivi__nidanav-filled:before {
       background-color: #55b530;
       top: 28px;
@@ -386,12 +475,8 @@ body {
       font-size: 2.5rem;
       font-weight: 300;
       transform: translateY(-50%);
-      color: rgba(255, 255, 255, 0.3);
+      color: var(--white);
       z-index: 0;
-    }
-
-    &.active:after {
-      color: rgba(255, 255, 255, 0.4);
     }
 
     &.edivi__nidanav-nonumber {
@@ -409,12 +494,230 @@ body {
   }
 }
 
+[class*="edivi__interactbutton"] {
+  padding: 0 !important;
+  > a,
+  > label {
+    position: relative;
+    word-wrap: break-word;
+    color: var(--white);
+    background-color: var(--secondary-color);
+    border-radius: 0;
+    padding: 25px 4px;
+    padding-left: 14px;
+    text-decoration: none;
+    font-weight: 600;
+    text-align: start;
+    margin: 0;
+    border: 1px solid #191919;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    background-color: #333333;
+    z-index: 1;
+    overflow: hidden;
+    &:hover {
+      background-color: #5f5f5f;
+      color: var(--white);
+      cursor: pointer;
+    }
+    &.active {
+      background-color: #5f5f5f;
+      color: var(--white);
+    }
+    &:before {
+      content: "";
+      display: block;
+      width: 2px;
+      height: 20px;
+      background-color: transparent;
+      position: absolute;
+      top: 0;
+      left: 0;
+      transition: width 0.3s ease;
+      z-index: 2;
+    }
+    &.edivi__validation-red:before {
+      background-color: #d91425;
+      top: 8px;
+    }
+    &.edivi__validation-yellow:before {
+      background-color: #f7ec5d;
+      top: 8px;
+    }
+    &.edivi__validation-green:before {
+      background-color: #55b530;
+      top: 28px;
+    }
+    &.edivi__validation-ignore:before {
+      display: none;
+    }
+    span {
+      position: relative;
+      z-index: 1;
+    }
+  }
+
+  .btn-check {
+    position: absolute !important;
+    clip: rect(0, 0, 0, 0) !important;
+    pointer-events: none !important;
+
+    &:checked + label {
+      background-color: #5f5f5f;
+      color: var(--white);
+    }
+
+    &:focus + label {
+      box-shadow: 0 0 0 0.2rem rgba(87, 131, 207, 0.25);
+    }
+  }
+}
+
+[class*="edivi__interactbutton"] {
+  > label.edivi__zugang-24G:after,
+  .btn-check:checked + label.edivi__zugang-24G:after {
+    content: "";
+    height: 0.8rem;
+    width: 0.8rem;
+    border-radius: 50%;
+    background: rgb(255, 255, 0);
+    right: 10px;
+  }
+
+  > label.edivi__zugang-22G:after,
+  .btn-check:checked + label.edivi__zugang-22G:after {
+    content: "";
+    height: 0.8rem;
+    width: 0.8rem;
+    border-radius: 50%;
+    background: rgb(0, 0, 255);
+    right: 10px;
+  }
+
+  > label.edivi__zugang-20G:after,
+  .btn-check:checked + label.edivi__zugang-20G:after {
+    content: "";
+    height: 0.8rem;
+    width: 0.8rem;
+    border-radius: 50%;
+    background: rgb(255, 192, 203);
+    right: 10px;
+  }
+
+  > label.edivi__zugang-18G:after,
+  .btn-check:checked + label.edivi__zugang-18G:after {
+    content: "";
+    height: 0.8rem;
+    width: 0.8rem;
+    border-radius: 50%;
+    background: rgb(0, 128, 0);
+    right: 10px;
+  }
+
+  > label.edivi__zugang-18G_kurz:after,
+  .btn-check:checked + label.edivi__zugang-18G_kurz:after {
+    content: "";
+    height: 0.8rem;
+    width: 0.8rem;
+    border-radius: 50%;
+    background: rgb(0, 128, 0);
+    box-shadow: 0 0 0 2px #fff inset, 0 0 0 2px rgb(0, 128, 0);
+    right: 10px;
+  }
+
+  > label.edivi__zugang-17G:after,
+  .btn-check:checked + label.edivi__zugang-17G:after {
+    content: "";
+    height: 0.8rem;
+    width: 0.8rem;
+    border-radius: 50%;
+    background: rgb(255, 255, 255);
+    right: 10px;
+  }
+
+  > label.edivi__zugang-16G:after,
+  .btn-check:checked + label.edivi__zugang-16G:after {
+    content: "";
+    height: 0.8rem;
+    width: 0.8rem;
+    border-radius: 50%;
+    background: rgb(128, 128, 128);
+    right: 10px;
+  }
+
+  > label.edivi__zugang-14G:after,
+  .btn-check:checked + label.edivi__zugang-14G:after {
+    content: "";
+    height: 0.8rem;
+    width: 0.8rem;
+    border-radius: 50%;
+    background: rgb(255, 165, 0);
+    right: 10px;
+  }
+}
+
+[class*="edivi__interactbutton"] > label.edivi__interactbutton-text {
+  background: transparent;
+  margin: 25px 4px;
+  margin-left: 14px;
+  text-align: center;
+
+  &:hover {
+    background: transparent;
+    color: var(--white);
+    cursor: default;
+  }
+
+  &:after {
+    content: "";
+  }
+}
+
+[class*="edivi__interactbutton"] > label:after {
+  content: "\f04d";
+  font-family: "Line Awesome Free";
+  position: absolute;
+  right: 7px;
+  top: 50%;
+  font-size: 1.5rem;
+  font-weight: 900;
+  transform: translateY(-50%);
+  color: var(--white);
+  z-index: 0;
+}
+
+[class*="edivi__interactbutton"] .btn-check:checked + label:after {
+  content: "\f14a";
+}
+
+@media (max-width: 1001px) {
+  [class*="edivi__interactbutton"] > *:after {
+    display: none;
+  }
+}
+
+.edivi__interactbutton-more > a:after {
+  content: "\f105";
+  font-family: "Line Awesome Free";
+  position: absolute;
+  right: 7px;
+  top: 50%;
+  font-size: 1.5rem;
+  font-weight: 900;
+  transform: translateY(-50%);
+  color: var(--white);
+  z-index: 0;
+}
+
 .edivi__box h5 {
   font-size: 1.4rem;
 }
 
 #edivi__container .edivi__box .edivi__group-check {
   border-left: 3px solid #d91425;
+}
+
+#edivi__container .edivi__box .edivi__group-partchecked {
+  border-left: 3px solid #f7ec5d;
 }
 
 #edivi__container .edivi__box .edivi__group-checked {
@@ -456,6 +759,14 @@ body {
   #edivi__login #edivi__content .row > .col-2 {
     flex: 0 0 100%;
     max-width: 100%;
+  }
+}
+
+#edivi__content .edivi__overview-container {
+  margin: 10px 5px;
+
+  span.fw-bold {
+    padding-right: 8px;
   }
 }
 
@@ -626,19 +937,19 @@ body#edivi__print {
   color: #fff;
   padding: 12px 20px;
   margin-top: 10px;
-  border-radius: 4px;
+  border-radius: 0;
   min-width: 250px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   opacity: 0.9;
   animation: fadeInOut 5s forwards;
 }
 
 .toast.success {
-  background-color: #28a745;
+  border: 2px solid #28a745;
 }
 
 .toast.error {
-  background-color: #dc3545;
+  border: 2px solid #dc3545;
 }
 
 @keyframes fadeInOut {
@@ -831,7 +1142,7 @@ body[data-page="freigabe"] {
 }
 
 #edivi__login input.form-control,
-select.form-select {
+#edivi__login select.form-select {
   background-color: #333333;
   border-radius: 0;
   color: #fff;
@@ -874,7 +1185,7 @@ select.form-select {
     color: #fa0002;
     padding: 0 5px;
     outline: 2px solid #fa0002;
-    border-radius: 4px;
+    border-radius: 0;
     font-size: 0.6rem;
     vertical-align: super;
     margin-left: 2px;
@@ -1165,6 +1476,11 @@ body[data-page="verlauf"] {
     &::placeholder {
       color: #5f5f5f !important;
     }
+
+    &:active,
+    &:focus {
+      background: #333333 !important;
+    }
   }
 
   input[type="text"].form-control.edivi__vitalparam,
@@ -1182,7 +1498,17 @@ body[data-page="verlauf"] {
     --bs-body-color: #fff;
 
     &::placeholder {
-      color: #333333 !important;
+      color: #808080 !important;
+    }
+
+    &:active,
+    &:focus {
+      background: #333333 !important;
+    }
+
+    &.edivi__vitalparam-required {
+      border-color: rgba(220, 53, 69, 0.8) !important;
+      background-color: rgba(220, 53, 69, 0.3) !important;
     }
   }
 
@@ -1200,13 +1526,24 @@ body[data-page="verlauf"] {
     --bs-body-color: #fff;
 
     &::placeholder {
-      color: #333333 !important;
+      color: #808080 !important;
+    }
+
+    &:active,
+    &:focus {
+      background: #333333 !important;
+    }
+
+    &.edivi__vitalparam-required {
+      border-color: rgba(220, 53, 69, 0.8) !important;
+      background-color: rgba(220, 53, 69, 0.3) !important;
     }
   }
 
   input[type="number"].form-control.edivi__vitalparam,
   input[type="number"].form-control.edivi__vitalparam-shared {
     -moz-appearance: textfield;
+    appearance: textfield;
     &::-webkit-outer-spin-button,
     &::-webkit-inner-spin-button {
       -webkit-appearance: none;

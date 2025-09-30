@@ -1,51 +1,60 @@
 <?php
-require_once __DIR__ . '/../../assets/config/config.php';
-require __DIR__ . '/../../assets/config/database.php';
-$openedID = $_GET['docid'];
+// assets/functions/docredir.php
+// Zentrale Routing-Datei für alle Dokumente
 
-$stmt = $pdo->prepare("SELECT * FROM intra_mitarbeiter_dokumente WHERE docid = :docid");
-$stmt->execute(['docid' => $_GET['docid']]);
-$row = $stmt->fetch(PDO::FETCH_ASSOC);
+require_once __DIR__ . '/../config/config.php';
+require __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../../src/Documents/DocumentRenderer.php';
 
-$docType = $row['type'];
+use App\Documents\DocumentRenderer;
 
-// Abmahnungen
-if ($docType == 10) {
-    header("Location: " . BASE_PATH . "dokumente/schreiben/abmahnung.php?dok=" . $openedID);
+if (!isset($_GET['docid'])) {
+    header("Location: " . BASE_PATH . "404.php");
+    exit;
 }
-// Dienstenthebungen
-if ($docType == 11) {
-    header("Location: " . BASE_PATH . "dokumente/schreiben/dienstenthebung.php?dok=" . $openedID);
+
+$docid = $_GET['docid'];
+
+// Lade Dokument-Informationen
+$stmt = $pdo->prepare("SELECT type, template_id FROM intra_mitarbeiter_dokumente WHERE docid = :docid");
+$stmt->execute(['docid' => $docid]);
+$doc = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$doc) {
+    header("Location: " . BASE_PATH . "404.php");
+    exit;
 }
-// Dienstentfernungen
-if ($docType == 12) {
-    header("Location: " . BASE_PATH . "dokumente/schreiben/dienstentfernung.php?dok=" . $openedID);
-}
-// Kündigung
-if ($docType == 13) {
-    header("Location: " . BASE_PATH . "dokumente/schreiben/kuendigung.php?dok=" . $openedID);
-}
-// Ernennungsurkunde
-if ($docType == 0) {
-    header("Location: " . BASE_PATH . "dokumente/urkunden/ernennung.php?dok=" . $openedID);
-}
-// Beförderungsurkunde
-if ($docType == 1) {
-    header("Location: " . BASE_PATH . "dokumente/urkunden/befoerderung.php?dok=" . $openedID);
-}
-// Entlassungsurkunde
-if ($docType == 2) {
-    header("Location: " . BASE_PATH . "dokumente/urkunden/entlassung.php?dok=" . $openedID);
-}
-// Ausbildungszertifikat
-if ($docType == 5) {
-    header("Location: " . BASE_PATH . "dokumente/zertifikate/ausbildung.php?dok=" . $openedID);
-}
-// Lehrgangszertifikat
-if ($docType == 6) {
-    header("Location: " . BASE_PATH . "dokumente/zertifikate/lehrgang.php?dok=" . $openedID);
-}
-// Fachlehrgangszertifikat
-if ($docType == 7) {
-    header("Location: " . BASE_PATH . "dokumente/zertifikate/fachlehrgang.php?dok=" . $openedID);
+
+// Routing-Logik
+if ($doc['type'] == 99 && $doc['template_id']) {
+    // Custom Template Dokument - verwende den Renderer
+    try {
+        $renderer = new DocumentRenderer($pdo);
+        echo $renderer->renderDocument($docid);
+    } catch (Exception $e) {
+        echo "<h1>Fehler</h1><p>" . htmlspecialchars($e->getMessage()) . "</p>";
+    }
+} else {
+    // Legacy Dokumente - alte Routing-Logik
+    $routes = [
+        0 => 'urkunden/ernennung.php',
+        1 => 'urkunden/befoerderung.php',
+        2 => 'urkunden/entlassung.php',
+        3 => 'vertraege/ausbildung.php',
+        5 => 'zertifikate/ausbildung.php',
+        6 => 'zertifikate/lehrgang.php',
+        7 => 'zertifikate/fachlehrgang.php',
+        10 => 'schreiben/abmahnung.php',
+        11 => 'schreiben/dienstenthebung.php',
+        12 => 'schreiben/dienstentfernung.php',
+        13 => 'schreiben/kuendigung.php',
+    ];
+
+    if (isset($routes[$doc['type']])) {
+        $_GET['dok'] = $docid; // Für Kompatibilität mit alten Dateien
+        include __DIR__ . '/../../dokumente/' . $routes[$doc['type']];
+    } else {
+        header("Location: " . BASE_PATH . "404.php");
+        exit;
+    }
 }

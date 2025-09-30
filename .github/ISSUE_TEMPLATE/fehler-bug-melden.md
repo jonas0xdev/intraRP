@@ -15,9 +15,10 @@ Konntest du den Fehler selbst erneut provozieren?
 ### Wo tritt der Fehler auf?
 - [ ] Computer (Browser)
 - [ ] Handy (Browser)
+- [ ] Ingame (intraTab)
 
 ### Welche Version wird verwendet?
-Version X.X.X oder z.B. Datum, wann die Dateien heruntergeladen wurden.
+Version X.X.X
 
 ## Beschreibe den Fehler
 Eine klare und präzise Beschreibung des Fehlers.
@@ -25,5 +26,5 @@ Eine klare und präzise Beschreibung des Fehlers.
 ## Erwartetes Verhalten
 Eine klare und präzise Beschreibung dessen, was geschehen sollte.
 
-## Zusätzlicher Kontext
+## Zusätzlicher Kontext / Bilder
 Weitere Informationen zum Problem bitte hier hinzufügen.

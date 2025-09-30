@@ -1,4 +1,17 @@
 <?php
+// Autoloader
+require_once __DIR__ . '/../../vendor/autoload.php';
+
+use App\Auth\Permissions;
+
+if (!session_status() === PHP_SESSION_NONE) {
+    // Initialisiere Permissions für eingeloggte User
+    if (isset($_SESSION['userid']) && !isset($_SESSION['permissions'])) {
+        require_once __DIR__ . '/database.php'; // Falls noch nicht geladen
+        $_SESSION['permissions'] = Permissions::retrieveFromDatabase($pdo, $_SESSION['userid']);
+    }
+}
+
 // BASIS DATEN
 define('SYSTEM_NAME', 'intraRP'); // Eigenname des Intranets
 define('SYSTEM_VERSION', '0.4.4'); // Versionsnummer
@@ -16,5 +29,5 @@ define('RP_ZIP', '1337'); // PLZ der Organisation
 // FUNKTIONEN
 define('CHAR_ID', true); // Wird eine eindeutige Charakter-ID verwendet? (true = ja, false = nein)
 define('ENOTF_PREREG', true); // Wird das Voranmeldungssystem des eNOTF verwendet? (true = ja, false = nein)
-define('LANG', 'de'); // Sprache des Systems (de = Deutsch, en = Englisch)
+define('LANG', 'de'); // Sprache des Systems (de = Deutsch, en = Englisch) // AKTUELL OHNE FUNKTION!
 define('BASE_PATH', '/'); // Basis-Pfad des Systems (z.B. /intraRP/ für https://domain.de/intraRP/)
