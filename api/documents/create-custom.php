@@ -30,7 +30,7 @@ try {
         }
     }
 
-    // Stelle sicher dass ausstellungsdatum vorhanden ist (entweder direkt oder in fields)
+    // Stelle sicher dass ausstellungsdatum vorhanden ist
     $ausstellungsdatum = $input['fields']['ausstellungsdatum'] ?? $input['ausstellungsdatum'] ?? date('Y-m-d');
 
     $manager = new DocumentTemplateManager($pdo);
@@ -50,10 +50,30 @@ try {
         )
     );
 
-    // Logge die Aktion
+    // NEU: Lade Template-Infos für Log-Eintrag
+    $template = $manager->getTemplate($input['template_id']);
+
+    // NEU: Erstelle Log-Eintrag
+    $logStmt = $pdo->prepare("
+        INSERT INTO intra_mitarbeiter_log 
+        (profilid, type, content, paneluser, datetime) 
+        VALUES (?, 7, ?, ?, NOW())
+    ");
+
+    $logContent = "Dokument erstellt: " . htmlspecialchars($template['name']) . " (ID: {$docId})";
+    $panelUser = $_SESSION['cirs_user'] ?? 'System';
+
+    $logStmt->execute([
+        $input['profileid'],
+        $logContent,
+        $panelUser
+    ]);
+
+    // Logge die Aktion im Audit-Log
     logAction($pdo, 'document_created', [
         'doc_id' => $docId,
         'template_id' => $input['template_id'],
+        'template_name' => $template['name'],
         'profileid' => $input['profileid'],
         'created_by' => $_SESSION['discordtag'] ?? null
     ]);
@@ -76,12 +96,12 @@ function logAction($pdo, $action, $data)
     try {
         $stmt = $pdo->prepare("
             INSERT INTO intra_audit_log 
-            (user_id, action, data, created_at) 
+            (userid, action, data, created_at) 
             VALUES (:user_id, :action, :data, NOW())
         ");
 
         $stmt->execute([
-            'user_id' => $_SESSION['user_id'] ?? null,
+            'user_id' => $_SESSION['userid'] ?? null,
             'action' => $action,
             'data' => json_encode($data)
         ]);
