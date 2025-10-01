@@ -40,7 +40,7 @@ $ziel = $_GET['klinik'] ?? NULL;
     <meta name="theme-color" content="#ffaf2f" />
     <meta property="og:site_name" content="<?php echo SERVER_NAME ?>" />
     <meta property="og:url" content="<?= $prot_url ?>" />
-    <meta property="og:title" content="Arrivalboard &rsaquo;eNOTF &rsaquo; <?php echo SYSTEM_NAME ?>" />
+    <meta property="og:title" content="Arrivalboard &rsaquo; eNOTF &rsaquo; <?php echo SYSTEM_NAME ?>" />
     <meta property="og:image" content="https://<?php echo SYSTEM_URL ?>/assets/img/aelrd.png" />
     <meta property="og:description" content="Verwaltungsportal der <?php echo RP_ORGTYPE . " " .  SERVER_CITY ?>" />
     <meta http-equiv="refresh" content="60">
