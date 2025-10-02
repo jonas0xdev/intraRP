@@ -26,56 +26,15 @@ if (!$caseid) {
     exit();
 }
 
-// Zuerst in neuen dynamischen Anträgen suchen
+// Antrag aus der neuen Tabellenstruktur laden
 $stmt = $pdo->prepare("
-    SELECT a.*, at.name as typ_name, at.icon as typ_icon, at.tabelle_name
+    SELECT a.*, at.name as typ_name, at.icon as typ_icon
     FROM intra_antraege a
     JOIN intra_antrag_typen at ON a.antragstyp_id = at.id
     WHERE a.uniqueid = ?
 ");
 $stmt->execute([$caseid]);
 $antrag = $stmt->fetch(PDO::FETCH_ASSOC);
-
-// Wenn nicht gefunden, in Beförderungsanträgen suchen
-if (!$antrag) {
-    $stmt = $pdo->prepare("
-        SELECT 
-            uniqueid,
-            name_dn,
-            dienstgrad,
-            time_added,
-            freitext,
-            cirs_manager,
-            cirs_time,
-            cirs_status,
-            cirs_text,
-            discordid
-        FROM intra_antrag_bef 
-        WHERE uniqueid = ?
-    ");
-    $stmt->execute([$caseid]);
-    $bef_antrag = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if ($bef_antrag) {
-        // Beförderungsantrag in einheitliches Format konvertieren
-        $antrag = [
-            'uniqueid' => $bef_antrag['uniqueid'],
-            'name_dn' => $bef_antrag['name_dn'],
-            'dienstgrad' => $bef_antrag['dienstgrad'],
-            'time_added' => $bef_antrag['time_added'],
-            'cirs_manager' => $bef_antrag['cirs_manager'],
-            'cirs_time' => $bef_antrag['cirs_time'],
-            'cirs_status' => $bef_antrag['cirs_status'],
-            'cirs_text' => $bef_antrag['cirs_text'],
-            'discordid' => $bef_antrag['discordid'],
-            'typ_name' => 'Beförderungsantrag',
-            'typ_icon' => 'las la-angle-double-up',
-            'tabelle_name' => 'intra_antrag_bef',
-            'is_bef' => true,
-            'freitext' => $bef_antrag['freitext']
-        ];
-    }
-}
 
 if (!$antrag) {
     Flash::set('error', 'Antrag nicht gefunden.');
@@ -92,21 +51,18 @@ if (!Permissions::check(['admin', 'application.view'])) {
     }
 }
 
-// Felddaten laden (nur für dynamische Anträge)
-$felder_daten = [];
-if (!isset($antrag['is_bef'])) {
-    $stmt = $pdo->prepare("
-        SELECT af.*, ad.wert
-        FROM intra_antrag_felder af
-        LEFT JOIN intra_antraege_daten ad ON af.feldname = ad.feldname AND ad.antrag_id = (
-            SELECT id FROM intra_antraege WHERE uniqueid = ?
-        )
-        WHERE af.antragstyp_id = ?
-        ORDER BY af.sortierung ASC
-    ");
-    $stmt->execute([$caseid, $antrag['antragstyp_id']]);
-    $felder_daten = $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
+// Felddaten laden
+$stmt = $pdo->prepare("
+    SELECT af.*, ad.wert
+    FROM intra_antrag_felder af
+    LEFT JOIN intra_antraege_daten ad ON af.feldname = ad.feldname AND ad.antrag_id = (
+        SELECT id FROM intra_antraege WHERE uniqueid = ?
+    )
+    WHERE af.antragstyp_id = ?
+    ORDER BY af.sortierung ASC
+");
+$stmt->execute([$caseid, $antrag['antragstyp_id']]);
+$felder_daten = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Status-Mapping
 $statusMapping = [
@@ -213,17 +169,8 @@ $createDate = new DateTime($antrag['time_added'] ?? 'now');
                                     <i class="las la-file-alt me-2"></i>Antragsinhalt
                                 </h5>
 
-                                <?php if (isset($antrag['is_bef'])): ?>
-                                    <!-- Beförderungsantrag -->
-                                    <div class="bg-dark rounded p-3">
-                                        <?php if (!empty($antrag['freitext'])): ?>
-                                            <p class="mb-0" style="white-space: pre-line;"><?= htmlspecialchars($antrag['freitext']) ?></p>
-                                        <?php else: ?>
-                                            <p class="text-muted mb-0"><i>Kein Antragstext vorhanden</i></p>
-                                        <?php endif; ?>
-                                    </div>
-                                <?php else: ?>
-                                    <!-- Dynamische Felder -->
+                                <!-- Dynamische Felder -->
+                                <?php if (!empty($felder_daten)): ?>
                                     <?php
                                     $current_row = [];
                                     foreach ($felder_daten as $index => $feld):
@@ -257,11 +204,15 @@ $createDate = new DateTime($antrag['time_added'] ?? 'now');
                                         }
                                     endforeach;
                                     ?>
+                                <?php else: ?>
+                                    <div class="bg-dark rounded p-3">
+                                        <p class="text-muted mb-0"><i>Keine Felddaten vorhanden</i></p>
+                                    </div>
                                 <?php endif; ?>
                             </div>
 
                             <!-- Bearbeitung -->
-                            <div class="intra__tile p-2">
+                            <div class="intra__tile p-2 mb-5">
                                 <h5 class="mb-3">
                                     <i class="las la-clipboard-check me-2"></i>Bearbeitung
                                 </h5>

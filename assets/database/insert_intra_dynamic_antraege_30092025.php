@@ -4,7 +4,7 @@ try {
     INSERT INTO `intra_antrag_typen` 
         (`name`, `beschreibung`, `icon`, `aktiv`, `sortierung`, `tabelle_name`) 
         VALUES 
-    ('Beförderungsantrag', 'Antrag auf Beförderung in den nächsten Dienstgrad', 'las la-angle-double-up', 1, 1, 'intra_antrag_bef');
+    ('Beförderungsantrag', 'Antrag auf Beförderung in den nächsten Dienstgrad', 'las la-angle-double-up', 1, 1, NULL);
 
     SET @bef_typ_id = LAST_INSERT_ID();
 

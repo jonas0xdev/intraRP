@@ -85,47 +85,31 @@ if (isset($_POST['submit_antrag'])) {
         // Hauptantrag speichern
         $name_dn = $mitarbeiter['fullname'] . ' (' . $mitarbeiter['dienstnr'] . ')';
 
-        if ($typ['tabelle_name'] === 'intra_antrag_bef') {
-            // Beförderungsantrag: Alte Tabelle
+        // Alle Anträge werden jetzt in der neuen Struktur gespeichert
+        $stmt = $pdo->prepare("
+            INSERT INTO intra_antraege 
+            (uniqueid, antragstyp_id, name_dn, dienstgrad, discordid) 
+            VALUES (?, ?, ?, ?, ?)
+        ");
+        $stmt->execute([
+            $random_number,
+            $typ_id,
+            $name_dn,
+            $mitarbeiter['dienstgrad_name'],
+            $_SESSION['discordtag']
+        ]);
+
+        $antrag_id = $pdo->lastInsertId();
+
+        // Felddaten speichern
+        foreach ($felder as $feld) {
+            $wert = $_POST[$feld['feldname']] ?? '';
+
             $stmt = $pdo->prepare("
-                INSERT INTO intra_antrag_bef 
-                (uniqueid, name_dn, dienstgrad, freitext, discordid) 
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO intra_antraege_daten (antrag_id, feldname, wert) 
+                VALUES (?, ?, ?)
             ");
-            $stmt->execute([
-                $random_number,
-                $name_dn,
-                $mitarbeiter['dienstgrad_name'],
-                $_POST['freitext'] ?? '',
-                $_SESSION['discordtag']
-            ]);
-        } else {
-            // Neuer dynamischer Antrag
-            $stmt = $pdo->prepare("
-                INSERT INTO intra_antraege 
-                (uniqueid, antragstyp_id, name_dn, dienstgrad, discordid) 
-                VALUES (?, ?, ?, ?, ?)
-            ");
-            $stmt->execute([
-                $random_number,
-                $typ_id,
-                $name_dn,
-                $mitarbeiter['dienstgrad_name'],
-                $_SESSION['discordtag']
-            ]);
-
-            $antrag_id = $pdo->lastInsertId();
-
-            // Felddaten speichern
-            foreach ($felder as $feld) {
-                $wert = $_POST[$feld['feldname']] ?? '';
-
-                $stmt = $pdo->prepare("
-                    INSERT INTO intra_antraege_daten (antrag_id, feldname, wert) 
-                    VALUES (?, ?, ?)
-                ");
-                $stmt->execute([$antrag_id, $feld['feldname'], $wert]);
-            }
+            $stmt->execute([$antrag_id, $feld['feldname'], $wert]);
         }
 
         $pdo->commit();

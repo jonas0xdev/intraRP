@@ -38,18 +38,7 @@ if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
     $stmt->execute([$id]);
     $count = $stmt->fetchColumn();
 
-    // Prüfen ob es Beförderungsanträge gibt (alte Tabelle)
-    $stmt2 = $pdo->prepare("SELECT COUNT(*) FROM intra_antrag_bef WHERE 1");
-    $stmt2->execute();
-    $count_bef = $stmt2->fetchColumn();
-
-    $stmt3 = $pdo->prepare("SELECT tabelle_name FROM intra_antrag_typen WHERE id = ?");
-    $stmt3->execute([$id]);
-    $tabelle = $stmt3->fetchColumn();
-
-    if ($tabelle === 'intra_antrag_bef' && $count_bef > 0) {
-        Flash::set('error', 'Dieser Antragstyp kann nicht gelöscht werden, da noch ' . $count_bef . ' Beförderungsanträge existieren.');
-    } elseif ($count > 0) {
+    if ($count > 0) {
         Flash::set('error', 'Dieser Antragstyp kann nicht gelöscht werden, da noch ' . $count . ' Anträge existieren.');
     } else {
         $stmt = $pdo->prepare("DELETE FROM intra_antrag_typen WHERE id = ?");
@@ -78,12 +67,10 @@ $stmt = $pdo->prepare("
     SELECT 
         at.*,
         COUNT(DISTINCT af.id) as anzahl_felder,
-        CASE 
-            WHEN at.tabelle_name = 'intra_antrag_bef' THEN (SELECT COUNT(*) FROM intra_antrag_bef)
-            ELSE (SELECT COUNT(*) FROM intra_antraege WHERE antragstyp_id = at.id)
-        END as anzahl_antraege
+        COUNT(DISTINCT a.uniqueid) as anzahl_antraege
     FROM intra_antrag_typen at
     LEFT JOIN intra_antrag_felder af ON at.id = af.antragstyp_id
+    LEFT JOIN intra_antraege a ON at.id = a.antragstyp_id
     GROUP BY at.id
     ORDER BY at.sortierung ASC, at.name ASC
 ");
