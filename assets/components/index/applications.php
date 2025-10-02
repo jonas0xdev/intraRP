@@ -11,35 +11,20 @@
         <?php
         $query = "
     SELECT 
-        uniqueid,
-        'Beförderungsantrag' as typ_name,
-        'las la-angle-double-up' as typ_icon,
-        cirs_status,
-        cirs_manager,
-        time_added,
-        'bef' as source
-    FROM intra_antrag_bef 
-    WHERE discordid = ?
-    
-    UNION ALL
-    
-    SELECT 
         a.uniqueid,
         at.name as typ_name,
         at.icon as typ_icon,
         a.cirs_status,
         a.cirs_manager,
-        a.time_added,
-        'dynamic' as source
+        a.time_added
     FROM intra_antraege a
     JOIN intra_antrag_typen at ON a.antragstyp_id = at.id
     WHERE a.discordid = ?
-    
-    ORDER BY time_added DESC
+    ORDER BY a.time_added DESC
 ";
 
         $stmt = $pdo->prepare($query);
-        $stmt->execute([$_SESSION['discordtag'], $_SESSION['discordtag']]);
+        $stmt->execute([$_SESSION['discordtag']]);
         $appresult = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         if (empty($appresult)) {
