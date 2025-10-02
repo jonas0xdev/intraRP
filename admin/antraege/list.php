@@ -19,32 +19,17 @@ if (!Permissions::check(['admin', 'application.edit'])) {
     exit();
 }
 
-// Alle Anträge kombiniert abfragen
 $stmt = $pdo->prepare("
-    SELECT 
-        uniqueid,
-        'Beförderungsantrag' as typ_name,
-        'las la-angle-double-up' as typ_icon,
-        name_dn,
-        cirs_status,
-        time_added,
-        'bef' as source
-    FROM intra_antrag_bef
-    
-    UNION ALL
-    
     SELECT 
         a.uniqueid,
         at.name as typ_name,
         at.icon as typ_icon,
         a.name_dn,
         a.cirs_status,
-        a.time_added,
-        'dynamic' as source
+        a.time_added
     FROM intra_antraege a
     JOIN intra_antrag_typen at ON a.antragstyp_id = at.id
-    
-    ORDER BY time_added DESC
+    ORDER BY a.time_added DESC
 ");
 $stmt->execute();
 $antraege = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -136,7 +121,7 @@ $antraege = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                                 break;
                                         }
 
-                                        // Bestimme Ziel-URL basierend auf Quelle
+                                        // URL zur Antragsansicht
                                         $view_url = BASE_PATH . "admin/antraege/view.php?antrag={$row['uniqueid']}";
 
                                         echo "<tr";

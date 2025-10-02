@@ -75,7 +75,12 @@ if (!isset($_SESSION['cirs_user']) || empty($_SESSION['cirs_user'])) {
                     <div class="row">
                         <div class="col-6 me-2 intra__tile">
                             <?php require __DIR__ . "/../assets/config/database.php";
-                            $stmt = $pdo->prepare("SELECT cirs_status, COUNT(*) as count FROM intra_antrag_bef GROUP BY cirs_status");
+
+                            $stmt = $pdo->prepare("
+                            SELECT cirs_status, COUNT(*) as count 
+                            FROM intra_antraege
+                            GROUP BY cirs_status
+                            ");
                             $stmt->execute();
                             $result3 = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -109,9 +114,9 @@ if (!isset($_SESSION['cirs_user']) || empty($_SESSION['cirs_user'])) {
                                     data: {
                                         labels: <?php echo json_encode($labels3); ?>,
                                         datasets: [{
-                                            label: 'Beförderungsanträge',
+                                            label: 'Anträge',
                                             data: <?php echo json_encode($data3); ?>,
-                                            backgroundColor: 'rgba(110, 168, 254, .7)', // Example color
+                                            backgroundColor: 'rgba(110, 168, 254, .7)',
                                             borderWidth: 1
                                         }]
                                     },
