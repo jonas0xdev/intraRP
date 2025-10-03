@@ -33,13 +33,21 @@ class DocumentPDFGenerator
         $html = $this->renderer->renderDocument($dbId);
 
         // Hole die docid für den Dateinamen
-        $stmt = $this->pdo->prepare("SELECT docid FROM intra_mitarbeiter_dokumente WHERE id = :id");
+        $stmt = $this->pdo->prepare("
+        SELECT d.docid, t.template_file 
+        FROM intra_mitarbeiter_dokumente d
+        JOIN intra_dokument_templates t ON d.template_id = t.id
+        WHERE d.id = :id
+        ");
         $stmt->execute(['id' => $dbId]);
-        $docid = $stmt->fetchColumn();
+        $docInfo = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if (!$docid) {
+        if (!$docInfo) {
             throw new \Exception("Dokument mit ID {$dbId} nicht gefunden");
         }
+
+        $docid = $docInfo['docid'];
+        $templateFile = $docInfo['template_file'];
 
         // Generiere Dateiname basierend auf docid
         $filename = $this->generateFilename($docid);
@@ -56,6 +64,28 @@ class DocumentPDFGenerator
         $dompdf->setPaper('A4', 'portrait');
         $dompdf->loadHtml($html);
         $dompdf->render();
+
+        $templatesWithPageNumbers = [
+            'ernennung.html.twig',
+            'befoerderung.html.twig',
+            'ausbildung.html.twig',
+            'fachlehrgang.html.twig',
+            'entlassung.html.twig'
+        ];
+
+        if (in_array($templateFile, $templatesWithPageNumbers)) {
+            $canvas = $dompdf->getCanvas();
+            $canvas->page_script(function ($pageNumber, $pageCount, $canvas, $fontMetrics) {
+                $font = $fontMetrics->getFont("DejaVu Sans");
+                $size = 8.5;
+                $text = "$pageNumber von $pageCount";
+
+                $x = 86;
+                $y = 64;
+
+                $canvas->text($x, $y, $text, $font, $size, [0, 0, 0]);
+            });
+        }
 
         file_put_contents($filepath, $dompdf->output());
 

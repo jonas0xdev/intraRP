@@ -1,4 +1,6 @@
 <?php
+ob_start(); // Start output buffering at the very beginning
+
 error_reporting(E_ERROR | E_PARSE);
 ini_set('display_errors', 0);
 
@@ -12,11 +14,15 @@ use App\Documents\DocumentPDFGenerator;
 use App\Documents\DocumentIdGenerator;
 use App\Auth\Permissions;
 
+// Clear any output that happened during includes
+ob_clean();
+
 header('Content-Type: application/json');
 
 if (!Permissions::check(['admin', 'personnel.documents.manage'])) {
     http_response_code(403);
     echo json_encode(['success' => false, 'error' => 'Keine Berechtigung']);
+    ob_end_flush();
     exit;
 }
 
@@ -53,36 +59,34 @@ try {
                 'erhalter_gebdat' => $input['erhalter_gebdat'] ?? null,
                 'anrede' => $input['anrede'] ?? null,
                 'ausstellungsdatum' => $ausstellungsdatum,
-                'document_id' => $documentId  // Übergebe die generierte ID
+                'document_id' => $documentId
             ],
             $input['fields'] ?? []
         ),
-        $documentId  // Übergebe auch als docid
+        $documentId
     );
 
     // PDF generieren
     try {
         $renderer = new DocumentRenderer($pdo);
         $pdfGenerator = new DocumentPDFGenerator($pdo, $renderer);
-        $pdfPath = $pdfGenerator->generateAndStore($dbId);  // Verwende Database ID!
+        $pdfPath = $pdfGenerator->generateAndStore($dbId);
         error_log("PDF erfolgreich generiert: $pdfPath");
     } catch (Exception $e) {
         error_log("PDF-Generierung fehlgeschlagen für Dokument-DB-ID {$dbId}: " . $e->getMessage());
-        // Dokument wurde trotzdem erstellt, nur PDF fehlt
     }
 
     // Lade Template-Infos für Log-Eintrag
     $template = $manager->getTemplate($input['template_id']);
 
-    // Erstelle Log-Eintrag mit Link zum PDF (ohne Bindestriche im Dateinamen!)
+    // Erstelle Log-Eintrag mit Link zum PDF
     $logStmt = $pdo->prepare("
         INSERT INTO intra_mitarbeiter_log 
         (profilid, type, content, paneluser, datetime) 
         VALUES (?, 7, ?, ?, NOW())
     ");
 
-    // Dateiname ohne Bindestriche für PDF-Link
-    $pdfFilename = str_replace('-', '', $documentId) . '.pdf';
+    $pdfFilename = $documentId . '.pdf';
     $pdfLink = BASE_PATH . 'storage/documents/' . $pdfFilename;
 
     $logContent = "Dokument erstellt: <a href='{$pdfLink}' target='_blank'>" .
@@ -106,6 +110,9 @@ try {
         'created_by' => $_SESSION['discordtag'] ?? null
     ]);
 
+    // Clear buffer before sending JSON
+    ob_clean();
+
     echo json_encode([
         'success' => true,
         'db_id' => $dbId,
@@ -113,12 +120,18 @@ try {
         'pdf_url' => $pdfLink,
         'message' => 'Dokument erfolgreich erstellt'
     ]);
+
+    ob_end_flush();
+    exit;
 } catch (Exception $e) {
+    ob_clean();
     http_response_code(400);
     echo json_encode([
         'success' => false,
         'error' => $e->getMessage()
     ]);
+    ob_end_flush();
+    exit;
 }
 
 function logAction($pdo, $action, $data)
@@ -126,14 +139,14 @@ function logAction($pdo, $action, $data)
     try {
         $stmt = $pdo->prepare("
             INSERT INTO intra_audit_log 
-            (user, action, data, created_at) 
-            VALUES (:user_id, :action, :data, NOW())
+            (user, action, details, timestamp) 
+            VALUES (:user_id, :action, :details, CURRENT_TIMESTAMP)
         ");
 
         $stmt->execute([
-            'user_id' => $_SESSION['userid'] ?? null,
+            'user_id' => $_SESSION['userid'] ?? 0,
             'action' => $action,
-            'data' => json_encode($data)
+            'details' => json_encode($data)
         ]);
     } catch (Exception $e) {
         error_log("Audit Log Fehler: " . $e->getMessage());

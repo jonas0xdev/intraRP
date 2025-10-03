@@ -506,7 +506,6 @@ if (isset($_POST['new'])) {
                                 }
                                 ?>
                                 <div class="w-100 text-center">
-                                    <i class="las la-user-circle" style="font-size:94px"></i>
                                     <?php if (!isset($_GET['edit']) || !Permissions::check(['admin', 'personnel.edit'])) { ?>
                                         <p class="mt-3">
                                             <?php if ($row['geschlecht'] == 0) {

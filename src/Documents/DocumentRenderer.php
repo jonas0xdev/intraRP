@@ -199,6 +199,7 @@ class DocumentRenderer
             'ausstellungsdatum' => date("d.m.Y", strtotime($doc['ausstellungsdatum'])),
             'ausstelldatum' => date("d.m.Y", strtotime($doc['ausstellungsdatum'])),
             'wappen_base64' => $this->getImageAsBase64(__DIR__ . '/../../assets/img/wappen_small.png'),
+            'logo_base64' => $this->getImageAsBase64(__DIR__ . '/../../assets/img/schrift_fw_schwarz.png'),
             'BASE_PATH' => BASE_PATH,
             'SYSTEM_NAME' => SYSTEM_NAME,
             'SYSTEM_COLOR' => SYSTEM_COLOR ?? '#000000',
