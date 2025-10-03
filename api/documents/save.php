@@ -6,6 +6,7 @@ require_once __DIR__ . '/../../src/Documents/DocumentTemplateManager.php';
 
 use App\Documents\DocumentTemplateManager;
 use App\Auth\Permissions;
+use App\Helpers\Flash;
 
 header('Content-Type: application/json');
 
@@ -19,7 +20,18 @@ try {
 
     $manager = new DocumentTemplateManager($pdo);
 
-    if (isset($input['id']) && $input['id']) {
+    $isUpdate = isset($input['id']) && $input['id'];
+    $fieldsChanged = false;
+
+    if ($isUpdate) {
+        // Prüfe ob Felder hinzugefügt oder geändert wurden
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM intra_dokument_template_fields WHERE template_id = ?");
+        $stmt->execute([$input['id']]);
+        $oldFieldCount = $stmt->fetchColumn();
+        $newFieldCount = count($input['fields']);
+
+        $fieldsChanged = ($newFieldCount !== $oldFieldCount);
+
         $manager->updateTemplate($input['id'], [
             'name' => $input['name'],
             'category' => $input['category'],
@@ -56,17 +68,35 @@ try {
     $stmt->execute([json_encode($config), $templateId]);
 
     // Erstelle Template-Datei NUR wenn sie noch nicht existiert
+    $templateFile = $input['template_file'] ?? strtolower(str_replace(' ', '_', $input['name'])) . '.html.twig';
     $templateCreated = createTemplateFile($templateId, $input);
+
+    // Setze passende Flash-Nachricht
+    if ($templateCreated) {
+        Flash::success('Template erfolgreich erstellt');
+    } elseif ($fieldsChanged) {
+        Flash::warning(
+            'Template wurde aktualisiert, aber die Felder wurden geändert.<br><br>' .
+                '<strong>Wichtig:</strong> Die Template-Datei <code>' . htmlspecialchars($templateFile) . '</code> wurde nicht automatisch aktualisiert.<br><br>' .
+                '<strong>Optionen:</strong><br>' .
+                '<ul style="margin: 8px 0; padding-left: 20px;">' .
+                '<li>Löschen Sie die Datei <code>dokumente/templates/' . htmlspecialchars($templateFile) . '</code> und speichern Sie erneut, um sie automatisch zu generieren</li>' .
+                '<li>Oder passen Sie die bestehende Datei manuell an die neuen Felder an</li>' .
+                '</ul>',
+            'Template aktualisiert - Aktion erforderlich!'
+        );
+    } else {
+        Flash::success('Template erfolgreich aktualisiert');
+    }
 
     echo json_encode([
         'success' => true,
         'id' => $templateId,
         'template_created' => $templateCreated,
-        'message' => $templateCreated
-            ? 'Template erfolgreich erstellt'
-            : 'Template aktualisiert (bestehende .twig-Datei wurde nicht überschrieben)'
+        'fields_changed' => $fieldsChanged && !$templateCreated
     ]);
 } catch (Exception $e) {
+    Flash::error($e->getMessage());
     echo json_encode(['success' => false, 'error' => $e->getMessage()]);
 }
 

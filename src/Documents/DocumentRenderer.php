@@ -31,11 +31,11 @@ class DocumentRenderer
     public function renderDocument(int $docId): string
     {
         $stmt = $this->pdo->prepare("
-        SELECT d.*, t.template_file, t.is_system
-        FROM intra_mitarbeiter_dokumente d
-        LEFT JOIN intra_dokument_templates t ON d.template_id = t.id
-        WHERE d.docid = :docid
-    ");
+            SELECT d.*, t.template_file, t.is_system
+            FROM intra_mitarbeiter_dokumente d
+            LEFT JOIN intra_dokument_templates t ON d.template_id = t.id
+            WHERE d.docid = :docid
+        ");
         $stmt->execute(['docid' => $docId]);
         $doc = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -55,9 +55,18 @@ class DocumentRenderer
         $customData = json_decode($doc['custom_data'], true);
         $issuer = $this->getIssuerData($doc['ausstellerid']);
 
-        $stmt = $this->pdo->prepare("SELECT config FROM intra_dokument_templates WHERE id = ?");
+        // Lade Template-Felder und Config
+        $stmt = $this->pdo->prepare("
+            SELECT tf.*, t.config 
+            FROM intra_dokument_template_fields tf
+            JOIN intra_dokument_templates t ON tf.template_id = t.id
+            WHERE tf.template_id = ?
+            ORDER BY tf.sort_order
+        ");
         $stmt->execute([$doc['template_id']]);
-        $templateConfig = json_decode($stmt->fetchColumn(), true) ?? [];
+        $templateFields = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $templateConfig = json_decode($templateFields[0]['config'] ?? '{}', true);
 
         // Anrede-Logik
         $anrede = (int)($doc['anrede'] ?? 0);
@@ -91,96 +100,56 @@ class DocumentRenderer
             default => 'ihm/ihr'
         };
 
+        // Dynamische Verarbeitung aller Felder
+        $processedData = [];
+
+        foreach ($templateFields as $field) {
+            $fieldName = $field['field_name'];
+            $fieldValue = $customData[$fieldName] ?? null;
+
+            // Wenn es ein geschlechtsspezifisches Feld ist und einen Wert hat
+            if ($field['gender_specific'] && $fieldValue !== null && $fieldValue !== '') {
+                $options = $this->getFieldOptions($field['field_type'], $field['field_options']);
+                $processedData[$fieldName] = $this->resolveGenderSpecificValue($options, $fieldValue, $anrede);
+
+                // Erstelle zusätzlich eine "_text" Variable für bessere Lesbarkeit
+                $processedData[$fieldName . '_text'] = $processedData[$fieldName];
+            } else {
+                $processedData[$fieldName] = $fieldValue;
+            }
+        }
+
+        // Legacy-Felder für Rückwärtskompatibilität
+        // Diese können später entfernt werden, wenn alle Templates migriert sind
+        $dienstgradText = '';
+        if (isset($customData['erhalter_rang']) && $customData['erhalter_rang']) {
+            $options = $this->getFieldOptions('db_dg', null);
+            $dienstgradText = $this->resolveGenderSpecificValue($options, $customData['erhalter_rang'], $anrede);
+        }
+
+        $dienstgrad = '';
+        if (isset($customData['erhalter_rang_rd']) && $customData['erhalter_rang_rd']) {
+            $options = $this->getFieldOptions('db_rdq', null);
+            $dienstgrad = $this->resolveGenderSpecificValue($options, $customData['erhalter_rang_rd'], $anrede);
+        }
+
+        $qualifikation = '';
+        if (isset($customData['erhalter_quali']) && $customData['erhalter_quali'] !== null) {
+            // Hole Optionen aus Template-Config
+            $qualiConfig = $templateConfig['fields']['erhalter_quali'] ?? null;
+            if ($qualiConfig && isset($qualiConfig['options'])) {
+                $qualifikation = $this->resolveGenderSpecificValue(
+                    $qualiConfig['options'],
+                    $customData['erhalter_quali'],
+                    $anrede
+                );
+            }
+        }
+
         // Suspend-String
         $suspendstring = 'bis auf unbestimmt';
         if (isset($customData['suspendtime']) && $customData['suspendtime'] && $customData['suspendtime'] != '0000-00-00') {
             $suspendstring = 'bis zum ' . date('d.m.Y', strtotime($customData['suspendtime']));
-        }
-
-        // Dienstgrad-Text (für Beförderungs-/Ernennungsurkunden)
-        $dienstgradText = '';
-        if (isset($customData['erhalter_rang'])) {
-            $stmt = $this->pdo->prepare("SELECT name, name_m, name_w FROM intra_mitarbeiter_dienstgrade WHERE id = ?");
-            $stmt->execute([$customData['erhalter_rang']]);
-            $dg = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if ($dg) {
-                if ($anrede == 0) {
-                    $dienstgradText = $dg['name_m'];
-                } elseif ($anrede == 1) {
-                    $dienstgradText = $dg['name_w'];
-                } else {
-                    $dienstgradText = $dg['name'];
-                }
-            }
-        }
-
-        // Rettungsdienstgrad (für Ausbildungszertifikate)
-        $dienstgrad = '';
-        if (isset($customData['erhalter_rang_rd'])) {
-            $stmt = $this->pdo->prepare("SELECT id, name, name_m, name_w FROM intra_mitarbeiter_rdquali WHERE id = ?");
-            $stmt->execute([$customData['erhalter_rang_rd']]);
-            $rdg = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if ($rdg) {
-                if ($anrede == 1) {
-                    $dienstgrad = $rdg['name_w'];
-                } elseif ($anrede == 0) {
-                    $dienstgrad = $rdg['name_m'];
-                } else {
-                    $dienstgrad = $rdg['name'];
-                }
-            }
-        }
-
-        // Qualifikation (für Lehrgangszertifikate)
-        $qualifikation = '';
-        if (isset($customData['erhalter_quali'])) {
-            $qualis = [
-                0 => 'Brandmeister/-in',
-                1 => 'Gruppenführer/-in',
-                2 => 'Zugführer/-in',
-                3 => 'Leitstellen-Disponent/-in',
-                4 => 'Sonderfahrzeug-Maschinist/-in',
-                8 => 'HEMS-TC',
-                9 => 'Luftrettungspilot/-in',
-                5 => 'Helfergrundmodul (SEG)',
-                6 => 'SEG-Sanitäter/-in',
-                7 => 'Gruppenführer/-in-BevS',
-            ];
-            $qualisF = [
-                0 => 'Brandmeisterin',
-                1 => 'Gruppenführerin',
-                2 => 'Zugführerin',
-                3 => 'Leitstellen-Disponentin',
-                4 => 'Sonderfahrzeug-Maschinistin',
-                8 => 'HEMS-TC',
-                9 => 'Luftrettungspilotin',
-                5 => 'Helfergrundmodul (SEG)',
-                6 => 'SEG-Sanitäterin',
-                7 => 'Gruppenführerin-BevS',
-            ];
-            $qualisM = [
-                0 => 'Brandmeister',
-                1 => 'Gruppenführer',
-                2 => 'Zugführer',
-                3 => 'Leitstellen-Disponent',
-                4 => 'Sonderfahrzeug-Maschinist',
-                8 => 'HEMS-TC',
-                9 => 'Luftrettungspilot',
-                5 => 'Helfergrundmodul (SEG)',
-                6 => 'SEG-Sanitäter',
-                7 => 'Gruppenführer-BevS',
-            ];
-
-            $dq = $customData['erhalter_quali'];
-            if ($anrede == 1) {
-                $qualifikation = $qualisF[$dq] ?? '';
-            } elseif ($anrede == 0) {
-                $qualifikation = $qualisM[$dq] ?? '';
-            } else {
-                $qualifikation = $qualis[$dq] ?? '';
-            }
         }
 
         // Typtext basierend auf Template
@@ -191,11 +160,11 @@ class DocumentRenderer
         };
 
         // Bereite Daten vor
-        $data = array_merge($customData, [
-            'dokument' => $doc, // Für Zertifikate
+        $data = array_merge($customData, $processedData, [
+            'dokument' => $doc,
             'doc' => $doc,
             'issuer' => $issuer,
-            'aussteller' => [ // Für Zertifikate
+            'aussteller' => [
                 'fullname' => $issuer['fullname'] ?? '',
                 'lastname' => $issuer['lastname'] ?? '',
                 'dienstgrad' => $issuer['dienstgrad_text'] ?? '',
@@ -210,15 +179,15 @@ class DocumentRenderer
             'ihm_ihr' => $ihm_ihr,
             'suspendstring' => $suspendstring,
             'dienstgrad_text' => $dienstgradText,
-            'dienstgrad' => $dienstgrad, // Für Ausbildungszertifikat
-            'qualifikation' => $qualifikation, // Für Lehrgangszertifikate
+            'dienstgrad' => $dienstgrad,
+            'qualifikation' => $qualifikation,
             'typtext' => $typtext,
             'erhalter' => $doc['erhalter'],
             'erhalter_gebdat_formatted' => $this->formatGermanDate($doc['erhalter_gebdat']),
-            'formatted_date' => $this->formatGermanDate($doc['erhalter_gebdat']), // Für Zertifikate
+            'formatted_date' => $this->formatGermanDate($doc['erhalter_gebdat']),
             'inhalt' => $customData['inhalt'] ?? '',
             'ausstellungsdatum' => date("d.m.Y", strtotime($doc['ausstellungsdatum'])),
-            'ausstelldatum' => date("d.m.Y", strtotime($doc['ausstellungsdatum'])), // Für Zertifikate
+            'ausstelldatum' => date("d.m.Y", strtotime($doc['ausstellungsdatum'])),
             'BASE_PATH' => BASE_PATH,
             'SYSTEM_NAME' => SYSTEM_NAME,
             'SYSTEM_COLOR' => SYSTEM_COLOR ?? '#000000',
@@ -233,6 +202,56 @@ class DocumentRenderer
 
         $templateFile = $doc['template_file'] ?? 'default.html.twig';
         return $this->twig->render($templateFile, $data);
+    }
+
+    /**
+     * Löst geschlechtsspezifische Werte auf
+     */
+    private function resolveGenderSpecificValue(array $options, $value, int $gender): string
+    {
+        foreach ($options as $option) {
+            if ($option['value'] == $value) {
+                if ($gender === 1 && isset($option['label_w'])) {
+                    return $option['label_w'];
+                } elseif ($gender === 0 && isset($option['label_m'])) {
+                    return $option['label_m'];
+                }
+                return $option['label'] ?? '';
+            }
+        }
+        return '';
+    }
+
+    /**
+     * Lädt Optionen für ein Feld basierend auf dessen Typ
+     */
+    private function getFieldOptions(string $fieldType, ?string $fieldOptions): array
+    {
+        switch ($fieldType) {
+            case 'db_dg':
+                $stmt = $this->pdo->query("
+                    SELECT id as value, name as label, name_m as label_m, name_w as label_w 
+                    FROM intra_mitarbeiter_dienstgrade 
+                    WHERE archive = 0 
+                    ORDER BY priority ASC
+                ");
+                return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            case 'db_rdq':
+                $stmt = $this->pdo->query("
+                    SELECT id as value, name as label, name_m as label_m, name_w as label_w 
+                    FROM intra_mitarbeiter_rdquali 
+                    WHERE none = 0 
+                    ORDER BY priority ASC
+                ");
+                return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            case 'select':
+                return $fieldOptions ? json_decode($fieldOptions, true) : [];
+
+            default:
+                return [];
+        }
     }
 
     private function formatGermanDate(?string $date): string
@@ -331,36 +350,5 @@ class DocumentRenderer
         }
 
         return $data ?? [];
-    }
-
-    /**
-     * Erstellt PDF aus HTML
-     */
-    public function generatePDF(int $docId, ?string $outputPath = null): string
-    {
-        $html = $this->renderDocument($docId);
-
-        // Hier kannst du eine PDF-Library wie TCPDF oder mPDF verwenden
-        // Beispiel mit mPDF:
-
-        // $mpdf = new \Mpdf\Mpdf([
-        //     'format' => 'A4',
-        //     'margin_left' => 15,
-        //     'margin_right' => 15,
-        //     'margin_top' => 16,
-        //     'margin_bottom' => 16,
-        // ]);
-        // 
-        // $mpdf->WriteHTML($html);
-        // 
-        // if ($outputPath) {
-        //     $mpdf->Output($outputPath, 'F');
-        //     return $outputPath;
-        // }
-        // 
-        // return $mpdf->Output('', 'S'); // Als String zurückgeben
-
-        // Für jetzt: Gib nur HTML zurück
-        return $html;
     }
 }

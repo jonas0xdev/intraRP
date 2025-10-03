@@ -40,23 +40,6 @@ try {
             ADD COLUMN IF NOT EXISTS `custom_data` TEXT DEFAULT NULL";
     $pdo->exec($sql);
 
-    // Foreign Key nur hinzufügen wenn noch nicht existiert
-    $checkFK = $pdo->query("
-        SELECT COUNT(*) as cnt 
-        FROM information_schema.TABLE_CONSTRAINTS 
-        WHERE CONSTRAINT_SCHEMA = DATABASE() 
-        AND TABLE_NAME = 'intra_mitarbeiter_dokumente' 
-        AND CONSTRAINT_NAME = 'FK_dokumente_templates'
-    ")->fetch();
-
-    if ($checkFK['cnt'] == 0) {
-        $pdo->exec("
-            ALTER TABLE `intra_mitarbeiter_dokumente` 
-            ADD CONSTRAINT `FK_dokumente_templates` 
-            FOREIGN KEY (`template_id`) REFERENCES `intra_dokument_templates`(`id`)
-        ");
-    }
-
     echo "✓ Template-Tabellen erstellt\n";
 } catch (PDOException $e) {
     echo "Fehler: " . $e->getMessage() . "\n";

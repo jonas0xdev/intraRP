@@ -65,6 +65,7 @@ $rdQualis = $rdQualisStmt->fetchAll(PDO::FETCH_ASSOC);
             padding: 1rem;
             margin-bottom: 1rem;
             position: relative;
+            transition: transform 0.2s ease, background-color 0.2s ease;
         }
 
         .field-item .btn-remove {
@@ -78,9 +79,14 @@ $rdQualis = $rdQualisStmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
         .drag-handle {
-            cursor: move;
+            cursor: grab;
             color: #6c757d;
             margin-right: 0.5rem;
+            user-select: none;
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
         }
 
         .template-preview {
@@ -92,6 +98,8 @@ $rdQualis = $rdQualisStmt->fetchAll(PDO::FETCH_ASSOC);
         .option-item {
             padding: 1rem;
             border-radius: 0.375rem;
+            border: 1px solid #495057;
+            background-color: rgba(0, 0, 0, 0.2);
         }
 
         .sortable-ghost {
@@ -103,23 +111,15 @@ $rdQualis = $rdQualisStmt->fetchAll(PDO::FETCH_ASSOC);
             opacity: 0.8;
         }
 
-        .drag-handle {
-            cursor: grab;
-            color: #6c757d;
-            margin-right: 0.5rem;
-            user-select: none;
+        .gender-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
         }
 
-        .drag-handle:active {
-            cursor: grabbing;
-        }
-
-        .field-item {
-            transition: transform 0.2s ease;
-        }
-
-        .field-item:hover {
-            background-color: rgba(255, 255, 255, 0.05);
+        .option-item .gender-inputs {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid #495057;
         }
     </style>
 </head>
@@ -129,6 +129,10 @@ $rdQualis = $rdQualisStmt->fetchAll(PDO::FETCH_ASSOC);
     <div class="container-full position-relative" id="mainpageContainer">
         <div class="container my-5">
             <h1 class="mb-4">Dokumenten-Templates verwalten</h1>
+
+            <?php
+            Flash::render();
+            ?>
 
             <div class="row">
                 <div class="col-md-8">
@@ -273,7 +277,7 @@ $rdQualis = $rdQualisStmt->fetchAll(PDO::FETCH_ASSOC);
                         <div id="optionsContainer" class="mb-3" style="display: none;">
                             <label class="form-label">Auswahloptionen</label>
                             <div id="optionsList"></div>
-                            <button type="button" class="btn btn-sm btn-secondary" id="addOptionBtn">
+                            <button type="button" class="btn btn-sm btn-secondary mt-2" id="addOptionBtn">
                                 + Option hinzufügen
                             </button>
                         </div>
@@ -346,6 +350,8 @@ $rdQualis = $rdQualisStmt->fetchAll(PDO::FETCH_ASSOC);
                 optionsContainer.style.display = 'none';
                 genderContainer.style.display = 'none';
                 dbFieldInfo.style.display = 'block';
+                // DB-Felder sind automatisch geschlechtsspezifisch
+                document.getElementById('genderSpecific').checked = true;
             } else {
                 optionsContainer.style.display = 'none';
                 genderContainer.style.display = 'none';
@@ -362,36 +368,39 @@ $rdQualis = $rdQualisStmt->fetchAll(PDO::FETCH_ASSOC);
             });
         }
 
-        function addOption(value = '', label = '', label_m = '', label_w = '', hasGender = false) {
+        function addOption(value = '', label = '', label_m = '', label_w = '') {
             const optionsList = document.getElementById('optionsList');
             const isGenderSpecific = document.getElementById('genderSpecific').checked;
 
             const optionDiv = document.createElement('div');
             optionDiv.className = 'option-item mb-3';
             optionDiv.innerHTML = `
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <strong>Option</strong>
-                <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.option-item').remove()">Löschen</button>
-            </div>
-            <div class="mb-2">
-                <label class="form-label small">Wert (z.B. 0, 1, 2)</label>
-                <input type="text" class="form-control form-control-sm" value="${value}" data-option-value>
-            </div>
-            <div class="mb-2">
-                <label class="form-label small">Label ${isGenderSpecific ? 'Neutral/Allgemein' : ''}</label>
-                <input type="text" class="form-control form-control-sm" placeholder="z.B. Brandmeister${isGenderSpecific ? '/-in' : ''}" value="${label}" data-option-label>
-            </div>
-            <div class="gender-inputs row" style="display: ${isGenderSpecific ? 'block' : 'none'}">
-                <div class="col-6">
-                    <label class="form-label small">Label Männlich</label>
-                    <input type="text" class="form-control form-control-sm" placeholder="z.B. Brandmeister" value="${label_m}" data-option-label-m>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <strong>Option</strong>
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.option-item').remove()">Löschen</button>
                 </div>
-                <div class="col-6">
-                    <label class="form-label small">Label Weiblich</label>
-                    <input type="text" class="form-control form-control-sm" placeholder="z.B. Brandmeisterin" value="${label_w}" data-option-label-w>
+                <div class="mb-2">
+                    <label class="form-label small">Wert (z.B. 0, 1, 2)</label>
+                    <input type="text" class="form-control form-control-sm" value="${value}" data-option-value required>
                 </div>
-            </div>
-        `;
+                <div class="mb-2">
+                    <label class="form-label small">Label ${isGenderSpecific ? '(Neutral/Allgemein)' : ''}</label>
+                    <input type="text" class="form-control form-control-sm" placeholder="z.B. Brandmeister${isGenderSpecific ? '/-in' : ''}" value="${label}" data-option-label required>
+                </div>
+                <div class="gender-inputs" style="display: ${isGenderSpecific ? 'block' : 'none'}">
+                    <div class="row">
+                        <div class="col-6 mb-2">
+                            <label class="form-label small">Label Männlich <span class="gender-badge badge bg-primary">♂</span></label>
+                            <input type="text" class="form-control form-control-sm" placeholder="z.B. Brandmeister" value="${label_m}" data-option-label-m>
+                        </div>
+                        <div class="col-6 mb-2">
+                            <label class="form-label small">Label Weiblich <span class="gender-badge badge bg-danger">♀</span></label>
+                            <input type="text" class="form-control form-control-sm" placeholder="z.B. Brandmeisterin" value="${label_w}" data-option-label-w>
+                        </div>
+                    </div>
+                    <small class="text-muted">Wenn leer, wird das allgemeine Label verwendet</small>
+                </div>
+            `;
             optionsList.appendChild(optionDiv);
         }
 
@@ -400,7 +409,7 @@ $rdQualis = $rdQualisStmt->fetchAll(PDO::FETCH_ASSOC);
             const fieldName = document.getElementById('fieldName').value;
             const fieldType = document.getElementById('fieldType').value;
             const fieldRequired = document.getElementById('fieldRequired').checked;
-            const genderSpecific = document.getElementById('genderSpecific').checked;
+            const genderSpecific = document.getElementById('genderSpecific').checked || fieldType === 'db_dg' || fieldType === 'db_rdq';
 
             if (!fieldLabel || !fieldName) {
                 alert('Bitte alle Pflichtfelder ausfüllen');
@@ -427,6 +436,12 @@ $rdQualis = $rdQualisStmt->fetchAll(PDO::FETCH_ASSOC);
             } else if (fieldType === 'select') {
                 options = [];
                 const optionContainers = document.querySelectorAll('#optionsList .option-item');
+
+                if (optionContainers.length === 0) {
+                    alert('Bitte mindestens eine Auswahloption hinzufügen');
+                    return;
+                }
+
                 optionContainers.forEach(container => {
                     const value = container.querySelector('[data-option-value]').value;
                     const label = container.querySelector('[data-option-label]').value;
@@ -454,7 +469,7 @@ $rdQualis = $rdQualisStmt->fetchAll(PDO::FETCH_ASSOC);
                 field_name: fieldName,
                 field_type: fieldType,
                 is_required: fieldRequired,
-                gender_specific: genderSpecific || (fieldType === 'db_dg' || fieldType === 'db_rdq'),
+                gender_specific: genderSpecific,
                 field_options: options,
                 sort_order: editingFieldIndex !== null ? fields[editingFieldIndex].sort_order : fields.length
             };
@@ -481,24 +496,35 @@ $rdQualis = $rdQualisStmt->fetchAll(PDO::FETCH_ASSOC);
             fields.forEach((field, index) => {
                 const fieldDiv = document.createElement('div');
                 fieldDiv.className = 'field-item';
-                fieldDiv.dataset.index = index; // Wichtig für die Sortierung
+                fieldDiv.dataset.index = index;
+
+                let badges = '';
+                if (field.is_required) {
+                    badges += '<span class="badge bg-danger ms-2">Pflichtfeld</span>';
+                }
+                if (field.gender_specific) {
+                    badges += '<span class="badge bg-info ms-2">Geschlechtsspezifisch</span>';
+                }
+                if (field.field_type === 'db_dg' || field.field_type === 'db_rdq') {
+                    badges += '<span class="badge bg-success ms-2">DB-Feld</span>';
+                }
+
                 fieldDiv.innerHTML = `
-            <button type="button" class="btn btn-sm btn-danger btn-remove" onclick="removeField(${index})">×</button>
-            <div class="d-flex align-items-center mb-2">
-                <span class="drag-handle" style="cursor: grab;">☰</span>
-                <strong>${field.field_label}</strong>
-                ${field.is_required ? '<span class="badge bg-danger ms-2">Pflichtfeld</span>' : ''}
-                ${field.gender_specific ? '<span class="badge bg-info ms-2">Geschlechtsspezifisch</span>' : ''}
-                ${(field.field_type === 'db_dg' || field.field_type === 'db_rdq') ? '<span class="badge bg-success ms-2">DB-Feld</span>' : ''}
-            </div>
-            <div class="text-muted small">
-                Typ: ${getFieldTypeLabel(field.field_type)} | 
-                Name: ${field.field_name}
-            </div>
-            <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="editField(${index})">
-                Bearbeiten
-            </button>
-        `;
+                    <button type="button" class="btn btn-sm btn-danger btn-remove" onclick="removeField(${index})">×</button>
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="drag-handle">☰</span>
+                        <strong>${field.field_label}</strong>
+                        ${badges}
+                    </div>
+                    <div class="text-muted small">
+                        Typ: ${getFieldTypeLabel(field.field_type)} | 
+                        Name: ${field.field_name}
+                        ${field.field_options && field.field_options.length > 0 ? ` | ${field.field_options.length} Optionen` : ''}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="editField(${index})">
+                        Bearbeiten
+                    </button>
+                `;
                 fieldList.appendChild(fieldDiv);
             });
 
@@ -553,8 +579,7 @@ $rdQualis = $rdQualisStmt->fetchAll(PDO::FETCH_ASSOC);
                         opt.value,
                         opt.label,
                         opt.label_m || opt.label,
-                        opt.label_w || opt.label,
-                        field.gender_specific
+                        opt.label_w || opt.label
                     );
                 });
             }
@@ -614,9 +639,7 @@ $rdQualis = $rdQualisStmt->fetchAll(PDO::FETCH_ASSOC);
                 const result = await response.json();
 
                 if (result.success) {
-                    alert('Template erfolgreich gespeichert!');
-                    loadTemplates();
-                    resetForm();
+                    window.location.reload();
                 } else {
                     alert('Fehler beim Speichern: ' + result.error);
                 }
@@ -650,19 +673,19 @@ $rdQualis = $rdQualisStmt->fetchAll(PDO::FETCH_ASSOC);
                 item.href = '#';
                 item.className = 'list-group-item list-group-item-action';
                 item.innerHTML = `
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <strong>${template.name}</strong>
-                        <br>
-                        <small class="text-muted">${template.category}</small>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>${template.name}</strong>
+                            <br>
+                            <small class="text-muted">${template.category}</small>
+                        </div>
+                        <div>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteTemplate(${template.id}, event)">
+                                Löschen
+                            </button>
+                        </div>
                     </div>
-                    <div>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteTemplate(${template.id}, event)">
-                            Löschen
-                        </button>
-                    </div>
-                </div>
-            `;
+                `;
                 item.addEventListener('click', (e) => {
                     if (e.target.tagName !== 'BUTTON') {
                         loadTemplate(template.id);
@@ -725,17 +748,23 @@ $rdQualis = $rdQualisStmt->fetchAll(PDO::FETCH_ASSOC);
             const preview = document.getElementById('previewContent');
             preview.innerHTML = '<h5>' + (document.getElementById('templateName').value || 'Unbenanntes Template') + '</h5>';
 
-            fields.forEach(field => {
-                preview.innerHTML += renderFieldPreview(field);
-            });
+            if (fields.length === 0) {
+                preview.innerHTML += '<p class="text-muted">Keine Felder definiert</p>';
+            } else {
+                fields.forEach(field => {
+                    preview.innerHTML += renderFieldPreview(field);
+                });
+            }
 
             previewModal.show();
         }
 
         function renderFieldPreview(field) {
             const required = field.is_required ? '<span class="text-danger">*</span>' : '';
+            const genderBadge = field.gender_specific ? ' <span class="badge bg-info">Geschlechtsspezifisch</span>' : '';
+
             let html = `<div class="mb-3">
-            <label class="form-label">${field.field_label} ${required}</label>`;
+                <label class="form-label">${field.field_label} ${required}${genderBadge}</label>`;
 
             switch (field.field_type) {
                 case 'text':
@@ -746,7 +775,7 @@ $rdQualis = $rdQualisStmt->fetchAll(PDO::FETCH_ASSOC);
                     break;
                 case 'richtext':
                     html += `<textarea class="form-control" rows="5" ${field.is_required ? 'required' : ''}></textarea>
-                         <small class="text-muted">Rich-Text Editor würde hier angezeigt</small>`;
+                             <small class="text-muted">Rich-Text Editor würde hier angezeigt</small>`;
                     break;
                 case 'date':
                     html += `<input type="date" class="form-control" ${field.is_required ? 'required' : ''}>`;
@@ -758,15 +787,22 @@ $rdQualis = $rdQualisStmt->fetchAll(PDO::FETCH_ASSOC);
                 case 'db_dg':
                 case 'db_rdq':
                     html += `<select class="form-select" ${field.is_required ? 'required' : ''}>
-                    <option value="">Bitte wählen</option>`;
+                        <option value="">Bitte wählen</option>`;
                     if (field.field_options) {
                         field.field_options.forEach(opt => {
-                            html += `<option value="${opt.value}">${opt.label}</option>`;
+                            let optionLabel = opt.label;
+                            if (field.gender_specific && (opt.label_m || opt.label_w)) {
+                                optionLabel += ` (♂: ${opt.label_m || opt.label}, ♀: ${opt.label_w || opt.label})`;
+                            }
+                            html += `<option value="${opt.value}">${optionLabel}</option>`;
                         });
                     }
                     html += `</select>`;
                     if (field.field_type !== 'select') {
                         html += `<small class="text-muted">Daten aus Datenbank</small>`;
+                    }
+                    if (field.gender_specific) {
+                        html += `<small class="text-muted d-block mt-1">Die Anzeige passt sich automatisch an das Geschlecht an</small>`;
                     }
                     break;
             }
