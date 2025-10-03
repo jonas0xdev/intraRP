@@ -1,0 +1,15 @@
+# Erlaube direkten Zugriff auf PDFs
+
+<FilesMatch "\.pdf$">
+Allow from all
+</FilesMatch>
+
+## Verhindere Verzeichnis-Listing
+
+Options -Indexes
+
+## Verhindere Zugriff auf andere Dateien
+
+<FilesMatch "(?<!\.pdf)$">
+Deny from all
+</FilesMatch>

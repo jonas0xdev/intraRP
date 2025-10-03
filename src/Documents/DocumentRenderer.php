@@ -34,10 +34,20 @@ class DocumentRenderer
             SELECT d.*, t.template_file, t.is_system
             FROM intra_mitarbeiter_dokumente d
             LEFT JOIN intra_dokument_templates t ON d.template_id = t.id
-            WHERE d.docid = :docid
+            WHERE d.id = :docid
         ");
         $stmt->execute(['docid' => $docId]);
         $doc = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // DEBUG
+        error_log("=== DEBUG renderDocument ===");
+        error_log("docId: " . $docId);
+        error_log("doc gefunden: " . ($doc ? 'JA' : 'NEIN'));
+        if ($doc) {
+            error_log("template_id: " . ($doc['template_id'] ?? 'NULL'));
+            error_log("template_file: " . ($doc['template_file'] ?? 'NULL'));
+        }
+        error_log("=========================");
 
         if (!$doc || !$doc['template_id']) {
             throw new \Exception("Dokument oder Template nicht gefunden");
@@ -188,6 +198,8 @@ class DocumentRenderer
             'inhalt' => $customData['inhalt'] ?? '',
             'ausstellungsdatum' => date("d.m.Y", strtotime($doc['ausstellungsdatum'])),
             'ausstelldatum' => date("d.m.Y", strtotime($doc['ausstellungsdatum'])),
+            'wappen_base64' => $this->getImageAsBase64(__DIR__ . '/../../assets/img/wappen_small.png'),
+            'logo_base64' => $this->getImageAsBase64(__DIR__ . '/../../assets/img/schrift_fw_schwarz.png'),
             'BASE_PATH' => BASE_PATH,
             'SYSTEM_NAME' => SYSTEM_NAME,
             'SYSTEM_COLOR' => SYSTEM_COLOR ?? '#000000',
@@ -201,6 +213,7 @@ class DocumentRenderer
         ]);
 
         $templateFile = $doc['template_file'] ?? 'default.html.twig';
+        $data['BASE_PATH_ABSOLUTE'] = 'file://' . realpath(__DIR__ . '/../../') . '/';
         return $this->twig->render($templateFile, $data);
     }
 
@@ -220,6 +233,29 @@ class DocumentRenderer
             }
         }
         return '';
+    }
+
+    private function getImageAsBase64(string $path): ?string
+    {
+        if (!file_exists($path)) {
+            return null;
+        }
+
+        $imageData = file_get_contents($path);
+
+        $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        $mimeTypes = [
+            'png' => 'image/png',
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'gif' => 'image/gif',
+            'svg' => 'image/svg+xml',
+        ];
+
+        $mimeType = $mimeTypes[$extension] ?? 'image/png';
+        $base64 = base64_encode($imageData);
+
+        return "data:$mimeType;base64,$base64";
     }
 
     /**
