@@ -57,7 +57,7 @@ class DocumentTemplateManager
                 ? json_encode($fieldData['field_options'])
                 : null,
             'is_required' => !empty($fieldData['is_required']) ? 1 : 0,
-            'gender_specific' => !empty($fieldData['gender_specific']) ? 1 : 0,  // NEU
+            'gender_specific' => !empty($fieldData['gender_specific']) ? 1 : 0,
             'sort_order' => $fieldData['sort_order'] ?? 0,
             'validation_rules' => isset($fieldData['validation_rules'])
                 ? json_encode($fieldData['validation_rules'])
@@ -124,10 +124,7 @@ class DocumentTemplateManager
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * Erstellt ein Dokument aus einem Template
-     */
-    public function createDocument(int $templateId, int $profileId, array $formData): int
+    public function createDocument(int $templateId, int $profileId, array $formData, ?string $docId = null): int
     {
         $template = $this->getTemplate($templateId);
 
@@ -138,8 +135,10 @@ class DocumentTemplateManager
         // Validiere Formulardaten
         $this->validateFormData($template, $formData);
 
-        // Generiere eindeutige 6-stellige docid
-        $docid = $this->generateUniqueDocId();
+        // Generiere docid falls nicht übergeben
+        if ($docId === null) {
+            $docId = DocumentIdGenerator::generate($this->pdo);
+        }
 
         $stmt = $this->pdo->prepare("
         INSERT INTO intra_mitarbeiter_dokumente 
@@ -151,7 +150,7 @@ class DocumentTemplateManager
     ");
 
         $stmt->execute([
-            'docid' => $docid,
+            'docid' => $docId,
             'profileid' => $profileId,
             'template_id' => $templateId,
             'custom_data' => json_encode($formData),
@@ -162,34 +161,7 @@ class DocumentTemplateManager
             'anrede' => $formData['anrede'] ?? null
         ]);
 
-        return $docid;
-    }
-
-    /**
-     * Generiert eine eindeutige 6-stellige Dokument-ID
-     */
-    private function generateUniqueDocId(): int
-    {
-        $maxAttempts = 100;
-        $attempt = 0;
-
-        do {
-            // Generiere zufällige 6-stellige Zahl (100000 - 999999)
-            $docid = random_int(100000, 999999);
-
-            // Prüfe ob ID bereits existiert
-            $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM intra_mitarbeiter_dokumente WHERE docid = ?");
-            $stmt->execute([$docid]);
-            $exists = $stmt->fetchColumn() > 0;
-
-            $attempt++;
-
-            if ($attempt >= $maxAttempts) {
-                throw new \Exception("Konnte keine eindeutige Dokument-ID generieren");
-            }
-        } while ($exists);
-
-        return $docid;
+        return (int) $this->pdo->lastInsertId();
     }
 
     /**
@@ -364,6 +336,7 @@ class DocumentTemplateManager
             'template_file' => $data['template_file'] ?? null
         ]);
     }
+
     /**
      * Löscht ein Template (nur wenn nicht System-Template)
      */

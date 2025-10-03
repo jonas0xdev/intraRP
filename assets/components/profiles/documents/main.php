@@ -20,7 +20,8 @@ use App\Auth\Permissions;
         pd.ausstellungsdatum, 
         pd.type, 
         pd.template_id,
-        pd.aussteller_name, 
+        pd.aussteller_name,
+        pd.pdf_path,
         u.discord_id AS user_id, 
         u.fullname, 
         u.aktenid,
@@ -50,7 +51,7 @@ use App\Auth\Permissions;
             11 => "Vorläufige Dienstenthebung",
             12 => "Dienstentfernung",
             13 => "Außerordentliche Kündigung",
-            99 => "Eigenes Dokument" // Fallback für Template-Dokumente
+            99 => "Eigenes Dokument"
         ];
 
         foreach ($dokuresult as $doks) {
@@ -63,11 +64,11 @@ use App\Auth\Permissions;
                 $docart = isset($arten[$doks['type']]) ? $arten[$doks['type']] : 'Unbekannt';
             }
 
-            $path = BASE_PATH . "assets/functions/docredir.php?docid=" . $doks['docid'];
+            // Direkter PDF-Pfad
+            $pdfPath = BASE_PATH . "storage/documents/" . $doks['docid'] . ".pdf";
 
             // Badge-Farbe bestimmen
             if ($doks['type'] == 99) {
-                // Farbe nach Template-Kategorie
                 $bg = match ($doks['template_category']) {
                     'urkunde' => 'text-bg-secondary',
                     'zertifikat' => 'text-bg-dark',
@@ -90,7 +91,8 @@ use App\Auth\Permissions;
             echo "<td>" . htmlspecialchars($doks['ersteller_name']) . "</td>";
             echo "<td>" . htmlspecialchars($austdatum) . "</td>";
             echo "<td>";
-            echo "<a href='$path' class='btn btn-sm btn-primary' target='_blank'>Ansehen</a>";
+            echo "<a href='$pdfPath' class='btn btn-sm btn-primary' target='_blank'><i class='las la-eye'></i> Ansehen</a> ";
+            // echo "<a href='$pdfPath' download class='btn btn-sm btn-success'><i class='las la-download'></i></a>";
 
             if (Permissions::check('admin')) {
                 echo " <a href='" . BASE_PATH . "admin/personal/dokument-delete.php?id={$doks['docid']}&pid=$openedID' class='btn btn-sm btn-danger'><i class='las la-trash'></i></a>";

@@ -1,10 +1,15 @@
 <?php
+error_reporting(E_ERROR | E_PARSE);
+ini_set('display_errors', 0);
+
 session_start();
-require_once __DIR__ . '/../../assets/config/config.php';
-require_once __DIR__ . '/../../assets/config/database.php';
-require_once __DIR__ . '/../../src/Documents/DocumentTemplateManager.php';
+require_once __DIR__ . '/../../../assets/config/config.php';
+require_once __DIR__ . '/../../../assets/config/database.php';
 
 use App\Documents\DocumentTemplateManager;
+use App\Documents\DocumentRenderer;
+use App\Documents\DocumentPDFGenerator;
+use App\Documents\DocumentIdGenerator;
 use App\Auth\Permissions;
 
 header('Content-Type: application/json');
@@ -30,13 +35,16 @@ try {
         }
     }
 
+    // Generiere neue 12-stellige Dokument-ID
+    $documentId = DocumentIdGenerator::generate($pdo);
+
     // Stelle sicher dass ausstellungsdatum vorhanden ist
     $ausstellungsdatum = $input['fields']['ausstellungsdatum'] ?? $input['ausstellungsdatum'] ?? date('Y-m-d');
 
     $manager = new DocumentTemplateManager($pdo);
 
-    // Erstelle Dokument
-    $docId = $manager->createDocument(
+    // Erstelle Dokument mit der generierten ID
+    $dbId = $manager->createDocument(
         $input['template_id'],
         $input['profileid'],
         array_merge(
@@ -44,23 +52,42 @@ try {
                 'erhalter' => $input['erhalter'],
                 'erhalter_gebdat' => $input['erhalter_gebdat'] ?? null,
                 'anrede' => $input['anrede'] ?? null,
-                'ausstellungsdatum' => $ausstellungsdatum
+                'ausstellungsdatum' => $ausstellungsdatum,
+                'document_id' => $documentId  // Übergebe die generierte ID
             ],
             $input['fields'] ?? []
-        )
+        ),
+        $documentId  // Übergebe auch als docid
     );
 
-    // NEU: Lade Template-Infos für Log-Eintrag
+    // PDF generieren
+    try {
+        $renderer = new DocumentRenderer($pdo);
+        $pdfGenerator = new DocumentPDFGenerator($pdo, $renderer);
+        $pdfPath = $pdfGenerator->generateAndStore($dbId);  // Verwende Database ID!
+        error_log("PDF erfolgreich generiert: $pdfPath");
+    } catch (Exception $e) {
+        error_log("PDF-Generierung fehlgeschlagen für Dokument-DB-ID {$dbId}: " . $e->getMessage());
+        // Dokument wurde trotzdem erstellt, nur PDF fehlt
+    }
+
+    // Lade Template-Infos für Log-Eintrag
     $template = $manager->getTemplate($input['template_id']);
 
-    // NEU: Erstelle Log-Eintrag
+    // Erstelle Log-Eintrag mit Link zum PDF (ohne Bindestriche im Dateinamen!)
     $logStmt = $pdo->prepare("
         INSERT INTO intra_mitarbeiter_log 
         (profilid, type, content, paneluser, datetime) 
         VALUES (?, 7, ?, ?, NOW())
     ");
 
-    $logContent = "Dokument erstellt: " . htmlspecialchars($template['name']) . " (ID: {$docId})";
+    // Dateiname ohne Bindestriche für PDF-Link
+    $pdfFilename = str_replace('-', '', $documentId) . '.pdf';
+    $pdfLink = BASE_PATH . 'storage/documents/' . $pdfFilename;
+
+    $logContent = "Dokument erstellt: <a href='{$pdfLink}' target='_blank'>" .
+        htmlspecialchars($template['name']) .
+        " (ID: {$documentId})</a>";
     $panelUser = $_SESSION['cirs_user'] ?? 'System';
 
     $logStmt->execute([
@@ -71,7 +98,8 @@ try {
 
     // Logge die Aktion im Audit-Log
     logAction($pdo, 'document_created', [
-        'doc_id' => $docId,
+        'db_id' => $dbId,
+        'document_id' => $documentId,
         'template_id' => $input['template_id'],
         'template_name' => $template['name'],
         'profileid' => $input['profileid'],
@@ -80,7 +108,9 @@ try {
 
     echo json_encode([
         'success' => true,
-        'doc_id' => $docId,
+        'db_id' => $dbId,
+        'document_id' => $documentId,
+        'pdf_url' => $pdfLink,
         'message' => 'Dokument erfolgreich erstellt'
     ]);
 } catch (Exception $e) {
@@ -96,7 +126,7 @@ function logAction($pdo, $action, $data)
     try {
         $stmt = $pdo->prepare("
             INSERT INTO intra_audit_log 
-            (userid, action, data, created_at) 
+            (user, action, data, created_at) 
             VALUES (:user_id, :action, :data, NOW())
         ");
 

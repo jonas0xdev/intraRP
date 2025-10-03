@@ -1,8 +1,8 @@
 <?php
 session_start();
-require_once __DIR__ . '/../../assets/config/config.php';
-require_once __DIR__ . '/../../assets/config/database.php';
-require_once __DIR__ . '/../../src/Documents/DocumentTemplateManager.php';
+require_once __DIR__ . '/../../../assets/config/config.php';
+require_once __DIR__ . '/../../../assets/config/database.php';
+require_once __DIR__ . '/../../../src/Documents/DocumentTemplateManager.php';
 
 use App\Documents\DocumentTemplateManager;
 use App\Auth\Permissions;
@@ -120,7 +120,7 @@ function buildTemplateConfig($fields)
 
 function createTemplateFile($templateId, $data)
 {
-    $templatePath = __DIR__ . '/../../dokumente/templates/';
+    $templatePath = __DIR__ . '/../../../dokumente/templates/';
     if (!file_exists($templatePath)) {
         mkdir($templatePath, 0755, true);
     }
