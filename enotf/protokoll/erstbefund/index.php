@@ -39,6 +39,14 @@ $daten['last_edit'] = !empty($daten['last_edit']) ? (new DateTime($daten['last_e
 
 $enr = $daten['enr'];
 
+$psych = [];
+if (!empty($daten['psych'])) {
+    $decoded = json_decode($daten['psych'], true);
+    if (is_array($decoded)) {
+        $psych = array_map('intval', $decoded);
+    }
+}
+
 $prot_url = "https://" . SYSTEM_URL . "/enotf/protokoll/index.php?enr=" . $enr;
 
 date_default_timezone_set('Europe/Berlin');
@@ -104,6 +112,9 @@ $currentDate = date('d.m.Y');
                             </a>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/index.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_k,v_muster_t,v_muster_a,v_muster_al,v_muster_bl,v_muster_w">
                                 <span>Erweitern</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/psychisch/index.php?enr=<?= $daten['enr'] ?>" data-requires="psych">
+                                <span>psych. Zustand</span>
                             </a>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/messwerte/index.php?enr=<?= $daten['enr'] ?>" data-requires="spo2,atemfreq,rrsys,herzfreq,bz">
                                 <span>Messwerte</span>
@@ -205,6 +216,33 @@ $currentDate = date('d.m.Y');
                             1 => 'Tolerabel',
                             2 => 'Nicht tolerabel'
                         ];
+                        $psychLabels = [
+                            1 => 'unauffällig',
+                            2 => 'aggressiv',
+                            3 => 'depressiv',
+                            4 => 'wahnhaft',
+                            5 => 'verwirrt',
+                            6 => 'verlangsamt',
+                            7 => 'euphorisch',
+                            8 => 'erregt',
+                            9 => 'ängstlich',
+                            10 => 'suizidal',
+                            11 => 'motorisch unruhig',
+                            12 => 'Sonstige',
+                            98 => 'nicht beurteilbar',
+                            99 => 'nicht untersucht'
+                        ];
+
+                        $psychDisplayTexts = [];
+                        if (!empty($psych) && is_array($psych)) {
+                            foreach ($psych as $value) {
+                                if (isset($psychLabels[$value])) {
+                                    $psychDisplayTexts[] = $psychLabels[$value];
+                                }
+                            }
+                        }
+
+                        $psychDisplay = !empty($psychDisplayTexts) ? implode(', ', $psychDisplayTexts) : '';
                         ?>
                         <div class="col edivi__overview-container">
                             <div class="row edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/atemwege/index.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
@@ -273,6 +311,10 @@ $currentDate = date('d.m.Y');
                                 <h6 class="fw-bold pt-1 pb-0">Schmerzen</h6>
                                 <div class="col border border-end-0 border-light py-1"><span class="fw-bold">Intensität</span> <?= $sz_nrs_labels[$daten['sz_nrs']] ?? '' ?></div>
                                 <div class="col border border-light py-1"><span class="fw-bold">Toleranz</span> <?= $sz_toleranz_1_labels[$daten['sz_toleranz_1']] ?? '' ?></div>
+                            </div>
+                            <div class="row edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/psychisch/index.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
+                                <h6 class="fw-bold pt-1 pb-0">Psychischer Zustand</h6>
+                                <div class="col border border-light py-1"><?= !empty($psychDisplay) ? htmlspecialchars($psychDisplay) : '' ?></div>
                             </div>
                             <div class="row edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/messwerte/index.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
                                 <h6 class="fw-bold pt-1 pb-0">Vitalparameter</h6>

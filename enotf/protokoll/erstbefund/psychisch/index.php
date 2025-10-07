@@ -39,6 +39,14 @@ $daten['last_edit'] = !empty($daten['last_edit']) ? (new DateTime($daten['last_e
 
 $enr = $daten['enr'];
 
+$psych = [];
+if (!empty($daten['psych'])) {
+    $decoded = json_decode($daten['psych'], true);
+    if (is_array($decoded)) {
+        $psych = array_map('intval', $decoded);
+    }
+}
+
 $prot_url = "https://" . SYSTEM_URL . "/enotf/protokoll/index.php?enr=" . $enr;
 
 date_default_timezone_set('Europe/Berlin');
@@ -102,66 +110,59 @@ $currentDate = date('d.m.Y');
                             <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/neurologie/index.php?enr=<?= $daten['enr'] ?>" data-requires="d_bewusstsein,d_ex_1,d_pupillenw_1,d_pupillenw_2,d_lichtreakt_1,d_lichtreakt_2,d_gcs_1,d_gcs_2,d_gcs_3">
                                 <span>Neurologie</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/index.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_k,v_muster_t,v_muster_a,v_muster_al,v_muster_bl,v_muster_w" class="active">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/index.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_k,v_muster_t,v_muster_a,v_muster_al,v_muster_bl,v_muster_w">
                                 <span>Erweitern</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/psychisch/index.php?enr=<?= $daten['enr'] ?>" data-requires="psych">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/psychisch/index.php?enr=<?= $daten['enr'] ?>" data-requires="psych" class="active">
                                 <span>psych. Zustand</span>
                             </a>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/messwerte/index.php?enr=<?= $daten['enr'] ?>" data-requires="spo2,atemfreq,rrsys,herzfreq,bz">
                                 <span>Messwerte</span>
                             </a>
                         </div>
-                        <div class="col-2 d-flex flex-column edivi__interactbutton-more">
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/1.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_k,v_muster_w,v_muster_t,v_muster_a,v_muster_al,v_muster_bl" class="active">
-                                <span>Verletzungen</span>
-                            </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/2.php?enr=<?= $daten['enr'] ?>">
-                                <span>Schmerzen</span>
-                            </a>
-                        </div>
-                        <div class="col-2 d-flex flex-column edivi__interactbutton-more">
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/1_1.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_k">
-                                <span>Schädel-Hirn</span>
-                            </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/1_2.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_w">
-                                <span>Wirbelsäule</span>
-                            </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/1_3.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_t">
-                                <span>Thorax</span>
-                            </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/1_4.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_a">
-                                <span>Abdomen</span>
-                            </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/1_5.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_al">
-                                <span>Obere Extremitäten</span>
-                            </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/1_6.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_bl" class="active">
-                                <span>Untere Extremitäten</span>
-                            </a>
+                        <div class="col-2 d-flex flex-column edivi__interactbutton">
+                            <input type="checkbox" class="btn-check" id="psych-1" name="psych[]" value="1" <?php echo (in_array(1, $psych) ? 'checked' : '') ?> autocomplete="off">
+                            <label for="psych-1">unauffällig</label>
+
+                            <input type="checkbox" class="btn-check" id="psych-2" name="psych[]" value="2" <?php echo (in_array(2, $psych) ? 'checked' : '') ?> autocomplete="off">
+                            <label for="psych-2">aggressiv</label>
+
+                            <input type="checkbox" class="btn-check" id="psych-3" name="psych[]" value="3" <?php echo (in_array(3, $psych) ? 'checked' : '') ?> autocomplete="off">
+                            <label for="psych-3">depressiv</label>
+
+                            <input type="checkbox" class="btn-check" id="psych-4" name="psych[]" value="4" <?php echo (in_array(4, $psych) ? 'checked' : '') ?> autocomplete="off">
+                            <label for="psych-4">wahnhaft</label>
+
+                            <input type="checkbox" class="btn-check" id="psych-5" name="psych[]" value="5" <?php echo (in_array(5, $psych) ? 'checked' : '') ?> autocomplete="off">
+                            <label for="psych-5">verwirrt</label>
+
+                            <input type="checkbox" class="btn-check" id="psych-6" name="psych[]" value="6" <?php echo (in_array(6, $psych) ? 'checked' : '') ?> autocomplete="off">
+                            <label for="psych-6">verlangsamt</label>
+
+                            <input type="checkbox" class="btn-check" id="psych-7" name="psych[]" value="7" <?php echo (in_array(7, $psych) ? 'checked' : '') ?> autocomplete="off">
+                            <label for="psych-7">euphorisch</label>
+
+                            <input type="checkbox" class="btn-check" id="psych-8" name="psych[]" value="8" <?php echo (in_array(8, $psych) ? 'checked' : '') ?> autocomplete="off">
+                            <label for="psych-8">erregt</label>
+
+                            <input type="checkbox" class="btn-check" id="psych-9" name="psych[]" value="9" <?php echo (in_array(9, $psych) ? 'checked' : '') ?> autocomplete="off">
+                            <label for="psych-9">ängstlich</label>
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton">
-                            <input type="radio" class="btn-check" id="v_muster_bl-1" name="v_muster_bl" value="1" <?php echo ($daten['v_muster_bl'] == 1 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="v_muster_bl-1">keine</label>
+                            <input type="checkbox" class="btn-check" id="psych-10" name="psych[]" value="10" <?php echo (in_array(10, $psych) ? 'checked' : '') ?> autocomplete="off">
+                            <label for="psych-10">suizidal</label>
 
-                            <input type="radio" class="btn-check" id="v_muster_bl-2" name="v_muster_bl" value="2" <?php echo ($daten['v_muster_bl'] == 2 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="v_muster_bl-2">leicht</label>
+                            <input type="checkbox" class="btn-check" id="psych-11" name="psych[]" value="11" <?php echo (in_array(11, $psych) ? 'checked' : '') ?> autocomplete="off">
+                            <label for="psych-11">motorisch unruhig</label>
 
-                            <input type="radio" class="btn-check" id="v_muster_bl-3" name="v_muster_bl" value="3" <?php echo ($daten['v_muster_bl'] == 3 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="v_muster_bl-3">mittel</label>
+                            <input type="checkbox" class="btn-check" id="psych-12" name="psych[]" value="12" <?php echo (in_array(12, $psych) ? 'checked' : '') ?> autocomplete="off">
+                            <label for="psych-12">Sonstige</label>
 
-                            <input type="radio" class="btn-check" id="v_muster_bl-4" name="v_muster_bl" value="4" <?php echo ($daten['v_muster_bl'] == 4 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="v_muster_bl-4">schwer</label>
+                            <input type="checkbox" class="btn-check" id="psych-98" name="psych[]" value="98" <?php echo (in_array(98, $psych) ? 'checked' : '') ?> autocomplete="off">
+                            <label for="psych-98">nicht beurteilbar</label>
 
-                            <input type="radio" class="btn-check" id="v_muster_bl-99" name="v_muster_bl" value="99" <?php echo ($daten['v_muster_bl'] == 99 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="v_muster_bl-99">Nicht untersucht</label>
-                        </div>
-                        <div class="col-2 d-flex flex-column edivi__interactbutton">
-                            <input type="radio" class="btn-check" id="v_muster_bl1-1" name="v_muster_bl1" value="1" <?php echo ($daten['v_muster_bl1'] == 1 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="v_muster_bl1-1">offen</label>
-
-                            <input type="radio" class="btn-check" id="v_muster_bl1-2" name="v_muster_bl1" value="2" <?php echo ($daten['v_muster_bl1'] == 2 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="v_muster_bl1-2">geschlossen</label>
+                            <input type="checkbox" class="btn-check" id="psych-99" name="psych[]" value="99" <?php echo (in_array(99, $psych) ? 'checked' : '') ?> autocomplete="off">
+                            <label for="psych-99">nicht untersucht</label>
                         </div>
                     </div>
                 </div>
