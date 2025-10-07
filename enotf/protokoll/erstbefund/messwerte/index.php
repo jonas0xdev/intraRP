@@ -276,7 +276,7 @@ $currentDateTime = date('Y-m-d\TH:i');
             const raw = ((field && field.value) ? String(field.value) : '').trim();
             const lower = raw.toLowerCase();
 
-            field.classList.remove('text-warning', 'text-danger', 'text-success', 'text-info');
+            field.classList.remove('text-warning', 'text-danger', 'text-success', 'text-info', 'text-semiwarning');
 
             updateRequiredClass(field);
 
@@ -287,53 +287,61 @@ $currentDateTime = date('Y-m-d\TH:i');
 
             const name = field.name;
             let isWarning = false,
+                isSemiWarning = false,
                 isDanger = false,
                 isSuccess = false;
 
             switch (name) {
                 case 'spo2':
-                    if (value < 88 || value > 100) isDanger = true;
-                    else if (value < 95) isWarning = true;
+                    if (value < 87) isDanger = true;
+                    else if (value < 92) isWarning = true;
+                    else if (value < 97 && value >= 92) isSemiWarning = true;
                     else isSuccess = true;
                     break;
                 case 'atemfreq':
-                    if (value < 9 || value > 27) isDanger = true;
-                    else if (value < 12 || value > 20) isWarning = true;
+                    if (value < 5 || value > 25) isDanger = true;
+                    else if (value === 5 || value === 6 || value > 20 && value < 26) isWarning = true;
+                    else if (value > 6 && value < 9 || value > 15 && value < 21) isSemiWarning = true;
                     else isSuccess = true;
                     break;
                 case 'etco2':
-                    if (value < 25 || value > 50) isDanger = true;
-                    else if (value < 33 || value > 43) isWarning = true;
+                    if (value < 6 || value > 55) isDanger = true;
+                    else if (value < 36 || value > 45) isSemiWarning = true;
                     else isSuccess = true;
                     break;
                 case 'rrsys':
-                    if (value < 81 || value > 179) isDanger = true;
-                    else if (value < 110 || value > 139) isWarning = true;
+                    if (value < 80 || value > 199) isDanger = true;
+                    else if (value >= 80 && value < 90 || value > 169) isWarning = true;
+                    else if (value >= 90 && value < 101 || value > 149) isSemiWarning = true;
                     else isSuccess = true;
                     break;
                 case 'rrdias':
-                    if (value < 51 || value > 119) isDanger = true;
-                    else if (value < 80 || value > 99) isWarning = true;
+                    if (value < 80 || value > 199) isDanger = true;
+                    else if (value >= 80 && value < 90 || value > 169) isWarning = true;
+                    else if (value >= 90 && value < 101 || value > 149) isSemiWarning = true;
                     else isSuccess = true;
                     break;
                 case 'herzfreq':
-                    if (value < 51 || value > 300) isDanger = true;
-                    else if (value < 61 || value > 99) isWarning = true;
+                    if (value < 41 || value > 160) isDanger = true;
+                    else if (value < 51 || value > 130) isWarning = true;
+                    else if (value < 61 || value > 100) isSemiWarning = true;
                     else isSuccess = true;
                     break;
                 case 'bz':
-                    if (value < 61 || value > 199) isDanger = true;
-                    else if (value < 71 || value > 139) isWarning = true;
+                    if (value < 40 || value > 250) isDanger = true;
+                    else if (value < 51 || value > 180) isWarning = true;
+                    else if (value < 81 || value > 150) isSemiWarning = true;
                     else isSuccess = true;
                     break;
                 case 'temp':
-                    if (value < 35 || value > 40) isDanger = true;
-                    else if (value < 36.1 || value > 37.5) isWarning = true;
+                    if (value <= 34 || value > 40) isDanger = true;
+                    else if (value < 36.1 || value > 38) isSemiWarning = true;
                     else isSuccess = true;
                     break;
             }
 
             if (isDanger) field.classList.add('text-danger');
+            else if (isSemiWarning) field.classList.add('text-semiwarning');
             else if (isWarning) field.classList.add('text-warning');
             else if (isSuccess) field.classList.add('text-success');
         }
@@ -447,7 +455,7 @@ $currentDateTime = date('Y-m-d\TH:i');
 
             if (String(value).toLowerCase() === 'ng') {
                 field.value = 'ng';
-                field.classList.remove('text-danger', 'text-warning', 'text-success');
+                field.classList.remove('text-danger', 'text-warning', 'text-success', 'text-semiwarning');
                 field.dispatchEvent(new Event('input', {
                     bubbles: true
                 }));
@@ -457,7 +465,7 @@ $currentDateTime = date('Y-m-d\TH:i');
 
             if (value === '') {
                 field.value = '';
-                field.classList.remove('text-danger', 'text-warning', 'text-success');
+                field.classList.remove('text-danger', 'text-warning', 'text-success', 'text-semiwarning');
 
                 field.dispatchEvent(new Event('input', {
                     bubbles: true

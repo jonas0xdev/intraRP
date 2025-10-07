@@ -1560,8 +1560,11 @@ body[data-page=verlauf] .text-success {
 body[data-page=verlauf] .text-danger {
   color: #d91225 !important;
 }
+body[data-page=verlauf] .text-semiwarning {
+  color: #d5c215 !important;
+}
 body[data-page=verlauf] .text-warning {
-  color: #d5a715 !important;
+  color: #d58215 !important;
 }
 body[data-page=verlauf] .vital-entry {
   background: rgba(255, 255, 255, 0.05);
