@@ -184,6 +184,11 @@
             const fieldName = $this.attr('name');
             const elementId = $this.attr('id');
 
+            if (fieldName === 'diagnose_weitere[]') {
+                console.log('Skipping auto-save for diagnose_weitere[] - handled by custom handler');
+                return;
+            }
+
             if (elementId === 'c_zugang-0') {
                 return;
             }

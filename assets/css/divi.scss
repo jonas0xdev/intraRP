@@ -428,9 +428,9 @@ body {
     background-color: #333333;
     z-index: 1;
     overflow: hidden;
-    &:last-child {
-      padding-left: 8px;
-    }
+    // &:last-child {
+    //   padding-left: 8px;
+    // }
     &:hover {
       background-color: #5f5f5f;
       color: var(--white);
@@ -503,7 +503,7 @@ body {
     color: var(--white);
     background-color: var(--secondary-color);
     border-radius: 0;
-    padding: 25px 4px;
+    padding: 25px 30px;
     padding-left: 14px;
     text-decoration: none;
     font-weight: 600;
@@ -692,6 +692,11 @@ body {
 @media (max-width: 1001px) {
   [class*="edivi__interactbutton"] > *:after {
     display: none;
+  }
+
+  [class*="edivi__interactbutton"] > a,
+  [class*="edivi__interactbutton"] > label {
+    padding-right: 4px;
   }
 }
 

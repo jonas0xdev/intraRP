@@ -160,7 +160,9 @@ $migrationFiles = [
     'create_intra_antraege_30092025.php',
     'create_intra_antraege_daten_30092025.php',
     // 03.10.2025
-    'alter_intra_mitarbeiter_dokumente_03102025.php'
+    'alter_intra_mitarbeiter_dokumente_03102025.php',
+    // 07.10.2025
+    'alter_intra_edivi_07102025.php'
 ];
 
 $executed = 0;
