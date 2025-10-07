@@ -107,6 +107,18 @@ $currentDate = date('d.m.Y');
                             <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/atemwege/1.php?enr=<?= $daten['enr'] ?>" data-requires="awsicherung_neu" class="active">
                                 <span>Atemwegssicherung</span>
                             </a>
+
+                            <input type="checkbox" class="btn-check" id="awsicherung_1-1" name="awsicherung_1" value="1" <?php echo ($daten['awsicherung_1'] == 1 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="awsicherung_1-1">Atemwege freim.</label>
+
+                            <input type="checkbox" class="btn-check" id="awsicherung_2-1" name="awsicherung_2" value="1" <?php echo ($daten['awsicherung_2'] == 1 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="awsicherung_2-1">Absaugen</label>
+
+                            <input type="checkbox" class="btn-check" id="entlastungspunktion-1" name="entlastungspunktion" value="1" <?php echo ($daten['entlastungspunktion'] == 1 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="entlastungspunktion-1">Entlastungspunktion</label>
+
+                            <input type="checkbox" class="btn-check" id="hws_immo-1" name="hws_immo" value="1" <?php echo ($daten['hws_immo'] == 1 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="hws_immo-1">HWS-Immobilisation</label>
                         </div>
                         <div class="col-2 d-flex flex-column -edivi__interactbutton">
                             <input type="radio" class="btn-check" id="awsicherung_neu-1" name="awsicherung_neu" value="1" <?php echo ($daten['awsicherung_neu'] == 1 ? 'checked' : '') ?> autocomplete="off">
@@ -115,11 +127,17 @@ $currentDate = date('d.m.Y');
                             <input type="radio" class="btn-check" id="awsicherung_neu-2" name="awsicherung_neu" value="2" <?php echo ($daten['awsicherung_neu'] == 2 ? 'checked' : '') ?> autocomplete="off">
                             <label for="awsicherung_neu-2">Endotrachealtubus</label>
 
+                            <input type="radio" class="btn-check" id="awsicherung_neu-6" name="awsicherung_neu" value="6" <?php echo ($daten['awsicherung_neu'] == 6 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="awsicherung_neu-6">Wendl-Tubus</label>
+
                             <input type="radio" class="btn-check" id="awsicherung_neu-3" name="awsicherung_neu" value="3" <?php echo ($daten['awsicherung_neu'] == 3 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="awsicherung_neu-3">Larynxtubus/-maske</label>
+                            <label for="awsicherung_neu-3">Larynxmaske</label>
+
+                            <input type="radio" class="btn-check" id="awsicherung_neu-5" name="awsicherung_neu" value="5" <?php echo ($daten['awsicherung_neu'] == 5 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="awsicherung_neu-5">Larynxtubus</label>
 
                             <input type="radio" class="btn-check" id="awsicherung_neu-4" name="awsicherung_neu" value="4" <?php echo ($daten['awsicherung_neu'] == 4 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="awsicherung_neu-4">Guedel-/Wendltubus</label>
+                            <label for="awsicherung_neu-4">Guedeltubus</label>
 
                             <input type="radio" class="btn-check" id="awsicherung_neu-99" name="awsicherung_neu" value="99" <?php echo ($daten['awsicherung_neu'] == 99 ? 'checked' : '') ?> autocomplete="off">
                             <label for="awsicherung_neu-99">Sonstige</label>

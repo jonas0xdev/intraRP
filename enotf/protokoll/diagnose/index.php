@@ -276,16 +276,48 @@ if (!empty($diagnose_weitere_array)) {
                             </a>
                         </div>
                         <div class="col edivi__overview-container">
-                            <div class="row edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/diagnose/1.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
-                                <div class="col border border-end-0 border-light py-1"><span class="fw-bold">Diagnose (führend)</span> <?= !empty($diagnose_haupt_text) ? $diagnose_haupt_text : '<em>Nicht gesetzt</em>' ?></div>
-                                <div class="col border border-light py-1">
-                                    <span class="fw-bold">Diagnose (weitere)</span>
-                                    <?= !empty($diagnose_weitere_text) ? $diagnose_weitere_text : '' ?>
+                            <div class="row">
+                                <div class="col">
+                                    <div class="row edivi__box edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/diagnose/1.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
+                                        <h5 class="text-light px-2 py-1 edivi__group-check">Diagnose (führend)</h5>
+                                        <div class="col">
+                                            <div class="row my-2">
+                                                <div class="col">
+                                                    <label for="diagnose_fuehrend" class="edivi__description" style="display: none;">Diagnose (führend)</label>
+                                                    <input type="text" name="diagnose_fuehrend" id="diagnose_fuehrend" class="w-100 form-control edivi__input-check" value="<?= !empty($diagnose_haupt_text) ? $diagnose_haupt_text : '' ?>" readonly>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="row edivi__box edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/diagnose/2.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
+                                        <h5 class="text-light px-2 py-1">Diagnose (weitere)</h5>
+                                        <div class="col">
+                                            <div class="row my-2">
+                                                <div class="col">
+                                                    <label for="diagnose_weitere" class="edivi__description" style="display: none;">Diagnose (weitere)</label>
+                                                    <input type="text" name="diagnose_weitere" id="diagnose_weitere" class="w-100 form-control" value="<?= !empty($diagnose_weitere_text) ? $diagnose_weitere_text : '' ?>" readonly>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="row edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/anamnese/2.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
-                                <h6 class="fw-bold pt-1 pb-0">Diagnose Text</h6>
-                                <div class="col border border-light py-1" style="min-height: 15vh;"><?= $daten['diagnose'] ?? '' ?></div>
+                            <div class="row">
+                                <div class="col">
+                                    <div class="row edivi__box edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/diagnose/3.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
+                                        <h5 class="text-light px-2 py-1">Diagnose Text</h5>
+                                        <div class="col">
+                                            <div class="row my-2">
+                                                <div class="col">
+                                                    <label for="diagnose_text" class="edivi__description" style="display: none;">Diagnose Text</label>
+                                                    <textarea name="diagnose_text" id="diagnose_text" rows="5" class="w-100 form-control" style="resize: none" readonly><?= $daten['diagnose'] ?></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

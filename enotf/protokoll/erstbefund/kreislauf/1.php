@@ -96,7 +96,7 @@ $currentDate = date('d.m.Y');
                             <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/atmung/index.php?enr=<?= $daten['enr'] ?>" data-requires="b_symptome,b_auskult">
                                 <span>Atmung</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/index.php?enr=<?= $daten['enr'] ?>" data-requires="c_kreislauf,c_ekg" class="active">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/index.php?enr=<?= $daten['enr'] ?>" data-requires="c_kreislauf,c_ekg,c_puls_rad,c_puls_reg" class="active">
                                 <span>Kreislauf</span>
                             </a>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/neurologie/index.php?enr=<?= $daten['enr'] ?>" data-requires="d_bewusstsein,d_ex_1,d_pupillenw_1,d_pupillenw_2,d_lichtreakt_1,d_lichtreakt_2,d_gcs_1,d_gcs_2,d_gcs_3">
@@ -117,7 +117,10 @@ $currentDate = date('d.m.Y');
                                 <span>Patientenzustand</span>
                             </a>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/2.php?enr=<?= $daten['enr'] ?>" data-requires="c_ekg">
-                                <span>EKG</span>
+                                <span>EKG-Befund</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/3.php?enr=<?= $daten['enr'] ?>" data-requires="c_puls_rad,c_puls_reg">
+                                <span>Puls</span>
                             </a>
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton">

@@ -96,7 +96,7 @@ $currentDate = date('d.m.Y');
                             <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/atmung/index.php?enr=<?= $daten['enr'] ?>" data-requires="b_symptome,b_auskult">
                                 <span>Atmung</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/index.php?enr=<?= $daten['enr'] ?>" data-requires="c_kreislauf,c_ekg">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/index.php?enr=<?= $daten['enr'] ?>" data-requires="c_kreislauf,c_ekg,c_puls_rad,c_puls_reg">
                                 <span>Kreislauf</span>
                             </a>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/neurologie/index.php?enr=<?= $daten['enr'] ?>" data-requires="d_bewusstsein,d_ex_1,d_pupillenw_1,d_pupillenw_2,d_lichtreakt_1,d_lichtreakt_2,d_gcs_1,d_gcs_2,d_gcs_3" class="active">
@@ -131,13 +131,25 @@ $currentDate = date('d.m.Y');
                             <label for="d_bewusstsein-1">wach</label>
 
                             <input type="radio" class="btn-check" id="d_bewusstsein-2" name="d_bewusstsein" value="2" <?php echo ($daten['d_bewusstsein'] == 2 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="d_bewusstsein-2">somnolent</label>
+                            <label for="d_bewusstsein-2">analgosediert / Narkose</label>
 
                             <input type="radio" class="btn-check" id="d_bewusstsein-3" name="d_bewusstsein" value="3" <?php echo ($daten['d_bewusstsein'] == 3 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="d_bewusstsein-3">soporös</label>
+                            <label for="d_bewusstsein-3">reagiert auf Ansprache</label>
 
                             <input type="radio" class="btn-check" id="d_bewusstsein-4" name="d_bewusstsein" value="4" <?php echo ($daten['d_bewusstsein'] == 4 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="d_bewusstsein-4">komatös</label>
+                            <label for="d_bewusstsein-4">reagiert auf Schmerzreiz</label>
+
+                            <input type="radio" class="btn-check" id="d_bewusstsein-5" name="d_bewusstsein" value="5" <?php echo ($daten['d_bewusstsein'] == 5 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="d_bewusstsein-5">bewusstlos</label>
+
+                            <input type="radio" class="btn-check" id="d_bewusstsein-97" name="d_bewusstsein" value="97" <?php echo ($daten['d_bewusstsein'] == 97 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="d_bewusstsein-97">Sonstige</label>
+
+                            <input type="radio" class="btn-check" id="d_bewusstsein-98" name="d_bewusstsein" value="98" <?php echo ($daten['d_bewusstsein'] == 98 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="d_bewusstsein-98">nicht beurteilbar</label>
+
+                            <input type="radio" class="btn-check" id="d_bewusstsein-99" name="d_bewusstsein" value="99" <?php echo ($daten['d_bewusstsein'] == 99 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="d_bewusstsein-99">nicht untersucht</label>
                         </div>
                     </div>
                 </div>

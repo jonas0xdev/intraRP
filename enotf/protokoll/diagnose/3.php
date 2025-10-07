@@ -96,7 +96,7 @@ $currentDate = date('d.m.Y');
                             <a href="<?= BASE_PATH ?>enotf/protokoll/diagnose/2.php?enr=<?= $daten['enr'] ?>">
                                 <span>Diagnose (weitere)</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/diagnose/3.php?enr=<?= $daten['enr'] ?>">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/diagnose/3.php?enr=<?= $daten['enr'] ?>" class="active">
                                 <span>Diagnose Text</span>
                             </a>
                         </div>

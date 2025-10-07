@@ -5,9 +5,9 @@ if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
 }
 
 session_start();
-require_once __DIR__ . '/../../../assets/config/config.php';
-require_once __DIR__ . '/../../../vendor/autoload.php';
-require __DIR__ . '/../../../assets/config/database.php';
+require_once __DIR__ . '/../../../../assets/config/config.php';
+require_once __DIR__ . '/../../../../vendor/autoload.php';
+require __DIR__ . '/../../../../assets/config/database.php';
 
 use App\Auth\Permissions;
 
@@ -78,45 +78,73 @@ $currentDate = date('d.m.Y');
     <meta property="og:description" content="Verwaltungsportal der <?php echo RP_ORGTYPE . " " .  SERVER_CITY ?>" />
 </head>
 
-<body data-page="anamnese">
+<body data-page="erstbefund">
     <?php
-    include __DIR__ . '/../../../assets/components/enotf/topbar.php';
+    include __DIR__ . '/../../../../assets/components/enotf/topbar.php';
     ?>
     <form name="form" method="post" action="">
         <input type="hidden" name="new" value="1" />
         <div class="container-fluid" id="edivi__container">
             <div class="row h-100">
-                <?php include __DIR__ . '/../../../assets/components/enotf/nav.php'; ?>
+                <?php include __DIR__ . '/../../../../assets/components/enotf/nav.php'; ?>
                 <div class="col" id="edivi__content" style="padding-left: 0">
                     <div class="row" style="margin-left: 0">
                         <div class="col-2 d-flex flex-column edivi__interactbutton-more">
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/anamnese/1.php?enr=<?= $daten['enr'] ?>">
-                                <span>Anamnese</span>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/atemwege/index.php?enr=<?= $daten['enr'] ?>" data-requires="awfrei_1,zyanose_1">
+                                <span>Atemwege</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/anamnese/2.php?enr=<?= $daten['enr'] ?>" data-requires="diagnose" class="active">
-                                <span>Diagnose</span>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/atmung/index.php?enr=<?= $daten['enr'] ?>" data-requires="b_symptome,b_auskult">
+                                <span>Atmung</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/index.php?enr=<?= $daten['enr'] ?>" data-requires="c_kreislauf,c_ekg,c_puls_rad,c_puls_reg" class="active">
+                                <span>Kreislauf</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/neurologie/index.php?enr=<?= $daten['enr'] ?>" data-requires="d_bewusstsein,d_ex_1,d_pupillenw_1,d_pupillenw_2,d_lichtreakt_1,d_lichtreakt_2,d_gcs_1,d_gcs_2,d_gcs_3">
+                                <span>Neurologie</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/index.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_k,v_muster_t,v_muster_a,v_muster_al,v_muster_bl,v_muster_w">
+                                <span>Erweitern</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/psychisch/index.php?enr=<?= $daten['enr'] ?>" data-requires="psych">
+                                <span>psych. Zustand</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/messwerte/index.php?enr=<?= $daten['enr'] ?>" data-requires="spo2,atemfreq,rrsys,herzfreq,bz">
+                                <span>Messwerte</span>
                             </a>
                         </div>
-                        <div class="col-4 edivi__overview-container" style="margin:0; padding:0;">
-                            <div class="row edivi__box" style="margin:0;">
-                                <h5 class="text-light px-2 py-1">Freitext Verdachts-/Erstdiagnose</h5>
-                                <div class="col">
-                                    <div class="row my-2">
-                                        <div class="col">
-                                            <textarea name="diagnose" id="diagnose" rows="5" class="w-100 form-control" style="resize: none" placeholder="..."><?= $daten['diagnose'] ?></textarea>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="col-2 d-flex flex-column edivi__interactbutton-more">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/1.php?enr=<?= $daten['enr'] ?>" data-requires="c_kreislauf">
+                                <span>Patientenzustand</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/2.php?enr=<?= $daten['enr'] ?>" data-requires="c_ekg">
+                                <span>EKG-Befund</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/3.php?enr=<?= $daten['enr'] ?>" data-requires="c_puls_rad,c_puls_reg" class="active">
+                                <span>Puls</span>
+                            </a>
+                        </div>
+                        <div class="col-2 d-flex flex-column edivi__interactbutton">
+                            <input type="radio" class="btn-check" id="c_puls_reg-1" name="c_puls_reg" value="1" <?php echo ($daten['c_puls_reg'] == 1 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="c_puls_reg-1">regelmäßig</label>
+
+                            <input type="radio" class="btn-check" id="c_puls_reg-2" name="c_puls_reg" value="2" <?php echo ($daten['c_puls_reg'] == 2 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="c_puls_reg-2">arrhythmis</label>
+                        </div>
+                        <div class="col-2 d-flex flex-column edivi__interactbutton">
+                            <input type="radio" class="btn-check" id="c_puls_rad-1" name="c_puls_rad" value="1" <?php echo ($daten['c_puls_rad'] == 1 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="c_puls_rad-1">Radialispuls tastbar</label>
+
+                            <input type="radio" class="btn-check" id="c_puls_rad-2" name="c_puls_rad" value="2" <?php echo ($daten['c_puls_rad'] == 2 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="c_puls_rad-2">Radialispuls nicht tastbar</label>
                         </div>
                     </div>
                 </div>
             </div>
     </form>
     <?php
-    include __DIR__ . '/../../../assets/functions/enotf/notify.php';
-    include __DIR__ . '/../../../assets/functions/enotf/field_checks.php';
-    include __DIR__ . '/../../../assets/functions/enotf/clock.php';
+    include __DIR__ . '/../../../../assets/functions/enotf/notify.php';
+    include __DIR__ . '/../../../../assets/functions/enotf/field_checks.php';
+    include __DIR__ . '/../../../../assets/functions/enotf/clock.php';
     ?>
     <?php if ($ist_freigegeben) : ?>
         <script>

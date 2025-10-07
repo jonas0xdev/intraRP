@@ -96,7 +96,7 @@ $currentDate = date('d.m.Y');
                             <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/atmung/index.php?enr=<?= $daten['enr'] ?>" data-requires="b_symptome,b_auskult" class="active">
                                 <span>Atmung</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/index.php?enr=<?= $daten['enr'] ?>" data-requires="c_kreislauf,c_ekg">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/index.php?enr=<?= $daten['enr'] ?>" data-requires="c_kreislauf,c_ekg,c_puls_rad,c_puls_reg">
                                 <span>Kreislauf</span>
                             </a>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/neurologie/index.php?enr=<?= $daten['enr'] ?>" data-requires="d_bewusstsein,d_ex_1,d_pupillenw_1,d_pupillenw_2,d_lichtreakt_1,d_lichtreakt_2,d_gcs_1,d_gcs_2,d_gcs_3">
@@ -127,17 +127,23 @@ $currentDate = date('d.m.Y');
                             <input type="radio" class="btn-check" id="b_symptome-1" name="b_symptome" value="1" <?php echo ($daten['b_symptome'] == 1 ? 'checked' : '') ?> autocomplete="off">
                             <label for="b_symptome-1">Dyspnoe</label>
 
-                            <input type="radio" class="btn-check" id="b_symptome-2" name="b_symptome" value="2" <?php echo ($daten['b_symptome'] == 2 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="b_symptome-2">Apnoe</label>
-
                             <input type="radio" class="btn-check" id="b_symptome-3" name="b_symptome" value="3" <?php echo ($daten['b_symptome'] == 3 ? 'checked' : '') ?> autocomplete="off">
                             <label for="b_symptome-3">Schnappatmung</label>
 
+                            <input type="radio" class="btn-check" id="b_symptome-2" name="b_symptome" value="2" <?php echo ($daten['b_symptome'] == 2 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="b_symptome-2">Apnoe</label>
+
+                            <input type="radio" class="btn-check" id="b_symptome-5" name="b_symptome" value="5" <?php echo ($daten['b_symptome'] == 5 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="b_symptome-5">Beatmung</label>
+
+                            <input type="radio" class="btn-check" id="b_symptome-6" name="b_symptome" value="6" <?php echo ($daten['b_symptome'] == 6 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="b_symptome-6">Hyperventilation</label>
+
                             <input type="radio" class="btn-check" id="b_symptome-4" name="b_symptome" value="4" <?php echo ($daten['b_symptome'] == 4 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="b_symptome-4">Andere pathologien</label>
+                            <label for="b_symptome-4">sonstige path. Atemmuster</label>
 
                             <input type="radio" class="btn-check" id="b_symptome-99" name="b_symptome" value="99" <?php echo ($daten['b_symptome'] == 99 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="b_symptome-99">Nicht untersucht</label>
+                            <label for="b_symptome-99">nicht untersucht</label>
                         </div>
                     </div>
                 </div>

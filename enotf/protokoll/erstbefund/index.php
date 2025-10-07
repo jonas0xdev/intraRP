@@ -104,7 +104,7 @@ $currentDate = date('d.m.Y');
                             <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/atmung/index.php?enr=<?= $daten['enr'] ?>" data-requires="b_symptome,b_auskult">
                                 <span>Atmung</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/index.php?enr=<?= $daten['enr'] ?>" data-requires="c_kreislauf,c_ekg">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/index.php?enr=<?= $daten['enr'] ?>" data-requires="c_kreislauf,c_ekg,c_puls_rad,c_puls_reg">
                                 <span>Kreislauf</span>
                             </a>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/neurologie/index.php?enr=<?= $daten['enr'] ?>" data-requires="d_bewusstsein,d_ex_1,d_pupillenw_1,d_pupillenw_2,d_lichtreakt_1,d_lichtreakt_2,d_gcs_1,d_gcs_2,d_gcs_3">
@@ -135,16 +135,19 @@ $currentDate = date('d.m.Y');
                             1 => 'Dyspnoe',
                             2 => 'Apnoe',
                             3 => 'Schnappatmung',
-                            4 => 'Andere pathologien',
-                            99 => 'Nicht untersucht'
+                            4 => 'sonstige path. Atemmuster',
+                            5 => 'Beatmung',
+                            6 => 'Hyperventilation',
+                            99 => 'nicht untersucht'
                         ];
                         $b_auskult_labels = [
                             0 => 'unauffällig',
                             1 => 'Spastik',
                             2 => 'Stridor',
                             3 => 'Rasselgeräusche',
-                            4 => 'Andere pathologien',
-                            99 => 'Nicht untersucht'
+                            4 => 'Andere Pathologien',
+                            98 => 'nicht beurteilbar',
+                            99 => 'nicht untersucht'
                         ];
                         $c_kreislauf_labels = [
                             1 => 'stabil',
@@ -153,19 +156,29 @@ $currentDate = date('d.m.Y');
                         ];
                         $c_ekg_labels = [
                             1 => 'Sinusrhythmus',
-                            2 => 'STEMI',
+                            2 => 'Infarkt EKG / STEMI',
+                            21 => 'Schrittmacherrhythmus',
                             3 => 'Absolute Arrhythmie',
-                            4 => 'Kammerflimmern',
-                            5 => 'AV-Block II°/III°',
+                            4 => 'Kammerflimmern,-flattern',
+                            41 => 'Pulslose elektrische Aktivität',
+                            5 => 'AV-Block II',
+                            51 => 'AV-Block III',
                             6 => 'Astystolie',
+                            7 => 'Linksschenkelblock',
+                            71 => 'Rechtsschenkelblock',
+                            97 => 'Sonstige',
                             98 => 'Nicht beurteilbar',
                             99 => 'Kein EKG'
                         ];
                         $d_bewusstsein_labels = [
                             1 => 'wach',
-                            2 => 'somnolent',
-                            3 => 'soporös',
-                            4 => 'komatös'
+                            2 => 'analgosediert / Narkose',
+                            3 => 'reagiert auf Ansprache',
+                            4 => 'reagiert auf Schmerzreiz',
+                            5 => 'bewusstlos',
+                            97 => 'Sonstige',
+                            98 => 'nicht beurteilbar',
+                            99 => 'nicht untersucht'
                         ];
                         $d_ex_1_labels = [
                             1 => 'uneingeschränkt',
@@ -232,6 +245,14 @@ $currentDate = date('d.m.Y');
                             98 => 'nicht beurteilbar',
                             99 => 'nicht untersucht'
                         ];
+                        $c_puls_reg_labels = [
+                            1 => 'regelmäßig',
+                            2 => 'arrhythmisch'
+                        ];
+                        $c_puls_rad_labels = [
+                            1 => 'tastbar',
+                            2 => 'nicht tastbar'
+                        ];
 
                         $psychDisplayTexts = [];
                         if (!empty($psych) && is_array($psych)) {
@@ -245,87 +266,349 @@ $currentDate = date('d.m.Y');
                         $psychDisplay = !empty($psychDisplayTexts) ? implode(', ', $psychDisplayTexts) : '';
                         ?>
                         <div class="col edivi__overview-container">
-                            <div class="row edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/atemwege/index.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
-                                <h6 class="fw-bold pt-1 pb-0">Atemwege</h6>
-                                <div class="col border border-end-0 border-light py-1"><span class="fw-bold">Atemwegszustand</span> <?= $awfrei_labels[$daten['awfrei_1']] ?? '' ?></div>
-                                <div class="col border border-light py-1"><span class="fw-bold">Zyanose</span> <?= $zyanose_labels[$daten['zyanose_1']] ?? '' ?></div>
+                            <div class="row">
+                                <div class="col">
+                                    <div class="row edivi__box edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/atemwege/index.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
+                                        <h5 class="text-light px-2 py-1 edivi__group-check">Atemwege</h5>
+                                        <div class="col">
+                                            <div class="row my-2">
+                                                <div class="col">
+                                                    <label for="atemwegszustand" class="edivi__description">Atemwegszustand</label>
+                                                    <input type="text" name="atemwegszustand" id="atemwegszustand" class="w-100 form-control edivi__input-check" value="<?= $awfrei_labels[$daten['awfrei_1']] ?? '' ?>" readonly>
+                                                </div>
+                                            </div>
+                                            <div class="row my-2">
+                                                <div class="col">
+                                                    <label for="zyanose" class="edivi__description">Zyanose</label>
+                                                    <input type="text" name="zyanose" id="zyanose" class="w-100 form-control edivi__input-check" value="<?= $zyanose_labels[$daten['zyanose_1']] ?? '' ?>" readonly>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="row edivi__box edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/atmung/index.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
+                                        <h5 class="text-light px-2 py-1 edivi__group-check">Atmung</h5>
+                                        <div class="col">
+                                            <div class="row my-2">
+                                                <div class="col">
+                                                    <label for="beurteilung_atmung" class="edivi__description">Beurteilung Atmung</label>
+                                                    <input type="text" name="beurteilung_atmung" id="beurteilung_atmung" class="w-100 form-control edivi__input-check" value="<?= $b_symptome_labels[$daten['b_symptome']] ?? '' ?>" readonly>
+                                                </div>
+                                            </div>
+                                            <div class="row my-2">
+                                                <div class="col">
+                                                    <label for="auskultation" class="edivi__description">Auskultation</label>
+                                                    <input type="text" name="auskultation" id="auskultation" class="w-100 form-control edivi__input-check" value="<?= $b_auskult_labels[$daten['b_auskult']] ?? '' ?>" readonly>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="row edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/atmung/index.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
-                                <h6 class="fw-bold pt-1 pb-0">Atmung</h6>
-                                <div class="col border border-end-0 border-light py-1"><span class="fw-bold">Beurteilung Atmung</span> <?= $b_symptome_labels[$daten['b_symptome']] ?? '' ?></div>
-                                <div class="col border border-light py-1"><span class="fw-bold">Auskultation</span> <?= $b_auskult_labels[$daten['b_auskult']] ?? '' ?></div>
+                            <div class="row">
+                                <div class="col">
+                                    <div class="row edivi__box edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/index.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
+                                        <h5 class="text-light px-2 py-1 edivi__group-check">Kreislauf</h5>
+                                        <div class="col">
+                                            <div class="row">
+                                                <div class="col">
+                                                    <div class="row my-2">
+                                                        <div class="col">
+                                                            <label for="patientenzustand" class="edivi__description">Patientenzustand</label>
+                                                            <input type="text" name="patientenzustand" id="patientenzustand" class="w-100 form-control edivi__input-check" value="<?= $c_kreislauf_labels[$daten['c_kreislauf']] ?? '' ?>" readonly>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="row my-2">
+                                                        <div class="col">
+                                                            <label for="ekgbefund" class="edivi__description">EKG-Befund</label>
+                                                            <input type="text" name="ekgbefund" id="ekgbefund" class="w-100 form-control edivi__input-check" value="<?= $c_ekg_labels[$daten['c_ekg']] ?? '' ?>" readonly>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col">
+                                                    <div class="row my-2">
+                                                        <div class="col">
+                                                            <label for="pulsregelmaessig" class="edivi__description">Pulsqualität</label>
+                                                            <input type="text" name="pulsregelmaessig" id="pulsregelmaessig" class="w-100 form-control edivi__input-check" value="<?= $c_puls_reg_labels[$daten['c_puls_reg']] ?? '' ?>" readonly>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="row my-2">
+                                                        <div class="col">
+                                                            <label for="radialispuls" class="edivi__description">Radialispuls</label>
+                                                            <input type="text" name="radialispuls" id="radialispuls" class="w-100 form-control edivi__input-check" value="<?= $c_puls_rad_labels[$daten['c_puls_rad']] ?? '' ?>" readonly>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="row edivi__box edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/neurologie/index.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
+                                        <h5 class="text-light px-2 py-1 edivi__group-check">Neurologie</h5>
+                                        <div class="col">
+                                            <div class="row">
+                                                <div class="col">
+                                                    <div class="row my-2">
+                                                        <div class="col">
+                                                            <label for="bewusstseinslage" class="edivi__description">Bewusstseinslage</label>
+                                                            <input type="text" name="bewusstseinslage" id="bewusstseinslage" class="w-100 form-control edivi__input-check" value="<?= $d_bewusstsein_labels[$daten['d_bewusstsein']] ?? '' ?>" readonly>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="row my-2">
+                                                        <div class="col">
+                                                            <label for="extremitaetenbewegung" class="edivi__description">Extremitätenbewegung</label>
+                                                            <input type="text" name="extremitaetenbewegung" id="extremitaetenbewegung" class="w-100 form-control edivi__input-check" value="<?= $d_ex_1_labels[$daten['d_ex_1']] ?? '' ?>" readonly>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-4">
+                                                    <div class="row my-2">
+                                                        <div class="col">
+                                                            <select class="w-100 form-select gcs-select edivi__input-check" name="d_gcs_1" id="d_gcs_1" required data-mapping="4,3,2,1" autocomplete="off" style="display:none">
+                                                                <option disabled hidden selected>---</option>
+                                                                <option value="0" <?php echo ($daten['d_gcs_1'] == 0 ? 'selected' : '') ?>>(4)</option>
+                                                                <option value="1" <?php echo ($daten['d_gcs_1'] == 1 ? 'selected' : '') ?>>(3)</option>
+                                                                <option value="2" <?php echo ($daten['d_gcs_1'] == 2 ? 'selected' : '') ?>>(2)</option>
+                                                                <option value="3" <?php echo ($daten['d_gcs_1'] == 3 ? 'selected' : '') ?>>(1)</option>
+                                                            </select>
+                                                            <select class="w-100 form-select gcs-select edivi__input-check" name="d_gcs_2" id="d_gcs_2" required data-mapping="5,4,3,2,1" autocomplete="off" style="display:none">
+                                                                <option disabled hidden selected>---</option>
+                                                                <option value="0" <?php echo ($daten['d_gcs_2'] == 0 ? 'selected' : '') ?>>(5)</option>
+                                                                <option value="1" <?php echo ($daten['d_gcs_2'] == 1 ? 'selected' : '') ?>>(4)</option>
+                                                                <option value="2" <?php echo ($daten['d_gcs_2'] == 2 ? 'selected' : '') ?>>(3)</option>
+                                                                <option value="3" <?php echo ($daten['d_gcs_2'] == 3 ? 'selected' : '') ?>>(2)</option>
+                                                                <option value="4" <?php echo ($daten['d_gcs_2'] == 4 ? 'selected' : '') ?>>(1)</option>
+                                                            </select>
+                                                            <select class="w-100 form-select gcs-select edivi__input-check" name="d_gcs_3" id="d_gcs_3" required data-mapping="6,5,4,3,2,1" autocomplete="off" style="display:none">
+                                                                <option disabled hidden selected>---</option>
+                                                                <option value="0" <?php echo ($daten['d_gcs_3'] == 0 ? 'selected' : '') ?>>(6)</option>
+                                                                <option value="1" <?php echo ($daten['d_gcs_3'] == 1 ? 'selected' : '') ?>>(5)</option>
+                                                                <option value="2" <?php echo ($daten['d_gcs_3'] == 2 ? 'selected' : '') ?>>(4)</option>
+                                                                <option value="3" <?php echo ($daten['d_gcs_3'] == 3 ? 'selected' : '') ?>>(3)</option>
+                                                                <option value="4" <?php echo ($daten['d_gcs_3'] == 4 ? 'selected' : '') ?>>(2)</option>
+                                                                <option value="5" <?php echo ($daten['d_gcs_3'] == 5 ? 'selected' : '') ?>>(1)</option>
+                                                            </select>
+                                                            <label for="_GCS_" class="edivi__description">GCS</label>
+                                                            <input type="text" name="_GCS_" id="_GCS_" class="w-100 form-control edivi__input-check" value="" readonly>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col">
+                                                    <div class="row my-2">
+                                                        <div class="col">
+                                                            <label for="pupillenweite_li" class="edivi__description">Pupillenweite li</label>
+                                                            <input type="text" name="pupillenweite_li" id="pupillenweite_li" class="w-100 form-control edivi__input-check" value="<?= $d_pupillenw_1_labels[$daten['d_pupillenw_1']] ?? '' ?>" readonly>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="row my-2">
+                                                        <div class="col">
+                                                            <label for="pupillenweite_re" class="edivi__description">re</label>
+                                                            <input type="text" name="pupillenweite_re" id="pupillenweite_re" class="w-100 form-control edivi__input-check" value="<?= $d_pupillenw_1_labels[$daten['d_pupillenw_2']] ?? '' ?>" readonly>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="row my-2">
+                                                        <div class="col">
+                                                            <label for="lichtreaktion_li" class="edivi__description">Lichtreaktion li</label>
+                                                            <input type="text" name="lichtreaktion_li" id="lichtreaktion_li" class="w-100 form-control edivi__input-check" value="<?= $d_lichtreakt_1_labels[$daten['d_lichtreakt_1']] ?? '' ?>" readonly>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="row my-2">
+                                                        <div class="col">
+                                                            <label for="lichtreaktion_re" class="edivi__description">re</label>
+                                                            <input type="text" name="lichtreaktion_re" id="lichtreaktion_re" class="w-100 form-control edivi__input-check" value="<?= $d_lichtreakt_1_labels[$daten['d_lichtreakt_2']] ?? '' ?>" readonly>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="row edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/index.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
-                                <h6 class="fw-bold pt-1 pb-0">Kreislauf</h6>
-                                <div class="col border border-end-0 border-light py-1"><span class="fw-bold">Patientenzustand</span> <?= $c_kreislauf_labels[$daten['c_kreislauf']] ?? '' ?></div>
-                                <div class="col border border-light py-1"><span class="fw-bold">EKG-Befund</span> <?= $c_ekg_labels[$daten['c_ekg']] ?? '' ?></div>
+                            <div class="row">
+                                <div class="col-8">
+                                    <div class="row edivi__box edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/index.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
+                                        <h5 class="text-light px-2 py-1 edivi__group-check">Verletzungen</h5>
+                                        <div class="col">
+                                            <div class="row">
+                                                <div class="col">
+                                                    <div class="row my-2">
+                                                        <div class="col">
+                                                            <label for="schädel_hirn" class="edivi__description">Schädel-Hirn</label>
+                                                            <input type="text" name="schädel_hirn" id="schädel_hirn" class="w-100 form-control edivi__input-check" value="<?= ($v_muster_k_labels[$daten['v_muster_k']] ?? '') . (!empty($daten['v_muster_k1']) ? ' / ' . ($v_muster_k1_labels[$daten['v_muster_k1']] ?? '') : '') ?>" readonly>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="row my-2">
+                                                        <div class="col">
+                                                            <label for="wirbelsaeule" class="edivi__description">Wirbelsäule</label>
+                                                            <input type="text" name="wirbelsaeule" id="wirbelsaeule" class="w-100 form-control edivi__input-check" value="<?= ($v_muster_k_labels[$daten['v_muster_w']] ?? '') . (!empty($daten['v_musterw1']) ? ' / ' . ($v_muster_k1_labels[$daten['v_muster_w1']] ?? '') : '') ?>" readonly>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="row my-2">
+                                                        <div class="col">
+                                                            <label for="thorax" class="edivi__description">Thorax</label>
+                                                            <input type="text" name="thorax" id="thorax" class="w-100 form-control edivi__input-check" value="<?= ($v_muster_k_labels[$daten['v_muster_t']] ?? '') . (!empty($daten['v_muster_t1']) ? ' / ' . ($v_muster_k1_labels[$daten['v_muster_t1']] ?? '') : '') ?>" readonly>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="row my-2">
+                                                        <div class="col">
+                                                            <label for="abdomen" class="edivi__description">Abdomen</label>
+                                                            <input type="text" name="abdomen" id="abdomen" class="w-100 form-control edivi__input-check" value="<?= ($v_muster_k_labels[$daten['v_muster_a']] ?? '') . (!empty($daten['v_muster_a1']) ? ' / ' . ($v_muster_k1_labels[$daten['v_muster_a1']] ?? '') : '') ?>" readonly>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col">
+                                                    <div class="row my-2">
+                                                        <div class="col">
+                                                            <label for="obere_extremitaeten" class="edivi__description">Obere Extremitäten</label>
+                                                            <input type="text" name="obere_extremitaeten" id="obere_extremitaeten" class="w-100 form-control edivi__input-check" value="<?= ($v_muster_k_labels[$daten['v_muster_al']] ?? '') . (!empty($daten['v_muster_al1']) ? ' / ' . ($v_muster_k1_labels[$daten['v_muster_al1']] ?? '') : '') ?>" readonly>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="row my-2">
+                                                        <div class="col">
+                                                            <label for="untere_extremitaeten" class="edivi__description">Untere Extremitäten</label>
+                                                            <input type="text" name="untere_extremitaeten" id="untere_extremitaeten" class="w-100 form-control edivi__input-check" value="<?= ($v_muster_k_labels[$daten['v_muster_bl']] ?? '') . (!empty($daten['v_musterbl1']) ? ' / ' . ($v_muster_k1_labels[$daten['v_muster_bl1']] ?? '') : '') ?>" readonly>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="row edivi__box edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/index.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
+                                        <h5 class="text-light px-2 py-1">Schmerzen</h5>
+                                        <div class="col">
+                                            <div class="row my-2">
+                                                <div class="col">
+                                                    <label for="intensitaet" class="edivi__description">Intensität</label>
+                                                    <input type="text" name="intensitaet" id="intensitaet" class="w-100 form-control" value="<?= $sz_nrs_labels[$daten['sz_nrs']] ?? '' ?>" readonly>
+                                                </div>
+                                            </div>
+                                            <div class="row my-2">
+                                                <div class="col">
+                                                    <label for="toleranz" class="edivi__description">Toleranz</label>
+                                                    <input type="text" name="ekgbefund" id="ekgbefund" class="w-100 form-control" value="<?= $sz_toleranz_1_labels[$daten['sz_toleranz_1']] ?? '' ?>" readonly>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="row edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/neurologie/index.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
-                                <h6 class="fw-bold pt-1 pb-0">Neurologie</h6>
-                                <div class="col border border-end-0 border-light py-1"><span class="fw-bold">Bewusstseinslage</span> <?= $d_bewusstsein_labels[$daten['d_bewusstsein']] ?? '' ?></div>
-                                <div class="col border border-light py-1"><span class="fw-bold">Extremitätenbewegung</span> <?= $d_ex_1_labels[$daten['d_ex_1']] ?? '' ?></div>
-
-                                <select class="w-100 form-select gcs-select edivi__input-check" name="d_gcs_1" id="d_gcs_1" required data-mapping="4,3,2,1" autocomplete="off" style="display:none">
-                                    <option disabled hidden selected>---</option>
-                                    <option value="0" <?php echo ($daten['d_gcs_1'] == 0 ? 'selected' : '') ?>>(4)</option>
-                                    <option value="1" <?php echo ($daten['d_gcs_1'] == 1 ? 'selected' : '') ?>>(3)</option>
-                                    <option value="2" <?php echo ($daten['d_gcs_1'] == 2 ? 'selected' : '') ?>>(2)</option>
-                                    <option value="3" <?php echo ($daten['d_gcs_1'] == 3 ? 'selected' : '') ?>>(1)</option>
-                                </select>
-                                <select class="w-100 form-select gcs-select edivi__input-check" name="d_gcs_2" id="d_gcs_2" required data-mapping="5,4,3,2,1" autocomplete="off" style="display:none">
-                                    <option disabled hidden selected>---</option>
-                                    <option value="0" <?php echo ($daten['d_gcs_2'] == 0 ? 'selected' : '') ?>>(5)</option>
-                                    <option value="1" <?php echo ($daten['d_gcs_2'] == 1 ? 'selected' : '') ?>>(4)</option>
-                                    <option value="2" <?php echo ($daten['d_gcs_2'] == 2 ? 'selected' : '') ?>>(3)</option>
-                                    <option value="3" <?php echo ($daten['d_gcs_2'] == 3 ? 'selected' : '') ?>>(2)</option>
-                                    <option value="4" <?php echo ($daten['d_gcs_2'] == 4 ? 'selected' : '') ?>>(1)</option>
-                                </select>
-                                <select class="w-100 form-select gcs-select edivi__input-check" name="d_gcs_3" id="d_gcs_3" required data-mapping="6,5,4,3,2,1" autocomplete="off" style="display:none">
-                                    <option disabled hidden selected>---</option>
-                                    <option value="0" <?php echo ($daten['d_gcs_3'] == 0 ? 'selected' : '') ?>>(6)</option>
-                                    <option value="1" <?php echo ($daten['d_gcs_3'] == 1 ? 'selected' : '') ?>>(5)</option>
-                                    <option value="2" <?php echo ($daten['d_gcs_3'] == 2 ? 'selected' : '') ?>>(4)</option>
-                                    <option value="3" <?php echo ($daten['d_gcs_3'] == 3 ? 'selected' : '') ?>>(3)</option>
-                                    <option value="4" <?php echo ($daten['d_gcs_3'] == 4 ? 'selected' : '') ?>>(2)</option>
-                                    <option value="5" <?php echo ($daten['d_gcs_3'] == 5 ? 'selected' : '') ?>>(1)</option>
-                                </select>
-
-                                <div class="col-2 border border-start-0 border-light py-1"><span class="fw-bold">GCS</span> <span id="_GCS_"></span></div>
-                            </div>
-                            <div class="row edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/neurologie/index.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
-                                <div class="col border border-top-0 border-end-0 border-light py-1"><span class="fw-bold">Pupillenweite li</span> <?= $d_pupillenw_1_labels[$daten['d_pupillenw_1']] ?? '' ?> <span class="fw-bold" style="padding-left:20px">re</span> <?= $d_pupillenw_1_labels[$daten['d_pupillenw_2']] ?? '' ?></div>
-                                <div class="col border border-top-0 border-end-0 border-light py-1"><span class="fw-bold">Lichtreaktion li</span> <?= $d_lichtreakt_1_labels[$daten['d_lichtreakt_1']] ?? '' ?> <span class="fw-bold" style="padding-left:20px">re</span> <?= $d_lichtreakt_1_labels[$daten['d_lichtreakt_2']] ?? '' ?></div>
-                            </div>
-                            <div class="row edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/index.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
-                                <h6 class="fw-bold pt-1 pb-0">Verletzungen</h6>
-                                <div class="col border border-end-0 border-light py-1"><span class="fw-bold">Schädel-Hirn</span> <?= ($v_muster_k_labels[$daten['v_muster_k']] ?? '') . (!empty($daten['v_muster_k1']) ? ' / ' . ($v_muster_k1_labels[$daten['v_muster_k1']] ?? '') : '') ?></div>
-                                <div class="col border border-light py-1"><span class="fw-bold">Wirbelsäule</span> <?= ($v_muster_k_labels[$daten['v_muster_w']] ?? '') . (!empty($daten['v_musterw1']) ? ' / ' . ($v_muster_k1_labels[$daten['v_muster_w1']] ?? '') : '') ?></div>
-                                <div class="col border border-start-0 border-light py-1"><span class="fw-bold">Thorax</span> <?= ($v_muster_k_labels[$daten['v_muster_t']] ?? '') . (!empty($daten['v_muster_t1']) ? ' / ' . ($v_muster_k1_labels[$daten['v_muster_t1']] ?? '') : '') ?></div>
-                                <div class="col border border-start-0 border-light py-1"><span class="fw-bold">Abdomen</span> <?= ($v_muster_k_labels[$daten['v_muster_a']] ?? '') . (!empty($daten['v_muster_a1']) ? ' / ' . ($v_muster_k1_labels[$daten['v_muster_a1']] ?? '') : '') ?></div>
-                            </div>
-                            <div class="row edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/index.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
-                                <div class="col border border-top-0 border-end-0 border-light py-1"><span class="fw-bold">Obere Extremitäten</span> <?= ($v_muster_k_labels[$daten['v_muster_al']] ?? '') . (!empty($daten['v_muster_al1']) ? ' / ' . ($v_muster_k1_labels[$daten['v_muster_al1']] ?? '') : '') ?></div>
-                                <div class="col border border-top-0 border-light py-1"><span class="fw-bold">Untere Extremitäten</span> <?= ($v_muster_k_labels[$daten['v_muster_bl']] ?? '') . (!empty($daten['v_musterbl1']) ? ' / ' . ($v_muster_k1_labels[$daten['v_muster_bl1']] ?? '') : '') ?></div>
-                            </div>
-                            <div class="row edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/index.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
-                                <h6 class="fw-bold pt-1 pb-0">Schmerzen</h6>
-                                <div class="col border border-end-0 border-light py-1"><span class="fw-bold">Intensität</span> <?= $sz_nrs_labels[$daten['sz_nrs']] ?? '' ?></div>
-                                <div class="col border border-light py-1"><span class="fw-bold">Toleranz</span> <?= $sz_toleranz_1_labels[$daten['sz_toleranz_1']] ?? '' ?></div>
-                            </div>
-                            <div class="row edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/psychisch/index.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
-                                <h6 class="fw-bold pt-1 pb-0">Psychischer Zustand</h6>
-                                <div class="col border border-light py-1"><?= !empty($psychDisplay) ? htmlspecialchars($psychDisplay) : '' ?></div>
-                            </div>
-                            <div class="row edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/messwerte/index.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
-                                <h6 class="fw-bold pt-1 pb-0">Vitalparameter</h6>
-                                <div class="col border border-end-0 border-light py-1"><span class="fw-bold">SpO<sub>2</sub></span> <?= $daten['spo2'] ?? '' ?></div>
-                                <div class="col border border-end-0 border-light py-1"><span class="fw-bold">AF</span> <?= $daten['atemfreq'] ?? '' ?></div>
-                                <div class="col border border-end-0 border-light py-1"><span class="fw-bold">etCO<sub>2</sub></span> <?= $daten['etco2'] ?? '' ?></div>
-                                <div class="col border border-end-0 border-light py-1"><span class="fw-bold">HF</span> <?= $daten['herzfreq'] ?? '' ?></div>
-                                <div class="col border border-end-0 border-light py-1"><span class="fw-bold">RR<sub>sys</sub></span> <?= $daten['rrsys'] ?? '' ?></div>
-                                <div class="col border border-end-0 border-light py-1"><span class="fw-bold">RR<sub>dia</sub></span> <?= $daten['rrdias'] ?? '' ?></div>
-                                <div class="col border border-end-0 border-light py-1"><span class="fw-bold">BZ</span> <?= $daten['bz'] ?? '' ?></div>
-                                <div class="col border border-light py-1"><span class="fw-bold">Temp</span> <?= $daten['temp'] ?? '' ?></div>
+                            <div class="row">
+                                <div class="col-4">
+                                    <div class="row edivi__box edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/psychisch/index.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
+                                        <h5 class="text-light px-2 py-1 edivi__group-check">Psyche</h5>
+                                        <div class="col">
+                                            <div class="row my-2">
+                                                <div class="col">
+                                                    <label for="psychischer_zustand" class="edivi__description">Psychischer Zustand</label>
+                                                    <input type="text" name="psychischer_zustand" id="psychischer_zustand" class="w-100 form-control edivi__input-check" value="<?= !empty($psychDisplay) ? htmlspecialchars($psychDisplay) : '' ?>" readonly>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="row edivi__box edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/messwerte/index.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
+                                        <h5 class="text-light px-2 py-1">Vitalparameter</h5>
+                                        <div class="col">
+                                            <div class="row">
+                                                <div class="col">
+                                                    <div class="row my-2">
+                                                        <div class="col">
+                                                            <label for="spo2" class="edivi__description">SpO<sub>2</sub></label>
+                                                            <input type="text" name="spo2" id="spo2" class="w-100 form-control edivi__input-check" value="<?= $daten['spo2'] ?? '' ?>" readonly>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="row my-2">
+                                                        <div class="col">
+                                                            <label for="af" class="edivi__description">AF</label>
+                                                            <input type="text" name="af" id="af" class="w-100 form-control edivi__input-check" value="<?= $daten['atemfreq'] ?? '' ?>" readonly>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="row my-2">
+                                                        <div class="col">
+                                                            <label for="etco2" class="edivi__description">etCO<sub>2</sub></label>
+                                                            <input type="text" name="etco2" id="etco2" class="w-100 form-control" value="<?= $daten['etco2'] ?? '' ?>" readonly>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="row my-2">
+                                                        <div class="col">
+                                                            <label for="hf" class="edivi__description">HF</label>
+                                                            <input type="text" name="hf" id="hf" class="w-100 form-control edivi__input-check" value="<?= $daten['herzfreq'] ?? '' ?>" readonly>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="row my-2">
+                                                        <div class="col">
+                                                            <label for="rrsys" class="edivi__description">RR<sub>sys</sub></label>
+                                                            <input type="text" name="rrsys" id="rrsys" class="w-100 form-control edivi__input-check" value="<?= $daten['rrsys'] ?? '' ?>" readonly>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="row my-2">
+                                                        <div class="col">
+                                                            <label for="rrdia" class="edivi__description">RR<sub>dia</sub></label>
+                                                            <input type="text" name="rrdia" id="rrdia" class="w-100 form-control" value="<?= $daten['rrdias'] ?? '' ?>" readonly>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="row my-2">
+                                                        <div class="col">
+                                                            <label for="bz" class="edivi__description">BZ</label>
+                                                            <input type="text" name="bz" id="bz" class="w-100 form-control edivi__input-check" value="<?= $daten['bz'] ?? '' ?>" readonly>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="row my-2">
+                                                        <div class="col">
+                                                            <label for="temp" class="edivi__description">Temp</label>
+                                                            <input type="text" name="temp" id="temp" class="w-100 form-control" value="<?= $daten['temp'] ?? '' ?>" readonly>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -352,13 +635,12 @@ $currentDate = date('d.m.Y');
                         total += mapping[selectedIndex];
                     }
                 });
-                gcsInput.innerText = total;
+                gcsInput.value = total;
             }
 
             selects.forEach(sel => {
                 sel.addEventListener('change', updateGCS);
             });
-
 
             updateGCS();
         });

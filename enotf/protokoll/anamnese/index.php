@@ -93,18 +93,18 @@ $currentDate = date('d.m.Y');
                             <a href="<?= BASE_PATH ?>enotf/protokoll/anamnese/1.php?enr=<?= $daten['enr'] ?>">
                                 <span>Anamnese</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/anamnese/2.php?enr=<?= $daten['enr'] ?>" data-requires="diagnose">
-                                <span>Diagnose</span>
-                            </a>
                         </div>
                         <div class="col edivi__overview-container">
-                            <div class="row edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/anamnese/1.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
-                                <h6 class="fw-bold pt-1 pb-0">Anamnese</h6>
-                                <div class="col border border-light py-1" style="min-height: 30vh;"><?= $daten['anmerkungen'] ?? '' ?></div>
-                            </div>
-                            <div class="row edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/anamnese/2.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
-                                <h6 class="fw-bold pt-1 pb-0">Verdachts-/Erstdiagnose</h6>
-                                <div class="col border border-light py-1" style="min-height: 15vh;"><?= $daten['diagnose'] ?? '' ?></div>
+                            <div class="row edivi__box edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/anamnese/1.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
+                                <h5 class="text-light px-2 py-1">Anamnese</h5>
+                                <div class="col">
+                                    <div class="row my-2">
+                                        <div class="col">
+                                            <label for="anamnese" class="edivi__description" style="display: none;">Anamnese</label>
+                                            <textarea name="anamnese" id="anamnese" class="w-100 form-control" style="height: 40vh; overflow-y: auto; resize: vertical;" readonly><?= $daten['anmerkungen'] ?></textarea>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

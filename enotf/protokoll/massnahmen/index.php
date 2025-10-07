@@ -178,6 +178,127 @@ function displayAllZugaenge($zugangJson)
     return implode('<br>', $displays);
 }
 
+function displayAllZugaengeText($zugangJson)
+{
+    if (!isset($zugangJson) || $zugangJson === null) {
+        return 'Nicht gesetzt';
+    }
+    if ($zugangJson === '0') {
+        return 'Kein Zugang';
+    }
+
+    $zugaenge = getCurrentZugaenge($zugangJson);
+    if (empty($zugaenge)) {
+        return 'Keine gültigen Zugänge';
+    }
+
+    usort($zugaenge, function ($a, $b) {
+        return [$a['art'], $a['ort'], $a['seite']] <=> [$b['art'], $b['ort'], $b['seite']];
+    });
+
+    $artNames = ['pvk' => 'PVK', 'zvk' => 'ZVK', 'io' => 'intraossär'];
+    $displays = [];
+
+    foreach ($zugaenge as $zugang) {
+        $artName   = $artNames[$zugang['art']] ?? $zugang['art'];
+        $groesse   = normalize_groesse_pretty($zugang['groesse'] ?? '');
+        $ort       = $zugang['ort']   ?? '';
+        $seite     = $zugang['seite'] ?? '';
+
+        $displays[] = sprintf('%s %s %s %s', $artName, $groesse, $ort, $seite);
+    }
+
+    return implode("\n", $displays);
+}
+
+function displayZugaengeByArt($zugangJson, $filterArt = null)
+{
+    if (!isset($zugangJson) || $zugangJson === null) {
+        return '<em>Nicht gesetzt</em>';
+    }
+    if ($zugangJson === '0') {
+        return 'Kein Zugang';
+    }
+
+    $zugaenge = getCurrentZugaenge($zugangJson);
+    if (empty($zugaenge)) {
+        return '<em>Keine gültigen Zugänge</em>';
+    }
+
+    // Filtern nach Art, wenn angegeben
+    if ($filterArt !== null) {
+        $zugaenge = array_filter($zugaenge, function ($zugang) use ($filterArt) {
+            return $zugang['art'] === $filterArt;
+        });
+
+        if (empty($zugaenge)) {
+            return '<em>Keine Zugänge dieser Art</em>';
+        }
+    }
+
+    usort($zugaenge, function ($a, $b) {
+        return [$a['art'], $a['ort'], $a['seite']] <=> [$b['art'], $b['ort'], $b['seite']];
+    });
+
+    $artNames = ['pvk' => 'PVK', 'zvk' => 'ZVK', 'io' => 'intraossär'];
+    $displays = [];
+
+    foreach ($zugaenge as $zugang) {
+        $artName   = $artNames[$zugang['art']] ?? $zugang['art'];
+        $groesse   = normalize_groesse_pretty($zugang['groesse'] ?? '');
+        $ort       = $zugang['ort']   ?? '';
+        $seite     = $zugang['seite'] ?? '';
+
+        $displays[] = sprintf('%s %s %s %s', $artName, $groesse, $ort, $seite);
+    }
+
+    return implode('<br>', $displays);
+}
+
+// Oder als Text-Version für Textareas:
+function displayZugaengeByArtText($zugangJson, $filterArt = null)
+{
+    if (!isset($zugangJson) || $zugangJson === null) {
+        return 'Nicht gesetzt';
+    }
+    if ($zugangJson === '0') {
+        return 'Kein Zugang';
+    }
+
+    $zugaenge = getCurrentZugaenge($zugangJson);
+    if (empty($zugaenge)) {
+        return 'Keine gültigen Zugänge';
+    }
+
+    // Filtern nach Art, wenn angegeben
+    if ($filterArt !== null) {
+        $zugaenge = array_filter($zugaenge, function ($zugang) use ($filterArt) {
+            return $zugang['art'] === $filterArt;
+        });
+
+        if (empty($zugaenge)) {
+            return 'Keine Zugänge dieser Art';
+        }
+    }
+
+    usort($zugaenge, function ($a, $b) {
+        return [$a['art'], $a['ort'], $a['seite']] <=> [$b['art'], $b['ort'], $b['seite']];
+    });
+
+    $artNames = ['pvk' => 'PVK', 'zvk' => 'ZVK', 'io' => 'intraossär'];
+    $displays = [];
+
+    foreach ($zugaenge as $zugang) {
+        $artName   = $artNames[$zugang['art']] ?? $zugang['art'];
+        $groesse   = normalize_groesse_pretty($zugang['groesse'] ?? '');
+        $ort       = $zugang['ort']   ?? '';
+        $seite     = $zugang['seite'] ?? '';
+
+        $displays[] = sprintf('%s %s %s %s', $artName, $groesse, $ort, $seite);
+    }
+
+    return implode("\n", $displays);
+}
 
 function hasAnyZugang($zugangJson)
 {
@@ -206,7 +327,7 @@ function getCurrentMedikamente($medikamenteJson)
 function displayAllMedikamente($medikamenteJson)
 {
     if (!isset($medikamenteJson) || $medikamenteJson === null) {
-        return '<em>Nicht gesetzt</em>';
+        return '';
     }
 
     if ($medikamenteJson === '0') {
@@ -216,7 +337,7 @@ function displayAllMedikamente($medikamenteJson)
     $medikamente = getCurrentMedikamente($medikamenteJson);
 
     if (empty($medikamente)) {
-        return '<em>Keine gültigen Medikamente</em>';
+        return '';
     }
 
     usort($medikamente, function ($a, $b) {
@@ -242,7 +363,7 @@ function displayAllMedikamente($medikamenteJson)
         );
     }
 
-    return implode('<br>', $displays);
+    return implode("\n", $displays);
 }
 
 function hasAnyMedikamente($medikamenteJson)
@@ -313,8 +434,10 @@ function hasAnyMedikamente($medikamenteJson)
                         $awsicherung_neu_labels = [
                             1 => 'keine',
                             2 => 'Endotrachealtubus',
-                            3 => 'Larynxtubus/-maske',
-                            4 => 'Guedel-/Wendltubus',
+                            3 => 'Larynxmaske',
+                            4 => 'Guedeltubus',
+                            5 => 'Larynxtubus',
+                            6 => 'Wendl-Tubus',
                             99 => 'Sonstige'
                         ];
                         $b_beatmung_labels = [
@@ -344,25 +467,90 @@ function hasAnyMedikamente($medikamenteJson)
                         ];
                         ?>
                         <div class="col edivi__overview-container">
-                            <div class="row edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/atemwege/index.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
-                                <h6 class="fw-bold pt-1 pb-0">Atemwege</h6>
-                                <div class="col border border-light py-1"><span class="fw-bold">Atemwegssicherung</span> <?= $awsicherung_neu_labels[$daten['awsicherung_neu']] ?? '' ?></div>
-                            </div>
-                            <div class="row edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/atmung/index.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
-                                <h6 class="fw-bold pt-1 pb-0">Atmung</h6>
-                                <div class="col border border-end-0 border-light py-1"><span class="fw-bold">Beatmung</span> <?= $b_beatmung_labels[$daten['b_beatmung']] ?? '' ?></div>
-                                <div class="col border border-light py-1"><span class="fw-bold">O2-Gabe</span> <?= $o2gabe_labels[$daten['o2gabe']] ?? '' ?></div>
-                            </div>
-                            <div class="row edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/index.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
-                                <h6 class="fw-bold pt-1 pb-0">Zugänge</h6>
-                                <div class="col border border-light py-1" style="min-height: 15vh;">
-                                    <?= displayAllZugaenge($daten['c_zugang'] ?? '') ?>
+                            <div class="row">
+                                <div class="col">
+                                    <div class="row edivi__box edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/atemwege/index.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
+                                        <h5 class="text-light px-2 py-1 edivi__group-check">Atemwege</h5>
+                                        <div class="col">
+                                            <div class="row my-2">
+                                                <div class="col">
+                                                    <label for="atemwegssicherung" class="edivi__description">Atemwegssicherung</label>
+                                                    <input type="text" name="atemwegssicherung" id="atemwegssicherung" class="w-100 form-control edivi__input-check" value="<?= $awsicherung_neu_labels[$daten['awsicherung_neu']] ?? '' ?>" readonly>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="row edivi__box edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/atmung/index.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
+                                        <h5 class="text-light px-2 py-1">Atmung</h5>
+                                        <div class="col">
+                                            <div class="row">
+                                                <div class="col">
+                                                    <div class="row my-2">
+                                                        <div class="col">
+                                                            <label for="beatmung" class="edivi__description">Beatmung</label>
+                                                            <input type="text" name="beatmung" id="beatmung" class="w-100 form-control edivi__input-check" value="<?= $b_beatmung_labels[$daten['b_beatmung']] ?? '' ?>" readonly>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="row my-2">
+                                                        <div class="col">
+                                                            <label for="o2gabe" class="edivi__description">O2-Gabe</label>
+                                                            <input type="text" name="o2gabe" id="o2gabe" class="w-100 form-control" value="<?= $o2gabe_labels[$daten['o2gabe']] ?? '' ?>" readonly>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="row edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/medikamente/index.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
-                                <h6 class="fw-bold pt-1 pb-0">Medikamente</h6>
-                                <div class="col border border-light py-1" style="min-height: 40vh;">
-                                    <?= displayAllMedikamente($daten['medis'] ?? '') ?>
+                            <div class="row">
+                                <div class="col">
+                                    <div class="row edivi__box edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/index.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
+                                        <h5 class="text-light px-2 py-1">Zugänge</h5>
+                                        <div class="col">
+                                            <div class="row">
+                                                <div class="col">
+                                                    <div class="row my-2">
+                                                        <div class="col">
+                                                            <label for="pvk" class="edivi__description">PVK</label>
+                                                            <textarea name="pvk" id="pvk" class="w-100 form-control" style="height: 200px; overflow-y: auto; resize: vertical;" readonly><?= displayZugaengeByArtText($daten['c_zugang'] ?? '', 'pvk') ?></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="row my-2">
+                                                        <div class="col">
+                                                            <label for="io" class="edivi__description">intraossär</label>
+                                                            <textarea name="io" id="io" class="w-100 form-control" style="height: 200px; overflow-y: auto; resize: vertical;" readonly><?= displayZugaengeByArtText($daten['c_zugang'] ?? '', 'io') ?></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <div class="row edivi__box edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/medikamente/index.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
+                                        <h5 class="text-light px-2 py-1 edivi__group-check">Medikamente</h5>
+                                        <div class="col">
+                                            <div class="row">
+                                                <div class="col">
+                                                    <div class="row my-2">
+                                                        <div class="col">
+                                                            <label for="medikamente" class="edivi__description" style="display: none;">Medikamente</label>
+                                                            <textarea name="medikamente" id="medikamente" class="w-100 form-control edivi__input-check" style="height: 40vh; overflow-y: auto; resize: vertical;" readonly><?= displayAllMedikamente($daten['medis'] ?? '') ?></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
