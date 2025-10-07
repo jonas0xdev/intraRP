@@ -181,130 +181,96 @@ function hasAnyZugang($zugangJson)
                             <label for="c_zugang-0">Kein Zugang</label>
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton-more">
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1.php?enr=<?= $daten['enr'] ?>" class="active">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1.php?enr=<?= $daten['enr'] ?>">
                                 <span>PVK</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_2.php?enr=<?= $daten['enr'] ?>">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_2.php?enr=<?= $daten['enr'] ?>" class="active">
                                 <span>intraossär</span>
                             </a>
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton-more">
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1_1.php?enr=<?= $daten['enr'] ?>">
-                                <span>Handrücken</span>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_2_1.php?enr=<?= $daten['enr'] ?>">
+                                <span>Tibia proximal</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1_2.php?enr=<?= $daten['enr'] ?>">
-                                <span>Unterarm</span>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_2_3.php?enr=<?= $daten['enr'] ?>" class="active">
+                                <span>Tibia distal</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1_3.php?enr=<?= $daten['enr'] ?>" class="active">
-                                <span>Ellbeuge</span>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_2_2.php?enr=<?= $daten['enr'] ?>">
+                                <span>Humerus proximal</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1_5.php?enr=<?= $daten['enr'] ?>">
-                                <span>Oberarm</span>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_2_4.php?enr=<?= $daten['enr'] ?>">
+                                <span>Sternum</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1_6.php?enr=<?= $daten['enr'] ?>">
-                                <span>Hals</span>
-                            </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1_7.php?enr=<?= $daten['enr'] ?>">
-                                <span>Kopf</span>
-                            </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1_8.php?enr=<?= $daten['enr'] ?>">
-                                <span>Bein</span>
-                            </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1_4.php?enr=<?= $daten['enr'] ?>">
-                                <span>Fuss</span>
-                            </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1_9.php?enr=<?= $daten['enr'] ?>">
-                                <span>Sonstige</span>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_2_5.php?enr=<?= $daten['enr'] ?>">
+                                <span>anderer Ort</span>
                             </a>
                         </div>
                         <div class="col-1 d-flex flex-column edivi__interactbutton">
                             <label class="edivi__interactbutton-text">links</label>
 
                             <?php
-                            $groessen = [
-                                ['id' => '24G',       'label' => '24 G'],
-                                ['id' => '22G',       'label' => '22 G'],
-                                ['id' => '20G',       'label' => '20 G'],
-                                ['id' => '18G',       'label' => '18 G'],
-                                ['id' => '18G_kurz',  'label' => '18 G kurz'],
-                                ['id' => '17G',       'label' => '17 G'],
-                                ['id' => '16G',       'label' => '16 G'],
-                                ['id' => '14G',       'label' => '14 G'],
-                            ];
-
+                            $groessen = ['15mm', '25mm', '45mm'];
                             $currentLeftZugang = null;
+
                             foreach ($currentZugaenge as $zugang) {
-                                if ($zugang['art'] === 'pvk' && $zugang['ort'] === 'Ellbeuge' && $zugang['seite'] === 'links') {
+                                if ($zugang['art'] === 'io' && $zugang['ort'] === 'Tibia distal' && $zugang['seite'] === 'links') {
                                     $currentLeftZugang = $zugang;
                                     break;
                                 }
                             }
 
-                            foreach ($groessen as $index => $size):
-                                $idSlug   = $size['id'];
-                                $labelTxt = $size['label'];
-                                $inputId  = "c_zugang-pvk-ellbeuge-l-" . ($index + 1);
-
+                            foreach ($groessen as $index => $groesse):
+                                $radioId = "c_zugang-io-tibiadistal-l-" . ($index + 1);
                                 $zugangData = [
-                                    'art'     => 'pvk',
-                                    'groesse' => $idSlug,
-                                    'ort'     => 'Ellbeuge',
-                                    'seite'   => 'links'
+                                    'art' => 'io',
+                                    'groesse' => $groesse,
+                                    'ort' => 'Tibia distal',
+                                    'seite' => 'links'
                                 ];
-
-                                $isChecked = ($currentLeftZugang && ($currentLeftZugang['groesse'] ?? null) === $idSlug);
+                                $isChecked = ($currentLeftZugang && $currentLeftZugang['groesse'] === $groesse);
                             ?>
-                                <input
-                                    type="checkbox"
-                                    class="btn-check zugang-checkbox"
-                                    id="<?= $inputId ?>"
+                                <input type="checkbox" class="btn-check zugang-checkbox"
+                                    id="<?= $radioId ?>"
                                     name="zugang_selection"
                                     data-zugang='<?= htmlspecialchars(json_encode($zugangData), ENT_QUOTES) ?>'
-                                    data-location="pvk-ellbeuge-links"
+                                    data-location="io-tibiadistal-links"
                                     <?= $isChecked ? 'checked' : '' ?>
                                     autocomplete="off">
-                                <label for="<?= $inputId ?>" class="edivi__zugang-<?= $idSlug ?>"><?= $labelTxt ?></label>
+                                <label for="<?= $radioId ?>" class="edivi__zugang-<?= $groesse ?>"><?= $groesse ?></label>
                             <?php endforeach; ?>
-
                         </div>
                         <div class="col-1 d-flex flex-column edivi__interactbutton">
                             <label class="edivi__interactbutton-text">rechts</label>
 
                             <?php
                             $currentRightZugang = null;
+
                             foreach ($currentZugaenge as $zugang) {
-                                if ($zugang['art'] === 'pvk' && $zugang['ort'] === 'Ellbeuge' && $zugang['seite'] === 'rechts') {
+                                if ($zugang['art'] === 'io' && $zugang['ort'] === 'Tibia distal' && $zugang['seite'] === 'rechts') {
                                     $currentRightZugang = $zugang;
                                     break;
                                 }
                             }
 
-                            foreach ($groessen as $index => $size):
-                                $idSlug   = $size['id'];
-                                $labelTxt = $size['label'];
-                                $inputId  = "c_zugang-pvk-ellbeuge-r-" . ($index + 1);
-
+                            foreach ($groessen as $index => $groesse):
+                                $radioId = "c_zugang-io-tibiadistal-r-" . ($index + 1);
                                 $zugangData = [
-                                    'art'     => 'pvk',
-                                    'groesse' => $idSlug,
-                                    'ort'     => 'Ellbeuge',
-                                    'seite'   => 'rechts'
+                                    'art' => 'io',
+                                    'groesse' => $groesse,
+                                    'ort' => 'Tibia distal',
+                                    'seite' => 'rechts'
                                 ];
-
-                                $isChecked = ($currentRightZugang && ($currentRightZugang['groesse'] ?? null) === $idSlug);
+                                $isChecked = ($currentRightZugang && $currentRightZugang['groesse'] === $groesse);
                             ?>
-                                <input
-                                    type="checkbox"
-                                    class="btn-check zugang-checkbox"
-                                    id="<?= $inputId ?>"
+                                <input type="checkbox" class="btn-check zugang-checkbox"
+                                    id="<?= $radioId ?>"
                                     name="zugang_selection"
                                     data-zugang='<?= htmlspecialchars(json_encode($zugangData), ENT_QUOTES) ?>'
-                                    data-location="pvk-ellbeuge-rechts"
+                                    data-location="io-tibiadistal-rechts"
                                     <?= $isChecked ? 'checked' : '' ?>
                                     autocomplete="off">
-                                <label for="<?= $inputId ?>" class="edivi__zugang-<?= $idSlug ?>"><?= $labelTxt ?></label>
+                                <label for="<?= $radioId ?>" class="edivi__zugang-<?= $groesse ?>"><?= $groesse ?></label>
                             <?php endforeach; ?>
-
                         </div>
                     </div>
                 </div>
@@ -423,11 +389,9 @@ function hasAnyZugang($zugangJson)
                     }
                 }
 
-                let currentPageInfo = null;
-
-                currentPageInfo = {
-                    art: 'pvk',
-                    ort: 'Ellbeuge'
+                let currentPageInfo = {
+                    art: 'io',
+                    ort: 'Tibia distal'
                 };
 
                 let mergedZugaenge = existingZugaenge.filter(zugang => {

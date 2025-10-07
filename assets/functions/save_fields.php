@@ -48,13 +48,19 @@ if (isset($_POST['enr']) && isset($_POST['field'])) {
 
             $seenLocations = [];
             foreach ($zugaengeToValidate as $zugang) {
-                $requiredFields = ['art', 'groesse', 'ort', 'seite'];
+                $requiredFields = ['art', 'groesse', 'ort'];
                 foreach ($requiredFields as $requiredField) {
                     if (!isset($zugang[$requiredField]) || $zugang[$requiredField] === '') {
                         http_response_code(400);
                         echo "Pflichtfeld fehlt: $requiredField";
                         exit();
                     }
+                }
+
+                if (!array_key_exists('seite', $zugang)) {
+                    http_response_code(400);
+                    echo "Pflichtfeld fehlt: seite";
+                    exit();
                 }
 
                 $locationKey = $zugang['art'] . '-' . $zugang['ort'] . '-' . $zugang['seite'];
@@ -67,7 +73,7 @@ if (isset($_POST['enr']) && isset($_POST['field'])) {
 
                 $allowedArts = ['pvk', 'zvk', 'io'];
                 $allowedGroessen = ['24G', '22G', '20G', '18G', '18G_kurz', '17G', '16G', '14G', '15mm', '25mm', '45mm'];
-                $allowedSeiten = ['links', 'rechts'];
+                $allowedSeiten = ['links', 'rechts', ''];
 
                 if (!in_array($zugang['art'], $allowedArts)) {
                     http_response_code(400);

@@ -195,13 +195,13 @@ function hasAnyZugang($zugangJson)
                             <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1_2.php?enr=<?= $daten['enr'] ?>">
                                 <span>Unterarm</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1_3.php?enr=<?= $daten['enr'] ?>" class="active">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1_3.php?enr=<?= $daten['enr'] ?>">
                                 <span>Ellbeuge</span>
                             </a>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1_5.php?enr=<?= $daten['enr'] ?>">
                                 <span>Oberarm</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1_6.php?enr=<?= $daten['enr'] ?>">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1_6.php?enr=<?= $daten['enr'] ?>" class="active">
                                 <span>Hals</span>
                             </a>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1_7.php?enr=<?= $daten['enr'] ?>">
@@ -234,7 +234,7 @@ function hasAnyZugang($zugangJson)
 
                             $currentLeftZugang = null;
                             foreach ($currentZugaenge as $zugang) {
-                                if ($zugang['art'] === 'pvk' && $zugang['ort'] === 'Ellbeuge' && $zugang['seite'] === 'links') {
+                                if ($zugang['art'] === 'pvk' && $zugang['ort'] === 'Hals' && $zugang['seite'] === 'links') {
                                     $currentLeftZugang = $zugang;
                                     break;
                                 }
@@ -243,12 +243,12 @@ function hasAnyZugang($zugangJson)
                             foreach ($groessen as $index => $size):
                                 $idSlug   = $size['id'];
                                 $labelTxt = $size['label'];
-                                $inputId  = "c_zugang-pvk-ellbeuge-l-" . ($index + 1);
+                                $inputId  = "c_zugang-pvk-hals-l-" . ($index + 1);
 
                                 $zugangData = [
                                     'art'     => 'pvk',
                                     'groesse' => $idSlug,
-                                    'ort'     => 'Ellbeuge',
+                                    'ort'     => 'Hals',
                                     'seite'   => 'links'
                                 ];
 
@@ -260,7 +260,7 @@ function hasAnyZugang($zugangJson)
                                     id="<?= $inputId ?>"
                                     name="zugang_selection"
                                     data-zugang='<?= htmlspecialchars(json_encode($zugangData), ENT_QUOTES) ?>'
-                                    data-location="pvk-ellbeuge-links"
+                                    data-location="pvk-hals-links"
                                     <?= $isChecked ? 'checked' : '' ?>
                                     autocomplete="off">
                                 <label for="<?= $inputId ?>" class="edivi__zugang-<?= $idSlug ?>"><?= $labelTxt ?></label>
@@ -273,7 +273,7 @@ function hasAnyZugang($zugangJson)
                             <?php
                             $currentRightZugang = null;
                             foreach ($currentZugaenge as $zugang) {
-                                if ($zugang['art'] === 'pvk' && $zugang['ort'] === 'Ellbeuge' && $zugang['seite'] === 'rechts') {
+                                if ($zugang['art'] === 'pvk' && $zugang['ort'] === 'Hals' && $zugang['seite'] === 'rechts') {
                                     $currentRightZugang = $zugang;
                                     break;
                                 }
@@ -282,12 +282,12 @@ function hasAnyZugang($zugangJson)
                             foreach ($groessen as $index => $size):
                                 $idSlug   = $size['id'];
                                 $labelTxt = $size['label'];
-                                $inputId  = "c_zugang-pvk-ellbeuge-r-" . ($index + 1);
+                                $inputId  = "c_zugang-pvk-hals-r-" . ($index + 1);
 
                                 $zugangData = [
                                     'art'     => 'pvk',
                                     'groesse' => $idSlug,
-                                    'ort'     => 'Ellbeuge',
+                                    'ort'     => 'Hals',
                                     'seite'   => 'rechts'
                                 ];
 
@@ -299,7 +299,7 @@ function hasAnyZugang($zugangJson)
                                     id="<?= $inputId ?>"
                                     name="zugang_selection"
                                     data-zugang='<?= htmlspecialchars(json_encode($zugangData), ENT_QUOTES) ?>'
-                                    data-location="pvk-ellbeuge-rechts"
+                                    data-location="pvk-hals-rechts"
                                     <?= $isChecked ? 'checked' : '' ?>
                                     autocomplete="off">
                                 <label for="<?= $inputId ?>" class="edivi__zugang-<?= $idSlug ?>"><?= $labelTxt ?></label>
@@ -427,7 +427,7 @@ function hasAnyZugang($zugangJson)
 
                 currentPageInfo = {
                     art: 'pvk',
-                    ort: 'Ellbeuge'
+                    ort: 'Hals'
                 };
 
                 let mergedZugaenge = existingZugaenge.filter(zugang => {

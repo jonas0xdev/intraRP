@@ -125,7 +125,7 @@ function displayAllZugaenge($zugangJson)
 
     $displays = [];
     foreach ($zugaenge as $zugang) {
-        $artNames = ['pvk' => 'PVK', 'zvk' => 'ZVK', 'io' => 'i.o.'];
+        $artNames = ['pvk' => 'PVK', 'zvk' => 'ZVK', 'io' => 'intraossär'];
         $artName = $artNames[$zugang['art']] ?? $zugang['art'];
         $displays[] = sprintf(
             '%s %s - %s %s',
@@ -205,7 +205,7 @@ function hasAnyZugang($zugangJson)
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton-more">
                             <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1.php?enr=<?= $daten['enr'] ?>">
-                                <span>Zugang auswählen</span>
+                                <span>Zugang</span>
                             </a>
                             <input type="checkbox" class="btn-check" id="c_zugang-0" name="c_zugang" value="0"
                                 <?php echo (isset($daten['c_zugang']) && $daten['c_zugang'] === '0') ? 'checked' : '' ?>

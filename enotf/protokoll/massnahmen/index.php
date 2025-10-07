@@ -163,7 +163,7 @@ function displayAllZugaenge($zugangJson)
         return [$a['art'], $a['ort'], $a['seite']] <=> [$b['art'], $b['ort'], $b['seite']];
     });
 
-    $artNames = ['pvk' => 'PVK', 'zvk' => 'ZVK', 'io' => 'i.o.'];
+    $artNames = ['pvk' => 'PVK', 'zvk' => 'ZVK', 'io' => 'intraossär'];
     $displays = [];
 
     foreach ($zugaenge as $zugang) {

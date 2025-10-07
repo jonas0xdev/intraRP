@@ -195,7 +195,7 @@ function hasAnyZugang($zugangJson)
                             <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1_2.php?enr=<?= $daten['enr'] ?>">
                                 <span>Unterarm</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1_3.php?enr=<?= $daten['enr'] ?>" class="active">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1_3.php?enr=<?= $daten['enr'] ?>">
                                 <span>Ellbeuge</span>
                             </a>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1_5.php?enr=<?= $daten['enr'] ?>">
@@ -213,13 +213,11 @@ function hasAnyZugang($zugangJson)
                             <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1_4.php?enr=<?= $daten['enr'] ?>">
                                 <span>Fuss</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1_9.php?enr=<?= $daten['enr'] ?>">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1_9.php?enr=<?= $daten['enr'] ?>" class="active">
                                 <span>Sonstige</span>
                             </a>
                         </div>
                         <div class="col-1 d-flex flex-column edivi__interactbutton">
-                            <label class="edivi__interactbutton-text">links</label>
-
                             <?php
                             $groessen = [
                                 ['id' => '24G',       'label' => '24 G'],
@@ -232,10 +230,10 @@ function hasAnyZugang($zugangJson)
                                 ['id' => '14G',       'label' => '14 G'],
                             ];
 
-                            $currentLeftZugang = null;
+                            $currentZugang = null;
                             foreach ($currentZugaenge as $zugang) {
-                                if ($zugang['art'] === 'pvk' && $zugang['ort'] === 'Ellbeuge' && $zugang['seite'] === 'links') {
-                                    $currentLeftZugang = $zugang;
+                                if ($zugang['art'] === 'pvk' && $zugang['ort'] === 'Sonstige') {
+                                    $currentZugang = $zugang;
                                     break;
                                 }
                             }
@@ -243,16 +241,16 @@ function hasAnyZugang($zugangJson)
                             foreach ($groessen as $index => $size):
                                 $idSlug   = $size['id'];
                                 $labelTxt = $size['label'];
-                                $inputId  = "c_zugang-pvk-ellbeuge-l-" . ($index + 1);
+                                $inputId  = "c_zugang-pvk-sonstige-" . ($index + 1);
 
                                 $zugangData = [
                                     'art'     => 'pvk',
                                     'groesse' => $idSlug,
-                                    'ort'     => 'Ellbeuge',
-                                    'seite'   => 'links'
+                                    'ort'     => 'Sonstige',
+                                    'seite'   => ''
                                 ];
 
-                                $isChecked = ($currentLeftZugang && ($currentLeftZugang['groesse'] ?? null) === $idSlug);
+                                $isChecked = ($currentZugang && ($currentZugang['groesse'] ?? null) === $idSlug);
                             ?>
                                 <input
                                     type="checkbox"
@@ -260,46 +258,7 @@ function hasAnyZugang($zugangJson)
                                     id="<?= $inputId ?>"
                                     name="zugang_selection"
                                     data-zugang='<?= htmlspecialchars(json_encode($zugangData), ENT_QUOTES) ?>'
-                                    data-location="pvk-ellbeuge-links"
-                                    <?= $isChecked ? 'checked' : '' ?>
-                                    autocomplete="off">
-                                <label for="<?= $inputId ?>" class="edivi__zugang-<?= $idSlug ?>"><?= $labelTxt ?></label>
-                            <?php endforeach; ?>
-
-                        </div>
-                        <div class="col-1 d-flex flex-column edivi__interactbutton">
-                            <label class="edivi__interactbutton-text">rechts</label>
-
-                            <?php
-                            $currentRightZugang = null;
-                            foreach ($currentZugaenge as $zugang) {
-                                if ($zugang['art'] === 'pvk' && $zugang['ort'] === 'Ellbeuge' && $zugang['seite'] === 'rechts') {
-                                    $currentRightZugang = $zugang;
-                                    break;
-                                }
-                            }
-
-                            foreach ($groessen as $index => $size):
-                                $idSlug   = $size['id'];
-                                $labelTxt = $size['label'];
-                                $inputId  = "c_zugang-pvk-ellbeuge-r-" . ($index + 1);
-
-                                $zugangData = [
-                                    'art'     => 'pvk',
-                                    'groesse' => $idSlug,
-                                    'ort'     => 'Ellbeuge',
-                                    'seite'   => 'rechts'
-                                ];
-
-                                $isChecked = ($currentRightZugang && ($currentRightZugang['groesse'] ?? null) === $idSlug);
-                            ?>
-                                <input
-                                    type="checkbox"
-                                    class="btn-check zugang-checkbox"
-                                    id="<?= $inputId ?>"
-                                    name="zugang_selection"
-                                    data-zugang='<?= htmlspecialchars(json_encode($zugangData), ENT_QUOTES) ?>'
-                                    data-location="pvk-ellbeuge-rechts"
+                                    data-location="pvk-sonstige"
                                     <?= $isChecked ? 'checked' : '' ?>
                                     autocomplete="off">
                                 <label for="<?= $inputId ?>" class="edivi__zugang-<?= $idSlug ?>"><?= $labelTxt ?></label>
@@ -423,11 +382,9 @@ function hasAnyZugang($zugangJson)
                     }
                 }
 
-                let currentPageInfo = null;
-
-                currentPageInfo = {
+                let currentPageInfo = {
                     art: 'pvk',
-                    ort: 'Ellbeuge'
+                    ort: 'Sonstige'
                 };
 
                 let mergedZugaenge = existingZugaenge.filter(zugang => {
@@ -475,7 +432,7 @@ function hasAnyZugang($zugangJson)
                                 };
                                 const lastZugang = currentPageZugaenge[currentPageZugaenge.length - 1];
                                 const artName = artNames[lastZugang.art] || lastZugang.art;
-                                showToast(`${artName} ${lastZugang.groesse} an ${lastZugang.ort} ${lastZugang.seite} gespeichert`, 'success');
+                                showToast(`${artName} ${lastZugang.groesse} an ${lastZugang.ort} gespeichert`, 'success');
                             } else {
                                 showToast("Zugang von dieser Stelle entfernt", 'success');
                             }

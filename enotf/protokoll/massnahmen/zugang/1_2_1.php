@@ -173,7 +173,7 @@ function hasAnyZugang($zugangJson)
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton-more">
                             <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1.php?enr=<?= $daten['enr'] ?>" class="active">
-                                <span>Zugang auswählen</span>
+                                <span>Zugang</span>
                             </a>
                             <input type="checkbox" class="btn-check" id="c_zugang-0" name="c_zugang" value="0"
                                 <?php echo (isset($daten['c_zugang']) && $daten['c_zugang'] === '0') ? 'checked' : '' ?>
@@ -182,18 +182,27 @@ function hasAnyZugang($zugangJson)
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton-more">
                             <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1.php?enr=<?= $daten['enr'] ?>">
-                                <span>pvk</span>
+                                <span>PVK</span>
                             </a>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_2.php?enr=<?= $daten['enr'] ?>" class="active">
-                                <span>i.o.</span>
+                                <span>intraossär</span>
                             </a>
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton-more">
                             <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_2_1.php?enr=<?= $daten['enr'] ?>" class="active">
-                                <span>Schienbein</span>
+                                <span>Tibia proximal</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_2_3.php?enr=<?= $daten['enr'] ?>">
+                                <span>Tibia distal</span>
                             </a>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_2_2.php?enr=<?= $daten['enr'] ?>">
-                                <span>Oberarm</span>
+                                <span>Humerus proximal</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_2_4.php?enr=<?= $daten['enr'] ?>">
+                                <span>Sternum</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_2_5.php?enr=<?= $daten['enr'] ?>">
+                                <span>anderer Ort</span>
                             </a>
                         </div>
                         <div class="col-1 d-flex flex-column edivi__interactbutton">
@@ -204,18 +213,18 @@ function hasAnyZugang($zugangJson)
                             $currentLeftZugang = null;
 
                             foreach ($currentZugaenge as $zugang) {
-                                if ($zugang['art'] === 'io' && $zugang['ort'] === 'Schienbein' && $zugang['seite'] === 'links') {
+                                if ($zugang['art'] === 'io' && $zugang['ort'] === 'Tibia proximal' && $zugang['seite'] === 'links') {
                                     $currentLeftZugang = $zugang;
                                     break;
                                 }
                             }
 
                             foreach ($groessen as $index => $groesse):
-                                $radioId = "c_zugang-io-schienbein-l-" . ($index + 1);
+                                $radioId = "c_zugang-io-tibiaproximal-l-" . ($index + 1);
                                 $zugangData = [
                                     'art' => 'io',
                                     'groesse' => $groesse,
-                                    'ort' => 'Schienbein',
+                                    'ort' => 'Tibia proximal',
                                     'seite' => 'links'
                                 ];
                                 $isChecked = ($currentLeftZugang && $currentLeftZugang['groesse'] === $groesse);
@@ -224,7 +233,7 @@ function hasAnyZugang($zugangJson)
                                     id="<?= $radioId ?>"
                                     name="zugang_selection"
                                     data-zugang='<?= htmlspecialchars(json_encode($zugangData), ENT_QUOTES) ?>'
-                                    data-location="io-schienbein-links"
+                                    data-location="io-tibiaproximal-links"
                                     <?= $isChecked ? 'checked' : '' ?>
                                     autocomplete="off">
                                 <label for="<?= $radioId ?>" class="edivi__zugang-<?= $groesse ?>"><?= $groesse ?></label>
@@ -237,18 +246,18 @@ function hasAnyZugang($zugangJson)
                             $currentRightZugang = null;
 
                             foreach ($currentZugaenge as $zugang) {
-                                if ($zugang['art'] === 'io' && $zugang['ort'] === 'Schienbein' && $zugang['seite'] === 'rechts') {
+                                if ($zugang['art'] === 'io' && $zugang['ort'] === 'Tibia proximal' && $zugang['seite'] === 'rechts') {
                                     $currentRightZugang = $zugang;
                                     break;
                                 }
                             }
 
                             foreach ($groessen as $index => $groesse):
-                                $radioId = "c_zugang-io-schienbein-r-" . ($index + 1);
+                                $radioId = "c_zugang-io-tibiaproximal-r-" . ($index + 1);
                                 $zugangData = [
                                     'art' => 'io',
                                     'groesse' => $groesse,
-                                    'ort' => 'Schienbein',
+                                    'ort' => 'Tibia proximal',
                                     'seite' => 'rechts'
                                 ];
                                 $isChecked = ($currentRightZugang && $currentRightZugang['groesse'] === $groesse);
@@ -257,7 +266,7 @@ function hasAnyZugang($zugangJson)
                                     id="<?= $radioId ?>"
                                     name="zugang_selection"
                                     data-zugang='<?= htmlspecialchars(json_encode($zugangData), ENT_QUOTES) ?>'
-                                    data-location="io-schienbein-rechts"
+                                    data-location="io-tibiaproximal-rechts"
                                     <?= $isChecked ? 'checked' : '' ?>
                                     autocomplete="off">
                                 <label for="<?= $radioId ?>" class="edivi__zugang-<?= $groesse ?>"><?= $groesse ?></label>
@@ -380,11 +389,9 @@ function hasAnyZugang($zugangJson)
                     }
                 }
 
-                let currentPageInfo = null;
-
-                currentPageInfo = {
+                let currentPageInfo = {
                     art: 'io',
-                    ort: 'Schienbein'
+                    ort: 'Tibia proximal'
                 };
 
                 let mergedZugaenge = existingZugaenge.filter(zugang => {
