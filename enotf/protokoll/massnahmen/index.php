@@ -148,7 +148,7 @@ function normalize_groesse_pretty(string $raw): string
 function displayAllZugaenge($zugangJson)
 {
     if (!isset($zugangJson) || $zugangJson === null) {
-        return '<em>Nicht gesetzt</em>';
+        return '';
     }
     if ($zugangJson === '0') {
         return 'Kein Zugang';
@@ -156,7 +156,7 @@ function displayAllZugaenge($zugangJson)
 
     $zugaenge = getCurrentZugaenge($zugangJson);
     if (empty($zugaenge)) {
-        return '<em>Keine gültigen Zugänge</em>';
+        return '';
     }
 
     usort($zugaenge, function ($a, $b) {
@@ -181,7 +181,7 @@ function displayAllZugaenge($zugangJson)
 function displayAllZugaengeText($zugangJson)
 {
     if (!isset($zugangJson) || $zugangJson === null) {
-        return 'Nicht gesetzt';
+        return '';
     }
     if ($zugangJson === '0') {
         return 'Kein Zugang';
@@ -189,7 +189,7 @@ function displayAllZugaengeText($zugangJson)
 
     $zugaenge = getCurrentZugaenge($zugangJson);
     if (empty($zugaenge)) {
-        return 'Keine gültigen Zugänge';
+        return '';
     }
 
     usort($zugaenge, function ($a, $b) {
@@ -214,7 +214,7 @@ function displayAllZugaengeText($zugangJson)
 function displayZugaengeByArt($zugangJson, $filterArt = null)
 {
     if (!isset($zugangJson) || $zugangJson === null) {
-        return '<em>Nicht gesetzt</em>';
+        return '';
     }
     if ($zugangJson === '0') {
         return 'Kein Zugang';
@@ -222,7 +222,7 @@ function displayZugaengeByArt($zugangJson, $filterArt = null)
 
     $zugaenge = getCurrentZugaenge($zugangJson);
     if (empty($zugaenge)) {
-        return '<em>Keine gültigen Zugänge</em>';
+        return '';
     }
 
     // Filtern nach Art, wenn angegeben
@@ -259,7 +259,7 @@ function displayZugaengeByArt($zugangJson, $filterArt = null)
 function displayZugaengeByArtText($zugangJson, $filterArt = null)
 {
     if (!isset($zugangJson) || $zugangJson === null) {
-        return 'Nicht gesetzt';
+        return '';
     }
     if ($zugangJson === '0') {
         return 'Kein Zugang';
@@ -267,7 +267,7 @@ function displayZugaengeByArtText($zugangJson, $filterArt = null)
 
     $zugaenge = getCurrentZugaenge($zugangJson);
     if (empty($zugaenge)) {
-        return 'Keine gültigen Zugänge';
+        return '';
     }
 
     // Filtern nach Art, wenn angegeben
