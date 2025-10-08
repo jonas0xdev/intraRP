@@ -1,6 +1,6 @@
 ![intraRP Logo](/.github/intrarp_banner.png)
 
-[![PHP Composer](https://github.com/intraRP/intraRP/actions/workflows/php.yml/badge.svg)](https://github.com/intraRP/intraRP/actions/workflows/php.yml) ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/intraRP/intraRP/total) ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/intraRP/intraRP)
+[![PHP Composer](https://github.com/intraRP/intraRP/actions/workflows/php.yml/badge.svg)](https://github.com/intraRP/intraRP/actions/workflows/php.yml) ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/intraRP/intraRP)
 
 # intraRP - Roleplay Intranet für fiktive Fraktionen
 
@@ -70,7 +70,7 @@ QM-Optionen<br>
 
 </details>
 <details>
-  <summary>Beförderungsanträge</summary>
+  <summary>Beförderungsanträge <b>(OUTDATED!)</b></summary>
   Benutzer-Ansicht
   <img src="/.github/PREVIEW/befAntragUser.png">
   <img src="/.github/PREVIEW/befAntragViewUser.png">
