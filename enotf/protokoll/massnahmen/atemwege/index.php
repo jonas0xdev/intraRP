@@ -107,6 +107,18 @@ $currentDate = date('d.m.Y');
                             <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/atemwege/1.php?enr=<?= $daten['enr'] ?>" data-requires="awsicherung_neu">
                                 <span>Atemwegssicherung</span>
                             </a>
+
+                            <input type="checkbox" class="btn-check" id="awsicherung_1-1" name="awsicherung_1" value="1" <?php echo ($daten['awsicherung_1'] == 1 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="awsicherung_1-1">Atemwege freim.</label>
+
+                            <input type="checkbox" class="btn-check" id="awsicherung_2-1" name="awsicherung_2" value="1" <?php echo ($daten['awsicherung_2'] == 1 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="awsicherung_2-1">Absaugen</label>
+
+                            <input type="checkbox" class="btn-check" id="entlastungspunktion-1" name="entlastungspunktion" value="1" <?php echo ($daten['entlastungspunktion'] == 1 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="entlastungspunktion-1">Entlastungspunktion</label>
+
+                            <input type="checkbox" class="btn-check" id="hws_immo-1" name="hws_immo" value="1" <?php echo ($daten['hws_immo'] == 1 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="hws_immo-1">HWS-Immobilisation</label>
                         </div>
                     </div>
                 </div>

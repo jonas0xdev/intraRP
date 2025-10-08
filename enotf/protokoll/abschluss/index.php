@@ -284,6 +284,52 @@ $currentDate = date('d.m.Y');
                                     </div>
                                 </div>
                             </div>
+                            <div class="row edivi__box">
+                                <h5 class="text-light px-2 py-1">Übergabe</h5>
+                                <div class="col">
+                                    <?php
+                                    $stmtfn = $pdo->query("SELECT fullname FROM intra_mitarbeiter ORDER BY fullname ASC");
+                                    $fullnames = $stmtfn->fetchAll(PDO::FETCH_COLUMN);
+                                    ?>
+                                    <div class="row my-2">
+                                        <div class="col">
+                                            <label for="uebergabe_ort" class="edivi__description">Übergabe-Ort</label>
+                                            <select name="uebergabe_ort" id="uebergabe_ort" class="w-100 form-select" autocomplete="off">
+                                                <option disabled hidden selected>---</option>
+                                                <option value="1" <?php echo ($daten['uebergabe_ort'] == 1 ? 'selected' : '') ?>>Schockraum</option>
+                                                <option value="2" <?php echo ($daten['uebergabe_ort'] == 2 ? 'selected' : '') ?>>Praxis</option>
+                                                <option value="3" <?php echo ($daten['uebergabe_ort'] == 3 ? 'selected' : '') ?>>ZNA / INA</option>
+                                                <option value="4" <?php echo ($daten['uebergabe_ort'] == 4 ? 'selected' : '') ?>>Stroke Unit</option>
+                                                <option value="5" <?php echo ($daten['uebergabe_ort'] == 5 ? 'selected' : '') ?>>Intensivstation</option>
+                                                <option value="6" <?php echo ($daten['uebergabe_ort'] == 6 ? 'selected' : '') ?>>OP direkt</option>
+                                                <option value="7" <?php echo ($daten['uebergabe_ort'] == 7 ? 'selected' : '') ?>>Hausarzt</option>
+                                                <option value="8" <?php echo ($daten['uebergabe_ort'] == 8 ? 'selected' : '') ?>>Fachambulanz</option>
+                                                <option value="9" <?php echo ($daten['uebergabe_ort'] == 9 ? 'selected' : '') ?>>Chest Pain Unit</option>
+                                                <option value="10" <?php echo ($daten['uebergabe_ort'] == 10 ? 'selected' : '') ?>>HKL</option>
+                                                <option value="11" <?php echo ($daten['uebergabe_ort'] == 11 ? 'selected' : '') ?>>Allgemeinstation</option>
+                                                <option value="12" <?php echo ($daten['uebergabe_ort'] == 12 ? 'selected' : '') ?>>Einsatzstelle</option>
+                                                <option value="99" <?php echo ($daten['uebergabe_ort'] == 99 ? 'selected' : '') ?>>Sonstige</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row my-2">
+                                        <div class="col">
+                                            <label for="uebergabe_an" class="edivi__description">Übergabe an</label>
+                                            <select name="uebergabe_an" id="uebergabe_an" class="w-100 form-select" autocomplete="off">
+                                                <option disabled hidden selected>---</option>
+                                                <option value="1" <?php echo ($daten['uebergabe_an'] == 1 ? 'selected' : '') ?>>Arzt</option>
+                                                <option value="2" <?php echo ($daten['uebergabe_an'] == 2 ? 'selected' : '') ?>>Pflegepersonal</option>
+                                                <option value="3" <?php echo ($daten['uebergabe_an'] == 3 ? 'selected' : '') ?>>Rettungssanitäter</option>
+                                                <option value="4" <?php echo ($daten['uebergabe_an'] == 4 ? 'selected' : '') ?>>Rettungsassistent</option>
+                                                <option value="5" <?php echo ($daten['uebergabe_an'] == 5 ? 'selected' : '') ?>>Notfallsanitäter</option>
+                                                <option value="6" <?php echo ($daten['uebergabe_an'] == 6 ? 'selected' : '') ?>>Polizei</option>
+                                                <option value="7" <?php echo ($daten['uebergabe_an'] == 7 ? 'selected' : '') ?>>Angehörige</option>
+                                                <option value="99" <?php echo ($daten['uebergabe_an'] == 99 ? 'selected' : '') ?>>Sonstige</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <?php if (!$ist_freigegeben) : ?>

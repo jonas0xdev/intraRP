@@ -122,6 +122,162 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['new']) && $_POST['new
         $formError = "Bitte füllen Sie alle Pflichtfelder korrekt aus.";
     }
 }
+
+$diagnose_labels = [
+    // ZNS (1-9)
+    1 => 'Schlaganfall / TIA / ICB',
+    2 => 'ICB (klin. Diagn.)',
+    3 => 'SAB (klin. Diagn.)',
+    4 => 'Krampfanfall',
+    5 => 'Status Epilepticus',
+    6 => 'Meningitis / Encephalitis',
+    9 => 'sonstige Erkrankung ZNS',
+
+    // Herz-Kreislauf (11-29)
+    11 => 'ACS / NSTEMI',
+    12 => 'ACS / STEMI',
+    13 => 'Kardiogener Schock',
+    14 => 'tachykarde Arrhythmie',
+    15 => 'bradykarde Arrhythmie',
+    16 => 'Schrittmacher-/ICD Fehlfunktion',
+    17 => 'Lungenembolie',
+    18 => 'Lungenödem',
+    19 => 'hypertensiver Notfall',
+    20 => 'Aortenaneurysma',
+    21 => 'Hypotonie',
+    22 => 'Synkope',
+    23 => 'Thrombose / art. Verschluss',
+    24 => 'Herz-Kreislauf-Stillstand',
+    25 => 'Schock unklarer Genese',
+    26 => 'unklarer Thoraxschmerz',
+    27 => 'orthostatische Fehlregulation',
+    28 => 'hypertensive Krise / Entgleisung',
+    29 => 'sonstige Erkrankung Herz-Kreislauf',
+
+    // Atemwege (31-49)
+    31 => 'Asthma (Anfall)',
+    32 => 'Status Asthmaticus',
+    33 => 'exacerbierte COPD',
+    34 => 'Aspiration',
+    35 => 'Pneumonie / Bronchitis',
+    36 => 'Hyperventilation',
+    37 => 'Spontanpneumothorax',
+    38 => 'Hämoptysis',
+    39 => 'Dyspnoe unklarer Ursache',
+    49 => 'sonstige Erkrankung Atmung',
+
+    // Abdomen (51-59)
+    51 => 'akutes Abdomen',
+    52 => 'obere GI-Blutung',
+    53 => 'untere GI-Blutung',
+    54 => 'Gallenkolik',
+    55 => 'Nierenkolik',
+    56 => 'Kolik allgemein',
+    59 => 'sonstige Erkrankung Abdomen',
+
+    // Psychiatrie (61-69)
+    61 => 'psychischer Ausnahmezustand',
+    62 => 'Depression',
+    63 => 'Manie',
+    64 => 'Intoxikation',
+    65 => 'Entzug, Delir',
+    66 => 'Suizidalität',
+    67 => 'psychosoziale Krise',
+    69 => 'sonstige Erkrankung Psychiatrie',
+
+    // Stoffwechsel (71-79)
+    71 => 'Hypoglykämie',
+    72 => 'Hyperglykämie',
+    73 => 'Urämie / ANV',
+    74 => 'Exsikkose',
+    75 => 'bek. Dialyspflicht',
+    79 => 'sonstige Erkrankung Stoffwechsel',
+
+    // Sonstige (81-99)
+    81 => 'Anaphylaxie Grad 1/2',
+    82 => 'Anaphylaxie Grad 3/4',
+    83 => 'Infekt / Sepsis / Schock',
+    84 => 'Hitzeerschöpfung / Hitzschlag',
+    85 => 'Unterkühlung / Erfrierung',
+    86 => 'akute Lumbago',
+    87 => 'Palliative Situation',
+    88 => 'medizinische Behandlungskompl.',
+    89 => 'Epistaxis / HNO-Erkrankung',
+    91 => 'urologische Erkrankung',
+    92 => 'unklare Erkrankung',
+    93 => 'akzidentelle Intoxikation',
+    94 => 'Augenerkrankung',
+    99 => 'Keine Erkrankung / Verletzung feststellbar',
+
+    // Trauma - Schädel-Hirn (101-104)
+    101 => 'Trauma Schädel-Hirn (leicht)',
+    102 => 'Trauma Schädel-Hirn (mittel)',
+    103 => 'Trauma Schädel-Hirn (schwer)',
+    104 => 'Trauma Schädel-Hirn (tödlich)',
+
+    // Trauma - Gesicht (111-114)
+    111 => 'Trauma Gesicht (leicht)',
+    112 => 'Trauma Gesicht (mittel)',
+    113 => 'Trauma Gesicht (schwer)',
+    114 => 'Trauma Gesicht (tödlich)',
+
+    // Trauma - HWS (121-124)
+    121 => 'Trauma HWS (leicht)',
+    122 => 'Trauma HWS (mittel)',
+    123 => 'Trauma HWS (schwer)',
+    124 => 'Trauma HWS (tödlich)',
+
+    // Trauma - Thorax (131-134)
+    131 => 'Trauma Thorax (leicht)',
+    132 => 'Trauma Thorax (mittel)',
+    133 => 'Trauma Thorax (schwer)',
+    134 => 'Trauma Thorax (tödlich)',
+
+    // Trauma - Abdomen (141-144)
+    141 => 'Trauma Abdomen (leicht)',
+    142 => 'Trauma Abdomen (mittel)',
+    143 => 'Trauma Abdomen (schwer)',
+    144 => 'Trauma Abdomen (tödlich)',
+
+    // Trauma - BWS / LWS (151-153)
+    151 => 'Trauma BWS / LWS (leicht)',
+    152 => 'Trauma BWS / LWS (mittel)',
+    153 => 'Trauma BWS / LWS (schwer)',
+
+    // Trauma - Becken (161-163)
+    161 => 'Trauma Becken (leicht)',
+    162 => 'Trauma Becken (mittel)',
+    163 => 'Trauma Becken (schwer)',
+
+    // Trauma - obere Extremitäten (171-173)
+    171 => 'Trauma obere Extremitäten (leicht)',
+    172 => 'Trauma obere Extremitäten (mittel)',
+    173 => 'Trauma obere Extremitäten (schwer)',
+
+    // Trauma - untere Extremitäten (181-183)
+    181 => 'Trauma untere Extremitäten (leicht)',
+    182 => 'Trauma untere Extremitäten (mittel)',
+    183 => 'Trauma untere Extremitäten (schwer)',
+
+    // Trauma - Weichteile (191-193)
+    191 => 'Trauma Weichteile (leicht)',
+    192 => 'Trauma Weichteile (mittel)',
+    193 => 'Trauma Weichteile (schwer)',
+
+    // Trauma - spezielle (201-209)
+    201 => 'Verbrennung / Verbrühung',
+    202 => 'Inhalationstrauma',
+    203 => 'Elektrounfall',
+    204 => '(beinahe-) Ertrinken',
+    205 => 'Tauchunfall',
+    206 => 'Verätzung',
+    209 => 'Sonstige',
+];
+
+$diagnose_haupt_text = '';
+if (isset($daten['diagnose_haupt']) && !empty($daten['diagnose_haupt'])) {
+    $diagnose_haupt_text = $diagnose_labels[$daten['diagnose_haupt']] ?? 'Unbekannte Diagnose';
+}
 ?>
 
 <!DOCTYPE html>
@@ -223,8 +379,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['new']) && $_POST['new
                                 <div class="col">
                                     <div class="row">
                                         <div class="col">
-                                            <label for="diagnose" class="edivi__description">Anmeldediagnose</label>
-                                            <input type="text" name="diagnose" id="diagnose" class="w-100 form-control" maxlength="255" placeholder="..." value="<?= $daten['diagnose'] ?>" required>
+                                            <label for="diagnose" class="edivi__description">Diagnose</label>
+                                            <input type="text" name="diagnose" id="diagnose" class="w-100 form-control" maxlength="255" placeholder="..." value="<?= !empty($diagnose_haupt_text) ? $diagnose_haupt_text : '' ?>" readonly required>
                                         </div>
                                     </div>
                                     <div class="row mt-2">

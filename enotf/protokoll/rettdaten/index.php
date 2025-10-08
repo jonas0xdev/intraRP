@@ -159,6 +159,18 @@ $currentDate = date('d.m.Y');
                                             <label for="eort" class="edivi__description">Einsatzort</label>
                                             <input type="text" name="eort" id="eort" class="w-100 form-control edivi__input-check" placeholder="Einsatzort" value="<?= $daten['eort'] ?>" required>
                                         </div>
+                                        <div class="col">
+                                            <label for="eart" class="edivi__description">Einsatzart</label>
+                                            <select name="eart" id="eart" class="w-100 form-select edivi__input-check" required autocomplete="off">
+                                                <option disabled hidden selected>---</option>
+                                                <option value="1" <?php echo ($daten['eart'] == 1 ? 'selected' : '') ?>>Notfallrettung - Primäreinsatz mit NA</option>
+                                                <option value="11" <?php echo ($daten['eart'] == 11 ? 'selected' : '') ?>>Notfallrettung - Primäreinsatz ohne NA</option>
+                                                <option value="2" <?php echo ($daten['eart'] == 2 ? 'selected' : '') ?>>Notfallrettung - Verlegung mit NA</option>
+                                                <option value="21" <?php echo ($daten['eart'] == 21 ? 'selected' : '') ?>>Notfallrettung - Verlegung ohne NA</option>
+                                                <option value="3" <?php echo ($daten['eart'] == 3 ? 'selected' : '') ?>>Intensivtransport</option>
+                                                <option value="4" <?php echo ($daten['eart'] == 4 ? 'selected' : '') ?>>Krankentransport</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

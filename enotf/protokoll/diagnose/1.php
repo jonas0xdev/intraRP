@@ -78,7 +78,7 @@ $currentDate = date('d.m.Y');
     <meta property="og:description" content="Verwaltungsportal der <?php echo RP_ORGTYPE . " " .  SERVER_CITY ?>" />
 </head>
 
-<body data-page="anamnese">
+<body data-page="diagnose">
     <?php
     include __DIR__ . '/../../../assets/components/enotf/topbar.php';
     ?>
@@ -90,24 +90,43 @@ $currentDate = date('d.m.Y');
                 <div class="col" id="edivi__content" style="padding-left: 0">
                     <div class="row" style="margin-left: 0">
                         <div class="col-2 d-flex flex-column edivi__interactbutton-more">
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/anamnese/1.php?enr=<?= $daten['enr'] ?>">
-                                <span>Anamnese</span>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/diagnose/1.php?enr=<?= $daten['enr'] ?>" data-requires="diagnose_haupt" class="active">
+                                <span>Diagnose (führend)</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/anamnese/2.php?enr=<?= $daten['enr'] ?>" data-requires="diagnose" class="active">
-                                <span>Diagnose</span>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/diagnose/2.php?enr=<?= $daten['enr'] ?>">
+                                <span>Diagnose (weitere)</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/diagnose/3.php?enr=<?= $daten['enr'] ?>">
+                                <span>Diagnose Text</span>
                             </a>
                         </div>
-                        <div class="col-4 edivi__overview-container" style="margin:0; padding:0;">
-                            <div class="row edivi__box" style="margin:0;">
-                                <h5 class="text-light px-2 py-1">Freitext Verdachts-/Erstdiagnose</h5>
-                                <div class="col">
-                                    <div class="row my-2">
-                                        <div class="col">
-                                            <textarea name="diagnose" id="diagnose" rows="5" class="w-100 form-control" style="resize: none" placeholder="..."><?= $daten['diagnose'] ?></textarea>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="col-2 d-flex flex-column edivi__interactbutton-more">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/diagnose/1_1.php?enr=<?= $daten['enr'] ?>">
+                                <span>ZNS</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/diagnose/1_2.php?enr=<?= $daten['enr'] ?>">
+                                <span>Herz-Kreislauf</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/diagnose/1_3.php?enr=<?= $daten['enr'] ?>">
+                                <span>Atemwege</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/diagnose/1_4.php?enr=<?= $daten['enr'] ?>">
+                                <span>Abdomen</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/diagnose/1_5.php?enr=<?= $daten['enr'] ?>">
+                                <span>Psychiatrie</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/diagnose/1_6.php?enr=<?= $daten['enr'] ?>">
+                                <span>Stoffwechsel</span>
+                            </a>
+
+
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/diagnose/1_9.php?enr=<?= $daten['enr'] ?>">
+                                <span>Sonstige</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/diagnose/1_10.php?enr=<?= $daten['enr'] ?>">
+                                <span>Trauma</span>
+                            </a>
                         </div>
                     </div>
                 </div>

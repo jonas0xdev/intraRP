@@ -173,7 +173,7 @@ function hasAnyZugang($zugangJson)
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton-more">
                             <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1.php?enr=<?= $daten['enr'] ?>" class="active">
-                                <span>Zugang auswählen</span>
+                                <span>Zugang</span>
                             </a>
                             <input type="checkbox" class="btn-check" id="c_zugang-0" name="c_zugang" value="0"
                                 <?php echo (isset($daten['c_zugang']) && $daten['c_zugang'] === '0') ? 'checked' : '' ?>
@@ -182,10 +182,10 @@ function hasAnyZugang($zugangJson)
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton-more">
                             <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1.php?enr=<?= $daten['enr'] ?>">
-                                <span>pvk</span>
+                                <span>PVK</span>
                             </a>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_2.php?enr=<?= $daten['enr'] ?>">
-                                <span>i.o.</span>
+                                <span>intraossär</span>
                             </a>
                         </div>
                     </div>

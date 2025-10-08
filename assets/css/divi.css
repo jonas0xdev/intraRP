@@ -422,9 +422,6 @@ body {
   z-index: 1;
   overflow: hidden;
 }
-#edivi__nidanav > a:last-child {
-  padding-left: 8px;
-}
 #edivi__nidanav > a:hover {
   background-color: #5f5f5f;
   color: var(--white);
@@ -494,7 +491,7 @@ body {
   color: var(--white);
   background-color: var(--secondary-color);
   border-radius: 0;
-  padding: 25px 4px;
+  padding: 25px 30px;
   padding-left: 14px;
   text-decoration: none;
   font-weight: 600;
@@ -676,6 +673,11 @@ body {
 @media (max-width: 1001px) {
   [class*=edivi__interactbutton] > *:after {
     display: none;
+  }
+
+  [class*=edivi__interactbutton] > a,
+[class*=edivi__interactbutton] > label {
+    padding-right: 4px;
   }
 }
 .edivi__interactbutton-more > a:after {
@@ -1560,8 +1562,11 @@ body[data-page=verlauf] .text-success {
 body[data-page=verlauf] .text-danger {
   color: #d91225 !important;
 }
+body[data-page=verlauf] .text-semiwarning {
+  color: #d5c215 !important;
+}
 body[data-page=verlauf] .text-warning {
-  color: #d5a715 !important;
+  color: #d58215 !important;
 }
 body[data-page=verlauf] .vital-entry {
   background: rgba(255, 255, 255, 0.05);

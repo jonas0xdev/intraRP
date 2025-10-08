@@ -93,9 +93,6 @@ $currentDate = date('d.m.Y');
                             <a href="<?= BASE_PATH ?>enotf/protokoll/anamnese/1.php?enr=<?= $daten['enr'] ?>" class="active">
                                 <span>Anamnese</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/anamnese/2.php?enr=<?= $daten['enr'] ?>" data-requires="diagnose">
-                                <span>Diagnose</span>
-                            </a>
                         </div>
                         <div class="col-6 edivi__overview-container" style="margin:0; padding:0;">
                             <div class="row edivi__box" style="margin:0;">

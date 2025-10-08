@@ -173,7 +173,7 @@ function hasAnyZugang($zugangJson)
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton-more">
                             <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1.php?enr=<?= $daten['enr'] ?>" class="active">
-                                <span>Zugang auswählen</span>
+                                <span>Zugang</span>
                             </a>
                             <input type="checkbox" class="btn-check" id="c_zugang-0" name="c_zugang" value="0"
                                 <?php echo (isset($daten['c_zugang']) && $daten['c_zugang'] === '0') ? 'checked' : '' ?>
@@ -182,10 +182,10 @@ function hasAnyZugang($zugangJson)
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton-more">
                             <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1.php?enr=<?= $daten['enr'] ?>" class="active">
-                                <span>pvk</span>
+                                <span>PVK</span>
                             </a>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_2.php?enr=<?= $daten['enr'] ?>">
-                                <span>i.o.</span>
+                                <span>intraossär</span>
                             </a>
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton-more">
@@ -198,8 +198,23 @@ function hasAnyZugang($zugangJson)
                             <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1_3.php?enr=<?= $daten['enr'] ?>" class="active">
                                 <span>Ellbeuge</span>
                             </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1_5.php?enr=<?= $daten['enr'] ?>">
+                                <span>Oberarm</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1_6.php?enr=<?= $daten['enr'] ?>">
+                                <span>Hals</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1_7.php?enr=<?= $daten['enr'] ?>">
+                                <span>Kopf</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1_8.php?enr=<?= $daten['enr'] ?>">
+                                <span>Bein</span>
+                            </a>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1_4.php?enr=<?= $daten['enr'] ?>">
-                                <span>Fuß</span>
+                                <span>Fuss</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/1_1_9.php?enr=<?= $daten['enr'] ?>">
+                                <span>Sonstige</span>
                             </a>
                         </div>
                         <div class="col-1 d-flex flex-column edivi__interactbutton">

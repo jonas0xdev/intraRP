@@ -7,7 +7,7 @@ if (isset($_POST['enr']) && isset($_POST['field'])) {
     $field = $_POST['field'];
     $value = array_key_exists('value', $_POST) ? $_POST['value'] : null;
 
-    $allowedFields = ['patname', 'patgebdat', 'patsex', 'edatum', 'ezeit', 'eort', 'awfrei_1', 'awsicherung_neu', 'zyanose_1', 'o2gabe', 'b_symptome', 'b_auskult', 'b_beatmung', 'spo2', 'atemfreq', 'etco2', 'c_zugang', 'c_kreislauf', 'c_ekg', 'rrsys', 'rrdias', 'herzfreq', 'medis', 'd_bewusstsein', 'd_ex_1', 'd_pupillenw_1', 'd_pupillenw_2', 'd_lichtreakt_1', 'd_lichtreakt_2', 'd_gcs_1', 'd_gcs_2', 'd_gcs_3', 'v_muster_k', 'v_muster_k1', 'v_muster_t', 'v_muster_t1', 'v_muster_a', 'v_muster_a1', 'v_muster_al', 'v_muster_al1', 'v_muster_bl', 'v_muster_bl1', 'v_muster_w', 'v_muster_w1', 'sz_nrs', 'sz_toleranz_1', 'bz', 'temp', 'anmerkungen', 'diagnose', 'fzg_transp', 'fzg_transp_perso', 'fzg_transp_perso_2', 'fzg_na', 'fzg_na_perso', 'fzg_na_perso_2', 'fzg_sonst', 'transportziel', 'pfname', 'prot_by', 'spo2', 'atemfreq', 'etco2', 'rrsys', 'rrdias', 'herzfreq', 'bz', 'temp'];
+    $allowedFields = ['patname', 'patgebdat', 'patsex', 'edatum', 'ezeit', 'eort', 'awfrei_1', 'awsicherung_neu', 'zyanose_1', 'o2gabe', 'b_symptome', 'b_auskult', 'b_beatmung', 'spo2', 'atemfreq', 'etco2', 'c_zugang', 'c_kreislauf', 'c_ekg', 'rrsys', 'rrdias', 'herzfreq', 'medis', 'd_bewusstsein', 'd_ex_1', 'd_pupillenw_1', 'd_pupillenw_2', 'd_lichtreakt_1', 'd_lichtreakt_2', 'd_gcs_1', 'd_gcs_2', 'd_gcs_3', 'v_muster_k', 'v_muster_k1', 'v_muster_t', 'v_muster_t1', 'v_muster_a', 'v_muster_a1', 'v_muster_al', 'v_muster_al1', 'v_muster_bl', 'v_muster_bl1', 'v_muster_w', 'v_muster_w1', 'sz_nrs', 'sz_toleranz_1', 'bz', 'temp', 'anmerkungen', 'diagnose_haupt', 'diagnose_weitere', 'diagnose', 'fzg_transp', 'fzg_transp_perso', 'fzg_transp_perso_2', 'fzg_na', 'fzg_na_perso', 'fzg_na_perso_2', 'fzg_sonst', 'transportziel', 'pfname', 'prot_by', 'spo2', 'atemfreq', 'etco2', 'rrsys', 'rrdias', 'herzfreq', 'bz', 'temp', 'psych', 'uebergabe_ort', 'uebergabe_an', 'awsicherung_1', 'hws_immo', 'entlastungspunktion', 'c_puls_rad', 'c_puls_reg', 'eart'];
 
     if ($field === 'freigeber') {
         if (empty($value)) {
@@ -48,13 +48,19 @@ if (isset($_POST['enr']) && isset($_POST['field'])) {
 
             $seenLocations = [];
             foreach ($zugaengeToValidate as $zugang) {
-                $requiredFields = ['art', 'groesse', 'ort', 'seite'];
+                $requiredFields = ['art', 'groesse', 'ort'];
                 foreach ($requiredFields as $requiredField) {
                     if (!isset($zugang[$requiredField]) || $zugang[$requiredField] === '') {
                         http_response_code(400);
                         echo "Pflichtfeld fehlt: $requiredField";
                         exit();
                     }
+                }
+
+                if (!array_key_exists('seite', $zugang)) {
+                    http_response_code(400);
+                    echo "Pflichtfeld fehlt: seite";
+                    exit();
                 }
 
                 $locationKey = $zugang['art'] . '-' . $zugang['ort'] . '-' . $zugang['seite'];
@@ -67,7 +73,7 @@ if (isset($_POST['enr']) && isset($_POST['field'])) {
 
                 $allowedArts = ['pvk', 'zvk', 'io'];
                 $allowedGroessen = ['24G', '22G', '20G', '18G', '18G_kurz', '17G', '16G', '14G', '15mm', '25mm', '45mm'];
-                $allowedSeiten = ['links', 'rechts'];
+                $allowedSeiten = ['links', 'rechts', ''];
 
                 if (!in_array($zugang['art'], $allowedArts)) {
                     http_response_code(400);
