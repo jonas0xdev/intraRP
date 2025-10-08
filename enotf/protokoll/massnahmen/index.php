@@ -544,7 +544,7 @@ function hasAnyMedikamente($medikamenteJson)
                                                     <div class="row my-2">
                                                         <div class="col">
                                                             <label for="medikamente" class="edivi__description" style="display: none;">Medikamente</label>
-                                                            <textarea name="medikamente" id="medikamente" class="w-100 form-control edivi__input-check" style="height: 40vh; overflow-y: auto; resize: vertical;" readonly><?= displayAllMedikamente($daten['medis'] ?? '') ?></textarea>
+                                                            <textarea name="medikamente" id="medikamente" class="w-100 form-control edivi__input-check" style="height: 36vh; overflow-y: auto; resize: vertical;" readonly><?= displayAllMedikamente($daten['medis'] ?? '') ?></textarea>
                                                         </div>
                                                     </div>
                                                 </div>
