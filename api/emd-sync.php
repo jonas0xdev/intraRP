@@ -148,8 +148,21 @@ try {
 
         logSync("Es wurden " . count($validVehicles) . " gültige RD-Fahrzeuge für Einsatz #$dispatchId gefunden", 'INFO');
 
+        $checkExistingStmt = $pdo->prepare("
+            SELECT enr
+            FROM intra_edivi 
+            WHERE enr = :enr OR enr LIKE :enr_pattern
+        ");
+        $checkExistingStmt->execute([
+            ':enr' => $dispatchId,
+            ':enr_pattern' => $dispatchId . '_%'
+        ]);
+        $existingEnrs = $checkExistingStmt->fetchAll(PDO::FETCH_COLUMN);
+
+        logSync("Bereits vorhandene ENRs für Einsatz #$dispatchId: " . implode(', ', $existingEnrs), 'DEBUG');
+
         foreach ($validVehicles as $vehicle) {
-            $vehicleIdentifier = $vehicle['is_notarzt'] ? $vehicle['name'] : $vehicle['identifier'];
+            $vehicleIdentifier = $vehicle['identifier'];
             $fieldToCheck = $vehicle['is_notarzt'] ? 'fzg_na' : 'fzg_transp';
 
             $checkVehicleStmt = $pdo->prepare("
@@ -168,36 +181,23 @@ try {
 
             if ($existingEntry) {
                 logSync("Fahrzeug '$vehicleIdentifier' existiert bereits in Einsatz {$existingEntry['enr']}, wird übersprungen", 'DEBUG');
-                $skippedCount++;
                 continue;
             }
 
             $enrToUse = null;
 
-            $checkBaseStmt = $pdo->prepare("
-                SELECT COUNT(*) as count
-                FROM intra_edivi 
-                WHERE enr = :enr
-            ");
-            $checkBaseStmt->execute([':enr' => $dispatchId]);
-            $baseExists = $checkBaseStmt->fetch(PDO::FETCH_ASSOC)['count'] > 0;
-
-            if (!$baseExists) {
+            if (!in_array((string)$dispatchId, $existingEnrs)) {
                 $enrToUse = $dispatchId;
             } else {
-                $maxSuffixStmt = $pdo->prepare("
-                    SELECT MAX(CAST(SUBSTRING_INDEX(enr, '_', -1) AS UNSIGNED)) as max_suffix
-                    FROM intra_edivi 
-                    WHERE enr LIKE :enr_pattern
-                    AND enr != :base_enr
-                ");
-                $maxSuffixStmt->execute([
-                    ':enr_pattern' => $dispatchId . '_%',
-                    ':base_enr' => $dispatchId
-                ]);
-                $maxSuffix = intval($maxSuffixStmt->fetch(PDO::FETCH_ASSOC)['max_suffix'] ?? 0);
-
-                $enrToUse = $dispatchId . '_' . ($maxSuffix + 1);
+                $suffix = 1;
+                while (true) {
+                    $testEnr = $dispatchId . '_' . $suffix;
+                    if (!in_array($testEnr, $existingEnrs)) {
+                        $enrToUse = $testEnr;
+                        break;
+                    }
+                    $suffix++;
+                }
             }
 
             if ($vehicle['is_notarzt']) {
@@ -207,10 +207,10 @@ try {
                 ");
                 $insertStmt->execute([
                     ':enr' => $enrToUse,
-                    ':fzg_na' => $vehicle['name']
+                    ':fzg_na' => $vehicle['identifier']
                 ]);
 
-                logSync("Notarzt-Eintrag $enrToUse erstellt: {$vehicle['name']}", 'INFO');
+                logSync("Notarzt-Eintrag $enrToUse erstellt: {$vehicle['identifier']}", 'INFO');
             } else {
                 $insertStmt = $pdo->prepare("
                     INSERT INTO intra_edivi (enr, fzg_transp, created_at) 
@@ -224,6 +224,7 @@ try {
                 logSync("Transport-Eintrag $enrToUse erstellt: {$vehicle['identifier']}", 'INFO');
             }
 
+            $existingEnrs[] = $enrToUse;
             $createdEntries++;
         }
 
