@@ -13,6 +13,7 @@ if (!session_status() === PHP_SESSION_NONE) {
 }
 
 // BASIS DATEN
+define('API_KEY', 'CHANGE_ME'); // Wird automatisch beim Setup erstellt, sonst selbst einen sicheren Key festlegen
 define('SYSTEM_NAME', 'intraRP'); // Eigenname des Intranets
 define('SYSTEM_VERSION', '0.4.4'); // Versionsnummer
 define('SYSTEM_COLOR', '#d10000'); // Hauptfarbe des Systems
