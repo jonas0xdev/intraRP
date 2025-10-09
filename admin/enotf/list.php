@@ -113,7 +113,20 @@ if (!Permissions::check(['admin', 'edivi.view'])) {
                                             $freigabe_status = "";
                                             break;
                                         case 1:
-                                            $freigabe_status = "<span title='Freigeber: " . $row['freigeber_name'] . "' class='badge text-bg-success'>F</span>";
+                                            if ($row['hidden_user'] != 1) {
+                                                $freigabe_status = "<span title='Freigeber: " . htmlspecialchars($row['freigeber_name']) . "' class='badge text-bg-success'>F</span>";
+                                            } else {
+                                                $freigabe_status = "";
+                                            }
+                                            break;
+                                    }
+
+                                    switch ($row['hidden_user']) {
+                                        default:
+                                            $hu_status = "";
+                                            break;
+                                        case 1:
+                                            $hu_status = "<span title='Gelöscht: " . $row['freigeber_name'] . "' class='badge text-bg-danger'>G</span>";
                                             break;
                                     }
 
@@ -133,7 +146,7 @@ if (!Permissions::check(['admin', 'edivi.view'])) {
                                     echo "<td >" . $row['enr'] . "</td>";
                                     echo "<td>" . $patname . "</td>";
                                     echo "<td><span style='display:none'>" . $row['sendezeit'] . "</span>" . $date . "</td>";
-                                    echo "<td>" . $row['pfname'] . " " . $freigabe_status . "</td>";
+                                    echo "<td>" . $row['pfname'] . " " . $freigabe_status . $hu_status . "</td>";
                                     echo "<td>" . $status . "</td>";
                                     echo "<td><a title='Protokoll ansehen' href='" . BASE_PATH . "enotf/protokoll/index.php?enr={$row['enr']}' class='btn btn-sm btn-primary' target='_blank'><i class='las la-eye'></i></a> {$actions}</td>";
                                     echo "</tr>";
