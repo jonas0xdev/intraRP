@@ -141,7 +141,7 @@ if (!isset($_SESSION['cirs_user']) || empty($_SESSION['cirs_user'])) {
                                 3 => 'Ungenügend',
                             ];
 
-                            $stmt = $pdo->prepare("SELECT protokoll_status, COUNT(*) as count FROM intra_edivi GROUP BY protokoll_status");
+                            $stmt = $pdo->prepare("SELECT protokoll_status, COUNT(*) as count FROM intra_edivi WHERE protokoll_status <> 4 GROUP BY protokoll_status");
                             $stmt->execute();
                             $result2 = $stmt->fetchAll(PDO::FETCH_ASSOC);
 

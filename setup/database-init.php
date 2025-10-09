@@ -162,7 +162,9 @@ $migrationFiles = [
     // 03.10.2025
     'alter_intra_mitarbeiter_dokumente_03102025.php',
     // 07.10.2025
-    'alter_intra_edivi_07102025.php'
+    'alter_intra_edivi_07102025.php',
+    // 09.10.2025
+    'alter_intra_edivi_09102025.php'
 ];
 
 $executed = 0;

@@ -49,12 +49,22 @@ use App\Auth\Permissions;
         </div>
     </div>
 </div>
-<?php if ($ist_freigegeben) : ?>
+<?php if ($daten['freigegeben'] == 1 && $daten['hidden_user'] != 1) : ?>
     <div class="container-full edivi__notice edivi__notice-freigeber">
         <div class="row">
             <div class="col-1 text-end"><i class="las la-info"></i></div>
             <div class="col">
                 Das Protokoll wurde durch <strong><?= $daten['freigeber_name'] ?></strong> am <strong><?= $daten['last_edit'] ?></strong> Uhr freigegeben. Es kann nicht mehr bearbeitet werden.
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
+<?php if ($daten['hidden_user'] == 1) : ?>
+    <div class="container-full edivi__notice edivi__notice-freigeber">
+        <div class="row">
+            <div class="col-1 text-end"><i class="las la-info"></i></div>
+            <div class="col">
+                Das Protokoll wurde durch <strong><?= $daten['freigeber_name'] ?></strong> am <strong><?= $daten['last_edit'] ?></strong> Uhr gelöscht. Es kann nicht mehr bearbeitet werden.
             </div>
         </div>
     </div>

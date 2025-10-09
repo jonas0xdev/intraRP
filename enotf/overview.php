@@ -19,6 +19,37 @@ if (!isset($_SESSION['fahrername']) || !isset($_SESSION['protfzg'])) {
     header("Location: " . BASE_PATH . "enotf/loggedout.php");
     exit();
 }
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_all'])) {
+    try {
+        $freigeber_name = $_SESSION['fahrername'];
+        if (!empty($_SESSION['beifahrername'])) {
+            $freigeber_name .= ', ' . $_SESSION['beifahrername'];
+        }
+
+        $stmt = $pdo->prepare("
+            UPDATE intra_edivi 
+            SET hidden_user = 1,
+                freigeber_name = :freigeber_name,
+                last_edit = NOW(),
+                freigegeben = 1
+            WHERE freigegeben = 0 
+            AND (fzg_transp = :fzg_transp OR fzg_na = :fzg_na) 
+            AND hidden = 0 
+            AND hidden_user = 0
+        ");
+        $stmt->bindValue(':freigeber_name', $freigeber_name, PDO::PARAM_STR);
+        $stmt->bindValue(':fzg_transp', $_SESSION['protfzg'], PDO::PARAM_STR);
+        $stmt->bindValue(':fzg_na', $_SESSION['protfzg'], PDO::PARAM_STR);
+        $stmt->execute();
+
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit();
+    } catch (PDOException $e) {
+        $_SESSION['error_message'] = "Fehler beim Löschen der Protokolle.";
+        error_log("Fehler beim Löschen der Protokolle: " . $e->getMessage());
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -87,18 +118,8 @@ if (!isset($_SESSION['fahrername']) || !isset($_SESSION['protfzg'])) {
                             </div>
                             <div class="row ps-3">
                                 <div class="col edivi__box p-4" style="overflow-x: hidden; overflow-y:auto; height: 70vh;">
-                                    <!-- <div class="edivi__einsatz-container">
-                                        <a href="create.php" class="edivi__einsatz-link">
-                                            <div class="row edivi__einsatz">
-                                                <div class="col-2 edivi__einsatz-type"><span>A</span></div>
-                                                <div class="col edivi__einsatz-enr"></div>
-                                                <div class="col edivi__einsatz-dates"></div>
-                                                <div class="col edivi__einsatz-name"></div>
-                                            </div>
-                                        </a>
-                                    </div> -->
                                     <?php
-                                    $stmt = $pdo->prepare("SELECT patname, patgebdat, edatum, ezeit, enr, prot_by, freigegeben, pfname FROM intra_edivi WHERE freigegeben = 0 AND (fzg_transp = :fzg_transp OR fzg_na = :fzg_na) ORDER BY created_at ASC");
+                                    $stmt = $pdo->prepare("SELECT patname, patgebdat, edatum, ezeit, enr, prot_by, freigegeben, pfname FROM intra_edivi WHERE freigegeben = 0 AND (fzg_transp = :fzg_transp OR fzg_na = :fzg_na) AND hidden = 0 AND hidden_user = 0 ORDER BY created_at ASC");
                                     $stmt->bindValue(':fzg_transp', $_SESSION['protfzg'], PDO::PARAM_STR);
                                     $stmt->bindValue(':fzg_na',     $_SESSION['protfzg'], PDO::PARAM_STR);
                                     $stmt->execute();
@@ -172,6 +193,11 @@ if (!isset($_SESSION['fahrername']) || !isset($_SESSION['protfzg'])) {
                                         }
                                     }
                                     ?>
+                                </div>
+                            </div>
+                            <div class="row ps-3">
+                                <div class="col p-0" style="margin: 10px 0;">
+                                    <button type="submit" class="edivi__nidabutton w-100" name="delete_all">alle löschen</button>
                                 </div>
                             </div>
                         </div>
