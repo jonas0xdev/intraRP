@@ -103,6 +103,9 @@ if (!Permissions::check(['admin', 'edivi.view'])) {
                                         case 2:
                                             $status = "<span title='Prüfer: " . $row['bearbeiter'] . "' class='badge text-bg-success'>Geprüft</span>";
                                             break;
+                                        case 4:
+                                            $status = "<span title='Prüfer: " . $row['bearbeiter'] . "' class='badge text-bg-dark'>Ausgeblendet</span>";
+                                            break;
                                         default:
                                             $status = "<span title='Prüfer: " . $row['bearbeiter'] . "' class='badge text-bg-danger'>Ungenügend</span>";
                                             break;

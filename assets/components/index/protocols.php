@@ -15,12 +15,21 @@
         e.protokoll_status, 
         e.bearbeiter, 
         e.freigegeben,
-        e.freigeber_name
+        e.freigeber_name,
+        e.hidden_user
     FROM intra_edivi e
-    JOIN intra_mitarbeiter m ON e.pfname = m.fullname
-    WHERE m.discordtag = :discordtag
+    JOIN intra_mitarbeiter m ON m.discordtag = :discordtag
+    WHERE (
+        e.pfname LIKE CONCAT('%', m.fullname, '%')
+        OR e.fzg_transp_perso LIKE CONCAT('%', m.fullname, '%')
+        OR e.fzg_transp_perso_2 LIKE CONCAT('%', m.fullname, '%')
+        OR e.fzg_na_perso LIKE CONCAT('%', m.fullname, '%')
+        OR e.fzg_na_perso_2 LIKE CONCAT('%', m.fullname, '%')
+    )
+    AND e.hidden <> 1
+    AND e.hidden_user <> 1
     ORDER BY e.sendezeit DESC
-    LIMIT 1");
+");
         $stmtdivi->execute(['discordtag' => $_SESSION['discordtag']]);
         $ediviRows = $stmtdivi->fetchAll(PDO::FETCH_ASSOC);
 
@@ -35,13 +44,16 @@
                         $status = "<span class='badge text-bg-secondary'>Ungesehen</span>";
                         break;
                     case 1:
-                        $status = "<span title='Prüfer: " . $row['bearbeiter'] . "' class='badge text-bg-warning'>in Prüfung</span>";
+                        $status = "<span title='Prüfer: " . htmlspecialchars($row['bearbeiter']) . "' class='badge text-bg-warning'>in Prüfung</span>";
                         break;
                     case 2:
-                        $status = "<span title='Prüfer: " . $row['bearbeiter'] . "' class='badge text-bg-success'>Geprüft</span>";
+                        $status = "<span title='Prüfer: " . htmlspecialchars($row['bearbeiter']) . "' class='badge text-bg-success'>Geprüft</span>";
+                        break;
+                    case 4:
+                        $status = "<span title='Prüfer: " . htmlspecialchars($row['bearbeiter']) . "' class='badge text-bg-dark'>Ausgeblendet</span>";
                         break;
                     default:
-                        $status = "<span title='Prüfer: " . $row['bearbeiter'] . "' class='badge text-bg-danger'>Ungenügend</span>";
+                        $status = "<span title='Prüfer: " . htmlspecialchars($row['bearbeiter']) . "' class='badge text-bg-danger'>Ungenügend</span>";
                         break;
                 }
 
@@ -50,13 +62,17 @@
                         $freigabe_status = "";
                         break;
                     case 1:
-                        $freigabe_status = "<span title='Freigegeben von: " . $row['freigeber_name'] . "' class='badge text-bg-success'>F</span>";
+                        if ($row['hidden_user'] != 1) {
+                            $freigabe_status = "<span title='Freigegeben von: " . htmlspecialchars($row['freigeber_name']) . "' class='badge text-bg-success'>F</span>";
+                        } else {
+                            $freigabe_status = "";
+                        }
                         break;
                 }
 
                 echo "<tr>";
                 echo "<td>" . $status . "</td>";
-                echo "<td >" . $row['enr'] . " " . $freigabe_status . "</td>";
+                echo "<td>" . htmlspecialchars($row['enr']) . " " . $freigabe_status . "</td>";
                 echo "<td>" . (!empty($row['bearbeiter']) ? htmlspecialchars($row['bearbeiter']) : '---') . "</td>";
                 echo "<td><span style='display:none'>" . $row['sendezeit'] . "</span>" . $date . "</td>";
                 echo "<td><a href='" . BASE_PATH . "enotf/protokoll/index.php?enr={$row['enr']}' class='btn btn-sm btn-primary'>Ansehen</a></td>";

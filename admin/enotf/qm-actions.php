@@ -60,6 +60,10 @@ if (isset($_POST['new']) && $_POST['new'] == 1) {
             $status_klar = "Ungenügend";
             $statusstring = '<span class="badge text-bg-danger" style="line-height: var(--bs-body-line-height); border-radius: 0;">Ungenügend</span>';
             break;
+        case 3:
+            $status_klar = "Ausgeblendet";
+            $statusstring = '<span class="badge text-bg-dark" style="line-height: var(--bs-body-line-height); border-radius: 0;">Ausgeblendet</span>';
+            break;
     }
 
     if ($protokoll_status != $old_status) {
@@ -157,13 +161,14 @@ $prot_url = "https://" . SYSTEM_URL . "/admin/enotf/view.php?id=" . $row['id'];
                                         <option value="1" <?php echo ($row['protokoll_status'] == 1 ? 'selected' : '') ?>>in Prüfung</option>
                                         <option value="2" <?php echo ($row['protokoll_status'] == 2 ? 'selected' : '') ?>>Freigegeben</option>
                                         <option value="3" <?php echo ($row['protokoll_status'] == 3 ? 'selected' : '') ?>>Ungenügend</option>
+                                        <option value="4" <?php echo ($row['protokoll_status'] == 4 ? 'selected' : '') ?>>Ausgeblendet</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="row mt-3">
                                 <div class="col-3 fw-bold">Bemerkung</div>
                                 <div class="col">
-                                    <textarea name="qmkommentar" id="qmkommentar" rows="8" class="w-100 form-control edivi__admin" style="resize: none"></textarea>
+                                    <textarea name="qmkommentar" id="qmkommentar" rows="8" class="w-100 form-control edivi__admin" style="resize: none; border: 1px solid #fff;"></textarea>
                                 </div>
                             </div>
                             <div class=" row mt-5 mb-4">

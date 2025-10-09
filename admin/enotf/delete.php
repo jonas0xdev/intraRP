@@ -22,7 +22,7 @@ $userid = $_SESSION['userid'];
 
 $id = $_GET['id'];
 
-$stmt = $pdo->prepare("UPDATE intra_edivi SET hidden = 1, protokoll_status = 3 WHERE id = :id");
+$stmt = $pdo->prepare("UPDATE intra_edivi SET hidden = 1, protokoll_status = 4 WHERE id = :id");
 $stmt->bindParam(':id', $id);
 $stmt->execute();
 
