@@ -330,7 +330,7 @@ function displayAllMedikamente($medikamenteJson)
         return '';
     }
 
-    if ($medikamenteJson === '0') {
+    if ($medikamenteJson === '0' || $medikamenteJson == '1') {
         return 'Keine Medikamente';
     }
 

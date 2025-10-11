@@ -10,6 +10,7 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 require __DIR__ . '/../../assets/config/database.php';
 
 use App\Auth\Permissions;
+use App\Helpers\Redirects;
 
 $daten = array();
 
@@ -32,6 +33,7 @@ if (isset($_GET['enr'])) {
 $enr = $daten['enr'];
 
 $prot_url = "https://" . SYSTEM_URL . "/enotf/protokoll/index.php?enr=" . $enr;
+$defaultUrl = $prot_url;
 
 date_default_timezone_set('Europe/Berlin');
 $currentTime = date('H:i');
@@ -54,6 +56,9 @@ $currentDate = date('d.m.Y');
     <link rel="stylesheet" href="<?= BASE_PATH ?>vendor/twbs/bootstrap/dist/css/bootstrap.min.css">
     <script src="<?= BASE_PATH ?>vendor/components/jquery/jquery.min.js"></script>
     <script src="<?= BASE_PATH ?>vendor/twbs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="<?= BASE_PATH ?>assets/favicon/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="<?= BASE_PATH ?>assets/favicon/favicon.svg" />
@@ -71,6 +76,26 @@ $currentDate = date('d.m.Y');
 </head>
 
 <body>
+    <div id="topbar" class="container-fluid">
+        <div class="row">
+            <div class="col">
+                <a href="<?= Redirects::getRedirectUrl($defaultUrl); ?>" class="topbar-btn">
+                    <i class="las la-undo"></i>
+                </a>
+            </div>
+            <div class="col text-end">
+                <button type="button" class="topbar-btn" onclick="zoomOut()" title="Verkleinern">
+                    <i class="las la-minus"></i>
+                </button>
+                <button type="button" class="topbar-btn" onclick="zoomIn()" title="Vergrößern">
+                    <i class="las la-plus"></i>
+                </button>
+                <button type="button" class="topbar-btn" onclick="window.print()" title="Drucken">
+                    <i class="las la-print"></i>
+                </button>
+            </div>
+        </div>
+    </div>
     <div class="print__paper">
         <div class="row">
             <div class="col-5">
@@ -669,6 +694,242 @@ $currentDate = date('d.m.Y');
                         </table>
                     </div>
                 </div>
+                <div class="row border border-dark border-top-0">
+                    <div class="col">
+                        <h6 class="print__heading">Messwerte initial</h6>
+                        <div class="row">
+                            <div class="col">
+                                <div class="print__field-wrapper" data-field-name="/Min" data-vp-name="AF">
+                                    <input type="text" class="w-100 print__field-vitals" value="<?= $daten['atemfreq'] ?>" readonly>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="print__field-wrapper" data-field-name="%" data-vp-name="SpO2">
+                                    <input type="text" class="w-100 print__field-vitals" value="<?= $daten['spo2'] ?>" readonly>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="print__field-wrapper" data-field-name="/Min" data-vp-name="HF">
+                                    <input type="text" class="w-100 print__field-vitals" value="<?= $daten['herzfreq'] ?>" readonly>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="print__field-wrapper" data-field-name="mmHg" data-vp-name="etCO2">
+                                    <input type="text" class="w-100 print__field-vitals" value="<?= $daten['etco2'] ?>" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="print__field-wrapper" data-field-name="mmHg" data-vp-name="RR">
+                                    <input type="text" class="w-100 print__field-vitals" value="<?= $daten['rrsys'] ?><?= !empty($daten['rrdias']) ? '/' . $daten['rrdias'] : '' ?>" readonly>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="print__field-wrapper" data-field-name="mg/dl" data-vp-name="BZ">
+                                    <input type="text" class="w-100 print__field-vitals" value="<?= $daten['bz'] ?>" readonly>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="print__field-wrapper" data-field-name="°C" data-vp-name="Temp">
+                                    <input type="text" class="w-100 print__field-vitals" value="<?= $daten['temp'] ?>" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row border border-dark border-top-0">
+                    <div class="col">
+                        <h6 class="print__heading">ERKRANKUNGEN</h6>
+                        <?php
+                        $diagnose_labels = [
+                            // ZNS (1-9)
+                            1 => 'Schlaganfall / TIA / ICB',
+                            2 => 'ICB (klin. Diagn.)',
+                            3 => 'SAB (klin. Diagn.)',
+                            4 => 'Krampfanfall',
+                            5 => 'Status Epilepticus',
+                            6 => 'Meningitis / Encephalitis',
+                            9 => 'sonstige Erkrankung ZNS',
+
+                            // Herz-Kreislauf (11-29)
+                            11 => 'ACS / NSTEMI',
+                            12 => 'ACS / STEMI',
+                            13 => 'Kardiogener Schock',
+                            14 => 'tachykarde Arrhythmie',
+                            15 => 'bradykarde Arrhythmie',
+                            16 => 'Schrittmacher-/ICD Fehlfunktion',
+                            17 => 'Lungenembolie',
+                            18 => 'Lungenödem',
+                            19 => 'hypertensiver Notfall',
+                            20 => 'Aortenaneurysma',
+                            21 => 'Hypotonie',
+                            22 => 'Synkope',
+                            23 => 'Thrombose / art. Verschluss',
+                            24 => 'Herz-Kreislauf-Stillstand',
+                            25 => 'Schock unklarer Genese',
+                            26 => 'unklarer Thoraxschmerz',
+                            27 => 'orthostatische Fehlregulation',
+                            28 => 'hypertensive Krise / Entgleisung',
+                            29 => 'sonstige Erkrankung Herz-Kreislauf',
+
+                            // Atemwege (31-49)
+                            31 => 'Asthma (Anfall)',
+                            32 => 'Status Asthmaticus',
+                            33 => 'exacerbierte COPD',
+                            34 => 'Aspiration',
+                            35 => 'Pneumonie / Bronchitis',
+                            36 => 'Hyperventilation',
+                            37 => 'Spontanpneumothorax',
+                            38 => 'Hämoptysis',
+                            39 => 'Dyspnoe unklarer Ursache',
+                            49 => 'sonstige Erkrankung Atmung',
+
+                            // Abdomen (51-59)
+                            51 => 'akutes Abdomen',
+                            52 => 'obere GI-Blutung',
+                            53 => 'untere GI-Blutung',
+                            54 => 'Gallenkolik',
+                            55 => 'Nierenkolik',
+                            56 => 'Kolik allgemein',
+                            59 => 'sonstige Erkrankung Abdomen',
+
+                            // Psychiatrie (61-69)
+                            61 => 'psychischer Ausnahmezustand',
+                            62 => 'Depression',
+                            63 => 'Manie',
+                            64 => 'Intoxikation',
+                            65 => 'Entzug, Delir',
+                            66 => 'Suizidalität',
+                            67 => 'psychosoziale Krise',
+                            69 => 'sonstige Erkrankung Psychiatrie',
+
+                            // Stoffwechsel (71-79)
+                            71 => 'Hypoglykämie',
+                            72 => 'Hyperglykämie',
+                            73 => 'Urämie / ANV',
+                            74 => 'Exsikkose',
+                            75 => 'bek. Dialyspflicht',
+                            79 => 'sonstige Erkrankung Stoffwechsel',
+
+                            // Sonstige (81-99)
+                            81 => 'Anaphylaxie Grad 1/2',
+                            82 => 'Anaphylaxie Grad 3/4',
+                            83 => 'Infekt / Sepsis / Schock',
+                            84 => 'Hitzeerschöpfung / Hitzschlag',
+                            85 => 'Unterkühlung / Erfrierung',
+                            86 => 'akute Lumbago',
+                            87 => 'Palliative Situation',
+                            88 => 'medizinische Behandlungskompl.',
+                            89 => 'Epistaxis / HNO-Erkrankung',
+                            91 => 'urologische Erkrankung',
+                            92 => 'unklare Erkrankung',
+                            93 => 'akzidentelle Intoxikation',
+                            94 => 'Augenerkrankung',
+                            99 => 'Keine Erkrankung / Verletzung feststellbar',
+
+                            // Trauma - Schädel-Hirn (101-104)
+                            101 => 'Trauma Schädel-Hirn leicht',
+                            102 => 'Trauma Schädel-Hirn mittel',
+                            103 => 'Trauma Schädel-Hirn schwer',
+                            104 => 'Trauma Schädel-Hirn tödlich',
+
+                            // Trauma - Gesicht (111-114)
+                            111 => 'Trauma Gesicht leicht',
+                            112 => 'Trauma Gesicht mittel',
+                            113 => 'Trauma Gesicht schwer',
+                            114 => 'Trauma Gesicht tödlich',
+
+                            // Trauma - HWS (121-124)
+                            121 => 'Trauma HWS leicht',
+                            122 => 'Trauma HWS mittel',
+                            123 => 'Trauma HWS schwer',
+                            124 => 'Trauma HWS tödlich',
+
+                            // Trauma - Thorax (131-134)
+                            131 => 'Trauma Thorax leicht',
+                            132 => 'Trauma Thorax mittel',
+                            133 => 'Trauma Thorax schwer',
+                            134 => 'Trauma Thorax tödlich',
+
+                            // Trauma - Abdomen (141-144)
+                            141 => 'Trauma Abdomen leicht',
+                            142 => 'Trauma Abdomen mittel',
+                            143 => 'Trauma Abdomen schwer',
+                            144 => 'Trauma Abdomen tödlich',
+
+                            // Trauma - BWS / LWS (151-153)
+                            151 => 'Trauma BWS / LWS leicht',
+                            152 => 'Trauma BWS / LWS mittel',
+                            153 => 'Trauma BWS / LWS schwer',
+
+                            // Trauma - Becken (161-163)
+                            161 => 'Trauma Becken leicht',
+                            162 => 'Trauma Becken mittel',
+                            163 => 'Trauma Becken schwer',
+
+                            // Trauma - obere Extremitäten (171-173)
+                            171 => 'Trauma obere Extremitäten leicht',
+                            172 => 'Trauma obere Extremitäten mittel',
+                            173 => 'Trauma obere Extremitäten schwer',
+
+                            // Trauma - untere Extremitäten (181-183)
+                            181 => 'Trauma untere Extremitäten leicht',
+                            182 => 'Trauma untere Extremitäten mittel',
+                            183 => 'Trauma untere Extremitäten schwer',
+
+                            // Trauma - Weichteile (191-193)
+                            191 => 'Trauma Weichteile leicht',
+                            192 => 'Trauma Weichteile mittel',
+                            193 => 'Trauma Weichteile schwer',
+
+                            // Trauma - spezielle (201-209)
+                            201 => 'Verbrennung / Verbrühung',
+                            202 => 'Inhalationstrauma',
+                            203 => 'Elektrounfall',
+                            204 => '(beinahe-) Ertrinken',
+                            205 => 'Tauchunfall',
+                            206 => 'Verätzung',
+                            209 => 'Sonstige',
+                        ];
+
+                        $diagnose_haupt_text = '';
+                        if (isset($daten['diagnose_haupt']) && !empty($daten['diagnose_haupt'])) {
+                            $diagnose_haupt_text = $diagnose_labels[$daten['diagnose_haupt']] ?? 'Unbekannte Diagnose';
+                        }
+
+                        $diagnose_weitere_array = [];
+                        if (!empty($daten['diagnose_weitere'])) {
+                            $decoded = json_decode($daten['diagnose_weitere'], true);
+                            if (is_array($decoded)) {
+                                $diagnose_weitere_array = $decoded;
+                            }
+                        }
+
+                        $diagnose_weitere_text = '';
+                        if (!empty($diagnose_weitere_array)) {
+                            $diagnose_weitere_labels = [];
+                            foreach ($diagnose_weitere_array as $diagnose_id) {
+                                if (isset($diagnose_labels[$diagnose_id])) {
+                                    $diagnose_weitere_labels[] = $diagnose_labels[$diagnose_id];
+                                }
+                            }
+                            $diagnose_weitere_text = implode(', ', $diagnose_weitere_labels);
+                        }
+                        ?>
+                        <div class="print__field-wrapper" data-field-name="führende Diagnose">
+                            <input type="text" class="w-100 print__field" value="<?= !empty($diagnose_haupt_text) ? $diagnose_haupt_text : '' ?>" readonly>
+                        </div>
+                    </div>
+                </div>
+                <div class="row border border-dark border-top-0">
+                    <div class="col">
+                        <h5 class="print__heading">weitere Diagnosen</h5>
+                        <div class="print__field-wrapper">
+                            <textarea rows="3" style="resize:none;font-size:11pt" class="w-100 print__textbox" readonly><?= !empty($diagnose_weitere_text) ? $diagnose_weitere_text : '' ?></textarea>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="col">
                 <div class="row border border-dark border-top-0">
@@ -797,7 +1058,7 @@ $currentDate = date('d.m.Y');
                         ?>
                         <table class="w-100 print__text-small">
                             <tr>
-                                <td rowspan="2">Schmerzen<br><span class="fw-bold"><?= $sz_nrs_labels[$daten['sz_nrs']] ?? '' ?></span></td>
+                                <td rowspan="2">Schmerzen<br><span class="fw-bold">NRS <?= $sz_nrs_labels[$daten['sz_nrs']] ?? '' ?></span></td>
                                 <td>
                                     <?php if ($daten['sz_toleranz_1'] == 1): ?>
                                         <input type="radio" name="tolerabel" checked disabled />
@@ -972,9 +1233,1029 @@ $currentDate = date('d.m.Y');
                         </table>
                     </div>
                 </div>
+                <div class="row border border-dark border-top-0">
+                    <div class="col">
+                        <h6 class="print__heading">Verletzungen</h6>
+                        <?php
+                        $v_muster_k_labels = [
+                            1 => 'keine',
+                            2 => 'leicht',
+                            3 => 'mittel',
+                            4 => 'schwer',
+                            99 => 'Nicht untersucht'
+                        ];
+                        $v_muster_k1_labels = [
+                            1 => 'offen',
+                            2 => 'geschlossen'
+                        ];
+                        ?>
+                        <table class="w-100 print__text-small">
+                            <tr>
+                                <td>Schädel-Hirn</td>
+                                <td class="fw-bold"><?= $v_muster_k_labels[$daten['v_muster_k']] ?? '' ?></td>
+                                <td class="fw-bold"> <?= $v_muster_k1_labels[$daten['v_muster_k1']] ?? '' ?></td>
+                            </tr>
+                            <tr>
+                                <td>Wirbelsäule</td>
+                                <td class="fw-bold"><?= $v_muster_k_labels[$daten['v_muster_w']] ?? '' ?></td>
+                                <td class="fw-bold"> <?= $v_muster_k1_labels[$daten['v_muster_w1']] ?? '' ?></td>
+                            </tr>
+                            <tr>
+                                <td>Thorax</td>
+                                <td class="fw-bold"><?= $v_muster_k_labels[$daten['v_muster_t']] ?? '' ?></td>
+                                <td class="fw-bold"> <?= $v_muster_k1_labels[$daten['v_muster_t1']] ?? '' ?></td>
+                            </tr>
+                            <tr>
+                                <td>Abdomen</td>
+                                <td class="fw-bold"><?= $v_muster_k_labels[$daten['v_muster_a']] ?? '' ?></td>
+                                <td class="fw-bold"> <?= $v_muster_k1_labels[$daten['v_muster_a1']] ?? '' ?></td>
+                            </tr>
+                            <tr>
+                                <td>Obere Extremitäten</td>
+                                <td class="fw-bold"><?= $v_muster_k_labels[$daten['v_muster_al']] ?? '' ?></td>
+                                <td class="fw-bold"> <?= $v_muster_k1_labels[$daten['v_muster_al1']] ?? '' ?></td>
+                            </tr>
+                            <tr>
+                                <td>Untere Extremitäten</td>
+                                <td class="fw-bold"><?= $v_muster_k_labels[$daten['v_muster_bl']] ?? '' ?></td>
+                                <td class="fw-bold"> <?= $v_muster_k1_labels[$daten['v_muster_bl1']] ?? '' ?></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="row border border-dark border-top-0">
+                    <div class="col text-end fw-bold print__text-small">
+                        erstellt mit intraRP von EmergencyForge
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+    <div class="print__paper">
+        <div class="row">
+            <div class="col-8">
+                <div class="row border border-dark">
+                    <div class="col">
+                        <h6 class="print__heading">Verlaufsbeschreibung</h6>
+                    </div>
+                </div>
+                <?php
+                // Vitalparameter aus Datenbank laden
+                $queryVitals = "SELECT * FROM intra_edivi_vitalparameter_einzelwerte 
+                            WHERE enr = :enr AND geloescht = 0 
+                            ORDER BY zeitpunkt ASC";
+                $stmtVitals = $pdo->prepare($queryVitals);
+                $stmtVitals->execute(['enr' => $enr]);
+                $vitalsRaw = $stmtVitals->fetchAll(PDO::FETCH_ASSOC);
+
+                // Nach Zeitpunkt gruppieren
+                $groupedVitals = [];
+                foreach ($vitalsRaw as $vital) {
+                    $zeitpunkt = $vital['zeitpunkt'];
+                    if (!isset($groupedVitals[$zeitpunkt])) {
+                        $groupedVitals[$zeitpunkt] = [];
+                    }
+                    $groupedVitals[$zeitpunkt][$vital['parameter_name']] = $vital['parameter_wert'];
+                }
+                ksort($groupedVitals);
+
+                // Daten für Chart vorbereiten
+                $chartLabels = [];
+                $chartData = [
+                    'spo2' => [],
+                    'herzfreq' => [],
+                    'rrsys' => [],
+                    'rrdias' => [],
+                    'atemfreq' => [],
+                    'temp' => [],
+                    'bz' => [],
+                    'etco2' => []
+                ];
+
+                foreach ($groupedVitals as $zeitpunkt => $werte) {
+                    $chartLabels[] = (new DateTime($zeitpunkt))->format('H:i');
+
+                    $chartData['spo2'][] = isset($werte['SpO₂']) && $werte['SpO₂'] !== '' ? floatval(str_replace(',', '.', $werte['SpO₂'])) : null;
+                    $chartData['herzfreq'][] = isset($werte['Herzfrequenz']) && $werte['Herzfrequenz'] !== '' ? floatval(str_replace(',', '.', $werte['Herzfrequenz'])) : null;
+                    $chartData['rrsys'][] = isset($werte['RR systolisch']) && $werte['RR systolisch'] !== '' ? floatval(str_replace(',', '.', $werte['RR systolisch'])) : null;
+                    $chartData['rrdias'][] = isset($werte['RR diastolisch']) && $werte['RR diastolisch'] !== '' ? floatval(str_replace(',', '.', $werte['RR diastolisch'])) : null;
+                    $chartData['atemfreq'][] = isset($werte['Atemfrequenz']) && $werte['Atemfrequenz'] !== '' ? floatval(str_replace(',', '.', $werte['Atemfrequenz'])) : null;
+                    $chartData['temp'][] = isset($werte['Temperatur']) && $werte['Temperatur'] !== '' ? floatval(str_replace(',', '.', $werte['Temperatur'])) : null;
+                    $chartData['bz'][] = isset($werte['Blutzucker']) && $werte['Blutzucker'] !== '' ? floatval(str_replace(',', '.', $werte['Blutzucker'])) : null;
+                    $chartData['etco2'][] = isset($werte['etCO₂']) && $werte['etCO₂'] !== '' ? floatval(str_replace(',', '.', $werte['etCO₂'])) : null;
+                }
+                ?>
+
+                <?php if (!empty($groupedVitals)): ?>
+                    <div class="row border border-dark border-top-0">
+                        <div class="col p-3" style="background: white;">
+                            <canvas id="vitalChart" width="700" height="400"></canvas>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <div class="row border border-dark border-top-0">
+                        <div class="col p-3 text-center print__text-small">
+                            Keine Vitalparameter dokumentiert
+                        </div>
+                    </div>
+                <?php endif; ?>
+                <div class="row border border-dark border-top-0">
+                    <div class="col">
+                        <div class="row">
+                            <div class="col">
+                                <h6 class="print__heading">Medikation</h6>
+                            </div>
+                            <div class="col print__text-small text-end">
+                                <?php if ($daten['medis'] == 1 || $daten['medis'] === 0): ?>
+                                    <input type="radio" name="keine_medis" checked disabled />
+                                    <label for="keine_medis">Keine Medikamente</label>
+                                <?php else : ?>
+                                    <input type="radio" name="keine_medis" disabled />
+                                    <label for="keine_medis">Keine Medikamente</label>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <?php
+                        function getCurrentMedikamente($medikamenteJson)
+                        {
+                            if (empty($medikamenteJson) || $medikamenteJson === '0') {
+                                return [];
+                            }
+
+                            $decoded = json_decode($medikamenteJson, true);
+                            if (json_last_error() !== JSON_ERROR_NONE) {
+                                return [];
+                            }
+
+                            if (is_array($decoded)) {
+                                return $decoded;
+                            }
+
+                            return [];
+                        }
+
+                        function displayAllMedikamente($medikamenteJson)
+                        {
+                            if (!isset($medikamenteJson) || $medikamenteJson === null) {
+                                return '';
+                            }
+
+                            if ($medikamenteJson === '0') {
+                                return '';
+                            }
+
+                            $medikamente = getCurrentMedikamente($medikamenteJson);
+
+                            if (empty($medikamente)) {
+                                return '';
+                            }
+
+                            usort($medikamente, function ($a, $b) {
+                                return strcmp($a['zeit'], $b['zeit']);
+                            });
+
+                            $displays = [];
+                            foreach ($medikamente as $med) {
+                                $displayEinheit = $med['einheit'];
+                                if ($displayEinheit === 'mcg') {
+                                    $displayEinheit = '&micro;g';
+                                } else if ($displayEinheit === 'IE') {
+                                    $displayEinheit = 'I.E.';
+                                }
+
+                                $displays[] = sprintf(
+                                    '%s: %s %s %s %s',
+                                    $med['zeit'],
+                                    $med['wirkstoff'],
+                                    $med['dosierung'],
+                                    $displayEinheit,
+                                    $med['applikation']
+                                );
+                            }
+
+                            return implode("\n", $displays);
+                        }
+
+                        function hasAnyMedikamente($medikamenteJson)
+                        {
+                            $medikamente = getCurrentMedikamente($medikamenteJson);
+                            return !empty($medikamente);
+                        }
+                        ?>
+                        <div class="print__field-wrapper">
+                            <textarea rows="18" style="resize:none" class="w-100 print__textbox" readonly><?= displayAllMedikamente($daten['medis'] ?? ''); ?></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="row border border-dark">
+                    <div class="col">
+                        <table class="w-100 print__text-small">
+                            <tr>
+                                <td>Patient Name<br><span style="font-weight: 600;font-size:11pt"><?= $daten['patname'] ?></span></td>
+                                <td>Geb.Dat.<br><span style="font-weight: 600;font-size:11pt"><?= !empty($daten['patgebdat']) ? date('d.m.Y', strtotime($daten['patgebdat'])) : '' ?></span></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="row border border-dark border-top-0">
+                    <div class="col">
+                        <h5 class="print__heading">Maßnahmen</h5>
+                        <h6 class="print__heading">Zugänge</h6>
+                        <?php
+                        function getCurrentZugaenge($zugangJson)
+                        {
+                            if (empty($zugangJson) || $zugangJson === '0') {
+                                return [];
+                            }
+
+                            $decoded = json_decode($zugangJson, true);
+                            if (json_last_error() !== JSON_ERROR_NONE) {
+                                return [];
+                            }
+
+                            if (isset($decoded['art'])) {
+                                return [$decoded];
+                            } else if (is_array($decoded)) {
+                                return $decoded;
+                            }
+
+                            return [];
+                        }
+
+                        function hasZugangAtLocation($zugaenge, $art, $ort, $seite)
+                        {
+                            foreach ($zugaenge as $zugang) {
+                                if (
+                                    $zugang['art'] === $art &&
+                                    $zugang['ort'] === $ort &&
+                                    $zugang['seite'] === $seite
+                                ) {
+                                    return true;
+                                }
+                            }
+                            return false;
+                        }
+
+                        function addZugang($zugaenge, $newZugang)
+                        {
+                            foreach ($zugaenge as $index => $zugang) {
+                                if (
+                                    $zugang['art'] === $newZugang['art'] &&
+                                    $zugang['ort'] === $newZugang['ort'] &&
+                                    $zugang['seite'] === $newZugang['seite']
+                                ) {
+                                    $zugaenge[$index] = $newZugang;
+                                    return $zugaenge;
+                                }
+                            }
+
+                            $zugaenge[] = $newZugang;
+                            return $zugaenge;
+                        }
+
+                        function removeZugang($zugaenge, $art, $ort, $seite)
+                        {
+                            return array_values(array_filter($zugaenge, function ($zugang) use ($art, $ort, $seite) {
+                                return !($zugang['art'] === $art &&
+                                    $zugang['ort'] === $ort &&
+                                    $zugang['seite'] === $seite);
+                            }));
+                        }
+
+                        $currentZugaenge = getCurrentZugaenge($daten['c_zugang'] ?? '');
+
+                        function normalize_groesse_pretty(string $raw): string
+                        {
+                            $v = strtoupper(str_replace(' ', '', trim($raw)));
+                            $suffixKurz = false;
+
+                            if (str_ends_with($v, '_KURZ')) {
+                                $suffixKurz = true;
+                                $v = substr($v, 0, -5);
+                            }
+
+                            if (preg_match('/^(\d{2})G$/', $v, $m)) {
+                                $core = $m[1] . 'G';
+                            } elseif (preg_match('/^G(\d{2})$/', $v, $m)) {
+                                $core = $m[1] . 'G';
+                            } elseif (preg_match('/^(15|25|45)MM$/', $v, $m)) {
+                                return $m[1] . ' mm';
+                            } else {
+                                $core = $v;
+                            }
+
+                            $labels = [
+                                '24G' => '24 G',
+                                '22G' => '22 G',
+                                '20G' => '20 G',
+                                '18G' => '18 G',
+                                '17G' => '17 G',
+                                '16G' => '16 G',
+                                '14G' => '14 G',
+                            ];
+
+                            $pretty = $labels[$core] ?? $raw;
+
+                            if ($suffixKurz) {
+                                $pretty .= ' kurz';
+                            }
+                            return $pretty;
+                        }
+
+                        function displayAllZugaenge($zugangJson)
+                        {
+                            if (!isset($zugangJson) || $zugangJson === null) {
+                                return '';
+                            }
+                            if ($zugangJson === '0') {
+                                return 'Kein Zugang';
+                            }
+
+                            $zugaenge = getCurrentZugaenge($zugangJson);
+                            if (empty($zugaenge)) {
+                                return '';
+                            }
+
+                            usort($zugaenge, function ($a, $b) {
+                                return [$a['art'], $a['ort'], $a['seite']] <=> [$b['art'], $b['ort'], $b['seite']];
+                            });
+
+                            $artNames = ['pvk' => 'PVK', 'zvk' => 'ZVK', 'io' => 'intraossär'];
+                            $displays = [];
+
+                            foreach ($zugaenge as $zugang) {
+                                $artName   = $artNames[$zugang['art']] ?? $zugang['art'];
+                                $groesse   = normalize_groesse_pretty($zugang['groesse'] ?? '');
+                                $ort       = $zugang['ort']   ?? '';
+                                $seite     = $zugang['seite'] ?? '';
+
+                                $displays[] = sprintf('%s %s %s %s', $artName, $groesse, $ort, $seite);
+                            }
+
+                            return implode('<br>', $displays);
+                        }
+
+                        function displayAllZugaengeText($zugangJson)
+                        {
+                            if (!isset($zugangJson) || $zugangJson === null) {
+                                return '';
+                            }
+                            if ($zugangJson === '0') {
+                                return 'Kein Zugang';
+                            }
+
+                            $zugaenge = getCurrentZugaenge($zugangJson);
+                            if (empty($zugaenge)) {
+                                return '';
+                            }
+
+                            usort($zugaenge, function ($a, $b) {
+                                return [$a['art'], $a['ort'], $a['seite']] <=> [$b['art'], $b['ort'], $b['seite']];
+                            });
+
+                            $artNames = ['pvk' => 'PVK', 'zvk' => 'ZVK', 'io' => 'intraossär'];
+                            $displays = [];
+
+                            foreach ($zugaenge as $zugang) {
+                                $artName   = $artNames[$zugang['art']] ?? $zugang['art'];
+                                $groesse   = normalize_groesse_pretty($zugang['groesse'] ?? '');
+                                $ort       = $zugang['ort']   ?? '';
+                                $seite     = $zugang['seite'] ?? '';
+
+                                $displays[] = sprintf('%s %s %s %s', $artName, $groesse, $ort, $seite);
+                            }
+
+                            return implode("\n", $displays);
+                        }
+
+                        function displayZugaengeByArt($zugangJson, $filterArt = null)
+                        {
+                            if (!isset($zugangJson) || $zugangJson === null) {
+                                return '';
+                            }
+                            if ($zugangJson === '0') {
+                                return 'Kein Zugang';
+                            }
+
+                            $zugaenge = getCurrentZugaenge($zugangJson);
+                            if (empty($zugaenge)) {
+                                return '';
+                            }
+
+                            // Filtern nach Art, wenn angegeben
+                            if ($filterArt !== null) {
+                                $zugaenge = array_filter($zugaenge, function ($zugang) use ($filterArt) {
+                                    return $zugang['art'] === $filterArt;
+                                });
+
+                                if (empty($zugaenge)) {
+                                    return '<em>Keine Zugänge dieser Art</em>';
+                                }
+                            }
+
+                            usort($zugaenge, function ($a, $b) {
+                                return [$a['art'], $a['ort'], $a['seite']] <=> [$b['art'], $b['ort'], $b['seite']];
+                            });
+
+                            $artNames = ['pvk' => 'PVK', 'zvk' => 'ZVK', 'io' => 'intraossär'];
+                            $displays = [];
+
+                            foreach ($zugaenge as $zugang) {
+                                $artName   = $artNames[$zugang['art']] ?? $zugang['art'];
+                                $groesse   = normalize_groesse_pretty($zugang['groesse'] ?? '');
+                                $ort       = $zugang['ort']   ?? '';
+                                $seite     = $zugang['seite'] ?? '';
+
+                                $displays[] = sprintf('%s %s %s %s', $artName, $groesse, $ort, $seite);
+                            }
+
+                            return implode('<br>', $displays);
+                        }
+
+                        // Oder als Text-Version für Textareas:
+                        function displayZugaengeByArtText($zugangJson, $filterArt = null)
+                        {
+                            if (!isset($zugangJson) || $zugangJson === null) {
+                                return '';
+                            }
+                            if ($zugangJson === '0') {
+                                return 'Kein Zugang';
+                            }
+
+                            $zugaenge = getCurrentZugaenge($zugangJson);
+                            if (empty($zugaenge)) {
+                                return '';
+                            }
+
+                            // Filtern nach Art, wenn angegeben
+                            if ($filterArt !== null) {
+                                $zugaenge = array_filter($zugaenge, function ($zugang) use ($filterArt) {
+                                    return $zugang['art'] === $filterArt;
+                                });
+
+                                if (empty($zugaenge)) {
+                                    return 'Keine Zugänge dieser Art';
+                                }
+                            }
+
+                            usort($zugaenge, function ($a, $b) {
+                                return [$a['art'], $a['ort'], $a['seite']] <=> [$b['art'], $b['ort'], $b['seite']];
+                            });
+
+                            $artNames = ['pvk' => 'PVK', 'zvk' => 'ZVK', 'io' => 'intraossär'];
+                            $displays = [];
+
+                            foreach ($zugaenge as $zugang) {
+                                $artName   = $artNames[$zugang['art']] ?? $zugang['art'];
+                                $groesse   = normalize_groesse_pretty($zugang['groesse'] ?? '');
+                                $ort       = $zugang['ort']   ?? '';
+                                $seite     = $zugang['seite'] ?? '';
+
+                                $displays[] = sprintf('%s %s %s %s', $artName, $groesse, $ort, $seite);
+                            }
+
+                            return implode("\n", $displays);
+                        }
+
+                        function hasAnyZugang($zugangJson)
+                        {
+                            $zugaenge = getCurrentZugaenge($zugangJson);
+                            return !empty($zugaenge);
+                        }
+                        ?>
+                        <div class="print__field-wrapper">
+                            <textarea rows="8" style="resize:none" class="w-100 print__textbox" readonly><?= displayAllZugaengeText($daten['c_zugang'] ?? ''); ?></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="row border border-dark border-top-0">
+                    <div class="col">
+                        <h6 class="print__heading">Atemwege</h6>
+                        <table class="w-100 print__text-small">
+                            <tr>
+                                <td>
+                                    <?php if ($daten['awsicherung_1'] == 1): ?>
+                                        <input type="radio" name="atemwege_freimachen" checked disabled />
+                                        <label for="atemwege_freimachen">Atemwege freimachen</label>
+                                    <?php else : ?>
+                                        <input type="radio" name="atemwege_freimachen" disabled />
+                                        <label for="atemwege_freimachen">Atemwege freimachen</label>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php if ($daten['awsicherung_2'] == 1): ?>
+                                        <input type="radio" name="absaugen" checked disabled />
+                                        <label for="absaugen">Absaugen</label>
+                                    <?php else : ?>
+                                        <input type="radio" name="absaugen" disabled />
+                                        <label for="absaugen">Absaugen</label>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <?php if ($daten['entlastungspunktion'] == 1): ?>
+                                        <input type="radio" name="entlastungspunktion" checked disabled />
+                                        <label for="entlastungspunktion">Entlastungspunktion</label>
+                                    <?php else : ?>
+                                        <input type="radio" name="entlastungspunktion" disabled />
+                                        <label for="entlastungspunktion">Entlastungspunktion</label>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php if ($daten['hws_immo'] == 1): ?>
+                                        <input type="radio" name="hws_immo" checked disabled />
+                                        <label for="hws_immo">HWS-Immobilisation</label>
+                                    <?php else : ?>
+                                        <input type="radio" name="hws_immo" disabled />
+                                        <label for="hws_immo">HWS-Immobilisation</label>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="row border border-dark border-top-0">
+                    <div class="col">
+                        <?php
+                        $awsicherung_neu_labels = [
+                            1 => 'keine',
+                            2 => 'Endotrachealtubus',
+                            3 => 'Larynxmaske',
+                            4 => 'Guedeltubus',
+                            5 => 'Larynxtubus',
+                            6 => 'Wendl-Tubus',
+                            99 => 'Sonstige'
+                        ];
+                        $b_beatmung_labels = [
+                            1 => 'Spontanatmung',
+                            2 => 'Assistierte Beatmung',
+                            3 => 'Kontrollierte Beatmung',
+                            4 => 'Maschinelle Beatmung',
+                            5 => 'keine'
+                        ];
+                        ?>
+                        <table class="w-100 print__text-small">
+                            <tr>
+                                <td>
+                                    Intubation<br><span style="font-weight:600;font-size:11pt"><?= $awsicherung_neu_labels[$daten['awsicherung_neu']] ?? '' ?></span>
+                                </td>
+                                <td>
+                                    Beatmung<br><span style="font-weight:600;font-size:11pt"><?= $b_beatmung_labels[$daten['b_beatmung']] ?? '' ?></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    O2-Gabe L/min<br><span style="font-weight:600;font-size:11pt"><?= $daten['o2gabe'] ?? '' ?></span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="row border border-dark border-top-0">
+                    <div class="col">
+                        <?php
+                        $uebergabe_ort_labels = [
+                            1 => 'Schockraum',
+                            2 => 'Praxis',
+                            3 => 'ZNA / INA',
+                            4 => 'Stroke Unit',
+                            5 => 'Intensivstation',
+                            6 => 'OP direkt',
+                            7 => 'Hausarzt',
+                            8 => 'Fachambulanz',
+                            9 => 'Chest Pain Unit',
+                            10 => 'HKL',
+                            11 => 'Allgemeinstation',
+                            12 => 'Einsatzstelle',
+                            99 => 'Sonstige'
+                        ];
+
+                        $uebergabe_an_labels = [
+                            1 => 'Arzt',
+                            2 => 'Pflegepersonal',
+                            3 => 'Rettungssanitäter',
+                            4 => 'Rettungsassistent',
+                            5 => 'Notfallsanitäter',
+                            6 => 'Polizei',
+                            7 => 'Angehörige',
+                            99 => 'Sonstige'
+                        ];
+
+                        $uebergabe_an_text = '';
+                        if (isset($daten['uebergabe_an']) && !empty($daten['uebergabe_an'])) {
+                            $uebergabe_an_text = $uebergabe_an_labels[$daten['uebergabe_an']] ?? '&nbsp';
+                        }
+
+                        $uebergabe_ort_text = '';
+                        if (isset($daten['uebergabe_ort']) && !empty($daten['uebergabe_ort'])) {
+                            $uebergabe_ort_text = $uebergabe_ort_labels[$daten['uebergabe_ort']] ?? '&nbsp';
+                        }
+                        ?>
+                        <h6 class="print__heading">Übergabe an</h6>
+                        <span style="font-weight:600;font-size:11pt"><?= $uebergabe_an_text ?></span>
+                        <h6 class="print__heading">Übergabeort</h6>
+                        <span style="font-weight:600;font-size:11pt"><?= $uebergabe_ort_text ?></span>
+                    </div>
+                </div>
+                <div class="row border border-dark border-top-0">
+                    <div class="col">
+                        <h6 class="print__heading">Protokollant</h6>
+                        <span style="font-weight:600;font-size:11pt"><?= $daten['pfname'] ?? '&nbsp' ?></span>
+                    </div>
+                </div>
+                <div class="row border border-dark border-top-0">
+                    <div class="col text-end fw-bold print__text-small">
+                        erstellt mit intraRP von EmergencyForge
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <?php if (!empty($groupedVitals)): ?>
+        <script>
+            // Chart nach dem Laden der Seite erstellen
+            window.addEventListener('load', function() {
+                const ctx = document.getElementById('vitalChart');
+                if (!ctx) return;
+
+                const chartLabels = <?= json_encode($chartLabels) ?>;
+                const chartData = <?= json_encode($chartData) ?>;
+
+                // Custom Point Styles Plugin
+                const customPointStyles = {
+                    id: 'customPointStyles',
+                    afterDatasetsDraw(chart) {
+                        const ctx = chart.ctx;
+
+                        chart.data.datasets.forEach((dataset, datasetIndex) => {
+                            const meta = chart.getDatasetMeta(datasetIndex);
+
+                            meta.data.forEach((point, index) => {
+                                if (dataset.data[index] === null) return;
+
+                                const x = point.x;
+                                const y = point.y;
+                                const size = 6;
+
+                                ctx.save();
+                                ctx.fillStyle = 'black';
+                                ctx.strokeStyle = 'black';
+                                ctx.lineWidth = 2;
+
+                                // Verschiedene Symbole für verschiedene Parameter
+                                switch (dataset.label) {
+                                    case 'SpO₂': // Kreis gefüllt
+                                        ctx.beginPath();
+                                        ctx.arc(x, y, size, 0, Math.PI * 2);
+                                        ctx.fill();
+                                        break;
+
+                                    case 'HF': // Quadrat gefüllt
+                                        ctx.fillRect(x - size, y - size, size * 2, size * 2);
+                                        break;
+
+                                    case 'RRsys': // Dreieck gefüllt
+                                        ctx.beginPath();
+                                        ctx.moveTo(x, y - size);
+                                        ctx.lineTo(x - size, y + size);
+                                        ctx.lineTo(x + size, y + size);
+                                        ctx.closePath();
+                                        ctx.fill();
+                                        break;
+
+                                    case 'RRdia': // Dreieck leer
+                                        ctx.beginPath();
+                                        ctx.moveTo(x, y - size);
+                                        ctx.lineTo(x - size, y + size);
+                                        ctx.lineTo(x + size, y + size);
+                                        ctx.closePath();
+                                        ctx.stroke();
+                                        break;
+
+                                    case 'AF': // Raute gefüllt
+                                        ctx.beginPath();
+                                        ctx.moveTo(x, y - size);
+                                        ctx.lineTo(x + size, y);
+                                        ctx.lineTo(x, y + size);
+                                        ctx.lineTo(x - size, y);
+                                        ctx.closePath();
+                                        ctx.fill();
+                                        break;
+
+                                    case 'Temp': // Kreis leer
+                                        ctx.beginPath();
+                                        ctx.arc(x, y, size, 0, Math.PI * 2);
+                                        ctx.stroke();
+                                        break;
+
+                                    case 'BZ': // Stern
+                                        const spikes = 5;
+                                        const outerRadius = size;
+                                        const innerRadius = size / 2;
+
+                                        ctx.beginPath();
+                                        for (let i = 0; i < spikes * 2; i++) {
+                                            const radius = i % 2 === 0 ? outerRadius : innerRadius;
+                                            const angle = (Math.PI / spikes) * i - Math.PI / 2;
+                                            const px = x + Math.cos(angle) * radius;
+                                            const py = y + Math.sin(angle) * radius;
+
+                                            if (i === 0) {
+                                                ctx.moveTo(px, py);
+                                            } else {
+                                                ctx.lineTo(px, py);
+                                            }
+                                        }
+                                        ctx.closePath();
+                                        ctx.fill();
+                                        break;
+
+                                    case 'etCO₂': // Plus
+                                        ctx.beginPath();
+                                        ctx.moveTo(x - size, y);
+                                        ctx.lineTo(x + size, y);
+                                        ctx.moveTo(x, y - size);
+                                        ctx.lineTo(x, y + size);
+                                        ctx.stroke();
+                                        break;
+                                }
+
+                                ctx.restore();
+                            });
+                        });
+                    }
+                };
+
+                new Chart(ctx, {
+                    type: 'line',
+                    plugins: [customPointStyles],
+                    data: {
+                        labels: chartLabels,
+                        datasets: [{
+                                label: 'SpO₂',
+                                data: chartData.spo2,
+                                borderColor: 'black',
+                                backgroundColor: 'transparent',
+                                borderWidth: 2,
+                                borderDash: [],
+                                yAxisID: 'y',
+                                tension: 0.3,
+                                pointStyle: false,
+                                spanGaps: false
+                            },
+                            {
+                                label: 'HF',
+                                data: chartData.herzfreq,
+                                borderColor: 'black',
+                                backgroundColor: 'transparent',
+                                borderWidth: 2,
+                                borderDash: [5, 5],
+                                yAxisID: 'y1',
+                                tension: 0.3,
+                                pointStyle: false,
+                                spanGaps: false
+                            },
+                            {
+                                label: 'RRsys',
+                                data: chartData.rrsys,
+                                borderColor: 'black',
+                                backgroundColor: 'transparent',
+                                borderWidth: 2,
+                                borderDash: [10, 2, 2, 2],
+                                yAxisID: 'y1',
+                                tension: 0.3,
+                                pointStyle: false,
+                                spanGaps: false
+                            },
+                            {
+                                label: 'RRdia',
+                                data: chartData.rrdias,
+                                borderColor: 'black',
+                                backgroundColor: 'transparent',
+                                borderWidth: 2,
+                                borderDash: [2, 2],
+                                yAxisID: 'y1',
+                                tension: 0.3,
+                                pointStyle: false,
+                                spanGaps: false
+                            },
+                            {
+                                label: 'AF',
+                                data: chartData.atemfreq,
+                                borderColor: 'black',
+                                backgroundColor: 'transparent',
+                                borderWidth: 1.5,
+                                borderDash: [],
+                                yAxisID: 'y',
+                                tension: 0.3,
+                                pointStyle: false,
+                                spanGaps: false
+                            },
+                            {
+                                label: 'Temp',
+                                data: chartData.temp,
+                                borderColor: 'black',
+                                backgroundColor: 'transparent',
+                                borderWidth: 2.5,
+                                borderDash: [8, 4],
+                                yAxisID: 'y',
+                                tension: 0.3,
+                                pointStyle: false,
+                                spanGaps: false
+                            },
+                            {
+                                label: 'BZ',
+                                data: chartData.bz,
+                                borderColor: 'black',
+                                backgroundColor: 'transparent',
+                                borderWidth: 2,
+                                borderDash: [15, 3, 3, 3],
+                                yAxisID: 'y1',
+                                tension: 0.3,
+                                pointStyle: false,
+                                spanGaps: false
+                            },
+                            {
+                                label: 'etCO₂',
+                                data: chartData.etco2,
+                                borderColor: 'black',
+                                backgroundColor: 'transparent',
+                                borderWidth: 1.5,
+                                borderDash: [3, 3],
+                                yAxisID: 'y',
+                                tension: 0.3,
+                                pointStyle: false,
+                                spanGaps: false
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        aspectRatio: 1.75,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'bottom',
+                                labels: {
+                                    color: 'black',
+                                    font: {
+                                        size: 9
+                                    },
+                                    padding: 15,
+                                    boxWidth: 40,
+                                    boxHeight: 2,
+                                    usePointStyle: false,
+                                    generateLabels: function(chart) {
+                                        const datasets = chart.data.datasets;
+                                        return datasets.map((dataset, i) => {
+                                            // Symbol-Text für jeden Parameter
+                                            const symbols = {
+                                                'SpO₂': '●',
+                                                'HF': '■',
+                                                'RRsys': '▲',
+                                                'RRdia': '△',
+                                                'AF': '◆',
+                                                'Temp': '○',
+                                                'BZ': '★',
+                                                'etCO₂': '+'
+                                            };
+
+                                            // Einheit für jeden Parameter
+                                            const units = {
+                                                'SpO₂': '%',
+                                                'HF': '/min',
+                                                'RRsys': 'mmHg',
+                                                'RRdia': 'mmHg',
+                                                'AF': '/min',
+                                                'Temp': '°C',
+                                                'BZ': 'mg/dl',
+                                                'etCO₂': 'mmHg'
+                                            };
+
+                                            // Linienstil-Beschreibung
+                                            const lineStyles = {
+                                                'SpO₂': 'durchgezogen',
+                                                'HF': 'gestrichelt',
+                                                'RRsys': 'Strich-Punkt',
+                                                'RRdia': 'gepunktet',
+                                                'AF': 'dünn',
+                                                'Temp': 'gestrichelt dick',
+                                                'BZ': 'lang-kurz',
+                                                'etCO₂': 'klein gepunktet'
+                                            };
+
+                                            const label = dataset.label;
+                                            const symbol = symbols[label] || '●';
+                                            const unit = units[label] || '';
+                                            const lineStyle = lineStyles[label] || '';
+
+                                            return {
+                                                text: `${symbol} ${label} (${unit})`,
+                                                fillStyle: 'transparent',
+                                                strokeStyle: 'black',
+                                                lineWidth: dataset.borderWidth || 2,
+                                                lineDash: dataset.borderDash || [],
+                                                hidden: false,
+                                                index: i
+                                            };
+                                        });
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                enabled: false
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: {
+                                    color: 'black',
+                                    font: {
+                                        size: 9
+                                    }
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.1)',
+                                    drawBorder: true,
+                                    borderColor: 'black',
+                                    borderWidth: 2
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Zeit (Uhrzeit)',
+                                    color: 'black',
+                                    font: {
+                                        size: 11,
+                                        weight: 'bold'
+                                    }
+                                }
+                            },
+                            y: {
+                                type: 'linear',
+                                position: 'left',
+                                min: 0,
+                                max: 100,
+                                ticks: {
+                                    color: 'black',
+                                    font: {
+                                        size: 9,
+                                        weight: 'bold'
+                                    },
+                                    stepSize: 10
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.1)',
+                                    drawBorder: true,
+                                    borderColor: 'black',
+                                    borderWidth: 2
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'SpO₂ / AF / etCO₂ / Temp (0-100)',
+                                    color: 'black',
+                                    font: {
+                                        size: 10,
+                                        weight: 'bold'
+                                    }
+                                }
+                            },
+                            y1: {
+                                type: 'linear',
+                                position: 'right',
+                                min: 0,
+                                max: 300,
+                                ticks: {
+                                    color: 'black',
+                                    font: {
+                                        size: 9,
+                                        weight: 'bold'
+                                    },
+                                    stepSize: 30
+                                },
+                                grid: {
+                                    display: false
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'RR / HF / BZ (0-300)',
+                                    color: 'black',
+                                    font: {
+                                        size: 10,
+                                        weight: 'bold'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+        </script>
+    <?php endif; ?>
     <script>
         function calculateAge(birthDateString) {
             const birthDate = new Date(birthDateString);
@@ -1023,6 +2304,32 @@ $currentDate = date('d.m.Y');
 
             updateGCS();
         });
+    </script>
+    <script>
+        let currentZoom = 1;
+
+        function zoomIn() {
+            if (currentZoom < 2) {
+                currentZoom += 0.1;
+                applyZoom();
+            }
+        }
+
+        function zoomOut() {
+            if (currentZoom > 0.5) {
+                currentZoom -= 0.1;
+                applyZoom();
+            }
+        }
+
+        function applyZoom() {
+            const papers = document.querySelectorAll('.print__paper');
+            papers.forEach(paper => {
+                paper.style.transform = `scale(${currentZoom})`;
+                paper.style.transformOrigin = 'top center';
+                paper.style.marginBottom = `${20 * currentZoom}px`;
+            });
+        }
     </script>
 </body>
 
