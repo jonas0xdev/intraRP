@@ -206,7 +206,7 @@ $currentDate = date('d.m.Y');
                         <div class="row">
                             <div class="col">
                                 <div class="print__field-wrapper" data-field-name="Einsatz-Datum/Zeit">
-                                    <input type="text" class="w-100 print__field" value="<?= !empty($daten['edatum']) ? date('d.m.Y', strtotime($daten['edatum'])) : '' . " " . $daten['ezeit'] ?>" readonly>
+                                    <input type="text" class="w-100 print__field" value="<?= !empty($daten['edatum']) ? date('d.m.Y', strtotime($daten['edatum'])) . " " . $daten['ezeit'] : '' . " " . $daten['ezeit'] ?>" readonly>
                                 </div>
                                 <div class="print__field-wrapper" data-field-name="Einsatz-Ort">
                                     <input type="text" class="w-100 print__field" value="<?= $daten['eort'] ?>" readonly>
@@ -2330,6 +2330,24 @@ $currentDate = date('d.m.Y');
                 paper.style.marginBottom = `${20 * currentZoom}px`;
             });
         }
+
+
+        function isInIframe() {
+            try {
+                return window.self !== window.top;
+            } catch (e) {
+                return true;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (isInIframe()) {
+                const printButtons = document.querySelectorAll('.topbar-btn[onclick*="print"]');
+                printButtons.forEach(btn => {
+                    btn.style.display = 'none';
+                });
+            }
+        });
     </script>
 </body>
 
