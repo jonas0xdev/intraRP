@@ -239,6 +239,31 @@ $currentDate = date('d.m.Y');
                                 </div>
                             </div>
                         </div>
+                        <div class="row">
+                            <?php if ($daten['prot_by'] === 0) : ?>
+                                <div class="col">
+                                    <div class="print__field-wrapper" data-field-name="Fahrer">
+                                        <input type="text" class="w-100 print__field" value="<?= $daten['fzg_transp_perso_2'] ?>" readonly>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="print__field-wrapper" data-field-name="Beifahrer">
+                                        <input type="text" class="w-100 print__field" value="<?= $daten['fzg_transp_perso'] ?>" readonly>
+                                    </div>
+                                </div>
+                            <?php else : ?>
+                                <div class="col">
+                                    <div class="print__field-wrapper" data-field-name="Fahrer">
+                                        <input type="text" class="w-100 print__field" value="<?= $daten['fzg_na_perso_2'] ?>" readonly>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="print__field-wrapper" data-field-name="Beifahrer">
+                                        <input type="text" class="w-100 print__field" value="<?= $daten['fzg_na_perso'] ?>" readonly>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 </div>
             </div>
