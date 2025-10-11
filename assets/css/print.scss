@@ -1,0 +1,108 @@
+body {
+  --bs-body-bg: gray;
+}
+
+.print__paper {
+  height: 297mm;
+  width: 210mm;
+  background-color: #fff;
+  margin: 0 auto;
+  padding: 1.27cm;
+}
+
+h6.print__heading {
+  text-transform: uppercase;
+  font-size: 8pt;
+  margin-bottom: 0;
+}
+
+h5.print__heading {
+  font-size: 8pt;
+  margin-bottom: 0;
+}
+
+h1.print__heading-main {
+  font-size: 14pt;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.print__divider {
+  margin-left: calc(var(--bs-gutter-x) * -0.5) !important;
+  margin-right: calc(var(--bs-gutter-x) * -0.5) !important;
+}
+
+.print__text-small {
+  font-size: 6pt;
+}
+
+p.print__text-small {
+  margin-bottom: 0;
+}
+
+input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 6pt;
+  height: 6pt;
+  border: 1px solid #000;
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+  cursor: pointer;
+  outline: none;
+  vertical-align: middle;
+  margin-right: 2px;
+  cursor: default;
+}
+
+input[type="radio"]:checked {
+  background-color: #000;
+  border-color: #000;
+}
+
+.print__field-wrapper {
+  position: relative;
+  margin-bottom: 4pt;
+
+  &::after {
+    content: attr(data-field-name);
+    position: absolute;
+    right: 3pt;
+    bottom: 0;
+    font-size: 5pt;
+  }
+
+  .print__field {
+    font-size: 11pt;
+    font-weight: 600;
+    border: 1px solid #000;
+    border-top: 0;
+    padding-left: 0.35rem;
+    cursor: default;
+    pointer-events: none;
+    user-select: none;
+    caret-color: transparent;
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  .print__textbox {
+    font-size: 7pt;
+    border: 0;
+    cursor: default;
+    pointer-events: none;
+    user-select: none;
+    caret-color: transparent;
+
+    &:focus {
+      outline: none;
+    }
+  }
+}
+
+.print__full-height {
+  height: 100%;
+}
