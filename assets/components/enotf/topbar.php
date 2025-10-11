@@ -27,6 +27,11 @@ use App\Auth\Permissions;
                 </a>
             <?php endif; ?>
 
+            <a href="<?= BASE_PATH ?>enotf/print/index.php?enr=<?= $enr ?>" id="print" class="edivi__iconlink">
+                <i class="las la-file-alt"></i><br>
+                <small>Papieransicht</small>
+            </a>
+
             <?php if (Permissions::check(['admin', 'edivi.edit'])) : ?>
                 <a href="<?= BASE_PATH ?>admin/enotf/qm-actions.php?id=<?= $daten['id'] ?>" id="qma" target="_blank" class="edivi__iconlink">
                     <i class="las la-exclamation"></i><br>

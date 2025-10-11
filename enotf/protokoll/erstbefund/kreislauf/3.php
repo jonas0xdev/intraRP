@@ -128,7 +128,7 @@ $currentDate = date('d.m.Y');
                             <label for="c_puls_reg-1">regelmäßig</label>
 
                             <input type="radio" class="btn-check" id="c_puls_reg-2" name="c_puls_reg" value="2" <?php echo ($daten['c_puls_reg'] == 2 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="c_puls_reg-2">arrhythmis</label>
+                            <label for="c_puls_reg-2">arrhythmisch</label>
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton">
                             <input type="radio" class="btn-check" id="c_puls_rad-1" name="c_puls_rad" value="1" <?php echo ($daten['c_puls_rad'] == 1 ? 'checked' : '') ?> autocomplete="off">

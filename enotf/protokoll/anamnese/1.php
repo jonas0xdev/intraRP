@@ -94,13 +94,13 @@ $currentDate = date('d.m.Y');
                                 <span>Anamnese</span>
                             </a>
                         </div>
-                        <div class="col-6 edivi__overview-container" style="margin:0; padding:0;">
+                        <div class="col-8 edivi__overview-container" style="margin:0; padding:0;">
                             <div class="row edivi__box" style="margin:0;">
                                 <h5 class="text-light px-2 py-1">Notfallsituation, Anamnese, SAMPLER(+S), Bemerkungen</h5>
                                 <div class="col">
                                     <div class="row my-2">
                                         <div class="col">
-                                            <textarea name="anmerkungen" id="anmerkungen" rows="20" class="w-100 form-control" style="resize: none" placeholder="..."><?= $daten['anmerkungen'] ?></textarea>
+                                            <textarea name="anmerkungen" id="anmerkungen" rows="25" class="w-100 form-control" style="resize: none" placeholder="..."><?= $daten['anmerkungen'] ?></textarea>
                                         </div>
                                     </div>
                                 </div>
