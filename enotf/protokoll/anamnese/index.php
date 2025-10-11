@@ -101,7 +101,7 @@ $currentDate = date('d.m.Y');
                                     <div class="row my-2">
                                         <div class="col">
                                             <label for="anamnese" class="edivi__description" style="display: none;">Anamnese</label>
-                                            <textarea name="anamnese" id="anamnese" class="w-100 form-control" style="height: 40vh; overflow-y: auto; resize: vertical;" readonly><?= $daten['anmerkungen'] ?></textarea>
+                                            <textarea name="anamnese" id="anamnese" class="w-100 form-control" style="height: 80vh; overflow-y: auto; resize: vertical;" readonly><?= $daten['anmerkungen'] ?></textarea>
                                         </div>
                                     </div>
                                 </div>
