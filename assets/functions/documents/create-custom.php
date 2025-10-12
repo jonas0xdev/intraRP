@@ -70,7 +70,7 @@ try {
         $renderer = new DocumentRenderer($pdo);
         $pdfGenerator = new DocumentPDFGenerator($pdo, $renderer);
         $pdfPath = $pdfGenerator->generateAndStore($dbId);
-        error_log("PDF erfolgreich generiert: $pdfPath");
+        //error_log("PDF erfolgreich generiert: $pdfPath");
     } catch (Exception $e) {
         error_log("PDF-Generierung fehlgeschlagen für Dokument-DB-ID {$dbId}: " . $e->getMessage());
     }
