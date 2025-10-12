@@ -140,11 +140,11 @@ function logAction($pdo, $action, $data)
         $stmt = $pdo->prepare("
             INSERT INTO intra_audit_log 
             (user, action, details, timestamp) 
-            VALUES (:user_id, :action, :details, CURRENT_TIMESTAMP)
+            VALUES (:user, :action, :details, CURRENT_TIMESTAMP)
         ");
 
         $stmt->execute([
-            'user_id' => $_SESSION['userid'] ?? 0,
+            'user' => $_SESSION['userid'] ?? 0,
             'action' => $action,
             'details' => json_encode($data)
         ]);

@@ -4,7 +4,7 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 
 use App\Auth\Permissions;
 
-if (!session_status() === PHP_SESSION_NONE) {
+if (session_status() === PHP_SESSION_NONE) {
     // Initialisiere Permissions für eingeloggte User
     if (isset($_SESSION['userid']) && !isset($_SESSION['permissions'])) {
         require_once __DIR__ . '/database.php'; // Falls noch nicht geladen
