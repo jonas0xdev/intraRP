@@ -11,6 +11,16 @@ error_reporting(E_ALL);
 
 session_start();
 
+if (!isset($_SESSION['oauth2state']) || !isset($_SESSION['oauth2state_time'])) {
+    exit('Session expired. Please <a href="' . BASE_PATH . 'auth/discord.php">try again</a>.');
+}
+
+if (time() - $_SESSION['oauth2state_time'] > 300) {
+    unset($_SESSION['oauth2state']);
+    unset($_SESSION['oauth2state_time']);
+    exit('Authorization expired. Please <a href="' . BASE_PATH . 'auth/discord.php">try again</a>.');
+}
+
 $provider = new GenericProvider([
     'clientId'                => $_ENV['DISCORD_CLIENT_ID'],
     'clientSecret'            => $_ENV['DISCORD_CLIENT_SECRET'],
@@ -23,8 +33,12 @@ $provider = new GenericProvider([
 
 if (empty($_GET['state']) || ($_GET['state'] !== $_SESSION['oauth2state'])) {
     unset($_SESSION['oauth2state']);
-    exit('Invalid state');
+    unset($_SESSION['oauth2state_time']);
+    exit('Invalid state parameter. Please <a href="' . BASE_PATH . 'auth/discord.php">try again</a>.');
 }
+
+unset($_SESSION['oauth2state']);
+unset($_SESSION['oauth2state_time']);
 
 if (!isset($_GET['code'])) {
     exit('Authorization code not provided.');

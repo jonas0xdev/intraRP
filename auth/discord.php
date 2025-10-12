@@ -15,13 +15,13 @@ $provider = new GenericProvider([
     'urlResourceOwnerDetails' => 'https://discord.com/api/users/@me',
 ]);
 
-// Add the required scopes (e.g., 'identify' to get basic user info)
 $authorizationUrl = $provider->getAuthorizationUrl([
-    'scope' => ['identify'] // Add other scopes if needed, e.g., 'email', 'guilds'
+    'scope' => ['identify']
 ]);
 
 session_start();
 $_SESSION['oauth2state'] = $provider->getState();
+$_SESSION['oauth2state_time'] = time();
 
 header('Location: ' . $authorizationUrl);
 exit;
