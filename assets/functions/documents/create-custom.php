@@ -1,5 +1,5 @@
 <?php
-ob_start(); // Start output buffering at the very beginning
+ob_start();
 
 error_reporting(E_ERROR | E_PARSE);
 ini_set('display_errors', 0);
@@ -14,7 +14,6 @@ use App\Documents\DocumentPDFGenerator;
 use App\Documents\DocumentIdGenerator;
 use App\Auth\Permissions;
 
-// Clear any output that happened during includes
 ob_clean();
 
 header('Content-Type: application/json');

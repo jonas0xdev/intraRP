@@ -39,16 +39,6 @@ class DocumentRenderer
         $stmt->execute(['docid' => $docId]);
         $doc = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // DEBUG
-        error_log("=== DEBUG renderDocument ===");
-        error_log("docId: " . $docId);
-        error_log("doc gefunden: " . ($doc ? 'JA' : 'NEIN'));
-        if ($doc) {
-            error_log("template_id: " . ($doc['template_id'] ?? 'NULL'));
-            error_log("template_file: " . ($doc['template_file'] ?? 'NULL'));
-        }
-        error_log("=========================");
-
         if (!$doc || !$doc['template_id']) {
             throw new \Exception("Dokument oder Template nicht gefunden");
         }

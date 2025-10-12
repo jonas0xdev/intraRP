@@ -23,27 +23,14 @@ $row = $stmt->fetch(PDO::FETCH_ASSOC);
 if (isset($_POST['new']) && $_POST['new'] == 1) {
     $id = $_REQUEST['id'];
     $fullname = trim($_POST['fullname']);
-    //$aktenid = isset($_POST['aktenid']) && $_POST['aktenid'] !== '' ? (int)$_POST['aktenid'] : null;
-
-    // if ($aktenid !== null) {
-    //     $exists = $pdo->query("SELECT 1 FROM intra_mitarbeiter WHERE id = $aktenid")->fetchColumn();
-    //     if (!$exists) {
-    //         Flash::set('user', 'member-id-not-found');
-    //         header("Location: " . BASE_PATH . "admin/users/editprofile.php");
-    //         exit();
-    //     }
-    // }
 
     try {
-        //$stmt = $pdo->prepare("UPDATE intra_users SET fullname = :fullname, aktenid = :aktenid WHERE id = :id");
         $stmt = $pdo->prepare("UPDATE intra_users SET fullname = :fullname WHERE id = :id");
         $stmt->bindValue(':fullname', $fullname, PDO::PARAM_STR);
-        //$stmt->bindValue(':aktenid', $aktenid, $aktenid === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
 
         $_SESSION['cirs_user'] = $fullname;
-        //$_SESSION['aktenid'] = $aktenid;
 
         Flash::set('own', 'data-changed');
         $auditLogger = new AuditLogger($pdo);
