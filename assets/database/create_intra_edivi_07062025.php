@@ -92,7 +92,7 @@ CREATE TABLE IF NOT EXISTS `intra_edivi` (
   `last_edit` timestamp NULL DEFAULT NULL,
   `hidden` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2498 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2498 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 SQL;
 
     $pdo->exec($sql);

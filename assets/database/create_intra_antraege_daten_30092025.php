@@ -10,7 +10,7 @@ try {
         FOREIGN KEY (`antrag_id`) REFERENCES `intra_antraege`(`id`) ON DELETE CASCADE,
         INDEX `idx_antrag` (`antrag_id`),
         INDEX `idx_feldname` (`feldname`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
   SQL;
 
     $pdo->exec($sql);

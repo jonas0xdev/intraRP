@@ -13,7 +13,7 @@ try {
         `erstellt_von` int(11) DEFAULT NULL,
     PRIMARY KEY (`id`),
     INDEX `idx_aktiv` (`aktiv`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
   SQL;
 
     $pdo->exec($sql);

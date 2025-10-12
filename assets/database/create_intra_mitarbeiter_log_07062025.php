@@ -9,7 +9,7 @@ try {
         `datetime` datetime NOT NULL DEFAULT current_timestamp(),
         `paneluser` varchar(255) NOT NULL,
         PRIMARY KEY (`logid`)
-    ) ENGINE=InnoDB AUTO_INCREMENT=6412 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+    ) ENGINE=InnoDB AUTO_INCREMENT=6412 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
   SQL;
 
     $pdo->exec($sql);

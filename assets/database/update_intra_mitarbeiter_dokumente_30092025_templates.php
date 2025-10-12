@@ -13,7 +13,7 @@ try {
         `created_by` INT,
         `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
     SQL;
     $pdo->exec($sql);
 
@@ -30,7 +30,7 @@ try {
         `sort_order` INT DEFAULT 0,
         `validation_rules` TEXT,
         FOREIGN KEY (`template_id`) REFERENCES `intra_dokument_templates`(`id`) ON DELETE CASCADE
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
     SQL;
     $pdo->exec($sql);
 

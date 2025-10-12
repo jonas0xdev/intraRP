@@ -19,8 +19,8 @@ try {
         PRIMARY KEY (`id`),
         KEY `FK_intra_edivi_vitalparameter_intra_edivi` (`enr`),
         CONSTRAINT `FK_intra_edivi_vitalparameter_intra_edivi` FOREIGN KEY (`enr`) REFERENCES `intra_edivi` (`enr`) ON DELETE CASCADE ON UPDATE CASCADE
-        ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
-    ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+        ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+    ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
   SQL;
 
     $pdo->exec($sql);

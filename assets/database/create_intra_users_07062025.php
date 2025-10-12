@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS `intra_users` (
   `full_admin` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `FK_intra_users_intra_users_roles` (`role`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 SQL;
 
     $pdo->exec($sql);

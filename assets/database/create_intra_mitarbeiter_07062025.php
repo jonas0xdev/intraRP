@@ -26,7 +26,7 @@ try {
         CONSTRAINT `FK_intra_mitarbeiter_intra_mitarbeiter_dienstgrade` FOREIGN KEY (`dienstgrad`) REFERENCES `intra_mitarbeiter_dienstgrade` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE,
         CONSTRAINT `FK_intra_mitarbeiter_intra_mitarbeiter_fwquali` FOREIGN KEY (`qualifw2`) REFERENCES `intra_mitarbeiter_fwquali` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE,
         CONSTRAINT `FK_intra_mitarbeiter_intra_mitarbeiter_rdquali` FOREIGN KEY (`qualird`) REFERENCES `intra_mitarbeiter_rdquali` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE
-    ) ENGINE=InnoDB AUTO_INCREMENT=1038 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+    ) ENGINE=InnoDB AUTO_INCREMENT=1038 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
   SQL;
 
     $pdo->exec($sql);

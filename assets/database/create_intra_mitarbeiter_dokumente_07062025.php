@@ -24,7 +24,7 @@ try {
         UNIQUE KEY `docid` (`docid`),
         KEY `FK_intra_mitarbeiter_dokumente_intra_mitarbeiter` (`profileid`),
         CONSTRAINT `FK_intra_mitarbeiter_dokumente_intra_mitarbeiter` FOREIGN KEY (`profileid`) REFERENCES `intra_mitarbeiter` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-    ) ENGINE=InnoDB AUTO_INCREMENT=2291 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+    ) ENGINE=InnoDB AUTO_INCREMENT=2291 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
   SQL;
 
     $pdo->exec($sql);

@@ -11,7 +11,7 @@ try {
         PRIMARY KEY (`id`),
         KEY `FK_intra_edivi_qmlog_intra_edivi` (`protokoll_id`),
         CONSTRAINT `FK_intra_edivi_qmlog_intra_edivi` FOREIGN KEY (`protokoll_id`) REFERENCES `intra_edivi` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-    ) ENGINE=InnoDB AUTO_INCREMENT=938 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+    ) ENGINE=InnoDB AUTO_INCREMENT=938 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
   SQL;
 
     $pdo->exec($sql);

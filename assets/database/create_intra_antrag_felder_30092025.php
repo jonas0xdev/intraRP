@@ -20,7 +20,7 @@ try {
     FOREIGN KEY (`antragstyp_id`) REFERENCES `intra_antrag_typen`(`id`) ON DELETE CASCADE,
     INDEX `idx_antragstyp` (`antragstyp_id`),
     INDEX `idx_sortierung` (`sortierung`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
   SQL;
 
     $pdo->exec($sql);

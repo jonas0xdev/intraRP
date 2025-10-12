@@ -14,7 +14,7 @@ try {
     `cirs_text` text DEFAULT NULL,
     `discordid` varchar(255) DEFAULT NULL,
     PRIMARY KEY (`id`)
-  ) ENGINE=InnoDB AUTO_INCREMENT=652 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+  ) ENGINE=InnoDB AUTO_INCREMENT=652 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
   SQL;
 
   $pdo->exec($sql);
