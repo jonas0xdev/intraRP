@@ -2551,13 +2551,31 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
 
         function applyZoom() {
             const papers = document.querySelectorAll('.print__paper');
+
             papers.forEach(paper => {
+                let wrapper = paper.parentElement;
+                if (!wrapper.classList.contains('zoom-wrapper')) {
+                    wrapper = document.createElement('div');
+                    wrapper.className = 'zoom-wrapper';
+                    paper.parentNode.insertBefore(wrapper, paper);
+                    wrapper.appendChild(paper);
+                }
+
                 paper.style.transform = `scale(${currentZoom})`;
                 paper.style.transformOrigin = 'top center';
-                paper.style.marginBottom = `${20 * currentZoom}px`;
-            });
-        }
 
+                const naturalHeight = 297; // mm
+                const scaledHeight = naturalHeight * currentZoom;
+
+                wrapper.style.height = `${scaledHeight}mm`;
+                wrapper.style.marginBottom = '20px';
+                wrapper.style.overflow = 'visible';
+                wrapper.style.display = 'flex';
+                wrapper.style.justifyContent = 'center';
+            });
+
+            document.body.style.overflowX = currentZoom > 1 ? 'auto' : 'visible';
+        }
 
         function isInIframe() {
             try {
@@ -2574,6 +2592,25 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                     btn.style.display = 'none';
                 });
             }
+
+            applyZoom();
+        });
+
+        window.addEventListener('beforeprint', function() {
+            const papers = document.querySelectorAll('.print__paper');
+            papers.forEach(paper => {
+                const wrapper = paper.parentElement;
+                if (wrapper && wrapper.classList.contains('zoom-wrapper')) {
+                    wrapper.parentNode.insertBefore(paper, wrapper);
+                    wrapper.remove();
+                }
+                paper.style.transform = '';
+                paper.style.transformOrigin = '';
+            });
+            document.body.style.overflowX = '';
+        });
+        window.addEventListener('afterprint', function() {
+            applyZoom();
         });
     </script>
     <script src="<?= BASE_PATH ?>assets/js/pin_activity.js"></script>

@@ -193,6 +193,13 @@ body {
     transform: none !important;
   }
 
+  .zoom-wrapper {
+    display: contents !important;
+    height: auto !important;
+    margin: 0 !important;
+    overflow: visible !important;
+  }
+
   .print__paper {
     page-break-after: always;
     page-break-inside: avoid;
@@ -269,4 +276,31 @@ select {
   #topbar {
     display: none !important;
   }
+}
+.zoom-wrapper {
+  width: 100%;
+  overflow: visible;
+  display: flex;
+  justify-content: center;
+  transition: height 0.2s ease;
+  margin-bottom: 20px;
+}
+
+body {
+  overflow-x: auto;
+  min-height: 100vh;
+  transition: overflow-x 0.2s ease;
+}
+
+.print__paper {
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+#topbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: transparent;
+  padding: 10px 15px;
 }
