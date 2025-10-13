@@ -178,12 +178,12 @@ $prot_url = "https://" . SYSTEM_URL . "/enotf/index.php";
                 </div>
                 <h2 class="lockscreen-title">System gesperrt</h2>
                 <p style="text-align: center; color: #a2a2a2; margin-bottom: 20px;">
-                    Bitte PIN eingeben (<?= $pinLength ?> Zeichen)
+                    Bitte PIN eingeben
                 </p>
 
                 <form method="post" id="pinForm">
                     <div class="pin-display <?= isset($error) ? 'error' : '' ?>" id="pinDisplay">
-                        <?= str_repeat('•', $pinLength) ?>
+
                     </div>
                     <input type="hidden" name="pin" id="pinInput" value="">
 
@@ -226,11 +226,9 @@ $prot_url = "https://" . SYSTEM_URL . "/enotf/index.php";
         function updateDisplay() {
             const display = document.getElementById('pinDisplay');
             if (pinValue.length === 0) {
-                display.textContent = '•'.repeat(maxLength);
+                display.textContent = '';
             } else {
-                const filled = '•'.repeat(pinValue.length);
-                const empty = '•'.repeat(maxLength - pinValue.length);
-                display.textContent = filled + empty;
+                display.textContent = '•'.repeat(pinValue.length);
             }
             document.getElementById('pinInput').value = pinValue;
         }
