@@ -1842,6 +1842,35 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                         </table>
                     </div>
                 </div>
+                <?php if ($daten['prot_by'] != 1): ?>
+                    <div class="row border border-dark border-top-0">
+                        <div class="col">
+                            <h6 class="print__heading">Nachforderung Notarzt</h6>
+                            <table class="w-100 print__text-small">
+                                <tr>
+                                    <td>
+                                        <?php if ($daten['na_nachf'] == 1): ?>
+                                            <input type="radio" name="na_nachf_nein" checked disabled />
+                                            <label for="na_nachf_nein">nein</label>
+                                        <?php else : ?>
+                                            <input type="radio" name="na_nachf_nein" disabled />
+                                            <label for="na_nachf_nein">nein</label>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <?php if ($daten['na_nachf'] == 2): ?>
+                                            <input type="radio" name="na_nachf_ja" checked disabled />
+                                            <label for="na_nachf_ja">ja</label>
+                                        <?php else : ?>
+                                            <input type="radio" name="na_nachf_ja" disabled />
+                                            <label for="na_nachf_ja">ja</label>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                <?php endif; ?>
                 <div class="row border border-dark border-top-0">
                     <div class="col">
                         <?php

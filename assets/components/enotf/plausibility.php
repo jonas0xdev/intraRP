@@ -39,6 +39,10 @@ if ($daten['c_ekg'] === NULL) {
     echo '[2] Erstbefund: EKG ist nicht gesetzt.<br>';
 }
 
+if ($daten['c_puls_reg'] === NULL || $daten['c_puls_rad'] === NULL) {
+    echo '[2] Erstbefund: Puls ist nicht gesetzt.<br>';
+}
+
 if ($daten['d_bewusstsein'] === NULL) {
     echo '[2] Erstbefund: Bewusstseinslage ist nicht gesetzt.<br>';
 }
@@ -59,34 +63,50 @@ if ($daten['v_muster_k'] === NULL || $daten['v_muster_t'] === NULL || $daten['v_
     echo '[2] Erstbefund: Verletzungen sind nicht gesetzt.<br>';
 }
 
+if ($daten['psych'] === NULL) {
+    echo '[2] Erstbefund: Psychischer Zustand ist nicht gesetzt.<br>';
+}
+
 if (empty($daten['spo2']) || empty($daten['atemfreq']) || empty($daten['rrsys']) || empty($daten['herzfreq']) || empty($daten['bz'])) {
     echo '[2] Erstbefund: Messwerte sind nicht gesetzt.<br>';
 }
 
+if ($daten['diagnose_haupt'] === NULL) {
+    echo '[4] Diagnose: Führende Diagnose ist nicht gesetzt.<br>';
+}
+
 if ($daten['awsicherung_neu'] === NULL) {
-    echo '[4] Maßnahmen: Atemwegssicherung ist nicht gesetzt.<br>';
+    echo '[6] Maßnahmen: Atemwegssicherung ist nicht gesetzt.<br>';
 }
 
 if ($daten['b_beatmung'] === NULL) {
-    echo '[4] Maßnahmen: Beatmung ist nicht gesetzt.<br>';
+    echo '[6] Maßnahmen: Beatmung ist nicht gesetzt.<br>';
 }
 
 if ($daten['c_zugang'] === NULL) {
-    echo '[4] Maßnahmen: Zugang ist nicht gesetzt.<br>';
+    echo '[6] Maßnahmen: Zugang ist nicht gesetzt.<br>';
 }
 
 if ($daten['medis'] === NULL) {
-    echo '[4] Maßnahmen: Medikamente sind nicht gesetzt.<br>';
+    echo '[6] Maßnahmen: Medikamente sind nicht gesetzt.<br>';
+}
+
+if (empty($daten['ebesonderheiten'])) {
+    echo '[7] Abschluss: Einsatzverlauf Besonderheiten sind nicht gesetzt.<br>';
+}
+
+if ($daten['prot_by'] != 1 && $daten['na_nachf'] === NULL) {
+    echo '[7] Abschluss: NA-Nachforderung ist nicht gesetzt.<br>';
 }
 
 if ($daten['transportziel'] === NULL) {
-    echo 'Abschluss: Transportziel ist nicht gesetzt.<br>';
+    echo '[7] Abschluss: Transportziel ist nicht gesetzt.<br>';
 }
 
 if (empty($daten['pfname'])) {
-    echo 'Abschluss: Kein Protokollant gesetzt.<br>';
+    echo '[7] Abschluss: Kein Protokollant gesetzt.<br>';
 }
 
 if ($daten['prot_by'] === NULL) {
-    echo 'Abschluss: Keine Protokollart gesetzt.<br>';
+    echo '[7] Abschluss: Keine Protokollart gesetzt.<br>';
 }

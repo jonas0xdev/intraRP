@@ -3,8 +3,8 @@
     $(document).ready(function() {
         const enr = <?= json_encode($enr) ?>;
 
-        // WICHTIG: Verhindere Standard-Speichern für psych[] Checkboxen BEVOR inputElements definiert wird
         $('input[name="psych[]"]').addClass('medikament-field-ignore');
+        $('input[name="ebesonderheiten[]"]').addClass('medikament-field-ignore');
 
         const inputElements = $(
             "form[name='form'] input:not([readonly]):not([disabled]):not(.medikament-field-ignore):not([data-ignore-autosave]), " +
@@ -163,22 +163,17 @@
 
         window.showToast = showToast;
 
-        // ========== PSYCHISCHE ZUSTAND CHECKBOX LOGIK ==========
-        const exclusiveValues = [1, 98, 99]; // unauffällig, nicht beurteilbar, nicht untersucht
+        const exclusiveValues = [1, 98, 99];
 
-        // Handler für psych Checkboxen
         $('input[name="psych[]"]').on('change', function() {
             const $clicked = $(this);
             const clickedValue = parseInt($clicked.val());
 
-            // Wenn eine exklusive Checkbox angeklickt wurde
             if (exclusiveValues.includes(clickedValue)) {
                 if ($clicked.is(':checked')) {
-                    // Deaktiviere alle anderen Checkboxen
                     $('input[name="psych[]"]').not($clicked).prop('checked', false);
                 }
             } else {
-                // Wenn eine normale Checkbox angeklickt wurde, deaktiviere die exklusiven
                 if ($clicked.is(':checked')) {
                     exclusiveValues.forEach(val => {
                         $('input[name="psych[]"][value="' + val + '"]').prop('checked', false);
@@ -186,18 +181,15 @@
                 }
             }
 
-            // Sammle alle aktivierten Werte in ein Array
             const selectedValues = [];
             $('input[name="psych[]"]:checked').each(function() {
                 selectedValues.push(parseInt($(this).val()));
             });
 
-            // Speichere das Array als JSON (oder null wenn leer)
             const jsonValue = selectedValues.length > 0 ? JSON.stringify(selectedValues) : null;
 
             console.log('Saving psych field with values:', selectedValues, 'as JSON:', jsonValue);
 
-            // Ajax-Request zum Speichern
             $.ajax({
                 url: '<?= BASE_PATH ?>assets/functions/save_fields.php',
                 type: 'POST',
@@ -209,7 +201,6 @@
                 success: function(response) {
                     showToast("✔️ 'Psychischer Zustand' gespeichert.", 'success');
 
-                    // Update global data
                     window.__dynamicDaten['psych'] = jsonValue;
                     updateNavFillStates(window.__dynamicDaten);
                     validateLinks();
@@ -220,15 +211,62 @@
                 }
             });
         });
-        // ========== ENDE PSYCHISCHE ZUSTAND LOGIK ==========
+
+        $('input[name="ebesonderheiten[]"]').on('change', function() {
+            const $clicked = $(this);
+            const clickedValue = parseInt($clicked.val());
+
+            if (clickedValue === 1) {
+                if ($clicked.is(':checked')) {
+                    $('input[name="ebesonderheiten[]"]').not($clicked).prop('checked', false);
+                }
+            } else {
+                if ($clicked.is(':checked')) {
+                    $('input[name="ebesonderheiten[]"][value="1"]').prop('checked', false);
+                }
+            }
+
+            const selectedValues = [];
+            $('input[name="ebesonderheiten[]"]:checked').each(function() {
+                selectedValues.push(parseInt($(this).val()));
+            });
+
+            const jsonValue = selectedValues.length > 0 ? JSON.stringify(selectedValues) : null;
+
+            console.log('Saving field: ebesonderheiten[] value:', jsonValue);
+
+            $.ajax({
+                url: '<?= BASE_PATH ?>assets/functions/save_fields.php',
+                type: 'POST',
+                data: {
+                    enr: enr,
+                    field: 'ebesonderheiten',
+                    value: jsonValue
+                },
+                success: function(response) {
+                    showToast("✔️ 'Einsatzverlauf Besonderheiten' gespeichert.", 'success');
+
+                    window.__dynamicDaten['ebesonderheiten'] = jsonValue;
+                    updateNavFillStates(window.__dynamicDaten);
+                    validateLinks();
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error saving ebesonderheiten field:', xhr.responseText);
+                    showToast("❌ Fehler beim Speichern: " + (xhr.responseText || error), 'error');
+                }
+            });
+        });
 
         $('input.btn-check[type="checkbox"]').on('change', function() {
             const clicked = $(this);
             const clickedId = clicked.attr('id');
             const base = clickedId.split('_')[0];
 
-            // Überspringe psych Checkboxen, da diese ihre eigene Logik haben
             if (clicked.attr('name') === 'psych[]') {
+                return;
+            }
+
+            if (clicked.attr('name') === 'ebesonderheiten[]') {
                 return;
             }
 
@@ -253,9 +291,13 @@
             const fieldName = $this.attr('name');
             const elementId = $this.attr('id');
 
-            // Überspringe psych[] - hat eigenen Handler
             if (fieldName === 'psych[]') {
                 console.log('Skipping auto-save for psych[] - handled by custom handler');
+                return;
+            }
+
+            if (fieldName === 'ebesonderheiten[]') {
+                console.log('Skipping auto-save for ebesonderheiten[] - handled by custom handler');
                 return;
             }
 

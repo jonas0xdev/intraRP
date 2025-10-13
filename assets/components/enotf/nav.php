@@ -16,10 +16,17 @@
         data-requires="awsicherung_neu,b_beatmung,c_zugang,medis">
         <span>Maßnahmen</span>
     </a>
-    <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/index.php?enr=<?= $daten['enr'] ?>" data-page="abschluss"
-        data-requires="transportziel,pfname">
-        <span>Abschluss</span>
-    </a>
+    <?php if ($daten['prot_by'] == 1) : ?>
+        <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/index.php?enr=<?= $daten['enr'] ?>" data-page="abschluss"
+            data-requires="transportziel,pfname,ebesonderheiten">
+            <span>Abschluss</span>
+        </a>
+    <?php else : ?>
+        <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/index.php?enr=<?= $daten['enr'] ?>" data-page="abschluss"
+            data-requires="transportziel,pfname,ebesonderheiten,na_nachf">
+            <span>Abschluss</span>
+        </a>
+    <?php endif; ?>
 </div>
 
 <script>

@@ -90,9 +90,19 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
         <div class="container-fluid" id="edivi__container">
             <div class="row h-100">
                 <?php include __DIR__ . '/../../../assets/components/enotf/nav.php'; ?>
-                <div class="col" id="edivi__content">
-                    <div class=" row">
-                        <div class="col">
+                <div class="col" id="edivi__content" style="padding-left: 0">
+                    <div class="row" style="margin-left: 0">
+                        <div class="col-2 d-flex flex-column edivi__interactbutton-more">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/1.php?enr=<?= $daten['enr'] ?>" data-requires="ebesonderheiten">
+                                <span>Einsatzverlauf Besonderheiten</span>
+                            </a>
+                            <?php if ($daten['prot_by'] != 1) : ?>
+                                <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/2.php?enr=<?= $daten['enr'] ?>" data-requires="na_nachf">
+                                    <span>Nachforderung NA</span>
+                                </a>
+                            <?php endif; ?>
+                        </div>
+                        <div class="col edivi__overview-container">
                             <div class="row edivi__box">
                                 <h5 class="text-light px-2 py-1">Transportdaten</h5>
                                 <div class="col">
