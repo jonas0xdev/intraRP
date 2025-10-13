@@ -13,6 +13,9 @@ if (!defined('ENOTF_USE_PIN') || ENOTF_USE_PIN !== true) {
     exit();
 }
 
+$_SESSION['pin_verified'] = false;
+unset($_SESSION['pin_last_activity']);
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pin'])) {
     $enteredPin = $_POST['pin'];
 

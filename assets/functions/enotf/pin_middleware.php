@@ -11,13 +11,17 @@ if (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) {
 
     $pin_verified = isset($_SESSION['pin_verified']) && $_SESSION['pin_verified'] === true;
 
-    $last_activity = $_SESSION['pin_last_activity'] ?? 0;
-    $is_timeout = ($current_time - $last_activity) > $timeout;
+    $last_activity = $_SESSION['pin_last_activity'] ?? null;
+
+    $is_timeout = ($last_activity === null || ($current_time - $last_activity) > $timeout);
 
     if (!$pin_verified || $is_timeout) {
-        $_SESSION['pin_return_url'] = $_SERVER['REQUEST_URI'];
+        if (basename($_SERVER['PHP_SELF']) !== 'lockscreen.php') {
+            $_SESSION['pin_return_url'] = $_SERVER['REQUEST_URI'];
+        }
 
         $_SESSION['pin_verified'] = false;
+        unset($_SESSION['pin_last_activity']);
 
         header("Location: " . BASE_PATH . "enotf/lockscreen.php");
         exit();
