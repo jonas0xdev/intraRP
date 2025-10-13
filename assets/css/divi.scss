@@ -580,6 +580,10 @@ body {
     span {
       color: #2ecc71;
     }
+
+    &:after {
+      color: #2ecc71;
+    }
   }
 
   > label.edivi__unauffaellig:hover {
@@ -588,12 +592,20 @@ body {
     span {
       color: #2ecc71;
     }
+
+    &:after {
+      color: #2ecc71;
+    }
   }
 
   .btn-check:checked + label.edivi__unauffaellig {
     color: #2ecc71;
 
     span {
+      color: #2ecc71;
+    }
+
+    &:after {
       color: #2ecc71;
     }
   }

@@ -572,16 +572,26 @@ body {
 [class*=edivi__interactbutton] .btn-check:checked + label.edivi__unauffaellig span {
   color: #2ecc71;
 }
+[class*=edivi__interactbutton] > label.edivi__unauffaellig:after,
+[class*=edivi__interactbutton] .btn-check:checked + label.edivi__unauffaellig:after {
+  color: #2ecc71;
+}
 [class*=edivi__interactbutton] > label.edivi__unauffaellig:hover {
   color: #2ecc71;
 }
 [class*=edivi__interactbutton] > label.edivi__unauffaellig:hover span {
   color: #2ecc71;
 }
+[class*=edivi__interactbutton] > label.edivi__unauffaellig:hover:after {
+  color: #2ecc71;
+}
 [class*=edivi__interactbutton] .btn-check:checked + label.edivi__unauffaellig {
   color: #2ecc71;
 }
 [class*=edivi__interactbutton] .btn-check:checked + label.edivi__unauffaellig span {
+  color: #2ecc71;
+}
+[class*=edivi__interactbutton] .btn-check:checked + label.edivi__unauffaellig:after {
   color: #2ecc71;
 }
 
