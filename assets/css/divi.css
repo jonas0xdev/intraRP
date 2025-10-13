@@ -502,6 +502,9 @@ body {
   background-color: #333333;
   z-index: 1;
   overflow: hidden;
+  max-height: 74px;
+  display: flex;
+  align-items: center;
 }
 [class*=edivi__interactbutton] > a:hover,
 [class*=edivi__interactbutton] > label:hover {
@@ -701,6 +704,14 @@ body {
   content: "";
 }
 
+@media (max-width: 1210px) {
+  [class*=edivi__interactbutton] > a,
+[class*=edivi__interactbutton] > label {
+    font-size: 0.9rem;
+    max-height: none;
+    min-height: 50px;
+  }
+}
 @media (max-width: 1001px) {
   [class*=edivi__interactbutton] > *:after {
     display: none;
@@ -709,6 +720,27 @@ body {
   [class*=edivi__interactbutton] > a,
 [class*=edivi__interactbutton] > label {
     padding-right: 4px;
+    padding: 15px 10px;
+    padding-left: 10px;
+    font-size: 0.9rem;
+    max-height: none;
+    min-height: 50px;
+  }
+}
+@media (max-width: 768px) {
+  [class*=edivi__interactbutton] > a,
+[class*=edivi__interactbutton] > label {
+    padding: 12px 8px;
+    font-size: 0.85rem;
+    min-height: 45px;
+  }
+}
+@media (max-width: 576px) {
+  [class*=edivi__interactbutton] > a,
+[class*=edivi__interactbutton] > label {
+    padding: 10px 6px;
+    font-size: 0.8rem;
+    min-height: 40px;
   }
 }
 .edivi__interactbutton-more > a:after {
@@ -741,8 +773,7 @@ body {
 }
 
 @media (max-width: 1700px) {
-  .edivi__box > .col > .row > [class^=col],
-.edivi__box > .row > [class^=col] {
+  #edivi__content .edivi__overview-container > .row > .col {
     flex: 0 0 100% !important;
     max-width: 100% !important;
   }
@@ -771,7 +802,6 @@ body {
   #edivi__content .row > .col,
 #edivi__content .row > .col-8,
 #edivi__login #edivi__content .row > .col-2 {
-    flex: 0 0 100%;
     max-width: 100%;
   }
 }

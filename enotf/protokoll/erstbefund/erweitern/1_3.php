@@ -124,7 +124,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                 id="erweitern-ohne-path"
                                 data-quickfill='{"v_muster_k": 1, "v_muster_w": 1, "v_muster_t": 1, "v_muster_a": 1, "v_muster_al": 1, "v_muster_bl": 1}'
                                 autocomplete="off">
-                            <label for="erweitern-ohne-path" class="edivi__unauffaellig">ohne path. Befund</label>
+                            <label for="erweitern-ohne-path" class="edivi__unauffaellig">keine</label>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/1.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_k,v_muster_w,v_muster_t,v_muster_a,v_muster_al,v_muster_bl" class="active">
                                 <span>Verletzungen</span>
                             </a>
