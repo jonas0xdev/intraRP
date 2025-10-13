@@ -96,7 +96,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/atemwege/index.php?enr=<?= $daten['enr'] ?>" data-requires="awsicherung_neu">
                                 <span>Atemwege</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/atmung/index.php?enr=<?= $daten['enr'] ?>" data-requires="b_beatmung" class="active">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/atmung/index.php?enr=<?= $daten['enr'] ?>" data-requires="b_beatmung">
                                 <span>Atmung</span>
                             </a>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/index.php?enr=<?= $daten['enr'] ?>" data-requires="c_zugang">
@@ -105,67 +105,28 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/medikamente/index.php?enr=<?= $daten['enr'] ?>" data-requires="medis">
                                 <span>Medikamente</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/weitere/index.php?enr=<?= $daten['enr'] ?>">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/weitere/index.php?enr=<?= $daten['enr'] ?>" class="active">
                                 <span>Weitere</span>
                             </a>
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton-more">
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/atmung/1.php?enr=<?= $daten['enr'] ?>" data-requires="b_beatmung">
-                                <span>Beatmung</span>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/weitere/1.php?enr=<?= $daten['enr'] ?>">
+                                <span>Lagerung</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/atmung/2.php?enr=<?= $daten['enr'] ?>" class="active">
-                                <span>O2-Gabe</span>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/weitere/3.php?enr=<?= $daten['enr'] ?>">
+                                <span>Rettungstechnik</span>
                             </a>
-                        </div>
-                        <div class="col-1 d-flex flex-column edivi__interactbutton-more">
-                            <input type="radio" class="btn-check" id="o2gabe-0" name="o2gabe" value="0" <?php echo ($daten['o2gabe'] === 0 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="o2gabe-0">keine</label>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/weitere/2.php?enr=<?= $daten['enr'] ?>">
+                                <span>spezielle Maßnahmen</span>
+                            </a>
+                            <input type="checkbox" class="btn-check" id="waerme_passiv-1" name="waerme_passiv" value="1" <?php echo ($daten['waerme_passiv'] == 1 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="waerme_passiv-1">passiver Wärmeerhalt</label>
 
-                            <input type="radio" class="btn-check" id="o2gabe-1" name="o2gabe" value="1" <?php echo ($daten['o2gabe'] == 1 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="o2gabe-1">1 L/min</label>
+                            <input type="checkbox" class="btn-check" id="e_reposition-1" name="e_reposition" value="1" <?php echo ($daten['e_reposition'] == 1 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="e_reposition-1">Reposition</label>
 
-                            <input type="radio" class="btn-check" id="o2gabe-2" name="o2gabe" value="2" <?php echo ($daten['o2gabe'] == 2 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="o2gabe-2">2 L/min</label>
-
-                            <input type="radio" class="btn-check" id="o2gabe-3" name="o2gabe" value="3" <?php echo ($daten['o2gabe'] == 3 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="o2gabe-3">3 L/min</label>
-
-                            <input type="radio" class="btn-check" id="o2gabe-4" name="o2gabe" value="4" <?php echo ($daten['o2gabe'] == 4 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="o2gabe-4">4 L/min</label>
-
-                            <input type="radio" class="btn-check" id="o2gabe-5" name="o2gabe" value="5" <?php echo ($daten['o2gabe'] == 5 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="o2gabe-5">5 L/min</label>
-
-                            <input type="radio" class="btn-check" id="o2gabe-6" name="o2gabe" value="6" <?php echo ($daten['o2gabe'] == 6 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="o2gabe-6">6 L/min</label>
-
-                            <input type="radio" class="btn-check" id="o2gabe-7" name="o2gabe" value="7" <?php echo ($daten['o2gabe'] == 7 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="o2gabe-7">7 L/min</label>
-
-                            <input type="radio" class="btn-check" id="o2gabe-8" name="o2gabe" value="8" <?php echo ($daten['o2gabe'] == 8 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="o2gabe-8">8 L/min</label>
-                        </div>
-                        <div class="col-1 d-flex flex-column edivi__interactbutton-more">
-                            <input type="radio" class="btn-check" id="o2gabe-9" name="o2gabe" value="9" <?php echo ($daten['o2gabe'] == 9 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="o2gabe-9">9 L/min</label>
-
-                            <input type="radio" class="btn-check" id="o2gabe-10" name="o2gabe" value="10" <?php echo ($daten['o2gabe'] == 10 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="o2gabe-10">10 L/min</label>
-
-                            <input type="radio" class="btn-check" id="o2gabe-11" name="o2gabe" value="11" <?php echo ($daten['o2gabe'] == 11 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="o2gabe-11">11 L/min</label>
-
-                            <input type="radio" class="btn-check" id="o2gabe-12" name="o2gabe" value="12" <?php echo ($daten['o2gabe'] == 12 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="o2gabe-12">12 L/min</label>
-
-                            <input type="radio" class="btn-check" id="o2gabe-13" name="o2gabe" value="13" <?php echo ($daten['o2gabe'] == 13 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="o2gabe-13">13 L/min</label>
-
-                            <input type="radio" class="btn-check" id="o2gabe-14" name="o2gabe" value="14" <?php echo ($daten['o2gabe'] == 14 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="o2gabe-14">14 L/min</label>
-
-                            <input type="radio" class="btn-check" id="o2gabe-15" name="o2gabe" value="15" <?php echo ($daten['o2gabe'] == 15 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="o2gabe-15">15 L/min</label>
+                            <input type="checkbox" class="btn-check" id="e_verband-1" name="e_verband" value="1" <?php echo ($daten['e_verband'] == 1 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="e_verband-1">Verband</label>
                         </div>
                     </div>
                 </div>

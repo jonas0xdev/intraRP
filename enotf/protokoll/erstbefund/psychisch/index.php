@@ -125,7 +125,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton">
                             <input type="checkbox" class="btn-check" id="psych-1" name="psych[]" value="1" <?php echo (in_array(1, $psych) ? 'checked' : '') ?> autocomplete="off">
-                            <label for="psych-1">unauffällig</label>
+                            <label for="psych-1" class="edivi__unauffaellig">unauffällig</label>
 
                             <input type="checkbox" class="btn-check" id="psych-2" name="psych[]" value="2" <?php echo (in_array(2, $psych) ? 'checked' : '') ?> autocomplete="off">
                             <label for="psych-2">aggressiv</label>

@@ -564,6 +564,27 @@ body {
   box-shadow: 0 0 0 0.2rem rgba(87, 131, 207, 0.25);
 }
 
+[class*=edivi__interactbutton] > label.edivi__unauffaellig,
+[class*=edivi__interactbutton] .btn-check:checked + label.edivi__unauffaellig {
+  color: #2ecc71;
+}
+[class*=edivi__interactbutton] > label.edivi__unauffaellig span,
+[class*=edivi__interactbutton] .btn-check:checked + label.edivi__unauffaellig span {
+  color: #2ecc71;
+}
+[class*=edivi__interactbutton] > label.edivi__unauffaellig:hover {
+  color: #2ecc71;
+}
+[class*=edivi__interactbutton] > label.edivi__unauffaellig:hover span {
+  color: #2ecc71;
+}
+[class*=edivi__interactbutton] .btn-check:checked + label.edivi__unauffaellig {
+  color: #2ecc71;
+}
+[class*=edivi__interactbutton] .btn-check:checked + label.edivi__unauffaellig span {
+  color: #2ecc71;
+}
+
 [class*=edivi__interactbutton] > label.edivi__zugang-24G:after,
 [class*=edivi__interactbutton] .btn-check:checked + label.edivi__zugang-24G:after {
   content: "";
@@ -1663,4 +1684,149 @@ body[data-page=verlauf] .vital-list-container::-webkit-scrollbar-thumb {
 }
 body[data-page=verlauf] .vital-list-container::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.5);
+}
+
+body[data-page=verlauf] .col-5 {
+  display: flex;
+  gap: 15px;
+}
+body[data-page=verlauf] .range-strip-wrapper {
+  width: 80px;
+  min-width: 80px;
+  display: flex;
+  flex-direction: column;
+}
+body[data-page=verlauf] .range-strip-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #2a2a2a;
+  padding: 10px;
+  border-radius: 4px;
+  min-height: 500px;
+  height: 100%;
+}
+body[data-page=verlauf] .strip-label {
+  text-align: center;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  padding: 6px 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  line-height: 1.2;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+body[data-page=verlauf] .range-strip {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  gap: 1px;
+}
+body[data-page=verlauf] .range-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border-left: 5px solid;
+  position: relative;
+  transition: all 0.2s;
+  min-height: 0;
+}
+body[data-page=verlauf] .range-item:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+body[data-page=verlauf] .range-value {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+body[data-page=verlauf] .range-item.empty {
+  border-left-color: #444;
+  background: rgba(255, 255, 255, 0.05);
+}
+body[data-page=verlauf] .range-item.empty.danger {
+  border-left-color: #d91425;
+  background: rgba(217, 20, 37, 0.15);
+}
+body[data-page=verlauf] .range-item.empty.success {
+  border-left-color: #038c4a;
+  background: rgba(3, 140, 74, 0.15);
+}
+body[data-page=verlauf] .range-item.empty .range-value {
+  visibility: hidden;
+}
+body[data-page=verlauf] .range-item.danger {
+  border-left-color: #d91425;
+  background: rgba(217, 20, 37, 0.15);
+}
+body[data-page=verlauf] .range-item.warning {
+  border-left-color: #d58215;
+  background: rgba(213, 130, 21, 0.15);
+}
+body[data-page=verlauf] .range-item.semiwarning {
+  border-left-color: #d5c215;
+  background: rgba(213, 194, 21, 0.15);
+}
+body[data-page=verlauf] .range-item.success {
+  border-left-color: #038c4a;
+  background: rgba(3, 140, 74, 0.15);
+}
+body[data-page=verlauf] .keypad-container {
+  flex: 1;
+  padding: 20px 10px 20px 0;
+  margin-top: 20px;
+}
+@media (max-width: 1400px) {
+  body[data-page=verlauf] .range-strip-wrapper {
+    width: 70px;
+    min-width: 70px;
+  }
+  body[data-page=verlauf] .range-value {
+    font-size: 0.7rem;
+  }
+  body[data-page=verlauf] .strip-label {
+    font-size: 0.7rem;
+    padding: 4px 2px;
+  }
+}
+@media (max-width: 1155px) {
+  body[data-page=verlauf] .col-5 {
+    flex-direction: column;
+  }
+  body[data-page=verlauf] .range-strip-wrapper {
+    width: 100%;
+    order: -1;
+    margin-bottom: 15px;
+  }
+  body[data-page=verlauf] .range-strip-container {
+    min-height: 120px;
+    max-height: 120px;
+  }
+  body[data-page=verlauf] .range-strip {
+    flex-direction: row;
+    gap: 2px;
+  }
+  body[data-page=verlauf] .range-item {
+    flex-direction: column;
+    border-left: none;
+    border-bottom: 5px solid;
+    justify-content: center;
+    padding: 4px 2px;
+  }
+  body[data-page=verlauf] .range-value {
+    font-size: 0.7rem;
+    writing-mode: horizontal-tb;
+  }
+  body[data-page=verlauf] .strip-label {
+    margin-bottom: 8px;
+    min-height: 30px;
+  }
 }

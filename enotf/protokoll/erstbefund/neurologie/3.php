@@ -116,6 +116,12 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             </a>
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton-more">
+                            <input type="checkbox"
+                                class="btn-check"
+                                id="neuro-ohne-path"
+                                data-quickfill='{"d_bewusstsein": 1, "d_ex_1": 1, "d_pupillenw_1": 2, "d_pupillenw_2": 2, "d_lichtreakt_1": 1, "d_lichtreakt_2": 1, "d_gcs_1": 0, "d_gcs_2": 0, "d_gcs_3": 0}'
+                                autocomplete="off">
+                            <label for="neuro-ohne-path" class="edivi__unauffaellig">ohne path. Befund</label>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/neurologie/1.php?enr=<?= $daten['enr'] ?>" data-requires="d_bewusstsein">
                                 <span>Bewusstseinslage</span>
                             </a>

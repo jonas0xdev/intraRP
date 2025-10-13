@@ -374,6 +374,14 @@ function hasAnyMedikamente($medikamenteJson)
     $medikamente = getCurrentMedikamente($medikamenteJson);
     return !empty($medikamente);
 }
+
+$rettungstechnik = [];
+if (!empty($daten['rettungstechnik'])) {
+    $decoded = json_decode($daten['rettungstechnik'], true);
+    if (is_array($decoded)) {
+        $rettungstechnik = array_map('intval', $decoded);
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -432,6 +440,9 @@ function hasAnyMedikamente($medikamenteJson)
                             <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/medikamente/index.php?enr=<?= $daten['enr'] ?>" data-requires="medis">
                                 <span>Medikamente</span>
                             </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/weitere/index.php?enr=<?= $daten['enr'] ?>">
+                                <span>Weitere</span>
+                            </a>
                         </div>
                         <?php
                         $awsicherung_neu_labels = [
@@ -468,6 +479,35 @@ function hasAnyMedikamente($medikamenteJson)
                             14 => '14 L/min',
                             15 => '15 L/min'
                         ];
+                        $lagerung_labels = [
+                            1 => 'OK Hochlagerung',
+                            2 => 'Flachlagerung',
+                            3 => 'Schocklagerung',
+                            4 => 'stabile Seitenlage',
+                            5 => 'sitzender Transport',
+                            6 => 'keine',
+                            99 => 'sonstige Lagerung'
+                        ];
+                        $rettungstechnikLabels = [
+                            1 => 'Spineboard',
+                            2 => 'KED-System',
+                            3 => 'Beckenschlinge',
+                            4 => 'Schaufeltrage',
+                            5 => 'Vakuummatratze',
+                            6 => 'SAMsplint',
+                            99 => 'sonstige Immobilisation'
+                        ];
+
+                        $rettungstechnikDisplayTexts = [];
+                        if (!empty($rettungstechnik) && is_array($rettungstechnik)) {
+                            foreach ($rettungstechnik as $value) {
+                                if (isset($rettungstechnikLabels[$value])) {
+                                    $rettungstechnikDisplayTexts[] = $rettungstechnikLabels[$value];
+                                }
+                            }
+                        }
+
+                        $rettungstechnikDisplay = !empty($rettungstechnikDisplayTexts) ? implode(', ', $rettungstechnikDisplayTexts) : '';
                         ?>
                         <div class="col edivi__overview-container">
                             <div class="row">
@@ -548,6 +588,33 @@ function hasAnyMedikamente($medikamenteJson)
                                                         <div class="col">
                                                             <label for="medikamente" class="edivi__description" style="display: none;">Medikamente</label>
                                                             <textarea name="medikamente" id="medikamente" class="w-100 form-control edivi__input-check" style="height: 36vh; overflow-y: auto; resize: vertical;" readonly><?= displayAllMedikamente($daten['medis'] ?? '') ?></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <div class="row edivi__box edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/weitere/index.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
+                                        <h5 class="text-light px-2 py-1">Weitere</h5>
+                                        <div class="col">
+                                            <div class="row">
+                                                <div class="col">
+                                                    <div class="row my-2">
+                                                        <div class="col">
+                                                            <label for="lagerung" class="edivi__description">Lagerung</label>
+                                                            <input type="text" name="lagerung" id="lagerung" class="w-100 form-control" value="<?= $lagerung_labels[$daten['lagerung']] ?? '' ?>" readonly>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="row my-2">
+                                                        <div class="col">
+                                                            <label for="rettungstechnik" class="edivi__description">Rettungstechnik</label>
+                                                            <input type="text" name="rettungstechnik" id="rettungstechnik" class="w-100 form-control" value="<?= $rettungstechnikDisplay ?>" readonly>
                                                         </div>
                                                     </div>
                                                 </div>

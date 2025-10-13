@@ -944,6 +944,14 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             }
                             $diagnose_weitere_text = implode(', ', $diagnose_weitere_labels);
                         }
+
+                        $rettungstechnik = [];
+                        if (!empty($daten['rettungstechnik'])) {
+                            $decoded = json_decode($daten['rettungstechnik'], true);
+                            if (is_array($decoded)) {
+                                $rettungstechnik = array_map('intval', $decoded);
+                            }
+                        }
                         ?>
                         <div class="print__field-wrapper" data-field-name="führende Diagnose">
                             <input type="text" class="w-100 print__field" value="<?= !empty($diagnose_haupt_text) ? $diagnose_haupt_text : '' ?>" readonly>
@@ -1837,6 +1845,160 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             <tr>
                                 <td colspan="2">
                                     O2-Gabe L/min<br><span style="font-weight:600;font-size:11pt"><?= $daten['o2gabe'] ?? '' ?></span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="row border border-dark border-top-0">
+                    <div class="col">
+                        <h6 class="print__heading">Weitere</h6>
+                        <?php
+                        $lagerung_labels = [
+                            1 => 'OK Hochlagerung',
+                            2 => 'Flachlagerung',
+                            3 => 'Schocklagerung',
+                            4 => 'stabile Seitenlage',
+                            5 => 'sitzender Transport',
+                            6 => 'keine',
+                            99 => 'sonstige Lagerung'
+                        ];
+                        ?>
+                        <table class="w-100 print__text-small">
+                            <tr>
+                                <td colspan="2">
+                                    Lagerung<br><span style="font-weight:600;font-size:11pt"><?= $lagerung_labels[$daten['lagerung']] ?? '' ?></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <?php if ($daten['waerme_passiv'] == 1): ?>
+                                        <input type="radio" name="waerme_passiv" checked disabled />
+                                        <label for="waerme_passiv">passiver Wärmeerhalt</label>
+                                    <?php else : ?>
+                                        <input type="radio" name="waerme_passiv" disabled />
+                                        <label for="waerme_passiv">passiver Wärmeerhalt</label>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php if ($daten['waerme_aktiv'] == 1): ?>
+                                        <input type="radio" name="waerme_aktiv" checked disabled />
+                                        <label for="waerme_aktiv">aktiver Wärmeerhalt</label>
+                                    <?php else : ?>
+                                        <input type="radio" name="waerme_aktiv" disabled />
+                                        <label for="waerme_aktiv">aktiver Wärmeerhalt</label>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <?php if ($daten['e_reposition'] == 1): ?>
+                                        <input type="radio" name="e_reposition" checked disabled />
+                                        <label for="e_reposition">Reposition</label>
+                                    <?php else : ?>
+                                        <input type="radio" name="e_reposition" disabled />
+                                        <label for="e_reposition">Reposition</label>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php if ($daten['e_verband'] == 1): ?>
+                                        <input type="radio" name="e_verband" checked disabled />
+                                        <label for="e_verband">Verband</label>
+                                    <?php else : ?>
+                                        <input type="radio" name="e_verband" disabled />
+                                        <label for="e_verband">Verband</label>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <?php if ($daten['e_kuehlung'] == 1): ?>
+                                        <input type="radio" name="e_kuehlung" checked disabled />
+                                        <label for="e_kuehlung">Kühlung</label>
+                                    <?php else : ?>
+                                        <input type="radio" name="e_kuehlung" disabled />
+                                        <label for="e_kuehlung">Kühlung</label>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php if ($daten['e_tourniquet'] == 1): ?>
+                                        <input type="radio" name="e_tourniquet" checked disabled />
+                                        <label for="e_tourniquet">Tourniquet</label>
+                                    <?php else : ?>
+                                        <input type="radio" name="e_tourniquet" disabled />
+                                        <label for="e_tourniquet">Tourniquet</label>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="row border border-dark border-top-0">
+                    <div class="col">
+                        <table class="w-100 print__text-small">
+                            <tr>
+                                <td colspan="2">
+                                    <?php if ($daten['e_krintervention'] == 1): ?>
+                                        <input type="radio" name="e_krintervention" checked disabled />
+                                        <label for="e_krintervention">Krisenintervention</label>
+                                    <?php else : ?>
+                                        <input type="radio" name="e_krintervention" disabled />
+                                        <label for="e_krintervention">Krisenintervention</label>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <?php if ($daten['e_narkose'] == 1): ?>
+                                        <input type="radio" name="e_narkose" checked disabled />
+                                        <label for="e_narkose">Notfallnarkose</label>
+                                    <?php else : ?>
+                                        <input type="radio" name="e_narkose" disabled />
+                                        <label for="e_narkose">Notfallnarkose</label>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php if ($daten['e_cpr'] == 1): ?>
+                                        <input type="radio" name="e_cpr" checked disabled />
+                                        <label for="e_cpr">CPR / HLW</label>
+                                    <?php else : ?>
+                                        <input type="radio" name="e_cpr" disabled />
+                                        <label for="e_cpr">CPR / HLW</label>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="row border border-dark border-top-0">
+                    <div class="col">
+                        <h6 class="print__heading">Rettungstechnik</h6>
+                        <?php
+                        $rettungstechnikLabels = [
+                            1 => 'Spineboard',
+                            2 => 'KED-System',
+                            3 => 'Beckenschlinge',
+                            4 => 'Schaufeltrage',
+                            5 => 'Vakuummatratze',
+                            6 => 'SAMsplint',
+                            99 => 'sonstige Immobilisation'
+                        ];
+
+                        $rettungstechnikDisplayTexts = [];
+                        if (!empty($rettungstechnik) && is_array($rettungstechnik)) {
+                            foreach ($rettungstechnik as $value) {
+                                if (isset($rettungstechnikLabels[$value])) {
+                                    $rettungstechnikDisplayTexts[] = $rettungstechnikLabels[$value];
+                                }
+                            }
+                        }
+
+                        $rettungstechnikDisplay = !empty($rettungstechnikDisplayTexts) ? implode(', ', $rettungstechnikDisplayTexts) : 'keine';
+                        ?>
+                        <table class="w-100 print__text-small">
+                            <tr>
+                                <td>
+                                    <?= $rettungstechnikDisplay ?>
                                 </td>
                             </tr>
                         </table>

@@ -105,6 +105,9 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/medikamente/index.php?enr=<?= $daten['enr'] ?>" data-requires="medis">
                                 <span>Medikamente</span>
                             </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/weitere/index.php?enr=<?= $daten['enr'] ?>">
+                                <span>Weitere</span>
+                            </a>
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton-more">
                             <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/atemwege/1.php?enr=<?= $daten['enr'] ?>" data-requires="awsicherung_neu" class="active">
@@ -125,7 +128,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                         </div>
                         <div class="col-2 d-flex flex-column -edivi__interactbutton">
                             <input type="radio" class="btn-check" id="awsicherung_neu-1" name="awsicherung_neu" value="1" <?php echo ($daten['awsicherung_neu'] == 1 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="awsicherung_neu-1">keine</label>
+                            <label for="awsicherung_neu-1" class="edivi__unauffaellig">keine</label>
 
                             <input type="radio" class="btn-check" id="awsicherung_neu-2" name="awsicherung_neu" value="2" <?php echo ($daten['awsicherung_neu'] == 2 ? 'checked' : '') ?> autocomplete="off">
                             <label for="awsicherung_neu-2">Endotrachealtubus</label>

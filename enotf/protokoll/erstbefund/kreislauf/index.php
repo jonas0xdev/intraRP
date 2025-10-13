@@ -116,6 +116,12 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             </a>
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton-more">
+                            <input type="checkbox"
+                                class="btn-check"
+                                id="kreislauf-ohne-path"
+                                data-quickfill='{"c_kreislauf": 1, "c_puls_rad": 1, "c_puls_reg": 1}'
+                                autocomplete="off">
+                            <label for="kreislauf-ohne-path" class="edivi__unauffaellig">ohne path. Befund</label>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/1.php?enr=<?= $daten['enr'] ?>" data-requires="c_kreislauf">
                                 <span>Patientenzustand</span>
                             </a>

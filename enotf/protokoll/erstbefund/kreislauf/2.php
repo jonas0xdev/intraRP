@@ -116,6 +116,12 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             </a>
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton-more">
+                            <input type="checkbox"
+                                class="btn-check"
+                                id="kreislauf-ohne-path"
+                                data-quickfill='{"c_kreislauf": 1, "c_puls_rad": 1, "c_puls_reg": 1}'
+                                autocomplete="off">
+                            <label for="kreislauf-ohne-path" class="edivi__unauffaellig">ohne path. Befund</label>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/1.php?enr=<?= $daten['enr'] ?>" data-requires="c_kreislauf">
                                 <span>Patientenzustand</span>
                             </a>
@@ -128,7 +134,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton">
                             <input type="radio" class="btn-check" id="c_ekg-1" name="c_ekg" value="1" <?php echo ($daten['c_ekg'] == 1 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="c_ekg-1">Sinusrhythmus</label>
+                            <label for="c_ekg-1" class="edivi__unauffaellig">Sinusrhythmus</label>
 
                             <input type="radio" class="btn-check" id="c_ekg-3" name="c_ekg" value="3" <?php echo ($daten['c_ekg'] == 3 ? 'checked' : '') ?> autocomplete="off">
                             <label for="c_ekg-3">Absolute Arrhythmie</label>

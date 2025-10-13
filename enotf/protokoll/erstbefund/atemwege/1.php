@@ -116,6 +116,12 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             </a>
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton-more">
+                            <input type="checkbox"
+                                class="btn-check"
+                                id="atemwege-ohne-path"
+                                data-quickfill='{"awfrei_1": 1, "zyanose_1": 1}'
+                                autocomplete="off">
+                            <label for="atemwege-ohne-path" class="edivi__unauffaellig">ohne path. Befund</label>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/atemwege/1.php?enr=<?= $daten['enr'] ?>" data-requires="awfrei_1" class="active">
                                 <span>Atemwegszustand</span>
                             </a>
@@ -125,7 +131,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton">
                             <input type="radio" class="btn-check" id="awfrei_1-1" name="awfrei_1" value="1" <?php echo ($daten['awfrei_1'] == 1 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="awfrei_1-1">frei</label>
+                            <label for="awfrei_1-1" class="edivi__unauffaellig">frei</label>
 
                             <input type="radio" class="btn-check" id="awfrei_1-2" name="awfrei_1" value="2" <?php echo ($daten['awfrei_1'] == 2 ? 'checked' : '') ?> autocomplete="off">
                             <label for="awfrei_1-2">gefährdet</label>

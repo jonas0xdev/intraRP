@@ -112,7 +112,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton">
                             <input type="checkbox" class="btn-check" id="ebesonderheiten-1" name="ebesonderheiten[]" value="1" <?php echo (in_array(1, $ebesonderheiten) ? 'checked' : '') ?> autocomplete="off">
-                            <label for="ebesonderheiten-1">keine</label>
+                            <label for="ebesonderheiten-1" class="edivi__unauffaellig">keine</label>
 
                             <input type="checkbox" class="btn-check" id="ebesonderheiten-2" name="ebesonderheiten[]" value="2" <?php echo (in_array(2, $ebesonderheiten) ? 'checked' : '') ?> autocomplete="off">
                             <label for="ebesonderheiten-2">nächste geeignete Klinik nicht aufnahmebereit</label>

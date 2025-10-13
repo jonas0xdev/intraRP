@@ -402,7 +402,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                                                 <option value="5" <?php echo ($daten['d_gcs_3'] == 5 ? 'selected' : '') ?>>(1)</option>
                                                             </select>
                                                             <label for="_GCS_" class="edivi__description">GCS</label>
-                                                            <input type="text" name="_GCS_" id="_GCS_" class="w-100 form-control edivi__input-check" value="" readonly>
+                                                            <input type="text" name="_GCS_" id="_GCS_" class="w-100 form-control" value="" readonly>
                                                         </div>
                                                     </div>
                                                 </div>

@@ -105,6 +105,9 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/medikamente/index.php?enr=<?= $daten['enr'] ?>" data-requires="medis">
                                 <span>Medikamente</span>
                             </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/weitere/index.php?enr=<?= $daten['enr'] ?>">
+                                <span>Weitere</span>
+                            </a>
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton-more">
                             <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/atmung/1.php?enr=<?= $daten['enr'] ?>" data-requires="b_beatmung" class="active">
@@ -116,7 +119,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton-more">
                             <input type="radio" class="btn-check" id="b_beatmung-1" name="b_beatmung" value="1" <?php echo ($daten['b_beatmung'] == 1 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="b_beatmung-1">Spontanatmung</label>
+                            <label for="b_beatmung-1" class="edivi__unauffaellig">Spontanatmung</label>
 
                             <input type="radio" class="btn-check" id="b_beatmung-2" name="b_beatmung" value="2" <?php echo ($daten['b_beatmung'] == 2 ? 'checked' : '') ?> autocomplete="off">
                             <label for="b_beatmung-2">Assistierte Beatmung</label>
