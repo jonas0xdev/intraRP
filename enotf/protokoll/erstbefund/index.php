@@ -107,7 +107,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/atmung/index.php?enr=<?= $daten['enr'] ?>" data-requires="b_symptome,b_auskult">
                                 <span>Atmung</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/index.php?enr=<?= $daten['enr'] ?>" data-requires="c_kreislauf,c_ekg,c_puls_rad,c_puls_reg">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/index.php?enr=<?= $daten['enr'] ?>" data-requires="c_kreislauf,c_puls_rad,c_puls_reg">
                                 <span>Kreislauf</span>
                             </a>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/neurologie/index.php?enr=<?= $daten['enr'] ?>" data-requires="d_bewusstsein,d_ex_1,d_pupillenw_1,d_pupillenw_2,d_lichtreakt_1,d_lichtreakt_2,d_gcs_1,d_gcs_2,d_gcs_3">
@@ -115,6 +115,9 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             </a>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/index.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_k,v_muster_t,v_muster_a,v_muster_al,v_muster_bl,v_muster_w">
                                 <span>Erweitern</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/ekg/index.php?enr=<?= $daten['enr'] ?>" data-requires="c_ekg">
+                                <span>EKG-Befund</span>
                             </a>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/psychisch/index.php?enr=<?= $daten['enr'] ?>" data-requires="psych">
                                 <span>psych. Zustand</span>
@@ -256,6 +259,14 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             1 => 'tastbar',
                             2 => 'nicht tastbar'
                         ];
+                        $c_rekap_labels = [
+                            1 => '< 2 s',
+                            2 => '> 2 s'
+                        ];
+                        $c_blutung_labels = [
+                            1 => 'nein',
+                            2 => 'ja'
+                        ];
 
                         $psychDisplayTexts = [];
                         if (!empty($psych) && is_array($psych)) {
@@ -326,6 +337,14 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                                 <div class="col">
                                                     <div class="row my-2">
                                                         <div class="col">
+                                                            <label for="rekap" class="edivi__description">Rekap. Zeit</label>
+                                                            <input type="text" name="rekap" id="rekap" class="w-100 form-control edivi__input-check" value="<?= $c_rekap_labels[$daten['c_rekap']] ?? '' ?>" readonly>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="row my-2">
+                                                        <div class="col">
                                                             <label for="ekgbefund" class="edivi__description">EKG-Befund</label>
                                                             <input type="text" name="ekgbefund" id="ekgbefund" class="w-100 form-control edivi__input-check" value="<?= $c_ekg_labels[$daten['c_ekg']] ?? '' ?>" readonly>
                                                         </div>
@@ -346,6 +365,14 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                                         <div class="col">
                                                             <label for="radialispuls" class="edivi__description">Radialispuls</label>
                                                             <input type="text" name="radialispuls" id="radialispuls" class="w-100 form-control edivi__input-check" value="<?= $c_puls_rad_labels[$daten['c_puls_rad']] ?? '' ?>" readonly>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="row my-2">
+                                                        <div class="col">
+                                                            <label for="blutung" class="edivi__description">starke Blutung</label>
+                                                            <input type="text" name="blutung" id="blutung" class="w-100 form-control edivi__input-check" value="<?= $c_blutung_labels[$daten['c_blutung']] ?? '' ?>" readonly>
                                                         </div>
                                                     </div>
                                                 </div>

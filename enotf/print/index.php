@@ -521,7 +521,29 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                 </div>
                 <div class="row border border-dark border-top-0">
                     <div class="col">
-                        <h6 class="print__heading">Kreislauf</h6>
+                        <div class="row">
+                            <div class="col">
+                                <h6 class="print__heading">Kreislauf</h6>
+                            </div>
+                            <div class="col print__text-small text-end">
+                                <?php if ($daten['c_rekap'] == 2): ?>
+                                    <input type="radio" name="rekap_verlängert" checked disabled />
+                                    <label for="rekap_verlängert">Rekap. &gt; 2 s</label>
+                                <?php else : ?>
+                                    <input type="radio" name="rekap_verlängert" disabled />
+                                    <label for="rekap_verlängert">Rekap. &gt; 2 s</label>
+                                <?php endif; ?>
+                            </div>
+                            <div class="col print__text-small text-end">
+                                <?php if ($daten['c_blutung'] == 2): ?>
+                                    <input type="radio" name="starke_blutung" checked disabled />
+                                    <label for="starke_blutung">starke Blutung</label>
+                                <?php else : ?>
+                                    <input type="radio" name="starke_blutung" disabled />
+                                    <label for="starke_blutung">starke Blutung</label>
+                                <?php endif; ?>
+                            </div>
+                        </div>
                         <?php
                         $c_kreislauf_labels = [
                             1 => 'stabil',

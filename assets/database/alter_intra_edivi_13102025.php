@@ -206,3 +206,35 @@ SQL;
         echo $message;
     }
 }
+
+try {
+    $sql = <<<SQL
+    ALTER TABLE `intra_edivi` 
+    ADD COLUMN `c_rekap` TINYINT(1) DEFAULT NULL
+    AFTER `c_puls_rad`;
+SQL;
+
+    $pdo->exec($sql);
+} catch (PDOException $e) {
+    if (str_contains($e->getMessage(), 'Duplicate foreign key constraint')) {
+    } else {
+        $message = $e->getMessage();
+        echo $message;
+    }
+}
+
+try {
+    $sql = <<<SQL
+    ALTER TABLE `intra_edivi` 
+    ADD COLUMN `c_blutung` TINYINT(1) DEFAULT NULL
+    AFTER `c_rekap`;
+SQL;
+
+    $pdo->exec($sql);
+} catch (PDOException $e) {
+    if (str_contains($e->getMessage(), 'Duplicate foreign key constraint')) {
+    } else {
+        $message = $e->getMessage();
+        echo $message;
+    }
+}

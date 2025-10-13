@@ -99,7 +99,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/atmung/index.php?enr=<?= $daten['enr'] ?>" data-requires="b_symptome,b_auskult">
                                 <span>Atmung</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/index.php?enr=<?= $daten['enr'] ?>" data-requires="c_kreislauf,c_ekg,c_puls_rad,c_puls_reg" class="active">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/index.php?enr=<?= $daten['enr'] ?>" data-requires="c_kreislauf,c_puls_rad,c_puls_reg" class="active">
                                 <span>Kreislauf</span>
                             </a>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/neurologie/index.php?enr=<?= $daten['enr'] ?>" data-requires="d_bewusstsein,d_ex_1,d_pupillenw_1,d_pupillenw_2,d_lichtreakt_1,d_lichtreakt_2,d_gcs_1,d_gcs_2,d_gcs_3">
@@ -107,6 +107,9 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             </a>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/erweitern/index.php?enr=<?= $daten['enr'] ?>" data-requires="v_muster_k,v_muster_t,v_muster_a,v_muster_al,v_muster_bl,v_muster_w">
                                 <span>Erweitern</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/ekg/index.php?enr=<?= $daten['enr'] ?>" data-requires="c_ekg">
+                                <span>EKG-Befund</span>
                             </a>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/psychisch/index.php?enr=<?= $daten['enr'] ?>" data-requires="psych">
                                 <span>psych. Zustand</span>
@@ -119,62 +122,29 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             <input type="checkbox"
                                 class="btn-check"
                                 id="kreislauf-ohne-path"
-                                data-quickfill='{"c_kreislauf": 1, "c_puls_rad": 1, "c_puls_reg": 1}'
+                                data-quickfill='{"c_kreislauf": 1, "c_puls_rad": 1, "c_puls_reg": 1, "c_rekap": 1, "c_blutung": 1}'
                                 autocomplete="off">
                             <label for="kreislauf-ohne-path" class="edivi__unauffaellig">ohne path. Befund</label>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/1.php?enr=<?= $daten['enr'] ?>" data-requires="c_kreislauf">
                                 <span>Patientenzustand</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/2.php?enr=<?= $daten['enr'] ?>" data-requires="c_ekg" class="active">
-                                <span>EKG-Befund</span>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/4.php?enr=<?= $daten['enr'] ?>" class="active">
+                                <span>Rekap. Zeit</span>
                             </a>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/3.php?enr=<?= $daten['enr'] ?>" data-requires="c_puls_rad,c_puls_reg">
                                 <span>Puls</span>
                             </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/5.php?enr=<?= $daten['enr'] ?>">
+                                <span>starke Blutung</span>
+                            </a>
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton">
-                            <input type="radio" class="btn-check" id="c_ekg-1" name="c_ekg" value="1" <?php echo ($daten['c_ekg'] == 1 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="c_ekg-1" class="edivi__unauffaellig">Sinusrhythmus</label>
+                            <input type="radio" class="btn-check" id="c_rekap-1" name="c_rekap" value="1" <?php echo ($daten['c_rekap'] == 1 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="c_rekap-1" class="edivi__unauffaellig">
+                                < 2 s</label>
 
-                            <input type="radio" class="btn-check" id="c_ekg-3" name="c_ekg" value="3" <?php echo ($daten['c_ekg'] == 3 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="c_ekg-3">Absolute Arrhythmie</label>
-
-                            <input type="radio" class="btn-check" id="c_ekg-5" name="c_ekg" value="5" <?php echo ($daten['c_ekg'] == 5 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="c_ekg-5">AV-Block II</label>
-
-                            <input type="radio" class="btn-check" id="c_ekg-51" name="c_ekg" value="51" <?php echo ($daten['c_ekg'] == 51 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="c_ekg-51">AV-Block III</label>
-
-                            <input type="radio" class="btn-check" id="c_ekg-4" name="c_ekg" value="4" <?php echo ($daten['c_ekg'] == 4 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="c_ekg-4">Kammerflimmern,-flattern</label>
-
-                            <input type="radio" class="btn-check" id="c_ekg-41" name="c_ekg" value="41" <?php echo ($daten['c_ekg'] == 41 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="c_ekg-41">Pulslose elektrische Aktivität</label>
-
-                            <input type="radio" class="btn-check" id="c_ekg-6" name="c_ekg" value="6" <?php echo ($daten['c_ekg'] == 6 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="c_ekg-6">Asystolie</label>
-                        </div>
-                        <div class="col-2 d-flex flex-column edivi__interactbutton">
-                            <input type="radio" class="btn-check" id="c_ekg-21" name="c_ekg" value="21" <?php echo ($daten['c_ekg'] == 21 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="c_ekg-21">Schrittmacherrhythmus</label>
-
-                            <input type="radio" class="btn-check" id="c_ekg-2" name="c_ekg" value="2" <?php echo ($daten['c_ekg'] == 2 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="c_ekg-2">Infarkt EKG / STEMI</label>
-
-                            <input type="radio" class="btn-check" id="c_ekg-7" name="c_ekg" value="7" <?php echo ($daten['c_ekg'] == 7 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="c_ekg-7">Linksschenkelblock</label>
-
-                            <input type="radio" class="btn-check" id="c_ekg-71" name="c_ekg" value="71" <?php echo ($daten['c_ekg'] == 71 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="c_ekg-71">Rechtsschenkelblock</label>
-
-                            <input type="radio" class="btn-check" id="c_ekg-97" name="c_ekg" value="97" <?php echo ($daten['c_ekg'] == 97 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="c_ekg-97">Sonstige</label>
-
-                            <input type="radio" class="btn-check" id="c_ekg-98" name="c_ekg" value="98" <?php echo ($daten['c_ekg'] == 98 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="c_ekg-98">Nicht beurteilbar</label>
-
-                            <input type="radio" class="btn-check" id="c_ekg-99" name="c_ekg" value="99" <?php echo ($daten['c_ekg'] == 99 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="c_ekg-99">Kein EKG</label>
+                                    <input type="radio" class="btn-check" id="c_rekap-2" name="c_rekap" value="2" <?php echo ($daten['c_rekap'] == 2 ? 'checked' : '') ?> autocomplete="off">
+                                    <label for="c_rekap-2">> 2 s</label>
                         </div>
                     </div>
                 </div>

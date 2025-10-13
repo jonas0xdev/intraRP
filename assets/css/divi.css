@@ -434,7 +434,7 @@ body {
 #edivi__nidanav > a:before {
   content: "";
   display: block;
-  width: 2px;
+  width: 3px;
   height: 20px;
   background-color: transparent;
   position: absolute;
@@ -518,7 +518,7 @@ body {
 [class*=edivi__interactbutton] > label:before {
   content: "";
   display: block;
-  width: 2px;
+  width: 3px;
   height: 20px;
   background-color: transparent;
   position: absolute;
@@ -727,7 +727,7 @@ body {
 }
 
 #edivi__container .edivi__box .edivi__group-checked {
-  border-left: 3px solid #038846;
+  border-left: 3px solid #55b530;
 }
 
 @media (max-width: 1700px) {

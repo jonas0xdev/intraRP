@@ -96,10 +96,10 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/atemwege/index.php?enr=<?= $daten['enr'] ?>" data-requires="awfrei_1,zyanose_1">
                                 <span>Atemwege</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/atmung/index.php?enr=<?= $daten['enr'] ?>" data-requires="b_symptome,b_auskult" class="active">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/atmung/index.php?enr=<?= $daten['enr'] ?>" data-requires="b_symptome,b_auskult">
                                 <span>Atmung</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/index.php?enr=<?= $daten['enr'] ?>" data-requires="c_kreislauf,c_puls_rad,c_puls_reg">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/index.php?enr=<?= $daten['enr'] ?>" data-requires="c_kreislauf,c_puls_rad,c_puls_reg" class="active">
                                 <span>Kreislauf</span>
                             </a>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/neurologie/index.php?enr=<?= $daten['enr'] ?>" data-requires="d_bewusstsein,d_ex_1,d_pupillenw_1,d_pupillenw_2,d_lichtreakt_1,d_lichtreakt_2,d_gcs_1,d_gcs_2,d_gcs_3">
@@ -121,38 +121,29 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                         <div class="col-2 d-flex flex-column edivi__interactbutton-more">
                             <input type="checkbox"
                                 class="btn-check"
-                                id="atmung-ohne-path"
-                                data-quickfill='{"b_symptome": 0, "b_auskult": 0}'
+                                id="kreislauf-ohne-path"
+                                data-quickfill='{"c_kreislauf": 1, "c_puls_rad": 1, "c_puls_reg": 1, "c_rekap": 1, "c_blutung": 1}'
                                 autocomplete="off">
-                            <label for="atmung-ohne-path" class="edivi__unauffaellig">ohne path. Befund</label>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/atmung/1.php?enr=<?= $daten['enr'] ?>" data-requires="b_symptome">
-                                <span>Beurteilung Atmung</span>
+                            <label for="kreislauf-ohne-path" class="edivi__unauffaellig">ohne path. Befund</label>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/1.php?enr=<?= $daten['enr'] ?>" data-requires="c_kreislauf">
+                                <span>Patientenzustand</span>
                             </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/atmung/2.php?enr=<?= $daten['enr'] ?>" data-requires="b_auskult" class="active">
-                                <span>Auskultation</span>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/4.php?enr=<?= $daten['enr'] ?>">
+                                <span>Rekap. Zeit</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/3.php?enr=<?= $daten['enr'] ?>" data-requires="c_puls_rad,c_puls_reg">
+                                <span>Puls</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/5.php?enr=<?= $daten['enr'] ?>" class="active">
+                                <span>starke Blutung</span>
                             </a>
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton">
-                            <input type="radio" class="btn-check" id="b_auskult-0" name="b_auskult" value="0" <?php echo ($daten['b_auskult'] === 0 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="b_auskult-0" class="edivi__unauffaellig">unauffällig</label>
+                            <input type="radio" class="btn-check" id="c_blutung-1" name="c_blutung" value="1" <?php echo ($daten['c_blutung'] == 1 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="c_blutung-1" class="edivi__unauffaellig">nein</label>
 
-                            <input type="radio" class="btn-check" id="b_auskult-1" name="b_auskult" value="1" <?php echo ($daten['b_auskult'] == 1 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="b_auskult-1">Spastik</label>
-
-                            <input type="radio" class="btn-check" id="b_auskult-2" name="b_auskult" value="2" <?php echo ($daten['b_auskult'] == 2 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="b_auskult-2">Stridor</label>
-
-                            <input type="radio" class="btn-check" id="b_auskult-3" name="b_auskult" value="3" <?php echo ($daten['b_auskult'] == 3 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="b_auskult-3">Rasselgeräusche</label>
-
-                            <input type="radio" class="btn-check" id="b_auskult-4" name="b_auskult" value="4" <?php echo ($daten['b_auskult'] == 4 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="b_auskult-4">Andere Pathologien</label>
-
-                            <input type="radio" class="btn-check" id="b_auskult-98" name="b_auskult" value="98" <?php echo ($daten['b_auskult'] == 98 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="b_auskult-98">nicht beurteilbar</label>
-
-                            <input type="radio" class="btn-check" id="b_auskult-99" name="b_auskult" value="99" <?php echo ($daten['b_auskult'] == 99 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="b_auskult-99">nicht untersucht</label>
+                            <input type="radio" class="btn-check" id="c_blutung-2" name="c_blutung" value="2" <?php echo ($daten['c_blutung'] == 2 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="c_blutung-2">ja</label>
                         </div>
                     </div>
                 </div>
