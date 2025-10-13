@@ -1873,6 +1873,14 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                 <?php endif; ?>
                 <div class="row border border-dark border-top-0">
                     <div class="col">
+                        <h6 class="print__heading">Beteiligte Einsatzmittel</h6>
+                        <div class="print__field-wrapper" data-field-name="Bet. EM">
+                            <input type="text" class="w-100 print__field" value="<?= $daten['fzg_sonst'] ?>" readonly>
+                        </div>
+                    </div>
+                </div>
+                <div class="row border border-dark border-top-0">
+                    <div class="col">
                         <?php
                         $uebergabe_ort_labels = [
                             1 => 'Schockraum',

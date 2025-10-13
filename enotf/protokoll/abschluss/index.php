@@ -46,6 +46,43 @@ date_default_timezone_set('Europe/Berlin');
 $currentTime = date('H:i');
 $currentDate = date('d.m.Y');
 
+$ebesonderheiten = [];
+if (!empty($daten['ebesonderheiten'])) {
+    $decoded = json_decode($daten['ebesonderheiten'], true);
+    if (is_array($decoded)) {
+        $ebesonderheiten = array_map('intval', $decoded);
+    }
+}
+
+$ebesonderheitenLabels = [
+    1 => 'keine',
+    2 => 'nächste geeignete Klinik nicht aufnahmebereit',
+    3 => 'Patient lehnt indizierte Maßnahmen ab',
+    4 => 'bewusster Therapieverzicht',
+    5 => 'Patient lehnt Transport ab',
+    6 => 'Vorsorgliche Bereitstellung',
+    7 => 'Zwangsunterbringung',
+    8 => 'aufwändige technische Rettung',
+    9 => 'Einsatz mit LNA/OrgL',
+    10 => 'mehrere Patienten',
+    11 => 'MANV',
+    12 => 'kein Notarzt in angemessener Zeit verfügbar',
+    13 => 'erschwerter Patientenzugang',
+    14 => 'verzögerte Patientenübergabe',
+    99 => 'Sonstige'
+];
+
+$ebesonderheitenDisplayTexts = [];
+if (!empty($ebesonderheiten) && is_array($ebesonderheiten)) {
+    foreach ($ebesonderheiten as $value) {
+        if (isset($ebesonderheitenLabels[$value])) {
+            $ebesonderheitenDisplayTexts[] = $ebesonderheitenLabels[$value];
+        }
+    }
+}
+
+$ebesonderheitenDisplay = !empty($ebesonderheitenDisplayTexts) ? implode(', ', $ebesonderheitenDisplayTexts) : '';
+
 $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'false';
 ?>
 
@@ -345,6 +382,17 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                                 <option value="7" <?php echo ($daten['uebergabe_an'] == 7 ? 'selected' : '') ?>>Angehörige</option>
                                                 <option value="99" <?php echo ($daten['uebergabe_an'] == 99 ? 'selected' : '') ?>>Sonstige</option>
                                             </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row edivi__box edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/abschluss/1.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
+                                <h5 class="text-light px-2 py-1 edivi__group-check">Einsatzverlauf</h5>
+                                <div class="col">
+                                    <div class="row my-2">
+                                        <div class="col">
+                                            <label for="einsatzverlauf_besonderheiten" class="edivi__description">Besonderheiten</label>
+                                            <input type="text" name="einsatzverlauf_besonderheiten" id="einsatzverlauf_besonderheiten" class="w-100 form-control edivi__input-check" value="<?= !empty($ebesonderheitenDisplay) ? htmlspecialchars($ebesonderheitenDisplay) : '' ?>" readonly>
                                         </div>
                                     </div>
                                 </div>
