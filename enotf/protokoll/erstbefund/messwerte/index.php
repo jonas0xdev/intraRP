@@ -8,6 +8,7 @@ session_start();
 require_once __DIR__ . '/../../../../assets/config/config.php';
 require_once __DIR__ . '/../../../../vendor/autoload.php';
 require __DIR__ . '/../../../../assets/config/database.php';
+require_once __DIR__ . '/../../../../assets/functions/enotf/pin_middleware.php';
 
 use App\Auth\Permissions;
 
@@ -48,6 +49,8 @@ $prot_url = "https://" . SYSTEM_URL . "/enotf/protokoll/index.php?enr=" . $enr;
 date_default_timezone_set('Europe/Berlin');
 $currentTime = date('H:i');
 $currentDate = date('d.m.Y');
+
+$pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'false';
 $currentDateTime = date('Y-m-d\TH:i');
 ?>
 
@@ -83,7 +86,7 @@ $currentDateTime = date('Y-m-d\TH:i');
     <meta property="og:description" content="Verwaltungsportal der <?php echo RP_ORGTYPE . " " .  SERVER_CITY ?>" />
 </head>
 
-<body data-page="verlauf">
+<body data-page="verlauf" data-pin-enabled="<?= $pinEnabled ?>">
     <div class="container-fluid" id="edivi__container">
         <div class="row h-100">
             <div class="col" id="edivi__content">
@@ -161,6 +164,13 @@ $currentDateTime = date('Y-m-d\TH:i');
                             </div>
                         </div>
                         <div class="col-5">
+                            <!-- Range Strip -->
+                            <div class="range-strip-wrapper">
+                                <div class="range-strip-container">
+                                    <div class="range-strip" id="rangeStrip"></div>
+                                </div>
+                            </div>
+                            <!-- Keypad -->
                             <div class="keypad-container">
                                 <div class="keypad-grid">
                                     <button type="button" class="keypad-btn" onclick="keypadAddDigit('7')">7</button>
@@ -682,6 +692,146 @@ $currentDateTime = date('Y-m-d\TH:i');
             });
         })();
     </script>
+    <script>
+        (function() {
+            'use strict';
+
+            const rangeConfigs = {
+                'temp': {
+                    label: 'Temperatur (°C)',
+                    values: [32, 34, 36, 38, 40, 42],
+                    getClass: (val) => {
+                        if (val <= 34 || val > 40) return 'danger';
+                        if (val < 36.1 || val > 38) return 'semiwarning';
+                        return 'success';
+                    }
+                },
+                'bz': {
+                    label: 'Blutzucker (mg/dl)',
+                    values: [20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 340],
+                    getClass: (val) => {
+                        if (val < 40 || val > 250) return 'danger';
+                        if (val < 51 || val > 180) return 'warning';
+                        if (val < 81 || val > 150) return 'semiwarning';
+                        return 'success';
+                    }
+                },
+                'rrsys': {
+                    label: 'RR systolisch (mmHg)',
+                    values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250],
+                    getClass: (val) => {
+                        if (val < 80 || val > 199) return 'danger';
+                        if ((val >= 80 && val < 90) || val > 169) return 'warning';
+                        if ((val >= 90 && val < 101) || val > 149) return 'semiwarning';
+                        return 'success';
+                    }
+                },
+                'rrdias': {
+                    label: 'RR diastolisch (mmHg)',
+                    values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250],
+                    getClass: (val) => {
+                        if (val < 80 || val > 199) return 'danger';
+                        if ((val >= 80 && val < 90) || val > 169) return 'warning';
+                        if ((val >= 90 && val < 101) || val > 149) return 'semiwarning';
+                        return 'success';
+                    }
+                },
+                'herzfreq': {
+                    label: 'Herzfrequenz (/min)',
+                    values: [40, 60, 80, 100, 120, 140, 160, 180, 200],
+                    getClass: (val) => {
+                        if (val < 41 || val > 160) return 'danger';
+                        if (val < 51 || val > 130) return 'warning';
+                        if (val < 61 || val > 100) return 'semiwarning';
+                        return 'success';
+                    }
+                },
+                'etco2': {
+                    label: 'etCO₂ (mmHg)',
+                    values: [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55],
+                    getClass: (val) => {
+                        if (val < 6 || val > 55) return 'danger';
+                        if (val < 36 || val > 45) return 'semiwarning';
+                        return 'success';
+                    }
+                },
+                'spo2': {
+                    label: 'SpO₂ (%)',
+                    values: [72, 74, 76, 78, 80, 82, 84, 86, 88, 90, 92, 94, 96, 98],
+                    getClass: (val) => {
+                        if (val < 87) return 'danger';
+                        if (val < 92) return 'warning';
+                        if (val < 97) return 'semiwarning';
+                        return 'success';
+                    }
+                },
+                'atemfreq': {
+                    label: 'Atemfrequenz (/min)',
+                    values: [5, 10, 15, 20, 25, 30],
+                    getClass: (val) => {
+                        if (val < 5 || val > 25) return 'danger';
+                        if (val === 5 || val === 6 || (val > 20 && val < 26)) return 'warning';
+                        if ((val > 6 && val < 9) || (val > 15 && val < 21)) return 'semiwarning';
+                        return 'success';
+                    }
+                }
+            };
+
+            function renderRangeStrip(fieldId) {
+                const stripElement = document.getElementById('rangeStrip');
+
+                if (!stripElement) return;
+
+                if (!fieldId || !rangeConfigs[fieldId]) {
+                    stripElement.innerHTML = '';
+                    return;
+                }
+
+                const config = rangeConfigs[fieldId];
+
+                let html = '';
+                if (fieldId === 'spo2') {
+                    html += '<div class="range-item success"><span class="range-value"></span></div>';
+                } else {
+                    html += '<div class="range-item danger"><span class="range-value"></span></div>';
+                }
+
+                for (let i = config.values.length - 1; i >= 0; i--) {
+                    const val = config.values[i];
+                    const className = config.getClass(val);
+                    html += `<div class="range-item ${className}"><span class="range-value">${val}</span></div>`;
+                }
+
+                html += '<div class="range-item danger"><span class="range-value"></span></div>';
+
+                stripElement.innerHTML = html;
+            }
+
+            const originalSelectField = window.selectField;
+            window.selectField = function(field) {
+                if (originalSelectField) {
+                    originalSelectField(field);
+                }
+
+                renderRangeStrip(field.id);
+            };
+
+            document.addEventListener('DOMContentLoaded', function() {
+                const keypadInputs = document.querySelectorAll('.keypad-input');
+
+                keypadInputs.forEach(input => {
+                    input.addEventListener('focus', function() {
+                        renderRangeStrip(this.id);
+                    });
+                });
+
+                renderRangeStrip(null);
+            });
+
+            window.updateRangeStrip = renderRangeStrip;
+        })();
+    </script>
+    <script src="<?= BASE_PATH ?>assets/js/pin_activity.js"></script>
 </body>
 
 </html>

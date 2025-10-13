@@ -8,6 +8,7 @@ session_start();
 require_once __DIR__ . '/../../../../assets/config/config.php';
 require_once __DIR__ . '/../../../../vendor/autoload.php';
 require __DIR__ . '/../../../../assets/config/database.php';
+require_once __DIR__ . '/../../../../assets/functions/enotf/pin_middleware.php';
 
 use App\Auth\Permissions;
 
@@ -44,6 +45,8 @@ $prot_url = "https://" . SYSTEM_URL . "/enotf/protokoll/index.php?enr=" . $enr;
 date_default_timezone_set('Europe/Berlin');
 $currentTime = date('H:i');
 $currentDate = date('d.m.Y');
+
+$pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'false';
 ?>
 
 <!DOCTYPE html>
@@ -78,7 +81,7 @@ $currentDate = date('d.m.Y');
     <meta property="og:description" content="Verwaltungsportal der <?php echo RP_ORGTYPE . " " .  SERVER_CITY ?>" />
 </head>
 
-<body data-page="erstbefund">
+<body data-page="erstbefund" data-pin-enabled="<?= $pinEnabled ?>">
     <?php
     include __DIR__ . '/../../../../assets/components/enotf/topbar.php';
     ?>
@@ -113,6 +116,12 @@ $currentDate = date('d.m.Y');
                             </a>
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton-more">
+                            <input type="checkbox"
+                                class="btn-check"
+                                id="kreislauf-ohne-path"
+                                data-quickfill='{"c_kreislauf": 1, "c_puls_rad": 1, "c_puls_reg": 1}'
+                                autocomplete="off">
+                            <label for="kreislauf-ohne-path" class="edivi__unauffaellig">ohne path. Befund</label>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/kreislauf/1.php?enr=<?= $daten['enr'] ?>" data-requires="c_kreislauf" class="active">
                                 <span>Patientenzustand</span>
                             </a>
@@ -125,7 +134,7 @@ $currentDate = date('d.m.Y');
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton">
                             <input type="radio" class="btn-check" id="c_kreislauf-1" name="c_kreislauf" value="1" <?php echo ($daten['c_kreislauf'] == 1 ? 'checked' : '') ?> autocomplete="off">
-                            <label for="c_kreislauf-1">stabil</label>
+                            <label for="c_kreislauf-1" class="edivi__unauffaellig">stabil</label>
 
                             <input type="radio" class="btn-check" id="c_kreislauf-2" name="c_kreislauf" value="2" <?php echo ($daten['c_kreislauf'] == 2 ? 'checked' : '') ?> autocomplete="off">
                             <label for="c_kreislauf-2">instabil</label>
@@ -166,6 +175,7 @@ $currentDate = date('d.m.Y');
             });
         </script>
     <?php endif; ?>
+    <script src="<?= BASE_PATH ?>assets/js/pin_activity.js"></script>
 </body>
 
 </html>

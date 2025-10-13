@@ -8,6 +8,7 @@ session_start();
 require_once __DIR__ . '/../../../../assets/config/config.php';
 require_once __DIR__ . '/../../../../vendor/autoload.php';
 require __DIR__ . '/../../../../assets/config/database.php';
+require_once __DIR__ . '/../../../../assets/functions/enotf/pin_middleware.php';
 
 use App\Auth\Permissions;
 use App\Helpers\Redirects;
@@ -46,6 +47,8 @@ $defaultUrl = BASE_PATH . "enotf/protokoll/massnahmen/medikamente/index.php?enr=
 date_default_timezone_set('Europe/Berlin');
 $currentTime = date('H:i:s');
 $currentDate = date('d.m.Y');
+
+$pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'false';
 ?>
 
 
@@ -81,7 +84,7 @@ $currentDate = date('d.m.Y');
     <meta property="og:description" content="Verwaltungsportal der <?php echo RP_ORGTYPE . " " .  SERVER_CITY ?>" />
 </head>
 
-<body>
+<body data-pin-enabled="<?= $pinEnabled ?>">
     <form name="form" method="post" action="">
         <input type="hidden" name="new" value="1" />
         <div class="container-fluid" id="edivi__container">
@@ -532,6 +535,7 @@ $currentDate = date('d.m.Y');
             return now.toTimeString().slice(0, 8);
         }
     </script>
+    <script src="<?= BASE_PATH ?>assets/js/pin_activity.js"></script>
 </body>
 
 </html>

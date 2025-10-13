@@ -8,6 +8,7 @@ session_start();
 require_once __DIR__ . '/../../../../assets/config/config.php';
 require_once __DIR__ . '/../../../../vendor/autoload.php';
 require __DIR__ . '/../../../../assets/config/database.php';
+require_once __DIR__ . '/../../../../assets/functions/enotf/pin_middleware.php';
 
 use App\Auth\Permissions;
 
@@ -44,6 +45,8 @@ $prot_url = "https://" . SYSTEM_URL . "/enotf/protokoll/index.php?enr=" . $enr;
 date_default_timezone_set('Europe/Berlin');
 $currentTime = date('H:i');
 $currentDate = date('d.m.Y');
+
+$pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'false';
 ?>
 
 <!DOCTYPE html>
@@ -78,7 +81,7 @@ $currentDate = date('d.m.Y');
     <meta property="og:description" content="Verwaltungsportal der <?php echo RP_ORGTYPE . " " .  SERVER_CITY ?>" />
 </head>
 
-<body data-page="erstbefund">
+<body data-page="erstbefund" data-pin-enabled="<?= $pinEnabled ?>">
     <?php
     include __DIR__ . '/../../../../assets/components/enotf/topbar.php';
     ?>
@@ -113,6 +116,12 @@ $currentDate = date('d.m.Y');
                             </a>
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton-more">
+                            <input type="checkbox"
+                                class="btn-check"
+                                id="neuro-ohne-path"
+                                data-quickfill='{"d_bewusstsein": 1, "d_ex_1": 1, "d_pupillenw_1": 2, "d_pupillenw_2": 2, "d_lichtreakt_1": 1, "d_lichtreakt_2": 1, "d_gcs_1": 0, "d_gcs_2": 0, "d_gcs_3": 0}'
+                                autocomplete="off">
+                            <label for="neuro-ohne-path" class="edivi__unauffaellig">ohne path. Befund</label>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/neurologie/1.php?enr=<?= $daten['enr'] ?>" data-requires="d_bewusstsein">
                                 <span>Bewusstseinslage</span>
                             </a>
@@ -203,6 +212,7 @@ $currentDate = date('d.m.Y');
             });
         </script>
     <?php endif; ?>
+    <script src="<?= BASE_PATH ?>assets/js/pin_activity.js"></script>
 </body>
 
 </html>

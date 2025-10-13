@@ -8,6 +8,7 @@ session_start();
 require_once __DIR__ . '/../assets/config/config.php';
 require_once __DIR__ . '/../vendor/autoload.php';
 require __DIR__ . '/../assets/config/database.php';
+require_once __DIR__ . '/../assets/functions/enotf/pin_middleware.php';
 
 $prot_url = "https://" . SYSTEM_URL . "/enotf/index.php";
 
@@ -19,6 +20,8 @@ if (!isset($_SESSION['fahrername']) || !isset($_SESSION['protfzg'])) {
     header("Location: " . BASE_PATH . "enotf/login.php");
     exit();
 }
+
+$pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'false';
 ?>
 
 <!DOCTYPE html>
@@ -53,7 +56,7 @@ if (!isset($_SESSION['fahrername']) || !isset($_SESSION['protfzg'])) {
     <meta property="og:description" content="Verwaltungsportal der <?php echo RP_ORGTYPE . " " .  SERVER_CITY ?>" />
 </head>
 
-<body style="overflow-x:hidden" id="edivi__login">
+<body style="overflow-x:hidden" id="edivi__login" data-pin-enabled="<?= $pinEnabled ?>">
     <form name="form" method="post" action="<?= BASE_PATH ?>assets/functions/enotf/enrbridge.php" id="enrForm">
         <input type="hidden" name="new" value="1" />
         <input type="hidden" name="action" value="openOrCreate" />
@@ -185,6 +188,7 @@ if (!isset($_SESSION['fahrername']) || !isset($_SESSION['protfzg'])) {
             });
         }
     </script>
+    <script src="<?= BASE_PATH ?>assets/js/pin_activity.js"></script>
 </body>
 
 </html>

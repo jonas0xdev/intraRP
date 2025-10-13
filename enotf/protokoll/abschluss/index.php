@@ -8,6 +8,7 @@ session_start();
 require_once __DIR__ . '/../../../assets/config/config.php';
 require_once __DIR__ . '/../../../vendor/autoload.php';
 require __DIR__ . '/../../../assets/config/database.php';
+require_once __DIR__ . '/../../../assets/functions/enotf/pin_middleware.php';
 
 use App\Auth\Permissions;
 
@@ -44,6 +45,45 @@ $prot_url = "https://" . SYSTEM_URL . "/enotf/prot/index.php?enr=" . $enr;
 date_default_timezone_set('Europe/Berlin');
 $currentTime = date('H:i');
 $currentDate = date('d.m.Y');
+
+$ebesonderheiten = [];
+if (!empty($daten['ebesonderheiten'])) {
+    $decoded = json_decode($daten['ebesonderheiten'], true);
+    if (is_array($decoded)) {
+        $ebesonderheiten = array_map('intval', $decoded);
+    }
+}
+
+$ebesonderheitenLabels = [
+    1 => 'keine',
+    2 => 'nächste geeignete Klinik nicht aufnahmebereit',
+    3 => 'Patient lehnt indizierte Maßnahmen ab',
+    4 => 'bewusster Therapieverzicht',
+    5 => 'Patient lehnt Transport ab',
+    6 => 'Vorsorgliche Bereitstellung',
+    7 => 'Zwangsunterbringung',
+    8 => 'aufwändige technische Rettung',
+    9 => 'Einsatz mit LNA/OrgL',
+    10 => 'mehrere Patienten',
+    11 => 'MANV',
+    12 => 'kein Notarzt in angemessener Zeit verfügbar',
+    13 => 'erschwerter Patientenzugang',
+    14 => 'verzögerte Patientenübergabe',
+    99 => 'Sonstige'
+];
+
+$ebesonderheitenDisplayTexts = [];
+if (!empty($ebesonderheiten) && is_array($ebesonderheiten)) {
+    foreach ($ebesonderheiten as $value) {
+        if (isset($ebesonderheitenLabels[$value])) {
+            $ebesonderheitenDisplayTexts[] = $ebesonderheitenLabels[$value];
+        }
+    }
+}
+
+$ebesonderheitenDisplay = !empty($ebesonderheitenDisplayTexts) ? implode(', ', $ebesonderheitenDisplayTexts) : '';
+
+$pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'false';
 ?>
 
 <!DOCTYPE html>
@@ -78,7 +118,7 @@ $currentDate = date('d.m.Y');
     <meta property="og:description" content="Verwaltungsportal der <?php echo RP_ORGTYPE . " " .  SERVER_CITY ?>" />
 </head>
 
-<body data-page="abschluss">
+<body data-page="abschluss" data-pin-enabled="<?= $pinEnabled ?>">
     <?php
     include __DIR__ . '/../../../assets/components/enotf/topbar.php';
     ?>
@@ -87,9 +127,19 @@ $currentDate = date('d.m.Y');
         <div class="container-fluid" id="edivi__container">
             <div class="row h-100">
                 <?php include __DIR__ . '/../../../assets/components/enotf/nav.php'; ?>
-                <div class="col" id="edivi__content">
-                    <div class=" row">
-                        <div class="col">
+                <div class="col" id="edivi__content" style="padding-left: 0">
+                    <div class="row" style="margin-left: 0">
+                        <div class="col-2 d-flex flex-column edivi__interactbutton-more">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/1.php?enr=<?= $daten['enr'] ?>" data-requires="ebesonderheiten">
+                                <span>Einsatzverlauf Besonderheiten</span>
+                            </a>
+                            <?php if ($daten['prot_by'] != 1) : ?>
+                                <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/2.php?enr=<?= $daten['enr'] ?>" data-requires="na_nachf">
+                                    <span>Nachforderung NA</span>
+                                </a>
+                            <?php endif; ?>
+                        </div>
+                        <div class="col edivi__overview-container">
                             <div class="row edivi__box">
                                 <h5 class="text-light px-2 py-1">Transportdaten</h5>
                                 <div class="col">
@@ -101,6 +151,7 @@ $currentDate = date('d.m.Y');
                                                     <option selected value="NULL">Fzg. Transp.</option>
                                                     <?php
                                                     require __DIR__ . '/../../../assets/config/database.php';
+                                                    require_once __DIR__ . '/../../../assets/functions/enotf/pin_middleware.php';
 
                                                     $stmt = $pdo->prepare("SELECT * FROM intra_fahrzeuge WHERE rd_type = 2 AND active = 1 ORDER BY priority ASC");
                                                     $stmt->execute();
@@ -115,6 +166,7 @@ $currentDate = date('d.m.Y');
                                                     <option selected value="NULL">Fzg. Transp.</option>
                                                     <?php
                                                     require __DIR__ . '/../../../assets/config/database.php';
+                                                    require_once __DIR__ . '/../../../assets/functions/enotf/pin_middleware.php';
 
                                                     $stmt = $pdo->prepare("SELECT * FROM intra_fahrzeuge WHERE rd_type = 2 ORDER BY priority ASC");
                                                     $stmt->execute();
@@ -153,6 +205,7 @@ $currentDate = date('d.m.Y');
                                                     <option selected value="NULL">Fzg. NA</option>
                                                     <?php
                                                     require __DIR__ . '/../../../assets/config/database.php';
+                                                    require_once __DIR__ . '/../../../assets/functions/enotf/pin_middleware.php';
 
                                                     $stmt = $pdo->prepare("SELECT * FROM intra_fahrzeuge WHERE rd_type = 1 AND active = 1 ORDER BY priority ASC");
                                                     $stmt->execute();
@@ -167,6 +220,7 @@ $currentDate = date('d.m.Y');
                                                     <option selected value="NULL">Fzg. NA</option>
                                                     <?php
                                                     require __DIR__ . '/../../../assets/config/database.php';
+                                                    require_once __DIR__ . '/../../../assets/functions/enotf/pin_middleware.php';
 
                                                     $stmt = $pdo->prepare("SELECT * FROM intra_fahrzeuge WHERE rd_type = 1 ORDER BY priority ASC");
                                                     $stmt->execute();
@@ -213,6 +267,7 @@ $currentDate = date('d.m.Y');
                                                     <option disabled hidden selected value="NULL">---</option>
                                                     <?php
                                                     require __DIR__ . '/../../../assets/config/database.php';
+                                                    require_once __DIR__ . '/../../../assets/functions/enotf/pin_middleware.php';
 
                                                     $stmt = $pdo->prepare("SELECT * FROM intra_edivi_ziele WHERE active = 1 ORDER BY priority ASC");
                                                     $stmt->execute();
@@ -229,6 +284,7 @@ $currentDate = date('d.m.Y');
                                                     <option disabled hidden selected value="NULL">---</option>
                                                     <?php
                                                     require __DIR__ . '/../../../assets/config/database.php';
+                                                    require_once __DIR__ . '/../../../assets/functions/enotf/pin_middleware.php';
 
                                                     $stmt = $pdo->prepare("SELECT * FROM intra_edivi_ziele ORDER BY priority ASC");
                                                     $stmt->execute();
@@ -330,6 +386,17 @@ $currentDate = date('d.m.Y');
                                     </div>
                                 </div>
                             </div>
+                            <div class="row edivi__box edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/abschluss/1.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
+                                <h5 class="text-light px-2 py-1 edivi__group-check">Einsatzverlauf</h5>
+                                <div class="col">
+                                    <div class="row my-2">
+                                        <div class="col">
+                                            <label for="einsatzverlauf_besonderheiten" class="edivi__description">Besonderheiten</label>
+                                            <input type="text" name="einsatzverlauf_besonderheiten" id="einsatzverlauf_besonderheiten" class="w-100 form-control edivi__input-check" value="<?= !empty($ebesonderheitenDisplay) ? htmlspecialchars($ebesonderheitenDisplay) : '' ?>" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <?php if (!$ist_freigegeben) : ?>
@@ -375,6 +442,7 @@ $currentDate = date('d.m.Y');
             freigeberInput.value = '';
         });
     </script>
+    <script src="<?= BASE_PATH ?>assets/js/pin_activity.js"></script>
 </body>
 
 </html>

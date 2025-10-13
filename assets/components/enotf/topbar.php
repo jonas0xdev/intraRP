@@ -17,19 +17,19 @@ use App\Auth\Permissions;
                 if (ENOTF_PREREG) : ?>
                     <a href="<?= BASE_PATH ?>enotf/schnittstelle/voranmeldung.php?enr=<?= $enr ?>" id="prereg" class="edivi__iconlink">
                         <i class="las la-hospital-alt"></i><br>
-                        <small>Voranmeldung</small>
+                        <small>Anmeldung</small>
                     </a>
                 <?php endif; ?>
 
                 <a href="<?= BASE_PATH ?>enotf/protokoll/protokollart.php?enr=<?= $enr ?>" id="modify" class="edivi__iconlink">
                     <i class="las la-sync"></i><br>
-                    <small>Protokollart ändern</small>
+                    <small>Art ändern</small>
                 </a>
             <?php endif; ?>
 
             <a href="<?= BASE_PATH ?>enotf/print/index.php?enr=<?= $enr ?>" id="print" class="edivi__iconlink">
                 <i class="las la-file-alt"></i><br>
-                <small>Papieransicht</small>
+                <small>Protokoll</small>
             </a>
 
             <?php if (Permissions::check(['admin', 'edivi.edit'])) : ?>

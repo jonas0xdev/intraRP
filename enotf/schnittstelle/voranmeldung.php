@@ -8,6 +8,7 @@ session_start();
 require_once __DIR__ . '/../../assets/config/config.php';
 require_once __DIR__ . '/../../vendor/autoload.php';
 require __DIR__ . '/../../assets/config/database.php';
+require_once __DIR__ . '/../../assets/functions/enotf/pin_middleware.php';
 
 use App\Auth\Permissions;
 use App\Helpers\Redirects;
@@ -210,59 +211,59 @@ $diagnose_labels = [
     99 => 'Keine Erkrankung / Verletzung feststellbar',
 
     // Trauma - Schädel-Hirn (101-104)
-    101 => 'Trauma Schädel-Hirn (leicht)',
-    102 => 'Trauma Schädel-Hirn (mittel)',
-    103 => 'Trauma Schädel-Hirn (schwer)',
-    104 => 'Trauma Schädel-Hirn (tödlich)',
+    101 => 'Trauma Schädel-Hirn leicht',
+    102 => 'Trauma Schädel-Hirn mittel',
+    103 => 'Trauma Schädel-Hirn schwer',
+    104 => 'Trauma Schädel-Hirn tödlich',
 
     // Trauma - Gesicht (111-114)
-    111 => 'Trauma Gesicht (leicht)',
-    112 => 'Trauma Gesicht (mittel)',
-    113 => 'Trauma Gesicht (schwer)',
-    114 => 'Trauma Gesicht (tödlich)',
+    111 => 'Trauma Gesicht leicht',
+    112 => 'Trauma Gesicht mittel',
+    113 => 'Trauma Gesicht schwer',
+    114 => 'Trauma Gesicht tödlich',
 
     // Trauma - HWS (121-124)
-    121 => 'Trauma HWS (leicht)',
-    122 => 'Trauma HWS (mittel)',
-    123 => 'Trauma HWS (schwer)',
-    124 => 'Trauma HWS (tödlich)',
+    121 => 'Trauma HWS leicht',
+    122 => 'Trauma HWS mittel',
+    123 => 'Trauma HWS schwer',
+    124 => 'Trauma HWS tödlich',
 
     // Trauma - Thorax (131-134)
-    131 => 'Trauma Thorax (leicht)',
-    132 => 'Trauma Thorax (mittel)',
-    133 => 'Trauma Thorax (schwer)',
-    134 => 'Trauma Thorax (tödlich)',
+    131 => 'Trauma Thorax leicht',
+    132 => 'Trauma Thorax mittel',
+    133 => 'Trauma Thorax schwer',
+    134 => 'Trauma Thorax tödlich',
 
     // Trauma - Abdomen (141-144)
-    141 => 'Trauma Abdomen (leicht)',
-    142 => 'Trauma Abdomen (mittel)',
-    143 => 'Trauma Abdomen (schwer)',
-    144 => 'Trauma Abdomen (tödlich)',
+    141 => 'Trauma Abdomen leicht',
+    142 => 'Trauma Abdomen mittel',
+    143 => 'Trauma Abdomen schwer',
+    144 => 'Trauma Abdomen tödlich',
 
     // Trauma - BWS / LWS (151-153)
-    151 => 'Trauma BWS / LWS (leicht)',
-    152 => 'Trauma BWS / LWS (mittel)',
-    153 => 'Trauma BWS / LWS (schwer)',
+    151 => 'Trauma BWS / LWS leicht',
+    152 => 'Trauma BWS / LWS mittel',
+    153 => 'Trauma BWS / LWS schwer',
 
     // Trauma - Becken (161-163)
-    161 => 'Trauma Becken (leicht)',
-    162 => 'Trauma Becken (mittel)',
-    163 => 'Trauma Becken (schwer)',
+    161 => 'Trauma Becken leicht',
+    162 => 'Trauma Becken mittel',
+    163 => 'Trauma Becken schwer',
 
     // Trauma - obere Extremitäten (171-173)
-    171 => 'Trauma obere Extremitäten (leicht)',
-    172 => 'Trauma obere Extremitäten (mittel)',
-    173 => 'Trauma obere Extremitäten (schwer)',
+    171 => 'Trauma obere Extremitäten leicht',
+    172 => 'Trauma obere Extremitäten mittel',
+    173 => 'Trauma obere Extremitäten schwer',
 
     // Trauma - untere Extremitäten (181-183)
-    181 => 'Trauma untere Extremitäten (leicht)',
-    182 => 'Trauma untere Extremitäten (mittel)',
-    183 => 'Trauma untere Extremitäten (schwer)',
+    181 => 'Trauma untere Extremitäten leicht',
+    182 => 'Trauma untere Extremitäten mittel',
+    183 => 'Trauma untere Extremitäten schwer',
 
     // Trauma - Weichteile (191-193)
-    191 => 'Trauma Weichteile (leicht)',
-    192 => 'Trauma Weichteile (mittel)',
-    193 => 'Trauma Weichteile (schwer)',
+    191 => 'Trauma Weichteile leicht',
+    192 => 'Trauma Weichteile mittel',
+    193 => 'Trauma Weichteile schwer',
 
     // Trauma - spezielle (201-209)
     201 => 'Verbrennung / Verbrühung',
@@ -278,6 +279,8 @@ $diagnose_haupt_text = '';
 if (isset($daten['diagnose_haupt']) && !empty($daten['diagnose_haupt'])) {
     $diagnose_haupt_text = $diagnose_labels[$daten['diagnose_haupt']] ?? 'Unbekannte Diagnose';
 }
+
+$pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'false';
 ?>
 
 <!DOCTYPE html>
@@ -312,7 +315,7 @@ if (isset($daten['diagnose_haupt']) && !empty($daten['diagnose_haupt'])) {
     <meta property="og:description" content="Verwaltungsportal der <?php echo RP_ORGTYPE . " " .  SERVER_CITY ?>" />
 </head>
 
-<body style="overflow-x:hidden">
+<body style="overflow-x:hidden" data-pin-enabled="<?= $pinEnabled ?>">
     <form name="form" method="post" action="">
         <input type="hidden" name="new" value="1" />
         <div class="container-fluid" id="edivi__container">
@@ -559,6 +562,7 @@ if (isset($daten['diagnose_haupt']) && !empty($daten['diagnose_haupt'])) {
             updateGCS();
         });
     </script>
+    <script src="<?= BASE_PATH ?>assets/js/pin_activity.js"></script>
 </body>
 
 </html>

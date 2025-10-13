@@ -8,6 +8,7 @@ session_start();
 require_once __DIR__ . '/../../../../assets/config/config.php';
 require_once __DIR__ . '/../../../../vendor/autoload.php';
 require __DIR__ . '/../../../../assets/config/database.php';
+require_once __DIR__ . '/../../../../assets/functions/enotf/pin_middleware.php';
 
 use App\Auth\Permissions;
 
@@ -44,6 +45,8 @@ $prot_url = "https://" . SYSTEM_URL . "/enotf/protokoll/index.php?enr=" . $enr;
 date_default_timezone_set('Europe/Berlin');
 $currentTime = date('H:i');
 $currentDate = date('d.m.Y');
+
+$pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'false';
 
 function getCurrentZugaenge($zugangJson)
 {
@@ -178,7 +181,7 @@ function hasAnyZugang($zugangJson)
     <meta property="og:description" content="Verwaltungsportal der <?php echo RP_ORGTYPE . " " .  SERVER_CITY ?>" />
 </head>
 
-<body data-page="massnahmen">
+<body data-page="massnahmen" data-pin-enabled="<?= $pinEnabled ?>">
     <?php
     include __DIR__ . '/../../../../assets/components/enotf/topbar.php';
     ?>
@@ -201,6 +204,9 @@ function hasAnyZugang($zugangJson)
                             </a>
                             <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/medikamente/index.php?enr=<?= $daten['enr'] ?>" data-requires="medis">
                                 <span>Medikamente</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/weitere/index.php?enr=<?= $daten['enr'] ?>">
+                                <span>Weitere</span>
                             </a>
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton-more">
@@ -266,6 +272,7 @@ function hasAnyZugang($zugangJson)
             });
         </script>
     <?php endif; ?>
+    <script src="<?= BASE_PATH ?>assets/js/pin_activity.js"></script>
 </body>
 
 </html>

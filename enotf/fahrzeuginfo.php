@@ -8,6 +8,7 @@ session_start();
 require_once __DIR__ . '/../assets/config/config.php';
 require_once __DIR__ . '/../vendor/autoload.php';
 require __DIR__ . '/../assets/config/database.php';
+require_once __DIR__ . '/../assets/functions/enotf/pin_middleware.php';
 
 $prot_url = "https://" . SYSTEM_URL . "/enotf/index.php";
 
@@ -44,6 +45,8 @@ if (!$vehicle) {
     $categoriesStmt->execute([$vehicle['veh_type']]);
     $categories = $categoriesStmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
+$pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'false';
 ?>
 
 <!DOCTYPE html>
@@ -78,7 +81,7 @@ if (!$vehicle) {
     <meta property="og:description" content="Fahrzeuginformationen der <?php echo RP_ORGTYPE . " " .  SERVER_CITY ?>" />
 </head>
 
-<body style="overflow-x:hidden" id="edivi__login">
+<body style="overflow-x:hidden" id="edivi__login" data-pin-enabled="<?= $pinEnabled ?>">
     <div class="container-fluid" id="edivi__container">
         <div class="row h-100">
             <div class="col" id="edivi__content">
@@ -284,6 +287,7 @@ if (!$vehicle) {
             </div>
         </div>
     </div>
+    <script src="<?= BASE_PATH ?>assets/js/pin_activity.js"></script>
 </body>
 
 </html>

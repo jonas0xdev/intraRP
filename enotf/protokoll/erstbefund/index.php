@@ -8,6 +8,7 @@ session_start();
 require_once __DIR__ . '/../../../assets/config/config.php';
 require_once __DIR__ . '/../../../vendor/autoload.php';
 require __DIR__ . '/../../../assets/config/database.php';
+require_once __DIR__ . '/../../../assets/functions/enotf/pin_middleware.php';
 
 use App\Auth\Permissions;
 
@@ -52,6 +53,8 @@ $prot_url = "https://" . SYSTEM_URL . "/enotf/protokoll/index.php?enr=" . $enr;
 date_default_timezone_set('Europe/Berlin');
 $currentTime = date('H:i');
 $currentDate = date('d.m.Y');
+
+$pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'false';
 ?>
 
 <!DOCTYPE html>
@@ -86,7 +89,7 @@ $currentDate = date('d.m.Y');
     <meta property="og:description" content="Verwaltungsportal der <?php echo RP_ORGTYPE . " " .  SERVER_CITY ?>" />
 </head>
 
-<body data-page="erstbefund">
+<body data-page="erstbefund" data-pin-enabled="<?= $pinEnabled ?>">
     <?php
     include __DIR__ . '/../../../assets/components/enotf/topbar.php';
     ?>
@@ -399,7 +402,7 @@ $currentDate = date('d.m.Y');
                                                                 <option value="5" <?php echo ($daten['d_gcs_3'] == 5 ? 'selected' : '') ?>>(1)</option>
                                                             </select>
                                                             <label for="_GCS_" class="edivi__description">GCS</label>
-                                                            <input type="text" name="_GCS_" id="_GCS_" class="w-100 form-control edivi__input-check" value="" readonly>
+                                                            <input type="text" name="_GCS_" id="_GCS_" class="w-100 form-control" value="" readonly>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -669,6 +672,7 @@ $currentDate = date('d.m.Y');
             });
         </script>
     <?php endif; ?>
+    <script src="<?= BASE_PATH ?>assets/js/pin_activity.js"></script>
 </body>
 
 </html>

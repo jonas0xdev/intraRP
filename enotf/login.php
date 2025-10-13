@@ -8,6 +8,7 @@ session_start();
 require_once __DIR__ . '/../assets/config/config.php';
 require_once __DIR__ . '/../vendor/autoload.php';
 require __DIR__ . '/../assets/config/database.php';
+require_once __DIR__ . '/../assets/functions/enotf/pin_middleware.php';
 
 $prot_url = "https://" . SYSTEM_URL . "/enotf/index.php";
 
@@ -28,6 +29,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $stmtfn = $pdo->query("SELECT fullname FROM intra_mitarbeiter ORDER BY fullname ASC");
 $fullnames = $stmtfn->fetchAll(PDO::FETCH_COLUMN);
+
+$pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'false';
 ?>
 
 <!DOCTYPE html>
@@ -62,7 +65,7 @@ $fullnames = $stmtfn->fetchAll(PDO::FETCH_COLUMN);
     <meta property="og:description" content="Verwaltungsportal der <?php echo RP_ORGTYPE . " " .  SERVER_CITY ?>" />
 </head>
 
-<body style="overflow-x:hidden" id="edivi__login">
+<body style="overflow-x:hidden" id="edivi__login" data-pin-enabled="<?= $pinEnabled ?>">
     <form name="form" method="post" action="">
         <datalist id="nameSuggestions">
             <?php foreach ($fullnames as $name): ?>
@@ -178,6 +181,7 @@ $fullnames = $stmtfn->fetchAll(PDO::FETCH_COLUMN);
             freigeberInput.value = '';
         });
     </script>
+    <script src="<?= BASE_PATH ?>assets/js/pin_activity.js"></script>
 </body>
 
 </html>
