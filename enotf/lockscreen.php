@@ -29,6 +29,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pin'])) {
     }
 }
 
+// PIN-Länge ermitteln
+$pinLength = defined('ENOTF_PIN') ? strlen(ENOTF_PIN) : 4;
+
 $prot_url = "https://" . SYSTEM_URL . "/enotf/index.php";
 ?>
 
@@ -172,12 +175,12 @@ $prot_url = "https://" . SYSTEM_URL . "/enotf/index.php";
                 </div>
                 <h2 class="lockscreen-title">System gesperrt</h2>
                 <p style="text-align: center; color: #a2a2a2; margin-bottom: 20px;">
-                    Bitte PIN eingeben
+                    Bitte PIN eingeben (<?= $pinLength ?> Zeichen)
                 </p>
 
                 <form method="post" id="pinForm">
                     <div class="pin-display <?= isset($error) ? 'error' : '' ?>" id="pinDisplay">
-                        ••••
+                        <?= str_repeat('•', $pinLength) ?>
                     </div>
                     <input type="hidden" name="pin" id="pinInput" value="">
 
@@ -215,14 +218,16 @@ $prot_url = "https://" . SYSTEM_URL . "/enotf/index.php";
 
     <script>
         let pinValue = '';
-        const maxLength = 6;
+        const maxLength = <?= $pinLength ?>;
 
         function updateDisplay() {
             const display = document.getElementById('pinDisplay');
             if (pinValue.length === 0) {
-                display.textContent = '••••';
+                display.textContent = '•'.repeat(maxLength);
             } else {
-                display.textContent = '•'.repeat(pinValue.length);
+                const filled = '•'.repeat(pinValue.length);
+                const empty = '•'.repeat(maxLength - pinValue.length);
+                display.textContent = filled + empty;
             }
             document.getElementById('pinInput').value = pinValue;
         }
@@ -232,7 +237,8 @@ $prot_url = "https://" . SYSTEM_URL . "/enotf/index.php";
                 pinValue += digit;
                 updateDisplay();
 
-                if (pinValue.length >= 4) {
+                // Automatisch absenden wenn PIN vollständig
+                if (pinValue.length === maxLength) {
                     setTimeout(() => submitPin(), 300);
                 }
             }
@@ -246,7 +252,7 @@ $prot_url = "https://" . SYSTEM_URL . "/enotf/index.php";
         }
 
         function submitPin() {
-            if (pinValue.length >= 4) {
+            if (pinValue.length === maxLength) {
                 const display = document.getElementById('pinDisplay');
                 display.style.opacity = '0.5';
                 document.getElementById('pinForm').submit();
