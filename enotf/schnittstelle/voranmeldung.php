@@ -8,6 +8,7 @@ session_start();
 require_once __DIR__ . '/../../assets/config/config.php';
 require_once __DIR__ . '/../../vendor/autoload.php';
 require __DIR__ . '/../../assets/config/database.php';
+require_once __DIR__ . '/../../assets/functions/enotf/pin_middleware.php';
 
 use App\Auth\Permissions;
 use App\Helpers\Redirects;
@@ -278,6 +279,8 @@ $diagnose_haupt_text = '';
 if (isset($daten['diagnose_haupt']) && !empty($daten['diagnose_haupt'])) {
     $diagnose_haupt_text = $diagnose_labels[$daten['diagnose_haupt']] ?? 'Unbekannte Diagnose';
 }
+
+$pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'false';
 ?>
 
 <!DOCTYPE html>
@@ -312,7 +315,7 @@ if (isset($daten['diagnose_haupt']) && !empty($daten['diagnose_haupt'])) {
     <meta property="og:description" content="Verwaltungsportal der <?php echo RP_ORGTYPE . " " .  SERVER_CITY ?>" />
 </head>
 
-<body style="overflow-x:hidden">
+<body style="overflow-x:hidden" data-pin-enabled="<?= $pinEnabled ?>">
     <form name="form" method="post" action="">
         <input type="hidden" name="new" value="1" />
         <div class="container-fluid" id="edivi__container">
@@ -559,6 +562,7 @@ if (isset($daten['diagnose_haupt']) && !empty($daten['diagnose_haupt'])) {
             updateGCS();
         });
     </script>
+    <script src="<?= BASE_PATH ?>assets/js/pin_activity.js"></script>
 </body>
 
 </html>

@@ -1,0 +1,278 @@
+<?php
+if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
+    ini_set('session.cookie_samesite', 'None');
+    ini_set('session.cookie_secure', '1');
+}
+
+session_start();
+require_once __DIR__ . '/../assets/config/config.php';
+require_once __DIR__ . '/../vendor/autoload.php';
+
+if (!defined('ENOTF_USE_PIN') || ENOTF_USE_PIN !== true) {
+    header("Location: overview.php");
+    exit();
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pin'])) {
+    $enteredPin = $_POST['pin'];
+
+    if (defined('ENOTF_PIN') && $enteredPin === ENOTF_PIN) {
+        $_SESSION['pin_verified'] = true;
+        $_SESSION['pin_last_activity'] = time();
+
+        $redirect = $_SESSION['pin_return_url'] ?? 'overview.php';
+        unset($_SESSION['pin_return_url']);
+        header("Location: " . $redirect);
+        exit();
+    } else {
+        $error = true;
+    }
+}
+
+$prot_url = "https://" . SYSTEM_URL . "/enotf/index.php";
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>eNOTF &rsaquo; <?php echo SYSTEM_NAME ?> &rsaquo; Gesperrt</title>
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/css/divi.min.css" />
+    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/_ext/lineawesome/css/line-awesome.min.css" />
+    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/fonts/mavenpro/css/all.min.css" />
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="<?= BASE_PATH ?>vendor/twbs/bootstrap/dist/css/bootstrap.min.css">
+    <script src="<?= BASE_PATH ?>vendor/components/jquery/jquery.min.js"></script>
+    <script src="<?= BASE_PATH ?>vendor/twbs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="<?= BASE_PATH ?>assets/favicon/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="<?= BASE_PATH ?>assets/favicon/favicon.svg" />
+    <link rel="shortcut icon" href="<?= BASE_PATH ?>assets/favicon/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="<?= BASE_PATH ?>assets/favicon/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="<?php echo SYSTEM_NAME ?>" />
+    <link rel="manifest" href="<?= BASE_PATH ?>assets/favicon/site.webmanifest" />
+    <!-- Metas -->
+    <meta name="theme-color" content="#ffaf2f" />
+    <style>
+        .lockscreen-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .lockscreen-box {
+            background: #333333;
+            padding: 40px;
+            border-radius: 0;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .lockscreen-icon {
+            text-align: center;
+            font-size: 4rem;
+            color: var(--main-color);
+            margin-bottom: 20px;
+        }
+
+        .lockscreen-title {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 30px;
+            font-size: 1.5rem;
+        }
+
+        .pin-display {
+            background: transparent;
+            border: 2px solid #5f5f5f;
+            color: #fff;
+            font-size: 2rem;
+            text-align: center;
+            padding: 15px;
+            margin-bottom: 20px;
+            letter-spacing: 10px;
+            font-family: monospace;
+            min-height: 70px;
+        }
+
+        .pin-display.error {
+            border-color: #d91425;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-10px);
+            }
+
+            75% {
+                transform: translateX(10px);
+            }
+        }
+
+        .keypad-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .keypad-btn {
+            background: #474747;
+            color: #fff;
+            border: none;
+            border-radius: 0;
+            padding: 20px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .keypad-btn:hover {
+            background: #5f5f5f;
+        }
+
+        .keypad-btn:active {
+            transform: scale(0.95);
+        }
+
+        .keypad-btn.wide {
+            grid-column: span 1;
+        }
+
+        .error-message {
+            color: #d91425;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+
+<body style="overflow-x:hidden">
+    <div class="container-fluid" id="edivi__container">
+        <div class="lockscreen-container">
+            <div class="lockscreen-box">
+                <div class="lockscreen-icon">
+                    <i class="las la-lock"></i>
+                </div>
+                <h2 class="lockscreen-title">System gesperrt</h2>
+                <p style="text-align: center; color: #a2a2a2; margin-bottom: 20px;">
+                    Bitte PIN eingeben
+                </p>
+
+                <form method="post" id="pinForm">
+                    <div class="pin-display <?= isset($error) ? 'error' : '' ?>" id="pinDisplay">
+                        ••••
+                    </div>
+                    <input type="hidden" name="pin" id="pinInput" value="">
+
+                    <div class="keypad-grid">
+                        <button type="button" class="keypad-btn" onclick="addDigit('1')">1</button>
+                        <button type="button" class="keypad-btn" onclick="addDigit('2')">2</button>
+                        <button type="button" class="keypad-btn" onclick="addDigit('3')">3</button>
+
+                        <button type="button" class="keypad-btn" onclick="addDigit('4')">4</button>
+                        <button type="button" class="keypad-btn" onclick="addDigit('5')">5</button>
+                        <button type="button" class="keypad-btn" onclick="addDigit('6')">6</button>
+
+                        <button type="button" class="keypad-btn" onclick="addDigit('7')">7</button>
+                        <button type="button" class="keypad-btn" onclick="addDigit('8')">8</button>
+                        <button type="button" class="keypad-btn" onclick="addDigit('9')">9</button>
+
+                        <button type="button" class="keypad-btn" onclick="deleteDigit()">
+                            <i class="las la-backspace"></i>
+                        </button>
+                        <button type="button" class="keypad-btn" onclick="addDigit('0')">0</button>
+                        <button type="button" class="keypad-btn" style="background: var(--main-color);" onclick="submitPin()">
+                            <i class="las la-check"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <?php if (isset($error)): ?>
+                    <div class="error-message">
+                        <i class="las la-exclamation-triangle"></i> Falsche PIN
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let pinValue = '';
+        const maxLength = 6;
+
+        function updateDisplay() {
+            const display = document.getElementById('pinDisplay');
+            if (pinValue.length === 0) {
+                display.textContent = '••••';
+            } else {
+                display.textContent = '•'.repeat(pinValue.length);
+            }
+            document.getElementById('pinInput').value = pinValue;
+        }
+
+        function addDigit(digit) {
+            if (pinValue.length < maxLength) {
+                pinValue += digit;
+                updateDisplay();
+
+                if (pinValue.length >= 4) {
+                    setTimeout(() => submitPin(), 300);
+                }
+            }
+        }
+
+        function deleteDigit() {
+            if (pinValue.length > 0) {
+                pinValue = pinValue.slice(0, -1);
+                updateDisplay();
+            }
+        }
+
+        function submitPin() {
+            if (pinValue.length >= 4) {
+                const display = document.getElementById('pinDisplay');
+                display.style.opacity = '0.5';
+                document.getElementById('pinForm').submit();
+            }
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key >= '0' && e.key <= '9') {
+                addDigit(e.key);
+            } else if (e.key === 'Backspace') {
+                e.preventDefault();
+                deleteDigit();
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                submitPin();
+            }
+        });
+
+        <?php if (isset($error)): ?>
+            setTimeout(() => {
+                document.getElementById('pinDisplay').classList.remove('error');
+                pinValue = '';
+                updateDisplay();
+            }, 1000);
+        <?php endif; ?>
+    </script>
+</body>
+
+</html>

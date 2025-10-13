@@ -8,6 +8,7 @@ session_start();
 require_once __DIR__ . '/../../assets/config/config.php';
 require_once __DIR__ . '/../../vendor/autoload.php';
 require __DIR__ . '/../../assets/config/database.php';
+require_once __DIR__ . '/../../assets/functions/enotf/pin_middleware.php';
 
 use App\Auth\Permissions;
 use App\Helpers\Redirects;
@@ -38,6 +39,8 @@ $defaultUrl = $prot_url;
 date_default_timezone_set('Europe/Berlin');
 $currentTime = date('H:i');
 $currentDate = date('d.m.Y');
+
+$pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'false';
 ?>
 
 <!DOCTYPE html>
@@ -76,7 +79,7 @@ $currentDate = date('d.m.Y');
 </head>
 
 <body>
-    <div id="topbar" class="container-fluid">
+    <div id="topbar" class="container-fluid" data-pin-enabled="<?= $pinEnabled ?>">
         <div class="row">
             <div class="col">
                 <a href="<?= Redirects::getRedirectUrl($defaultUrl); ?>" class="topbar-btn">
@@ -2374,6 +2377,7 @@ $currentDate = date('d.m.Y');
             }
         });
     </script>
+    <script src="<?= BASE_PATH ?>assets/js/pin_activity.js"></script>
 </body>
 
 </html>

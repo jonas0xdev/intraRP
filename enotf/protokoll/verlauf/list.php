@@ -10,6 +10,7 @@ session_start();
 require_once __DIR__ . '/../../../assets/config/config.php';
 require_once __DIR__ . '/../../../vendor/autoload.php';
 require __DIR__ . '/../../../assets/config/database.php';
+require_once __DIR__ . '/../../../assets/functions/enotf/pin_middleware.php';
 
 use App\Auth\Permissions;
 
@@ -329,7 +330,7 @@ $prot_url = "https://" . SYSTEM_URL . "/enotf/prot/index.php?enr=" . $enr;
     </style>
 </head>
 
-<body data-page="verlauf">
+<body data-page="verlauf" data-pin-enabled="<?= $pinEnabled ?>">
     <?php include __DIR__ . '/../../../assets/components/enotf/topbar.php'; ?>
 
     <div class="container-fluid" id="edivi__container">
@@ -472,6 +473,7 @@ $prot_url = "https://" . SYSTEM_URL . "/enotf/prot/index.php?enr=" . $enr;
     include __DIR__ . '/../../../assets/functions/enotf/field_checks.php';
     include __DIR__ . '/../../../assets/functions/enotf/clock.php';
     ?>
+    <script src="<?= BASE_PATH ?>assets/js/pin_activity.js"></script>
 </body>
 
 </html>

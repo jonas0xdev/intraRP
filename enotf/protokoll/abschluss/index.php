@@ -8,6 +8,7 @@ session_start();
 require_once __DIR__ . '/../../../assets/config/config.php';
 require_once __DIR__ . '/../../../vendor/autoload.php';
 require __DIR__ . '/../../../assets/config/database.php';
+require_once __DIR__ . '/../../../assets/functions/enotf/pin_middleware.php';
 
 use App\Auth\Permissions;
 
@@ -44,6 +45,8 @@ $prot_url = "https://" . SYSTEM_URL . "/enotf/prot/index.php?enr=" . $enr;
 date_default_timezone_set('Europe/Berlin');
 $currentTime = date('H:i');
 $currentDate = date('d.m.Y');
+
+$pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'false';
 ?>
 
 <!DOCTYPE html>
@@ -78,7 +81,7 @@ $currentDate = date('d.m.Y');
     <meta property="og:description" content="Verwaltungsportal der <?php echo RP_ORGTYPE . " " .  SERVER_CITY ?>" />
 </head>
 
-<body data-page="abschluss">
+<body data-page="abschluss" data-pin-enabled="<?= $pinEnabled ?>">
     <?php
     include __DIR__ . '/../../../assets/components/enotf/topbar.php';
     ?>
@@ -101,6 +104,7 @@ $currentDate = date('d.m.Y');
                                                     <option selected value="NULL">Fzg. Transp.</option>
                                                     <?php
                                                     require __DIR__ . '/../../../assets/config/database.php';
+                                                    require_once __DIR__ . '/../../../assets/functions/enotf/pin_middleware.php';
 
                                                     $stmt = $pdo->prepare("SELECT * FROM intra_fahrzeuge WHERE rd_type = 2 AND active = 1 ORDER BY priority ASC");
                                                     $stmt->execute();
@@ -115,6 +119,7 @@ $currentDate = date('d.m.Y');
                                                     <option selected value="NULL">Fzg. Transp.</option>
                                                     <?php
                                                     require __DIR__ . '/../../../assets/config/database.php';
+                                                    require_once __DIR__ . '/../../../assets/functions/enotf/pin_middleware.php';
 
                                                     $stmt = $pdo->prepare("SELECT * FROM intra_fahrzeuge WHERE rd_type = 2 ORDER BY priority ASC");
                                                     $stmt->execute();
@@ -153,6 +158,7 @@ $currentDate = date('d.m.Y');
                                                     <option selected value="NULL">Fzg. NA</option>
                                                     <?php
                                                     require __DIR__ . '/../../../assets/config/database.php';
+                                                    require_once __DIR__ . '/../../../assets/functions/enotf/pin_middleware.php';
 
                                                     $stmt = $pdo->prepare("SELECT * FROM intra_fahrzeuge WHERE rd_type = 1 AND active = 1 ORDER BY priority ASC");
                                                     $stmt->execute();
@@ -167,6 +173,7 @@ $currentDate = date('d.m.Y');
                                                     <option selected value="NULL">Fzg. NA</option>
                                                     <?php
                                                     require __DIR__ . '/../../../assets/config/database.php';
+                                                    require_once __DIR__ . '/../../../assets/functions/enotf/pin_middleware.php';
 
                                                     $stmt = $pdo->prepare("SELECT * FROM intra_fahrzeuge WHERE rd_type = 1 ORDER BY priority ASC");
                                                     $stmt->execute();
@@ -213,6 +220,7 @@ $currentDate = date('d.m.Y');
                                                     <option disabled hidden selected value="NULL">---</option>
                                                     <?php
                                                     require __DIR__ . '/../../../assets/config/database.php';
+                                                    require_once __DIR__ . '/../../../assets/functions/enotf/pin_middleware.php';
 
                                                     $stmt = $pdo->prepare("SELECT * FROM intra_edivi_ziele WHERE active = 1 ORDER BY priority ASC");
                                                     $stmt->execute();
@@ -229,6 +237,7 @@ $currentDate = date('d.m.Y');
                                                     <option disabled hidden selected value="NULL">---</option>
                                                     <?php
                                                     require __DIR__ . '/../../../assets/config/database.php';
+                                                    require_once __DIR__ . '/../../../assets/functions/enotf/pin_middleware.php';
 
                                                     $stmt = $pdo->prepare("SELECT * FROM intra_edivi_ziele ORDER BY priority ASC");
                                                     $stmt->execute();
@@ -375,6 +384,7 @@ $currentDate = date('d.m.Y');
             freigeberInput.value = '';
         });
     </script>
+    <script src="<?= BASE_PATH ?>assets/js/pin_activity.js"></script>
 </body>
 
 </html>
