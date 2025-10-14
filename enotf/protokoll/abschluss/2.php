@@ -108,9 +108,6 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             <label for="na_nachf-2">ja</label>
                         </div>
                     </div>
-                    <?php if (!$ist_freigegeben) : ?>
-                        <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/freigabe.php?enr=<?= $daten['enr'] ?>" id="abschluss__btn">Abschließen</a>
-                    <?php endif; ?>
                 </div>
             </div>
     </form>
