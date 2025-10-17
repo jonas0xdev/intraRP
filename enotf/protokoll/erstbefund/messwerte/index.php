@@ -696,86 +696,378 @@ $currentDateTime = date('Y-m-d\TH:i');
         (function() {
             'use strict';
 
+            const colorRanges = {
+                'spo2': [{
+                        min: 97,
+                        max: 100,
+                        class: 'success'
+                    },
+                    {
+                        min: 92,
+                        max: 97,
+                        class: 'semiwarning'
+                    },
+                    {
+                        min: 87,
+                        max: 92,
+                        class: 'warning'
+                    },
+                    {
+                        min: 70,
+                        max: 87,
+                        class: 'danger'
+                    }
+                ],
+                'atemfreq': [{
+                        min: 26,
+                        max: 35,
+                        class: 'danger'
+                    },
+                    {
+                        min: 21,
+                        max: 26,
+                        class: 'warning'
+                    },
+                    {
+                        min: 16,
+                        max: 21,
+                        class: 'semiwarning'
+                    },
+                    {
+                        min: 9,
+                        max: 16,
+                        class: 'success'
+                    },
+                    {
+                        min: 7,
+                        max: 9,
+                        class: 'semiwarning'
+                    },
+                    {
+                        min: 5,
+                        max: 7,
+                        class: 'warning'
+                    },
+                    {
+                        min: 0,
+                        max: 5,
+                        class: 'danger'
+                    }
+                ],
+                'etco2': [{
+                        min: 55,
+                        max: 60,
+                        class: 'danger'
+                    },
+                    {
+                        min: 45,
+                        max: 55,
+                        class: 'semiwarning'
+                    },
+                    {
+                        min: 36,
+                        max: 45,
+                        class: 'success'
+                    },
+                    {
+                        min: 6,
+                        max: 36,
+                        class: 'semiwarning'
+                    },
+                    {
+                        min: 0,
+                        max: 6,
+                        class: 'danger'
+                    }
+                ],
+                'herzfreq': [{
+                        min: 160,
+                        max: 210,
+                        class: 'danger'
+                    },
+                    {
+                        min: 130,
+                        max: 160,
+                        class: 'warning'
+                    },
+                    {
+                        min: 100,
+                        max: 130,
+                        class: 'semiwarning'
+                    },
+                    {
+                        min: 61,
+                        max: 100,
+                        class: 'success'
+                    },
+                    {
+                        min: 51,
+                        max: 61,
+                        class: 'semiwarning'
+                    },
+                    {
+                        min: 41,
+                        max: 51,
+                        class: 'warning'
+                    },
+                    {
+                        min: 0,
+                        max: 41,
+                        class: 'danger'
+                    }
+                ],
+                'rrsys': [{
+                        min: 199,
+                        max: 260,
+                        class: 'danger'
+                    },
+                    {
+                        min: 169,
+                        max: 199,
+                        class: 'warning'
+                    },
+                    {
+                        min: 149,
+                        max: 169,
+                        class: 'semiwarning'
+                    },
+                    {
+                        min: 101,
+                        max: 149,
+                        class: 'success'
+                    },
+                    {
+                        min: 90,
+                        max: 101,
+                        class: 'semiwarning'
+                    },
+                    {
+                        min: 80,
+                        max: 90,
+                        class: 'warning'
+                    },
+                    {
+                        min: 0,
+                        max: 80,
+                        class: 'danger'
+                    }
+                ],
+                'rrdias': [{
+                        min: 199,
+                        max: 260,
+                        class: 'danger'
+                    },
+                    {
+                        min: 169,
+                        max: 199,
+                        class: 'warning'
+                    },
+                    {
+                        min: 149,
+                        max: 169,
+                        class: 'semiwarning'
+                    },
+                    {
+                        min: 101,
+                        max: 149,
+                        class: 'success'
+                    },
+                    {
+                        min: 90,
+                        max: 101,
+                        class: 'semiwarning'
+                    },
+                    {
+                        min: 80,
+                        max: 90,
+                        class: 'warning'
+                    },
+                    {
+                        min: 0,
+                        max: 80,
+                        class: 'danger'
+                    }
+                ],
+                'bz': [{
+                        min: 250,
+                        max: 360,
+                        class: 'danger'
+                    },
+                    {
+                        min: 180,
+                        max: 250,
+                        class: 'warning'
+                    },
+                    {
+                        min: 150,
+                        max: 180,
+                        class: 'semiwarning'
+                    },
+                    {
+                        min: 81,
+                        max: 150,
+                        class: 'success'
+                    },
+                    {
+                        min: 51,
+                        max: 81,
+                        class: 'semiwarning'
+                    },
+                    {
+                        min: 40,
+                        max: 51,
+                        class: 'warning'
+                    },
+                    {
+                        min: 0,
+                        max: 40,
+                        class: 'danger'
+                    }
+                ],
+                'temp': [{
+                        min: 40,
+                        max: 44,
+                        class: 'danger'
+                    },
+                    {
+                        min: 38,
+                        max: 40,
+                        class: 'semiwarning'
+                    },
+                    {
+                        min: 36.1,
+                        max: 38,
+                        class: 'success'
+                    },
+                    {
+                        min: 34,
+                        max: 36.1,
+                        class: 'semiwarning'
+                    },
+                    {
+                        min: 30,
+                        max: 34,
+                        class: 'danger'
+                    }
+                ]
+            };
+
             const rangeConfigs = {
-                'temp': {
-                    label: 'Temperatur (°C)',
-                    values: [32, 34, 36, 38, 40, 42],
-                    getClass: (val) => {
-                        if (val <= 34 || val > 40) return 'danger';
-                        if (val < 36.1 || val > 38) return 'semiwarning';
-                        return 'success';
-                    }
-                },
-                'bz': {
-                    label: 'Blutzucker (mg/dl)',
-                    values: [20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 340],
-                    getClass: (val) => {
-                        if (val < 40 || val > 250) return 'danger';
-                        if (val < 51 || val > 180) return 'warning';
-                        if (val < 81 || val > 150) return 'semiwarning';
-                        return 'success';
-                    }
-                },
-                'rrsys': {
-                    label: 'RR systolisch (mmHg)',
-                    values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250],
-                    getClass: (val) => {
-                        if (val < 80 || val > 199) return 'danger';
-                        if ((val >= 80 && val < 90) || val > 169) return 'warning';
-                        if ((val >= 90 && val < 101) || val > 149) return 'semiwarning';
-                        return 'success';
-                    }
-                },
-                'rrdias': {
-                    label: 'RR diastolisch (mmHg)',
-                    values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250],
-                    getClass: (val) => {
-                        if (val < 80 || val > 199) return 'danger';
-                        if ((val >= 80 && val < 90) || val > 169) return 'warning';
-                        if ((val >= 90 && val < 101) || val > 149) return 'semiwarning';
-                        return 'success';
-                    }
-                },
-                'herzfreq': {
-                    label: 'Herzfrequenz (/min)',
-                    values: [40, 60, 80, 100, 120, 140, 160, 180, 200],
-                    getClass: (val) => {
-                        if (val < 41 || val > 160) return 'danger';
-                        if (val < 51 || val > 130) return 'warning';
-                        if (val < 61 || val > 100) return 'semiwarning';
-                        return 'success';
-                    }
-                },
-                'etco2': {
-                    label: 'etCO₂ (mmHg)',
-                    values: [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55],
-                    getClass: (val) => {
-                        if (val < 6 || val > 55) return 'danger';
-                        if (val < 36 || val > 45) return 'semiwarning';
-                        return 'success';
-                    }
-                },
                 'spo2': {
                     label: 'SpO₂ (%)',
                     values: [72, 74, 76, 78, 80, 82, 84, 86, 88, 90, 92, 94, 96, 98],
-                    getClass: (val) => {
-                        if (val < 87) return 'danger';
-                        if (val < 92) return 'warning';
-                        if (val < 97) return 'semiwarning';
-                        return 'success';
-                    }
+                    min: 70,
+                    max: 100
                 },
                 'atemfreq': {
                     label: 'Atemfrequenz (/min)',
                     values: [5, 10, 15, 20, 25, 30],
-                    getClass: (val) => {
-                        if (val < 5 || val > 25) return 'danger';
-                        if (val === 5 || val === 6 || (val > 20 && val < 26)) return 'warning';
-                        if ((val > 6 && val < 9) || (val > 15 && val < 21)) return 'semiwarning';
-                        return 'success';
-                    }
+                    min: 0,
+                    max: 35
+                },
+                'etco2': {
+                    label: 'etCO₂ (mmHg)',
+                    values: [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55],
+                    min: 0,
+                    max: 60
+                },
+                'herzfreq': {
+                    label: 'Herzfrequenz (/min)',
+                    values: [40, 60, 80, 100, 120, 140, 160, 180, 200],
+                    min: 30,
+                    max: 210
+                },
+                'rrsys': {
+                    label: 'RR systolisch (mmHg)',
+                    values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250],
+                    min: 0,
+                    max: 260
+                },
+                'rrdias': {
+                    label: 'RR diastolisch (mmHg)',
+                    values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250],
+                    min: 0,
+                    max: 260
+                },
+                'bz': {
+                    label: 'Blutzucker (mg/dl)',
+                    values: [20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 340],
+                    min: 0,
+                    max: 360
+                },
+                'temp': {
+                    label: 'Temperatur (°C)',
+                    values: [32, 34, 36, 38, 40, 42],
+                    min: 30,
+                    max: 44
                 }
             };
+
+            function getColorClass(value, fieldId) {
+                const ranges = colorRanges[fieldId];
+                if (!ranges) return 'success';
+
+                for (const range of ranges) {
+                    if (value >= range.min && value < range.max) {
+                        return range.class;
+                    }
+                }
+                return 'danger';
+            }
+
+            function generateColorSegments(fieldId, config) {
+                const ranges = colorRanges[fieldId];
+                if (!ranges) return [];
+
+                const segments = [];
+                const totalRange = config.max - config.min;
+
+                ranges.forEach(range => {
+                    const segmentHeight = ((range.max - range.min) / totalRange) * 100;
+
+                    segments.push({
+                        class: range.class,
+                        height: segmentHeight,
+                        min: range.min,
+                        max: range.max
+                    });
+                });
+
+                return segments;
+            }
+
+            function calculatePosition(value, config) {
+                const range = config.max - config.min;
+                const position = 100 - ((value - config.min) / range) * 100;
+                return Math.max(0, Math.min(100, position));
+            }
+
+            function updateValueIndicator(fieldId, stripElement) {
+                const field = document.getElementById(fieldId);
+                if (!field || !rangeConfigs[fieldId]) return;
+
+                const value = field.value.trim().toLowerCase();
+
+                const existingIndicator = stripElement.querySelector('.value-indicator');
+                if (existingIndicator) {
+                    existingIndicator.remove();
+                }
+
+                if (!value || value === 'ng') return;
+
+                const numValue = parseFloat(value.replace(',', '.'));
+                if (isNaN(numValue)) return;
+
+                const config = rangeConfigs[fieldId];
+                const position = calculatePosition(numValue, config);
+
+                const indicator = document.createElement('div');
+                indicator.className = 'value-indicator';
+                indicator.style.top = `${position}%`;
+                indicator.setAttribute('data-value', value);
+
+                stripElement.appendChild(indicator);
+            }
 
             function renderRangeStrip(fieldId) {
                 const stripElement = document.getElementById('rangeStrip');
@@ -788,23 +1080,40 @@ $currentDateTime = date('Y-m-d\TH:i');
                 }
 
                 const config = rangeConfigs[fieldId];
+                const segments = generateColorSegments(fieldId, config);
 
                 let html = '';
-                if (fieldId === 'spo2') {
-                    html += '<div class="range-item success"><span class="range-value"></span></div>';
-                } else {
-                    html += '<div class="range-item danger"><span class="range-value"></span></div>';
-                }
 
-                for (let i = config.values.length - 1; i >= 0; i--) {
-                    const val = config.values[i];
-                    const className = config.getClass(val);
-                    html += `<div class="range-item ${className}"><span class="range-value">${val}</span></div>`;
-                }
+                segments.forEach((segment, index) => {
+                    html += `<div class="range-segment ${segment.class}" style="flex: ${segment.height}; position: relative;">`;
 
-                html += '<div class="range-item danger"><span class="range-value"></span></div>';
+                    const segmentValues = config.values
+                        .filter(val => {
+                            if (index === segments.length - 1) {
+                                return val >= segment.min && val <= segment.max;
+                            }
+                            return val >= segment.min && val < segment.max;
+                        })
+                        .sort((a, b) => b - a);
+
+                    segmentValues.forEach(val => {
+                        const valuePositionInRange = (val - config.min) / (config.max - config.min);
+                        const positionFromTop = (1 - valuePositionInRange) * 100;
+                        const segmentStart = (segment.max - config.min) / (config.max - config.min);
+                        const segmentStartPercent = (1 - segmentStart) * 100;
+                        const segmentEnd = (segment.min - config.min) / (config.max - config.min);
+                        const segmentEndPercent = (1 - segmentEnd) * 100;
+                        const positionInSegment = ((positionFromTop - segmentStartPercent) / (segmentEndPercent - segmentStartPercent)) * 100;
+
+                        html += `<span class="range-value" style="position: absolute; top: ${positionInSegment}%; left: 50%; transform: translate(-50%, -50%);">${val}</span>`;
+                    });
+
+                    html += '</div>';
+                });
 
                 stripElement.innerHTML = html;
+
+                updateValueIndicator(fieldId, stripElement);
             }
 
             const originalSelectField = window.selectField;
@@ -812,7 +1121,6 @@ $currentDateTime = date('Y-m-d\TH:i');
                 if (originalSelectField) {
                     originalSelectField(field);
                 }
-
                 renderRangeStrip(field.id);
             };
 
@@ -822,6 +1130,15 @@ $currentDateTime = date('Y-m-d\TH:i');
                 keypadInputs.forEach(input => {
                     input.addEventListener('focus', function() {
                         renderRangeStrip(this.id);
+                    });
+
+                    input.addEventListener('input', function() {
+                        if (this.classList.contains('active-field')) {
+                            const stripElement = document.getElementById('rangeStrip');
+                            if (stripElement) {
+                                updateValueIndicator(this.id, stripElement);
+                            }
+                        }
                     });
                 });
 

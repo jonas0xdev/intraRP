@@ -321,7 +321,6 @@ $totalVitals = $stmtCount->fetch(PDO::FETCH_ASSOC)['count'];
     ?>
 
     <script>
-        // Chart-Daten
         const chartLabels = <?= json_encode($chartLabels) ?>;
         const chartData = {
             spo2: <?= json_encode($chartSpo2) ?>,
@@ -334,19 +333,16 @@ $totalVitals = $stmtCount->fetch(PDO::FETCH_ASSOC)['count'];
             bz: <?= json_encode($chartBz) ?>
         };
 
-        // Debug: Daten ausgeben
         console.log('Chart Labels:', chartLabels);
         console.log('Chart Data:', chartData);
         console.log('Total Data Points:', chartLabels.length);
 
-        // Konvertiere String-Werte zu Zahlen
         function parseValue(value) {
             if (value === null || value === undefined || value === '') return null;
             const parsed = parseFloat(String(value).replace(',', '.'));
             return isNaN(parsed) ? null : parsed;
         }
 
-        // Alle Daten zu Zahlen konvertieren
         const numericData = {
             spo2: chartData.spo2.map(parseValue),
             rrsys: chartData.rrsys.map(parseValue),
@@ -358,9 +354,7 @@ $totalVitals = $stmtCount->fetch(PDO::FETCH_ASSOC)['count'];
             bz: chartData.bz.map(parseValue)
         };
 
-        // Parameter-Kategorisierung
         const parameterConfig = {
-            // HOHE WERTE (0-300 Achse)
             rrsys: {
                 axis: 'y1',
                 color: 'rgb(255, 99, 132)',
@@ -391,8 +385,6 @@ $totalVitals = $stmtCount->fetch(PDO::FETCH_ASSOC)['count'];
                 label: 'etCO₂ (mmHg)',
                 category: 'Niedrige Werte'
             },
-
-            // NIEDRIGE WERTE (0-100 Achse)
             spo2: {
                 axis: 'y',
                 color: 'rgb(75, 192, 192)',
@@ -413,7 +405,6 @@ $totalVitals = $stmtCount->fetch(PDO::FETCH_ASSOC)['count'];
             }
         };
 
-        // Datasets erstellen
         const datasets = [];
         Object.keys(parameterConfig).forEach(paramKey => {
             const config = parameterConfig[paramKey];
@@ -427,21 +418,20 @@ $totalVitals = $stmtCount->fetch(PDO::FETCH_ASSOC)['count'];
                     backgroundColor: config.color.replace('rgb', 'rgba').replace(')', ', 0.1)'),
                     tension: 0.4,
                     yAxisID: config.axis,
-                    pointRadius: 5,
-                    pointHoverRadius: 8,
-                    pointBackgroundColor: config.color,
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
+                    pointRadius: 0,
+                    pointHoverRadius: 0,
+                    pointBackgroundColor: 'transparent',
+                    pointBorderColor: 'transparent',
+                    pointBorderWidth: 0,
                     borderWidth: 3,
                     hidden: false,
-                    spanGaps: false,
+                    spanGaps: true,
                     parameterKey: paramKey,
                     category: config.category
                 });
             }
         });
 
-        // Dynamische Skalierung für rechte Achse basierend auf Blutzucker
         function calculateRightAxisMax() {
             const bzValues = numericData.bz.filter(v => v !== null && v !== undefined);
             if (bzValues.length === 0) return 300;
@@ -457,10 +447,115 @@ $totalVitals = $stmtCount->fetch(PDO::FETCH_ASSOC)['count'];
         const rightAxisMax = calculateRightAxisMax();
         const rightAxisStep = rightAxisMax === 600 ? 60 : 30;
 
-        // Chart erstellen
+        const customPointStyles = {
+            id: 'customPointStyles',
+            afterDatasetsDraw(chart) {
+                const ctx = chart.ctx;
+
+                chart.data.datasets.forEach((dataset, datasetIndex) => {
+                    if (dataset.hidden) return;
+
+                    const meta = chart.getDatasetMeta(datasetIndex);
+
+                    meta.data.forEach((point, index) => {
+                        if (dataset.data[index] === null) return;
+
+                        const x = point.x;
+                        const y = point.y;
+                        const size = 6;
+
+                        ctx.save();
+                        ctx.fillStyle = dataset.borderColor;
+                        ctx.strokeStyle = dataset.borderColor;
+                        ctx.lineWidth = 2;
+
+                        switch (dataset.parameterKey) {
+                            case 'spo2':
+                                ctx.beginPath();
+                                ctx.arc(x, y, size, 0, Math.PI * 2);
+                                ctx.fill();
+                                break;
+
+                            case 'herzfreq':
+                                ctx.fillRect(x - size, y - size, size * 2, size * 2);
+                                break;
+
+                            case 'rrsys':
+                                ctx.beginPath();
+                                ctx.moveTo(x, y - size);
+                                ctx.lineTo(x - size, y + size);
+                                ctx.lineTo(x + size, y + size);
+                                ctx.closePath();
+                                ctx.fill();
+                                break;
+
+                            case 'rrdias':
+                                ctx.beginPath();
+                                ctx.moveTo(x, y + size);
+                                ctx.lineTo(x - size, y - size);
+                                ctx.lineTo(x + size, y - size);
+                                ctx.closePath();
+                                ctx.fill();
+                                break;
+
+                            case 'atemfreq':
+                                ctx.beginPath();
+                                ctx.moveTo(x, y - size);
+                                ctx.lineTo(x + size, y);
+                                ctx.lineTo(x, y + size);
+                                ctx.lineTo(x - size, y);
+                                ctx.closePath();
+                                ctx.fill();
+                                break;
+
+                            case 'temp':
+                                ctx.beginPath();
+                                ctx.arc(x, y, size, 0, Math.PI * 2);
+                                ctx.stroke();
+                                break;
+
+                            case 'bz':
+                                const spikes = 5;
+                                const outerRadius = size;
+                                const innerRadius = size / 2;
+
+                                ctx.beginPath();
+                                for (let i = 0; i < spikes * 2; i++) {
+                                    const radius = i % 2 === 0 ? outerRadius : innerRadius;
+                                    const angle = (Math.PI / spikes) * i - Math.PI / 2;
+                                    const px = x + Math.cos(angle) * radius;
+                                    const py = y + Math.sin(angle) * radius;
+
+                                    if (i === 0) {
+                                        ctx.moveTo(px, py);
+                                    } else {
+                                        ctx.lineTo(px, py);
+                                    }
+                                }
+                                ctx.closePath();
+                                ctx.fill();
+                                break;
+
+                            case 'etco2':
+                                ctx.beginPath();
+                                ctx.moveTo(x - size, y);
+                                ctx.lineTo(x + size, y);
+                                ctx.moveTo(x, y - size);
+                                ctx.lineTo(x, y + size);
+                                ctx.stroke();
+                                break;
+                        }
+
+                        ctx.restore();
+                    });
+                });
+            }
+        };
+
         const ctx = document.getElementById('chartCombined').getContext('2d');
         const chart = new Chart(ctx, {
             type: 'line',
+            plugins: [customPointStyles],
             data: {
                 labels: chartLabels,
                 datasets: datasets
@@ -503,7 +598,6 @@ $totalVitals = $stmtCount->fetch(PDO::FETCH_ASSOC)['count'];
                                 return label + ': Kein Wert';
                             },
                             footer: function(tooltipItems) {
-                                // Zeige Achsen-Info mit dynamischer Skalierung
                                 const item = tooltipItems[0];
                                 if (item) {
                                     const dataset = item.dataset;
@@ -530,7 +624,7 @@ $totalVitals = $stmtCount->fetch(PDO::FETCH_ASSOC)['count'];
                             color: 'rgba(255,255,255,0.1)'
                         }
                     },
-                    y: { // NIEDRIGE WERTE (0-100)
+                    y: {
                         type: 'linear',
                         position: 'left',
                         min: 0,
@@ -556,7 +650,7 @@ $totalVitals = $stmtCount->fetch(PDO::FETCH_ASSOC)['count'];
                             }
                         }
                     },
-                    y1: { // HOHE WERTE (dynamisch 0-300 oder 0-600)
+                    y1: {
                         type: 'linear',
                         position: 'left',
                         min: 0,
@@ -570,7 +664,7 @@ $totalVitals = $stmtCount->fetch(PDO::FETCH_ASSOC)['count'];
                             stepSize: rightAxisStep
                         },
                         grid: {
-                            display: false // Vermeidet doppelte Gitterlinien
+                            display: false
                         },
                         title: {
                             display: true,
@@ -587,30 +681,42 @@ $totalVitals = $stmtCount->fetch(PDO::FETCH_ASSOC)['count'];
             }
         });
 
-        // Einfache Legend ohne Kategorien
         function createLegend() {
             const legendContainer = document.getElementById('legendToggle');
             legendContainer.innerHTML = '';
+
+            const symbols = {
+                'spo2': '●',
+                'herzfreq': '■',
+                'rrsys': '▲',
+                'rrdias': '▼',
+                'atemfreq': '◆',
+                'temp': '○',
+                'bz': '★',
+                'etco2': '+'
+            };
 
             datasets.forEach((dataset, index) => {
                 const legendItem = document.createElement('div');
                 legendItem.className = 'legend-item';
                 legendItem.onclick = () => toggleDataset(index);
 
-                const color = document.createElement('div');
-                color.className = 'legend-color';
-                color.style.backgroundColor = dataset.borderColor;
+                const symbolSpan = document.createElement('span');
+                symbolSpan.style.color = dataset.borderColor;
+                symbolSpan.style.fontSize = '16px';
+                symbolSpan.style.marginRight = '8px';
+                symbolSpan.style.fontWeight = 'bold';
+                symbolSpan.textContent = symbols[dataset.parameterKey] || '●';
 
                 const label = document.createElement('span');
                 label.textContent = dataset.label;
 
-                legendItem.appendChild(color);
+                legendItem.appendChild(symbolSpan);
                 legendItem.appendChild(label);
                 legendContainer.appendChild(legendItem);
             });
         }
 
-        // Dataset ein-/ausblenden
         function toggleDataset(index) {
             const dataset = chart.data.datasets[index];
             dataset.hidden = !dataset.hidden;
@@ -623,7 +729,6 @@ $totalVitals = $stmtCount->fetch(PDO::FETCH_ASSOC)['count'];
             chart.update();
         }
 
-        // Werte hinzufügen
         function addValues() {
             <?php if (!$ist_freigegeben): ?>
                 window.location.href = 'add.php?enr=<?= $enr ?>';
@@ -632,13 +737,10 @@ $totalVitals = $stmtCount->fetch(PDO::FETCH_ASSOC)['count'];
             <?php endif; ?>
         }
 
-        // Chart-Höhe anpassen
         document.getElementById('chartCombined').style.height = '450px';
 
-        // Legend initialisieren
         createLegend();
 
-        // Informationstext mit dynamischer BZ-Info hinzufügen
         const infoText = document.createElement('div');
         const chartContainer = document.querySelector('.chart-container').parentNode;
         chartContainer.insertBefore(infoText, chartContainer.firstChild);

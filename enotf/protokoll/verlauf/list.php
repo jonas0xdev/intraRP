@@ -403,7 +403,7 @@ $prot_url = "https://" . SYSTEM_URL . "/enotf/prot/index.php?enr=" . $enr;
                                             <th style="width: 30%;">Parameter</th>
                                             <th style="width: 15%;">Wert</th>
                                             <th style="width: 10%;">Einheit</th>
-                                            <th style="width: 25%;">Erfasst von</th>
+                                            <th style="width: 25%;"></th>
                                             <?php if (!$ist_freigegeben): ?>
                                                 <th style="width: 20%;">Aktion</th>
                                             <?php endif; ?>
@@ -442,8 +442,6 @@ $prot_url = "https://" . SYSTEM_URL . "/enotf/prot/index.php?enr=" . $enr;
                                                         <?= htmlspecialchars($vital['parameter_einheit']) ?>
                                                     </td>
                                                     <td class="parameter-meta">
-                                                        <i class="las la-user" style="font-size: 10px;"></i>
-                                                        <?= htmlspecialchars($vital['erstellt_von']) ?>
                                                     </td>
                                                     <?php if (!$ist_freigegeben): ?>
                                                         <td>

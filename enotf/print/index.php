@@ -2176,13 +2176,13 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                         ctx.fill();
                                         break;
 
-                                    case 'RRdia': // Dreieck leer
+                                    case 'RRdia':
                                         ctx.beginPath();
-                                        ctx.moveTo(x, y - size);
-                                        ctx.lineTo(x - size, y + size);
-                                        ctx.lineTo(x + size, y + size);
+                                        ctx.moveTo(x, y + size);
+                                        ctx.lineTo(x - size, y - size);
+                                        ctx.lineTo(x + size, y - size);
                                         ctx.closePath();
-                                        ctx.stroke();
+                                        ctx.fill();
                                         break;
 
                                     case 'AF': // Raute gefüllt
@@ -2254,7 +2254,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                 yAxisID: 'y',
                                 tension: 0.3,
                                 pointStyle: false,
-                                spanGaps: false
+                                spanGaps: true
                             },
                             {
                                 label: 'HF',
@@ -2266,7 +2266,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                 yAxisID: 'y1',
                                 tension: 0.3,
                                 pointStyle: false,
-                                spanGaps: false
+                                spanGaps: true
                             },
                             {
                                 label: 'RRsys',
@@ -2278,7 +2278,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                 yAxisID: 'y1',
                                 tension: 0.3,
                                 pointStyle: false,
-                                spanGaps: false
+                                spanGaps: true
                             },
                             {
                                 label: 'RRdia',
@@ -2290,7 +2290,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                 yAxisID: 'y1',
                                 tension: 0.3,
                                 pointStyle: false,
-                                spanGaps: false
+                                spanGaps: true
                             },
                             {
                                 label: 'AF',
@@ -2302,7 +2302,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                 yAxisID: 'y',
                                 tension: 0.3,
                                 pointStyle: false,
-                                spanGaps: false
+                                spanGaps: true
                             },
                             {
                                 label: 'Temp',
@@ -2314,7 +2314,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                 yAxisID: 'y',
                                 tension: 0.3,
                                 pointStyle: false,
-                                spanGaps: false
+                                spanGaps: true
                             },
                             {
                                 label: 'BZ',
@@ -2326,7 +2326,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                 yAxisID: 'y1',
                                 tension: 0.3,
                                 pointStyle: false,
-                                spanGaps: false
+                                spanGaps: true
                             },
                             {
                                 label: 'etCO₂',
@@ -2338,7 +2338,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                 yAxisID: 'y',
                                 tension: 0.3,
                                 pointStyle: false,
-                                spanGaps: false
+                                spanGaps: true
                             }
                         ]
                     },
@@ -2367,7 +2367,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                                 'SpO₂': '●',
                                                 'HF': '■',
                                                 'RRsys': '▲',
-                                                'RRdia': '△',
+                                                'RRdia': '▼',
                                                 'AF': '◆',
                                                 'Temp': '○',
                                                 'BZ': '★',
