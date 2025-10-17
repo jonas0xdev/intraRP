@@ -811,7 +811,7 @@ $currentDateTime = date('Y-m-d\TH:i');
                         class: 'warning'
                     },
                     {
-                        min: 0,
+                        min: 20,
                         max: 41,
                         class: 'danger'
                     }
@@ -974,7 +974,7 @@ $currentDateTime = date('Y-m-d\TH:i');
                 'herzfreq': {
                     label: 'Herzfrequenz (/min)',
                     values: [40, 60, 80, 100, 120, 140, 160, 180, 200],
-                    min: 30,
+                    min: 20,
                     max: 210
                 },
                 'rrsys': {
