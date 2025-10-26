@@ -19,7 +19,7 @@ try {
     ];
 
     $stmt = $pdo->prepare("
-        INSERT INTO intra_dokument_templates (id, name, category, template_file, is_system, config)
+        INSERT IGNORE INTO intra_dokument_templates (id, name, category, template_file, is_system, config)
         VALUES (:id, :name, :category, :file, 1, '{}')
     ");
 

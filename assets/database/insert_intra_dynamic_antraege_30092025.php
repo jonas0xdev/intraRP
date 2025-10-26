@@ -1,28 +1,28 @@
 <?php
 try {
     $sql = <<<SQL
-    INSERT INTO `intra_antrag_typen` 
+    INSERT IGNORE INTO `intra_antrag_typen` 
         (`name`, `beschreibung`, `icon`, `aktiv`, `sortierung`, `tabelle_name`) 
         VALUES 
     ('Beförderungsantrag', 'Antrag auf Beförderung in den nächsten Dienstgrad', 'las la-angle-double-up', 1, 1, NULL);
 
     SET @bef_typ_id = LAST_INSERT_ID();
 
-    INSERT INTO `intra_antrag_felder` 
+    INSERT IGNORE INTO `intra_antrag_felder` 
         (`antragstyp_id`, `feldname`, `label`, `feldtyp`, `pflichtfeld`, `sortierung`, `breite`, `readonly`, `auto_fill`) 
         VALUES
         (@bef_typ_id, 'name_dn', 'Name und Dienstnummer', 'text', 1, 1, 'half', 1, 'fullname_dienstnr'),
         (@bef_typ_id, 'dienstgrad', 'Aktueller Dienstgrad', 'text', 1, 2, 'half', 1, 'dienstgrad'),
     (@bef_typ_id, 'freitext', 'Schriftlicher Antrag', 'textarea', 1, 3, 'full', 0, NULL);
 
-    INSERT INTO `intra_antrag_typen` 
+    INSERT IGNORE INTO `intra_antrag_typen` 
         (`name`, `beschreibung`, `icon`, `aktiv`, `sortierung`, `tabelle_name`) 
         VALUES 
     ('Urlaubsantrag', 'Beantragung von Urlaub oder Dienstfreistellung', 'las la-umbrella-beach', 1, 2, NULL);
 
     SET @urlaub_typ_id = LAST_INSERT_ID();
 
-    INSERT INTO `intra_antrag_felder` 
+    INSERT IGNORE INTO `intra_antrag_felder` 
         (`antragstyp_id`, `feldname`, `label`, `feldtyp`, `pflichtfeld`, `sortierung`, `breite`, `platzhalter`, `auto_fill`) 
         VALUES
         (@urlaub_typ_id, 'name_dn', 'Name und Dienstnummer', 'text', 1, 1, 'half', NULL, 'fullname_dienstnr'),

@@ -1,7 +1,7 @@
 <?php
 try {
     $sql = <<<SQL
-    INSERT INTO `intra_mitarbeiter_rdquali` (`id`, `priority`, `name`, `name_m`, `name_w`, `none`, `trainable`, `created_at`) VALUES
+    INSERT IGNORE INTO `intra_mitarbeiter_rdquali` (`id`, `priority`, `name`, `name_m`, `name_w`, `none`, `trainable`, `created_at`) VALUES
         (2, 1, 'Rettungssanitäter/-in i. A.', 'Rettungssanitäter i. A.', 'Rettungssanitäterin i. A.', 0, 0, '2025-03-20 01:07:47'),
         (3, 0, 'Keine', 'Keine', 'Keine', 1, 0, '2025-03-20 01:08:48'),
         (4, 2, 'Rettungssanitäter/-in', 'Rettungssanitäter', 'Rettungssanitäterin', 0, 1, '2025-03-20 01:09:04'),

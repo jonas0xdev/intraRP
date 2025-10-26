@@ -2,14 +2,14 @@
 try {
     // 1. ERNENNUNGSURKUNDE (Template ID 14)
     $stmt = $pdo->prepare("
-INSERT INTO intra_dokument_template_fields
+INSERT IGNORE INTO intra_dokument_template_fields
 (template_id, field_name, field_label, field_type, field_options, is_required, gender_specific, sort_order)
 VALUES (14, 'erhalter_rang', 'Dienstgrad', 'db_dg', NULL, 1, 1, 0)
 ");
     $stmt->execute();
 
     $stmt = $pdo->prepare("
-INSERT INTO intra_dokument_template_fields
+INSERT IGNORE INTO intra_dokument_template_fields
 (template_id, field_name, field_label, field_type, is_required, sort_order)
 VALUES (14, 'ausstellungsdatum', 'Ausstellungsdatum', 'date', 1, 1)
 ");
@@ -17,14 +17,14 @@ VALUES (14, 'ausstellungsdatum', 'Ausstellungsdatum', 'date', 1, 1)
 
     // 2. BEFÖRDERUNGSURKUNDE (Template ID 1)
     $stmt = $pdo->prepare("
-INSERT INTO intra_dokument_template_fields
+INSERT IGNORE INTO intra_dokument_template_fields
 (template_id, field_name, field_label, field_type, field_options, is_required, gender_specific, sort_order)
 VALUES (1, 'erhalter_rang', 'Neuer Dienstgrad', 'db_dg', NULL, 1, 1, 0)
 ");
     $stmt->execute();
 
     $stmt = $pdo->prepare("
-INSERT INTO intra_dokument_template_fields
+INSERT IGNORE INTO intra_dokument_template_fields
 (template_id, field_name, field_label, field_type, is_required, sort_order)
 VALUES (1, 'ausstellungsdatum', 'Ausstellungsdatum', 'date', 1, 1)
 ");
@@ -32,7 +32,7 @@ VALUES (1, 'ausstellungsdatum', 'Ausstellungsdatum', 'date', 1, 1)
 
     // 3. ENTLASSUNGSURKUNDE (Template ID 2)
     $stmt = $pdo->prepare("
-INSERT INTO intra_dokument_template_fields
+INSERT IGNORE INTO intra_dokument_template_fields
 (template_id, field_name, field_label, field_type, is_required, sort_order)
 VALUES (2, 'ausstellungsdatum', 'Ausstellungsdatum', 'date', 1, 0)
 ");
@@ -40,14 +40,14 @@ VALUES (2, 'ausstellungsdatum', 'Ausstellungsdatum', 'date', 1, 0)
 
     // 4. AUSBILDUNGSZERTIFIKAT (Template ID 5)
     $stmt = $pdo->prepare("
-INSERT INTO intra_dokument_template_fields
+INSERT IGNORE INTO intra_dokument_template_fields
 (template_id, field_name, field_label, field_type, field_options, is_required, gender_specific, sort_order)
 VALUES (5, 'erhalter_rang_rd', 'Qualifikation', 'db_rdq', NULL, 1, 1, 0)
 ");
     $stmt->execute();
 
     $stmt = $pdo->prepare("
-INSERT INTO intra_dokument_template_fields
+INSERT IGNORE INTO intra_dokument_template_fields
 (template_id, field_name, field_label, field_type, is_required, sort_order)
 VALUES (5, 'ausstellungsdatum', 'Ausstellungsdatum', 'date', 1, 1)
 ");
@@ -62,14 +62,14 @@ VALUES (5, 'ausstellungsdatum', 'Ausstellungsdatum', 'date', 1, 1)
     ]);
 
     $stmt = $pdo->prepare("
-INSERT INTO intra_dokument_template_fields
+INSERT IGNORE INTO intra_dokument_template_fields
 (template_id, field_name, field_label, field_type, field_options, is_required, gender_specific, sort_order)
 VALUES (6, 'erhalter_quali', 'Qualifikation', 'select', ?, 1, 1, 0)
 ");
     $stmt->execute([$qualiOptionsLehrgang]);
 
     $stmt = $pdo->prepare("
-INSERT INTO intra_dokument_template_fields
+INSERT IGNORE INTO intra_dokument_template_fields
 (template_id, field_name, field_label, field_type, is_required, sort_order)
 VALUES (6, 'ausstellungsdatum', 'Ausstellungsdatum', 'date', 1, 1)
 ");
@@ -99,14 +99,14 @@ VALUES (6, 'ausstellungsdatum', 'Ausstellungsdatum', 'date', 1, 1)
     ]);
 
     $stmt = $pdo->prepare("
-INSERT INTO intra_dokument_template_fields
+INSERT IGNORE INTO intra_dokument_template_fields
 (template_id, field_name, field_label, field_type, field_options, is_required, gender_specific, sort_order)
 VALUES (7, 'erhalter_quali', 'Qualifikation', 'select', ?, 1, 1, 0)
 ");
     $stmt->execute([$qualiOptionsFachlehrgang]);
 
     $stmt = $pdo->prepare("
-INSERT INTO intra_dokument_template_fields
+INSERT IGNORE INTO intra_dokument_template_fields
 (template_id, field_name, field_label, field_type, is_required, sort_order)
 VALUES (7, 'ausstellungsdatum', 'Ausstellungsdatum', 'date', 1, 1)
 ");
@@ -127,14 +127,14 @@ VALUES (7, 'ausstellungsdatum', 'Ausstellungsdatum', 'date', 1, 1)
 
     // 7. SCHRIFTLICHE ABMAHNUNG (Template ID 10)
     $stmt = $pdo->prepare("
-INSERT INTO intra_dokument_template_fields
+INSERT IGNORE INTO intra_dokument_template_fields
 (template_id, field_name, field_label, field_type, is_required, sort_order)
 VALUES (10, 'inhalt', 'Begründung', 'richtext', 1, 0)
 ");
     $stmt->execute();
 
     $stmt = $pdo->prepare("
-INSERT INTO intra_dokument_template_fields
+INSERT IGNORE INTO intra_dokument_template_fields
 (template_id, field_name, field_label, field_type, is_required, sort_order)
 VALUES (10, 'ausstellungsdatum', 'Ausstellungsdatum', 'date', 1, 1)
 ");
@@ -142,21 +142,21 @@ VALUES (10, 'ausstellungsdatum', 'Ausstellungsdatum', 'date', 1, 1)
 
     // 8. VORLÄUFIGE DIENSTENTHEBUNG (Template ID 11)
     $stmt = $pdo->prepare("
-INSERT INTO intra_dokument_template_fields
+INSERT IGNORE INTO intra_dokument_template_fields
 (template_id, field_name, field_label, field_type, is_required, sort_order)
 VALUES (11, 'inhalt', 'Begründung', 'richtext', 1, 0)
 ");
     $stmt->execute();
 
     $stmt = $pdo->prepare("
-INSERT INTO intra_dokument_template_fields
+INSERT IGNORE INTO intra_dokument_template_fields
 (template_id, field_name, field_label, field_type, is_required, sort_order)
 VALUES (11, 'suspendtime', 'Suspendiert bis (leer für unbegrenzt)', 'date', 0, 1)
 ");
     $stmt->execute();
 
     $stmt = $pdo->prepare("
-INSERT INTO intra_dokument_template_fields
+INSERT IGNORE INTO intra_dokument_template_fields
 (template_id, field_name, field_label, field_type, is_required, sort_order)
 VALUES (11, 'ausstellungsdatum', 'Ausstellungsdatum', 'date', 1, 2)
 ");
@@ -164,14 +164,14 @@ VALUES (11, 'ausstellungsdatum', 'Ausstellungsdatum', 'date', 1, 2)
 
     // 9. DIENSTENTFERNUNG (Template ID 12)
     $stmt = $pdo->prepare("
-INSERT INTO intra_dokument_template_fields
+INSERT IGNORE INTO intra_dokument_template_fields
 (template_id, field_name, field_label, field_type, is_required, sort_order)
 VALUES (12, 'inhalt', 'Begründung', 'richtext', 1, 0)
 ");
     $stmt->execute();
 
     $stmt = $pdo->prepare("
-INSERT INTO intra_dokument_template_fields
+INSERT IGNORE INTO intra_dokument_template_fields
 (template_id, field_name, field_label, field_type, is_required, sort_order)
 VALUES (12, 'ausstellungsdatum', 'Ausstellungsdatum', 'date', 1, 1)
 ");
@@ -179,14 +179,14 @@ VALUES (12, 'ausstellungsdatum', 'Ausstellungsdatum', 'date', 1, 1)
 
     // 10. AUßERORDENTLICHE KÜNDIGUNG (Template ID 13)
     $stmt = $pdo->prepare("
-INSERT INTO intra_dokument_template_fields
+INSERT IGNORE INTO intra_dokument_template_fields
 (template_id, field_name, field_label, field_type, is_required, sort_order)
 VALUES (13, 'inhalt', 'Begründung', 'richtext', 1, 0)
 ");
     $stmt->execute();
 
     $stmt = $pdo->prepare("
-INSERT INTO intra_dokument_template_fields
+INSERT IGNORE INTO intra_dokument_template_fields
 (template_id, field_name, field_label, field_type, is_required, sort_order)
 VALUES (13, 'ausstellungsdatum', 'Ausstellungsdatum', 'date', 1, 1)
 ");
