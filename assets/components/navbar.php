@@ -111,9 +111,6 @@ use App\Auth\Permissions; ?>
                             <li>
                                 <h6 class="dropdown-header">Sonstiges</h6>
                             </li>
-                            <?php if (Permissions::check(['full_admin'])) { ?>
-                                <!--<li><a class="dropdown-item" href="<?= BASE_PATH ?>admin/system/updates/index.php">System-Updates</a></li>-->
-                            <?php } ?>
                             <?php if (Permissions::check(['admin', 'dashboard.manage'])) { ?>
                                 <li><a class="dropdown-item" href="<?= BASE_PATH ?>admin/settings/dashboard/index.php">Dashboard</a></li>
                             <?php } ?>
@@ -136,14 +133,13 @@ use App\Auth\Permissions; ?>
 <script>
     $(document).ready(function() {
         var currentPage = $("body").data("page");
-
-        // Remove active class from all nav-links
         $(".nav-link").removeClass("active");
-
-        // Add active class to the appropriate nav-link
         $(".nav-link[data-page='" + currentPage + "']").addClass("active");
     });
 
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
     const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
 </script>
+
+<?php
+include __DIR__ . '/support/banner.php';
