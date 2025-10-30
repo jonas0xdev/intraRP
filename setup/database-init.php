@@ -206,7 +206,10 @@ $migrationFiles = [
     ['file' => 'alter_intra_edivi_09102025.php', 'type' => 'alter'],
 
     // 13.10.2025
-    ['file' => 'alter_intra_edivi_13102025.php', 'type' => 'alter']
+    ['file' => 'alter_intra_edivi_13102025.php', 'type' => 'alter'],
+
+    // 28.10.2025
+    ['file' => 'create_intra_support_db_28102025.php', 'type' => 'create'],
 ];
 
 $executed = 0;

@@ -20,8 +20,3 @@ function _la(string $key): array
 {
     return larray($key);
 }
-
-function checkperms(array|string $requiredPermissions): bool
-{
-    return \App\Auth\Permissions::check($requiredPermissions);
-}

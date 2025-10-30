@@ -5,6 +5,7 @@ namespace App\Documents;
 use PDO;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
+use App\Helpers\ProtocolDetection;
 
 class DocumentRenderer
 {
@@ -199,7 +200,7 @@ class DocumentRenderer
             'RP_ZIP' => RP_ZIP,
             'SERVER_NAME' => SERVER_NAME,
             'META_IMAGE_URL' => META_IMAGE_URL ?? '',
-            'own_url' => 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'],
+            'own_url' => ProtocolDetection::getCurrentUrl(),
         ]);
 
         $templateFile = $doc['template_file'] ?? 'default.html.twig';
