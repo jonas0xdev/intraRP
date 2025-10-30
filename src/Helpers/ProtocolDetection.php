@@ -75,23 +75,7 @@ class ProtocolDetection
 
     public static function buildRedirectUri(string $path): string
     {
-        $baseUrl = self::getBaseUrl();
-        $basePath = defined('BASE_PATH') ? BASE_PATH : '';
-
-        // Ensure path starts with /
-        if (!str_starts_with($path, '/')) {
-            $path = '/' . $path;
-        }
-
-        // Remove leading slash from base path if it exists
-        $basePath = ltrim($basePath, '/');
-
-        // Construct the full URL
-        if (!empty($basePath)) {
-            return $baseUrl . '/' . $basePath . $path;
-        }
-
-        return $baseUrl . $path;
+        return self::buildFullUrl($path);
     }
 
     public static function configureSecureSession(): void
@@ -100,5 +84,76 @@ class ProtocolDetection
             ini_set('session.cookie_samesite', 'None');
             ini_set('session.cookie_secure', '1');
         }
+    }
+
+    public static function getNormalizedBasePath(): string
+    {
+        if (!defined('BASE_PATH')) {
+            return '/';
+        }
+
+        $basePath = BASE_PATH;
+
+        // Entferne alle führenden und nachfolgenden Schrägstriche
+        $basePath = trim($basePath, '/');
+
+        // Wenn der Pfad leer ist, ist es der Root-Pfad
+        if (empty($basePath)) {
+            return '/';
+        }
+
+        // Füge führenden und nachfolgenden Schrägstrich hinzu
+        return '/' . $basePath . '/';
+    }
+
+    public static function buildPath(string $path): string
+    {
+        $basePath = self::getNormalizedBasePath();
+        $path = ltrim($path, '/');
+
+        return $basePath . $path;
+    }
+
+    public static function buildFullUrl(string $path): string
+    {
+        $baseUrl = rtrim(self::getBaseUrl(), '/');
+        $fullPath = self::buildPath($path);
+
+        return $baseUrl . $fullPath;
+    }
+
+    public static function validateBasePathConfiguration(): array
+    {
+        $warnings = [];
+
+        if (!defined('BASE_PATH')) {
+            $warnings[] = 'BASE_PATH ist nicht definiert. Verwende "/" als Standard.';
+            return $warnings;
+        }
+
+        $basePath = BASE_PATH;
+        $normalized = self::getNormalizedBasePath();
+
+        // Prüfe, ob der BASE_PATH bereits normalisiert ist
+        if ($basePath !== $normalized && $basePath !== rtrim($normalized, '/')) {
+            $warnings[] = sprintf(
+                'BASE_PATH "%s" wurde automatisch zu "%s" normalisiert. ' .
+                    'Für bessere Performance setzen Sie BASE_PATH direkt auf "%s" in der Konfiguration.',
+                $basePath,
+                $normalized,
+                $normalized
+            );
+        }
+
+        // Prüfe auf häufige Fehler
+        if (str_contains($basePath, '//')) {
+            $warnings[] = 'BASE_PATH enthält doppelte Schrägstriche ("//"). Dies wurde automatisch korrigiert.';
+        }
+
+        if (str_contains($basePath, '\\')) {
+            $warnings[] = 'BASE_PATH enthält Backslashes ("\\"). Diese wurden automatisch zu Schrägstrichen ("/") konvertiert.';
+        }
+
+        return $warnings;
     }
 }
