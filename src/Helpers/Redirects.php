@@ -16,7 +16,7 @@ class Redirects
         }
 
         $currentHost = $_SERVER['HTTP_HOST'] ?? '';
-        $currentScheme = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+        $currentScheme = ProtocolDetection::getProtocol();
 
         $refererHost = $parsedUrl['host'];
         $refererScheme = $parsedUrl['scheme'] ?? $currentScheme;
@@ -105,10 +105,6 @@ class Redirects
 
     private static function getCurrentUrl(): string
     {
-        $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
-        $host = $_SERVER['HTTP_HOST'] ?? '';
-        $uri = $_SERVER['REQUEST_URI'] ?? '';
-
-        return $protocol . '://' . $host . $uri;
+        return ProtocolDetection::getCurrentUrl();
     }
 }

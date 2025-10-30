@@ -4,12 +4,12 @@ require __DIR__ . '/../assets/config/config.php';
 require __DIR__ . '/../assets/config/database.php';
 
 use League\OAuth2\Client\Provider\GenericProvider;
+use App\Helpers\ProtocolDetection;
 
 $provider = new GenericProvider([
     'clientId'                => $_ENV['DISCORD_CLIENT_ID'],
     'clientSecret'            => $_ENV['DISCORD_CLIENT_SECRET'],
-    'redirectUri' => (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') .
-        '://' . $_SERVER['HTTP_HOST'] . BASE_PATH . 'auth/callback.php',
+    'redirectUri'             => ProtocolDetection::buildRedirectUri('auth/callback.php'),
     'urlAuthorize'            => 'https://discord.com/api/oauth2/authorize',
     'urlAccessToken'          => 'https://discord.com/api/oauth2/token',
     'urlResourceOwnerDetails' => 'https://discord.com/api/users/@me',

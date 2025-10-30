@@ -4,3 +4,4 @@ vendor
 php_errors.log
 storage/documents/**.pdf
 support_errors.log
+*.backup
