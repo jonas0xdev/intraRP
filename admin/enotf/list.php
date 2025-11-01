@@ -68,7 +68,7 @@ if (!Permissions::check(['admin', 'edivi.view'])) {
                         <?php if (!isset($_GET['view']) or $_GET['view'] != 1) { ?>
                             <a href="?view=1" class="btn btn-secondary btn-sm">Bearbeitete ausblenden</a>
                         <?php } else { ?>
-                            <a href="?view=0" class="btn btn-primary btn-sm">Bearbeitete einblenden</a>
+                            <a href="?view=0" class="btn btn-secondary btn-sm">Bearbeitete einblenden</a>
                         <?php } ?>
                     </div>
                     <?php
@@ -142,7 +142,7 @@ if (!Permissions::check(['admin', 'edivi.view'])) {
                                     $patname = $row['patname'] ?? "Unbekannt";
 
                                     $actions = (Permissions::check(['admin', 'edivi.edit']))
-                                        ? "<a title='QM-Aktionen öffnen' href='" . BASE_PATH . "admin/enotf/qm-actions.php?id={$row['id']}' class='btn btn-sm btn-main-color' target='_blank'><i class='las la-exclamation'></i></a> <a title='QM-Log öffnen' href='" . BASE_PATH . "admin/enotf/qm-log.php?id={$row['id']}' class='btn btn-sm btn-dark' target='_blank'><i class='las la-paperclip'></i></a> <a title='Protokoll löschen' href='" . BASE_PATH . "admin/enotf/delete.php?id={$row['id']}' class='btn btn-sm btn-danger'><i class='las la-trash'></i></a>"
+                                        ? "<button title='QM-Aktionen öffnen' onclick='openQMActions({$row['id']}, \"{$row['enr']}\", \"" . htmlspecialchars($row['patname'] ?? 'Unbekannt') . "\")' class='btn btn-sm btn-main-color'><i class='las la-exclamation'></i></button> <button title='QM-Log öffnen' onclick='openQMLog({$row['id']}, \"{$row['enr']}\", \"" . htmlspecialchars($row['patname'] ?? 'Unbekannt') . "\")' class='btn btn-sm btn-dark'><i class='las la-paperclip'></i></button> <a title='Protokoll löschen' href='" . BASE_PATH . "admin/enotf/delete.php?id={$row['id']}' class='btn btn-sm btn-danger'><i class='las la-trash'></i></a>"
                                         : "";
 
                                     echo "<tr>";
@@ -157,6 +157,44 @@ if (!Permissions::check(['admin', 'edivi.view'])) {
                                 ?>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- QM Actions Modal -->
+    <div class="modal fade" id="qmActionsModal" tabindex="-1" aria-labelledby="qmActionsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="qmActionsModalLabel">QM-Funktionen</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="qmActionsContent">
+                    <div class="d-flex justify-content-center">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Laden...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- QM Log Modal -->
+    <div class="modal fade" id="qmLogModal" tabindex="-1" aria-labelledby="qmLogModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="qmLogModalLabel">QM-Log</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="qmLogContent">
+                    <div class="d-flex justify-content-center">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Laden...</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -204,6 +242,102 @@ if (!Permissions::check(['admin', 'edivi.view'])) {
                         "sortDescending": ": aktivieren, um Spalte absteigend zu sortieren"
                     }
                 }
+            });
+
+            // QM Actions Modal Functions
+            window.openQMActions = function(id, enr, patname) {
+                const modal = new bootstrap.Modal(document.getElementById('qmActionsModal'));
+                document.getElementById('qmActionsModalLabel').textContent = `QM-Funktionen [#${enr}] ${patname}`;
+
+                // Reset content
+                document.getElementById('qmActionsContent').innerHTML = `
+                    <div class="d-flex justify-content-center">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Laden...</span>
+                        </div>
+                    </div>
+                `;
+
+                modal.show();
+
+                // Load content via AJAX
+                fetch(`<?= BASE_PATH ?>admin/enotf/qm-actions-modal.php?id=${id}`)
+                    .then(response => response.text())
+                    .then(data => {
+                        document.getElementById('qmActionsContent').innerHTML = data;
+                    })
+                    .catch(error => {
+                        document.getElementById('qmActionsContent').innerHTML = `
+                            <div class="alert alert-danger">
+                                Fehler beim Laden der QM-Aktionen: ${error.message}
+                            </div>
+                        `;
+                    });
+            };
+
+            // QM Log Modal Functions
+            window.openQMLog = function(id, enr, patname) {
+                const modal = new bootstrap.Modal(document.getElementById('qmLogModal'));
+                document.getElementById('qmLogModalLabel').textContent = `QM-Log [#${enr}] ${patname}`;
+
+                // Reset content
+                document.getElementById('qmLogContent').innerHTML = `
+                    <div class="d-flex justify-content-center">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Laden...</span>
+                        </div>
+                    </div>
+                `;
+
+                modal.show();
+
+                // Load content via AJAX
+                fetch(`<?= BASE_PATH ?>admin/enotf/qm-log-modal.php?id=${id}`)
+                    .then(response => response.text())
+                    .then(data => {
+                        document.getElementById('qmLogContent').innerHTML = data;
+                    })
+                    .catch(error => {
+                        document.getElementById('qmLogContent').innerHTML = `
+                            <div class="alert alert-danger">
+                                Fehler beim Laden des QM-Logs: ${error.message}
+                            </div>
+                        `;
+                    });
+            };
+
+            // Handle QM Actions form submission
+            $(document).on('submit', '#qmActionsForm', function(e) {
+                e.preventDefault();
+
+                const formData = new FormData(this);
+                const submitBtn = this.querySelector('input[type="submit"]');
+                const originalText = submitBtn.value;
+
+                submitBtn.value = 'Speichere...';
+                submitBtn.disabled = true;
+
+                fetch(this.action, {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            bootstrap.Modal.getInstance(document.getElementById('qmActionsModal')).hide();
+                            // Reload the page to reflect changes
+                            location.reload();
+                        } else {
+                            alert('Fehler beim Speichern: ' + (data.message || 'Unbekannter Fehler'));
+                        }
+                    })
+                    .catch(error => {
+                        alert('Fehler beim Speichern: ' + error.message);
+                    })
+                    .finally(() => {
+                        submitBtn.value = originalText;
+                        submitBtn.disabled = false;
+                    });
             });
         });
     </script>

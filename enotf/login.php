@@ -65,7 +65,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
     <meta property="og:description" content="Verwaltungsportal der <?php echo RP_ORGTYPE . " " .  SERVER_CITY ?>" />
 </head>
 
-<body style="overflow-x:hidden" id="edivi__login" data-pin-enabled="<?= $pinEnabled ?>">
+<body data-bs-theme="dark" style="overflow-x:hidden" id="edivi__login" data-pin-enabled="<?= $pinEnabled ?>">
     <form name="form" method="post" action="">
         <datalist id="nameSuggestions">
             <?php foreach ($fullnames as $name): ?>

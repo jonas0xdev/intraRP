@@ -158,10 +158,6 @@ if (!Permissions::check(['admin', 'users.view'])) {
                                     'personnel.documents.manage' => 'Mitarbeiter-Dokumente verwalten',
                                     'audit.view' => 'Logs einsehen',
                                 ],
-                                'Dateien' => [
-                                    'files.upload' => 'Dateien hochladen',
-                                    'files.log.view' => 'Datei-Uploads einsehen'
-                                ],
                                 'Sonstiges' => [
                                     'admin' => '<strong> Admin (Alle Rechte)</strong>',
                                     'dashboard.manage' => 'Dashboard verwalten',

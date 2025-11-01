@@ -159,7 +159,7 @@ $migrationFiles = [
     ['file' => 'insert_intra_mitarbeiter_rdquali_07062025.php', 'type' => 'insert'],
     ['file' => 'create_intra_mitarbeiter_07062025.php', 'type' => 'create'],
     ['file' => 'create_intra_mitarbeiter_dokumente_07062025.php', 'type' => 'create'],
-    ['file' => 'create_intra_uploads_07062025.php', 'type' => 'create'],
+    //['file' => 'create_intra_uploads_07062025.php', 'type' => 'create'],
 
     // 13.06.2025
     ['file' => 'create_intra_mitarbeiter_fdquali_13062025.php', 'type' => 'create'],

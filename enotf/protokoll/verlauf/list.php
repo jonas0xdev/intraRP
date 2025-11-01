@@ -327,7 +327,7 @@ $prot_url = "https://" . SYSTEM_URL . "/enotf/prot/index.php?enr=" . $enr;
     </style>
 </head>
 
-<body data-page="verlauf" data-pin-enabled="<?= $pinEnabled ?>">
+<body data-bs-theme="dark" data-page="verlauf" data-pin-enabled="<?= $pinEnabled ?>">
     <?php include __DIR__ . '/../../../assets/components/enotf/topbar.php'; ?>
 
     <div class="container-fluid" id="edivi__container">
