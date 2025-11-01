@@ -97,7 +97,7 @@ $createDate = new DateTime($antrag['time_added'] ?? 'now');
         .intra__tile {
             background: rgba(var(--bs-dark-rgb), 0.5);
             border: 1px solid rgba(var(--bs-light-rgb), 0.1);
-            border-radius: 0.5rem;
+            border-radius: 0;
             padding: 1.5rem;
         }
 

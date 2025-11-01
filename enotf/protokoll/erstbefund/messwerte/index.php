@@ -86,7 +86,7 @@ $currentDateTime = date('Y-m-d\TH:i');
     <meta property="og:description" content="Verwaltungsportal der <?php echo RP_ORGTYPE . " " .  SERVER_CITY ?>" />
 </head>
 
-<body data-page="verlauf" data-pin-enabled="<?= $pinEnabled ?>">
+<body data-bs-theme="dark" data-page="verlauf" data-pin-enabled="<?= $pinEnabled ?>">
     <div class="container-fluid" id="edivi__container">
         <div class="row h-100">
             <div class="col" id="edivi__content">

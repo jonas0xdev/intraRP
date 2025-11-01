@@ -3,7 +3,7 @@
 use App\Auth\Permissions; ?>
 <nav class="navbar navbar-expand-lg" id="intra-nav">
     <div class="container">
-        <a class="navbar-brand" href="#"><img src="<?php echo SYSTEM_LOGO ?>" alt="<?php echo SYSTEM_NAME ?>" style="height:36px;width:auto"></a>
+        <a class="navbar-brand" href="#"><img src="<?php echo SYSTEM_LOGO ?>" alt="<?php echo SYSTEM_NAME ?>" style="height:48px;width:auto"></a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -54,20 +54,7 @@ use App\Auth\Permissions; ?>
                         <?php } ?>
                     </ul>
                 </li>
-                <?php if (Permissions::check(['admin', 'files.upload'])) { ?>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" data-page="upload" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="las la-upload" style="margin-right:3px"></i> Dateien
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="<?= BASE_PATH ?>admin/upload/index.php">Datei hochladen</a></li>
-                            <?php if (Permissions::check(['admin', 'files.log.view'])) { ?>
-                                <li><a class="dropdown-item" href="<?= BASE_PATH ?>admin/upload/overview.php">Verlauf</a></li>
-                            <?php } ?>
-                        </ul>
-                    </li>
-                <?php }
-                if (Permissions::check(['admin', 'personnel.view', 'vehicles.view', 'edivi.view', 'dashboard.manage'])) { ?>
+                <?php if (Permissions::check(['admin', 'personnel.view', 'vehicles.view', 'edivi.view', 'dashboard.manage'])) { ?>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" data-page="settings" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="las la-cog" style="margin-right:3px"></i> Einstellungen

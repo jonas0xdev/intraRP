@@ -113,9 +113,6 @@ $createDate = new DateTime($antrag['time_added'] ?? 'now');
     <link rel="icon" type="image/png" href="<?= BASE_PATH ?>assets/favicon/favicon-96x96.png" sizes="96x96" />
     <style>
         .intra__tile {
-            background: rgba(var(--bs-dark-rgb), 0.5);
-            border: 1px solid rgba(var(--bs-light-rgb), 0.1);
-            border-radius: 0.5rem;
             padding: 1.5rem;
         }
 
@@ -129,7 +126,7 @@ $createDate = new DateTime($antrag['time_added'] ?? 'now');
         .field-value {
             background: rgba(0, 0, 0, 0.3);
             padding: 0.75rem;
-            border-radius: 0.375rem;
+            border-radius: 0;
             min-height: 2.5rem;
         }
     </style>

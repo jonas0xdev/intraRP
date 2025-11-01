@@ -934,6 +934,27 @@ body {
   line-height: 1;
 }
 
+#edivi__topbar a.edivi__iconlink,
+#edivi__topbar button.edivi__iconlink {
+  display: inline-block;
+  text-align: center;
+  font-size: 38px;
+  padding: 0 10px;
+  color: var(--white);
+  text-decoration: none;
+  line-height: 1;
+  background-color: transparent;
+  border: none;
+}
+
+#edivi__topbar a.edivi__iconlink small,
+#edivi__topbar button.edivi__iconlink small {
+  display: block;
+  font-size: 0.6rem;
+  margin-top: 2px;
+  line-height: 1;
+}
+
 body#edivi__print {
   background-color: var(--white) !important;
   font-size: 0.7rem;
@@ -2219,5 +2240,107 @@ body[data-page="verlauf"] {
         transform: translateX(-50%) translateY(0);
       }
     }
+  }
+}
+
+// QM Modals Styling for eNOTF
+#qmActionsModal,
+#qmLogModal {
+  .modal-content {
+    background-color: var(--body-bg, #2b2b2b);
+    border: 1px solid var(--darkgray);
+    border-radius: 0;
+    color: #fff;
+  }
+
+  .modal-header {
+    border-bottom: 1px solid var(--darkgray);
+    background-color: var(--body-bg-darker, #1f1f1f);
+    border-radius: 0;
+  }
+
+  .modal-body {
+    background-color: var(--body-bg, #2b2b2b);
+  }
+
+  // eNOTF Box Styling
+  .edivi__box {
+    background: #333333;
+    margin: 10px 0;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+    border-radius: 0;
+    padding: 1rem;
+
+    &.edivi__log-comment {
+      background: #333333;
+      color: #a2a2a2;
+      padding: 12px;
+      margin: 0;
+      font-size: 0.8rem;
+      margin-bottom: 10px !important;
+
+      i {
+        padding: 6px 9px;
+        border-radius: 2px;
+        background: #a2a2a2;
+        color: #333333;
+        opacity: 0.6;
+        font-size: 1rem !important;
+      }
+    }
+  }
+
+  // eNOTF Admin Form Controls
+  .edivi__admin {
+    background: transparent;
+    border-radius: 0;
+    color: #fff;
+    border: 0;
+    font-size: 1.2rem;
+
+    &:focus {
+      box-shadow: 0 0 0 1px #5783cf !important;
+      background: transparent;
+      color: #fff;
+      border-color: #5783cf;
+    }
+
+    &[readonly] {
+      box-shadow: none !important;
+      caret-color: transparent;
+      user-select: none;
+      pointer-events: none;
+      cursor: default;
+    }
+
+    option {
+      background: #333333;
+      color: #fff;
+    }
+  }
+
+  .form-control::placeholder {
+    color: rgba(222, 226, 230, 0.75);
+  }
+}
+
+// Button styling for topbar - Global scope for eNOTF
+.edivi__iconlink-button {
+  background: none;
+  border: none;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  padding: 0;
+  font: inherit;
+  text-align: center;
+
+  &:hover {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  &:focus {
+    outline: none;
   }
 }

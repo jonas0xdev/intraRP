@@ -169,7 +169,7 @@ $prot_url = "https://" . SYSTEM_URL . "/enotf/index.php";
     </style>
 </head>
 
-<body style="overflow-x:hidden">
+<body data-bs-theme="dark" style="overflow-x:hidden">
     <div class="container-fluid" id="edivi__container">
         <div class="lockscreen-container">
             <div class="lockscreen-box">

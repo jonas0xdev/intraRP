@@ -46,7 +46,7 @@ $ziel = $_GET['klinik'] ?? NULL;
     <meta http-equiv="refresh" content="60">
 </head>
 
-<body style="overflow-x:hidden; display: flex; flex-direction: column; min-height: 100vh;" id="edivi__arrivalboard">
+<body data-bs-theme="dark" style="overflow-x:hidden; display: flex; flex-direction: column; min-height: 100vh;" id="edivi__arrivalboard">
     <div class="container-fluid" style="flex: 1;">
         <div class="row h-100">
             <div class="col" id="edivi__content">

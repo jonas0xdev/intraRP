@@ -7,11 +7,9 @@
                 <p class="small">Verwaltungsportal der <?php echo RP_ORGTYPE . " " . SERVER_CITY ?></p>
             </div>
             <div class="col-md-4 text-center">
-                <p class="small">&copy; <?php echo date("Y") ?> <a href="https://intrarp.de">intraRP</a> | Alle Rechte vorbehalten</p>
+                <p class="small">&copy; <?php echo date("Y") ?> <a href="https://emforge.app" target="_blank" rel="nofollow">EmergencyForge</a> | Alle Rechte vorbehalten</p>
             </div>
             <div class="col-md-4 text-end">
-                <h5>Version <?php echo SYSTEM_VERSION ?? "1.0" ?></h5>
-                <p><a href="https://github.com/intraRP/intraRP/issues" target="_blank">Fehler melden</a></p>
             </div>
         </div>
     </div>

@@ -78,7 +78,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
     <meta property="og:description" content="Verwaltungsportal der <?php echo RP_ORGTYPE . " " .  SERVER_CITY ?>" />
 </head>
 
-<body>
+<body data-bs-theme="dark">
     <div id="topbar" class="container-fluid" data-pin-enabled="<?= $pinEnabled ?>">
         <div class="row">
             <div class="col">

@@ -33,14 +33,14 @@ use App\Auth\Permissions;
             </a>
 
             <?php if (Permissions::check(['admin', 'edivi.edit'])) : ?>
-                <a href="<?= BASE_PATH ?>admin/enotf/qm-actions.php?id=<?= $daten['id'] ?>" id="qma" target="_blank" class="edivi__iconlink">
+                <button onclick="openQMActions(<?= $daten['id'] ?>, '<?= $enr ?>', '<?= htmlspecialchars($daten['patname'] ?? 'Unbekannt') ?>')" id="qma" class="edivi__iconlink">
                     <i class="las la-exclamation"></i><br>
                     <small>QM-Aktion</small>
-                </a>
-                <a href="<?= BASE_PATH ?>admin/enotf/qm-log.php?id=<?= $daten['id'] ?>" id="qml" target="_blank" class="edivi__iconlink">
+                </button>
+                <button onclick="openQMLog(<?= $daten['id'] ?>, '<?= $enr ?>', '<?= htmlspecialchars($daten['patname'] ?? 'Unbekannt') ?>')" id="qml" class="edivi__iconlink">
                     <i class="las la-paperclip"></i><br>
                     <small>QM-Log</small>
-                </a>
+                </button>
             <?php endif; ?>
         </div>
         <div class="col text-end d-flex justify-content-end align-items-center">
@@ -54,6 +54,13 @@ use App\Auth\Permissions;
         </div>
     </div>
 </div>
+<?php
+// Include QM Modals if they haven't been included yet
+if (!defined('QM_MODALS_INCLUDED')) {
+    define('QM_MODALS_INCLUDED', true);
+    include __DIR__ . '/qm-modals.php';
+}
+?>
 <?php if ($daten['freigegeben'] == 1 && $daten['hidden_user'] != 1) : ?>
     <div class="container-full edivi__notice edivi__notice-freigeber">
         <div class="row">

@@ -890,6 +890,27 @@ body {
   line-height: 1;
 }
 
+#edivi__topbar a.edivi__iconlink,
+#edivi__topbar button.edivi__iconlink {
+  display: inline-block;
+  text-align: center;
+  font-size: 38px;
+  padding: 0 10px;
+  color: var(--white);
+  text-decoration: none;
+  line-height: 1;
+  background-color: transparent;
+  border: none;
+}
+
+#edivi__topbar a.edivi__iconlink small,
+#edivi__topbar button.edivi__iconlink small {
+  display: block;
+  font-size: 0.6rem;
+  margin-top: 2px;
+  line-height: 1;
+}
+
 body#edivi__print {
   background-color: var(--white) !important;
   font-size: 0.7rem;
@@ -2028,4 +2049,98 @@ body[data-page=verlauf] .value-indicator {
       transform: translateX(-50%) translateY(0);
     }
   }
+}
+
+#qmActionsModal .modal-content,
+#qmLogModal .modal-content {
+  background-color: var(--body-bg, #2b2b2b);
+  border: 1px solid var(--darkgray);
+  border-radius: 0;
+  color: #fff;
+}
+#qmActionsModal .modal-header,
+#qmLogModal .modal-header {
+  border-bottom: 1px solid var(--darkgray);
+  background-color: var(--body-bg-darker, #1f1f1f);
+  border-radius: 0;
+}
+#qmActionsModal .modal-body,
+#qmLogModal .modal-body {
+  background-color: var(--body-bg, #2b2b2b);
+}
+#qmActionsModal .edivi__box,
+#qmLogModal .edivi__box {
+  background: #333333;
+  margin: 10px 0;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+  border-radius: 0;
+  padding: 1rem;
+}
+#qmActionsModal .edivi__box.edivi__log-comment,
+#qmLogModal .edivi__box.edivi__log-comment {
+  background: #333333;
+  color: #a2a2a2;
+  padding: 12px;
+  margin: 0;
+  font-size: 0.8rem;
+  margin-bottom: 10px !important;
+}
+#qmActionsModal .edivi__box.edivi__log-comment i,
+#qmLogModal .edivi__box.edivi__log-comment i {
+  padding: 6px 9px;
+  border-radius: 2px;
+  background: #a2a2a2;
+  color: #333333;
+  opacity: 0.6;
+  font-size: 1rem !important;
+}
+#qmActionsModal .edivi__admin,
+#qmLogModal .edivi__admin {
+  background: transparent;
+  border-radius: 0;
+  color: #fff;
+  border: 0;
+  font-size: 1.2rem;
+}
+#qmActionsModal .edivi__admin:focus,
+#qmLogModal .edivi__admin:focus {
+  box-shadow: 0 0 0 1px #5783cf !important;
+  background: transparent;
+  color: #fff;
+  border-color: #5783cf;
+}
+#qmActionsModal .edivi__admin[readonly],
+#qmLogModal .edivi__admin[readonly] {
+  box-shadow: none !important;
+  caret-color: transparent;
+  user-select: none;
+  pointer-events: none;
+  cursor: default;
+}
+#qmActionsModal .edivi__admin option,
+#qmLogModal .edivi__admin option {
+  background: #333333;
+  color: #fff;
+}
+#qmActionsModal .form-control::placeholder,
+#qmLogModal .form-control::placeholder {
+  color: rgba(222, 226, 230, 0.75);
+}
+
+.edivi__iconlink-button {
+  background: none;
+  border: none;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  padding: 0;
+  font: inherit;
+  text-align: center;
+}
+.edivi__iconlink-button:hover {
+  color: inherit;
+  text-decoration: none;
+}
+.edivi__iconlink-button:focus {
+  outline: none;
 }
