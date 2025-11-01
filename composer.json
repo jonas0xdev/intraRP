@@ -1,5 +1,6 @@
 {
-  "name": "itshypax/intrarp",
+  "version": "0.4.5",
+  "name": "emergencyforge/intrarp",
   "description": "IntraRP ist das Intranet für deine Fraktionen (Feuerwehr, Rettungsdienst) - Allround-Fraktionsverwaltung",
   "license": "proprietary",
   "require": {
