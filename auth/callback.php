@@ -56,13 +56,18 @@ try {
     $username = $discordUser['username'];
     $avatar = $discordUser['avatar'];
 
+    // Check if this is the first user (database is empty)
+    $checkTotalUsersStmt = $pdo->query("SELECT COUNT(*) FROM intra_users");
+    $totalUsers = $checkTotalUsersStmt->fetchColumn();
+    $isFirstUser = ($totalUsers == 0);
+
     // Check if user exists first to determine if this is a login or registration attempt
     $checkUserStmt = $pdo->prepare("SELECT COUNT(*) FROM intra_users WHERE discord_id = :discord_id");
     $checkUserStmt->execute(['discord_id' => $discordId]);
     $userExists = $checkUserStmt->fetchColumn() > 0;
 
-    // If user doesn't exist and registration is closed, reject before proceeding
-    if (!$userExists) {
+    // If user doesn't exist and registration is closed, reject before proceeding (unless first user)
+    if (!$userExists && !$isFirstUser) {
         $registrationMode = defined('REGISTRATION_MODE') ? REGISTRATION_MODE : 'open';
 
         if ($registrationMode === 'closed') {
