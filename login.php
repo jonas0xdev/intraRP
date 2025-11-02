@@ -40,6 +40,20 @@ if (isset($_SESSION['userid']) && isset($_SESSION['permissions'])) {
                     <h1 id="loginHeader"><?php echo SYSTEM_NAME ?></h1>
                     <p class="subtext">Das Intranet der Stadt <?php echo SERVER_CITY ?>!</p>
 
+                    <?php
+                    $registrationMode = defined('REGISTRATION_MODE') ? REGISTRATION_MODE : 'open';
+                    
+                    if ($registrationMode === 'closed') {
+                        echo '<div class="alert alert-warning mb-3" role="alert">';
+                        echo '<i class="las la-exclamation-triangle"></i> Registrierung für neue Benutzer ist derzeit geschlossen.';
+                        echo '</div>';
+                    } elseif ($registrationMode === 'code') {
+                        echo '<div class="alert alert-info mb-3" role="alert">';
+                        echo '<i class="las la-info-circle"></i> Neue Benutzer benötigen einen Registrierungscode.';
+                        echo '</div>';
+                    }
+                    ?>
+
                     <div class="text-center mb-3">
                         <a href="<?= BASE_PATH ?>auth/discord.php" class="btn btn-primary btn-lg w-100"><i class="lab la-discord"></i> Login</a>
                     </div>
