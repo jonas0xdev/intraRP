@@ -4,9 +4,9 @@ use App\Utils\AuditLogger;
 use App\Support\SupportPasswordManager;
 
 session_start();
-require __DIR__ . '/../assets/config/config.php';
-require __DIR__ . '/../assets/config/database.php';
-require __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../assets/config/config.php';
+require_once __DIR__ . '/../assets/config/database.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
 $error = null;
 $auditLogger = new AuditLogger($pdo);

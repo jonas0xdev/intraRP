@@ -60,13 +60,13 @@ class Flash
     private static function getAlertIcon(string $type): string
     {
         $icons = [
-            'success' => 'las la-check-circle',
-            'danger' => 'las la-exclamation-triangle',
-            'warning' => 'las la-exclamation-triangle',
-            'info' => 'las la-info-circle',
+            'success' => 'fa-solid fa-check-circle',
+            'danger' => 'fa-solid fa-exclamation-triangle',
+            'warning' => 'fa-solid fa-exclamation-triangle',
+            'info' => 'fa-solid fa-info-circle',
         ];
 
-        return $icons[$type] ?? 'las la-info-circle';
+        return $icons[$type] ?? 'fa-solid fa-info-circle';
     }
 
     private static function getAlertColors(string $type): array
@@ -146,7 +146,7 @@ class Flash
             ],
             'user' => [
                 'deleted' => ['type' => 'success', 'title' => 'Erfolg!', 'text' => 'Der Benutzer wurde erfolgreich gelöscht.'],
-                'edit-self' => ['type' => 'danger', 'title' => 'Fehler!', 'text' => 'Du kannst dich nicht selbst bearbeiten! Nutze dafür <a href="' . BASE_PATH . 'users/editprofile.php">Profil bearbeiten</a>.'],
+                'edit-self' => ['type' => 'danger', 'title' => 'Fehler!', 'text' => 'Du kannst dich nicht selbst bearbeiten! Nutze dafür <a href="' . BASE_PATH . 'profil.php">Profil bearbeiten</a>.'],
                 'low-permissions' => ['type' => 'danger', 'title' => 'Fehler!', 'text' => 'Du kannst keine Benutzer mit den selben oder höheren Berechtigungen bearbeiten!'],
                 'new-password' => ['type' => 'success', 'title' => 'Erfolg!', 'text' => 'Das Passwort für den Benutzer <strong>:username</strong> wurde erfolgreich bearbeitet.<br>- Neues Passwort: <code>:pass</code>'],
                 'member-id-not-found' => ['type' => 'danger', 'title' => 'Fehler!', 'text' => 'Die angegebene Akten-ID wurde nicht gefunden. Bitte überprüfe die ID und versuche es erneut.'],

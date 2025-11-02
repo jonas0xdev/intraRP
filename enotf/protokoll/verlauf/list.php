@@ -1,8 +1,6 @@
 <?php
 // vitals_management.php - Verwaltung einzelner Vitalparameter
 
-require_once __DIR__ . '/../../includes/security.php';
-
 session_start();
 require_once __DIR__ . '/../../../assets/config/config.php';
 require_once __DIR__ . '/../../../vendor/autoload.php';

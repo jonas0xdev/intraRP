@@ -268,20 +268,18 @@ body#dashboard::before {
 }
 
 #cards .card {
-  transition: background-color 0.2s ease-in-out;
+  transition: all 0.2s ease-in-out;
+  border: 2px solid transparent;
+
+  &:hover {
+    border: 2px solid var(--main-color);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+    transform: translateY(-5px);
+  }
 }
 
 #cards .card .card-fa > i {
   font-size: 3rem;
-  background-color: var(--secondary-color);
-  color: var(--white);
-  border-radius: 50%;
-  padding: 1rem;
-  transition: background-color 0.2s ease-in-out;
-}
-
-#cards .card:hover .card-fa > i {
-  background-color: var(--main-color);
 }
 
 #cards h2 {

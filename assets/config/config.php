@@ -11,25 +11,25 @@ if (session_status() === PHP_SESSION_NONE) {
     }
 }
 
-// BASIS DATEN
-define('API_KEY', 'CHANGE_ME'); // Wird automatisch beim Setup erstellt, sonst selbst einen sicheren Key festlegen
-define('SYSTEM_NAME', 'intraRP'); // Eigenname des Intranets
-define('SYSTEM_VERSION', '0.4.5'); // Versionsnummer
-define('SYSTEM_COLOR', '#d10000'); // Hauptfarbe des Systems
-define('SYSTEM_URL', 'CHANGE_ME'); // Domain des Systems
-define('SYSTEM_LOGO', '/assets/img/defaultLogo.webp'); // Ort des Logos (entweder als relativer Pfad oder Link)
-define('META_IMAGE_URL', ''); // Ort des Bildes, welches in der Link-Vorschau angezeigt werden soll (immer als Link angeben!)
-// SERVER DATEN
-define('SERVER_NAME', 'CHANGE_ME'); // Name des Servers
-define('SERVER_CITY', 'Musterstadt'); // Name der Stadt in welcher der Server spielt
-// RP DATEN
-define('RP_ORGTYPE', 'Berufsfeuerwehr'); // Art/Name der Organisation
-define('RP_STREET', 'Musterweg 0815'); // Straße der Organisation
-define('RP_ZIP', '1337'); // PLZ der Organisation
-// FUNKTIONEN
-define('CHAR_ID', true); // Wird eine eindeutige Charakter-ID verwendet? (true = ja, false = nein)
-define('ENOTF_PREREG', true); // Wird das Voranmeldungssystem des eNOTF verwendet? (true = ja, false = nein)
-define('ENOTF_USE_PIN', true); // Wird die PIN-Funktion des eNOTF verwendet? (true = ja, false = nein)
-define('ENOTF_PIN', '1234'); // PIN für den Zugang zum eNOTF - 4-6 Zahlen (nur relevant, wenn ENOTF_USE_PIN auf true gesetzt ist)
-define('LANG', 'de'); // Sprache des Systems (de = Deutsch, en = Englisch) // AKTUELL OHNE FUNKTION!
-define('BASE_PATH', '/'); // Basis-Pfad des Systems (z.B. /intraRP/ für https://domain.de/intraRP/)
+require_once __DIR__ . '/database.php';
+$stmt = $pdo->prepare("SELECT `var`, `value` FROM intra_config");
+$stmt->execute();
+$configData = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+
+define('API_KEY', $configData['API_KEY'] ?? 'CHANGE_ME');
+define('SYSTEM_NAME', $configData['SYSTEM_NAME'] ?? 'intraRP');
+define('SYSTEM_COLOR', $configData['SYSTEM_COLOR'] ?? '#d10000');
+define('SYSTEM_URL', $configData['SYSTEM_URL'] ?? 'CHANGE_ME');
+define('SYSTEM_LOGO', $configData['SYSTEM_LOGO'] ?? '/assets/img/defaultLogo.webp');
+define('META_IMAGE_URL', $configData['META_IMAGE_URL'] ?? '');
+define('SERVER_NAME', $configData['SERVER_NAME'] ?? 'CHANGE_ME');
+define('SERVER_CITY', $configData['SERVER_CITY'] ?? 'Musterstadt');
+define('RP_ORGTYPE', $configData['RP_ORGTYPE'] ?? 'Berufsfeuerwehr');
+define('RP_STREET', $configData['RP_STREET'] ?? 'Musterweg 0815');
+define('RP_ZIP', $configData['RP_ZIP'] ?? '1337');
+define('CHAR_ID', filter_var($configData['CHAR_ID'] ?? '1', FILTER_VALIDATE_BOOLEAN));
+define('ENOTF_PREREG', filter_var($configData['ENOTF_PREREG'] ?? '1', FILTER_VALIDATE_BOOLEAN));
+define('ENOTF_USE_PIN', filter_var($configData['ENOTF_USE_PIN'] ?? '1', FILTER_VALIDATE_BOOLEAN));
+define('ENOTF_PIN', $configData['ENOTF_PIN'] ?? '1234');
+define('LANG', $configData['LANG'] ?? 'de');
+define('BASE_PATH', $configData['BASE_PATH'] ?? '/');

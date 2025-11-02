@@ -58,8 +58,8 @@ $antraege = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <i class="las la-clipboard-list me-2"></i>Antragsübersicht
                         </h1>
                         <?php if (Permissions::check(['admin'])): ?>
-                            <a href="<?= BASE_PATH ?>settings/antraege/list.php" class="btn btn-primary">
-                                <i class="las la-cog me-2"></i>Typen verwalten
+                            <a href="<?= BASE_PATH ?>settings/antrag/list.php" class="btn btn-primary">
+                                <i class="las la-cog me-2"></i>Antragstypen verwalten
                             </a>
                         <?php endif; ?>
                     </div>

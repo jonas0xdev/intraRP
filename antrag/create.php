@@ -11,8 +11,8 @@ if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
 }
 
 if (!isset($_SESSION['cirs_user']) || empty($_SESSION['cirs_user'])) {
-    header("Location: " . BASE_PATH . "users/editprofile.php");
-    exit();
+    header("Location: " . BASE_PATH . "profil.php");
+    exit;
 }
 
 use App\Helpers\Flash;

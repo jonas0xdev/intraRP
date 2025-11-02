@@ -54,7 +54,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: "Line Awesome Free";
+  font-family: "Font Awesome 7 Free";
 }
 
 .comment.note::after {

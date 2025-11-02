@@ -210,6 +210,10 @@ $migrationFiles = [
 
     // 28.10.2025
     ['file' => 'create_intra_support_db_28102025.php', 'type' => 'create'],
+
+    // 02.11.2025
+    ['file' => 'alter_intra_mitarbeiter_02112025.php', 'type' => 'alter'],
+    ['file' => 'create_intra_config_02112025.php', 'type' => 'create'],
 ];
 
 $executed = 0;
