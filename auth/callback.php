@@ -119,7 +119,7 @@ try {
 
         if ($registrationMode === 'closed') {
             // No registration allowed
-            exit('Registrierung ist derzeit geschlossen. Bitte wenden Sie sich an einen Administrator. <a href="' . BASE_PATH . 'login.php">Zurück zum Login</a>');
+            exit('Registrierung ist derzeit geschlossen. Bitte wenden Sie sich an einen Administrator. <a href="' . htmlspecialchars(BASE_PATH, ENT_QUOTES, 'UTF-8') . 'login.php">Zurück zum Login</a>');
         } elseif ($registrationMode === 'code') {
             // Check for valid registration code
             $code = $_SESSION['registration_code'] ?? null;
@@ -136,7 +136,7 @@ try {
 
             if (!$codeRecord) {
                 unset($_SESSION['registration_code']);
-                exit('Ungültiger oder bereits verwendeter Registrierungscode. <a href="' . BASE_PATH . 'login.php">Zurück zum Login</a>');
+                exit('Ungültiger oder bereits verwendeter Registrierungscode. <a href="' . htmlspecialchars(BASE_PATH, ENT_QUOTES, 'UTF-8') . 'login.php">Zurück zum Login</a>');
             }
 
             // Create user with the code

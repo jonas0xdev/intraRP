@@ -35,9 +35,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 // Handle code deletion
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete') {
     $codeId = $_POST['code_id'] ?? 0;
-    $stmt = $pdo->prepare("DELETE FROM intra_registration_codes WHERE id = :id");
+    $stmt = $pdo->prepare("DELETE FROM intra_registration_codes WHERE id = :id AND is_used = 0");
     $stmt->execute(['id' => $codeId]);
-    Flash::set('success', 'Registrierungscode erfolgreich gelöscht.');
+    
+    if ($stmt->rowCount() > 0) {
+        Flash::set('success', 'Registrierungscode erfolgreich gelöscht.');
+    } else {
+        Flash::set('error', 'Registrierungscode konnte nicht gelöscht werden (bereits verwendet oder nicht gefunden).');
+    }
+    
     header("Location: " . BASE_PATH . "benutzer/registration-codes.php");
     exit();
 }

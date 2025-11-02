@@ -28,10 +28,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Bitte geben Sie einen Registrierungscode ein.';
     } else {
         // Verify the code exists and is not used
-        $codeStmt = $pdo->prepare("SELECT id FROM intra_registration_codes WHERE code = :code AND is_used = 0");
+        $codeStmt = $pdo->prepare("SELECT 1 FROM intra_registration_codes WHERE code = :code AND is_used = 0");
         $codeStmt->execute(['code' => $code]);
         
-        if ($codeStmt->fetch()) {
+        if ($codeStmt->fetchColumn()) {
             $_SESSION['registration_code'] = $code;
             header('Location: ' . BASE_PATH . 'auth/discord.php');
             exit;
