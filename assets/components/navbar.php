@@ -17,6 +17,9 @@ use App\Auth\Permissions; ?>
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="<?= BASE_PATH ?>benutzer/list.php">Übersicht</a></li>
+                            <?php if (Permissions::check(['admin', 'users.create'])) { ?>
+                                <li><a class="dropdown-item" href="<?= BASE_PATH ?>benutzer/registration-codes.php">Registrierungscodes</a></li>
+                            <?php } ?>
                             <div class="dropdown-divider"></div>
                             <?php if (Permissions::check(['admin', 'audit.view'])) { ?>
                                 <li><a class="dropdown-item" href="<?= BASE_PATH ?>benutzer/auditlog.php">Audit-Log</a></li>

@@ -56,6 +56,29 @@ try {
     $username = $discordUser['username'];
     $avatar = $discordUser['avatar'];
 
+    // Check if user exists first to determine if this is a login or registration attempt
+    $checkUserStmt = $pdo->prepare("SELECT COUNT(*) FROM intra_users WHERE discord_id = :discord_id");
+    $checkUserStmt->execute(['discord_id' => $discordId]);
+    $userExists = $checkUserStmt->fetchColumn() > 0;
+
+    // If user doesn't exist and registration is closed, reject before proceeding
+    if (!$userExists) {
+        $registrationMode = defined('REGISTRATION_MODE') ? REGISTRATION_MODE : 'open';
+
+        if ($registrationMode === 'closed') {
+            $_SESSION['registration_error'] = 'Registrierung ist derzeit geschlossen. Bitte wenden Sie sich an einen Administrator.';
+            header('Location: ' . BASE_PATH . 'login.php');
+            exit;
+        } elseif ($registrationMode === 'code') {
+            $code = $_SESSION['registration_code'] ?? null;
+            if (!$code) {
+                $_SESSION['registration_error'] = 'Als neuer Benutzer benötigen Sie einen Registrierungscode. Bitte geben Sie diesen auf der Login-Seite ein.';
+                header('Location: ' . BASE_PATH . 'login.php');
+                exit;
+            }
+        }
+    }
+
     $adminRoleStmt = $pdo->prepare("SELECT id FROM intra_users_roles WHERE admin = 1 LIMIT 1");
     $adminRoleStmt->execute();
     $adminRole = $adminRoleStmt->fetch();
@@ -125,12 +148,11 @@ try {
         } elseif ($registrationMode === 'code') {
             // Check for valid registration code
             $code = $_SESSION['registration_code'] ?? null;
-            
+
             if (!$code) {
-                // Redirect to login page to enter code
-                $_SESSION['pending_discord_id'] = $discordId;
-                $_SESSION['registration_error'] = 'Bitte geben Sie Ihren Registrierungscode ein.';
-                header('Location: ' . BASE_PATH . 'login.php?require_code=1');
+                // No code provided - redirect to login with error message
+                $_SESSION['registration_error'] = 'Als neuer Benutzer benötigen Sie einen Registrierungscode. Bitte geben Sie diesen auf der Login-Seite ein.';
+                header('Location: ' . BASE_PATH . 'login.php');
                 exit;
             }
 
@@ -140,9 +162,8 @@ try {
 
             if (!$codeRecord) {
                 unset($_SESSION['registration_code']);
-                $_SESSION['pending_discord_id'] = $discordId;
                 $_SESSION['registration_error'] = 'Ungültiger oder bereits verwendeter Registrierungscode.';
-                header('Location: ' . BASE_PATH . 'login.php?require_code=1');
+                header('Location: ' . BASE_PATH . 'login.php');
                 exit;
             }
 

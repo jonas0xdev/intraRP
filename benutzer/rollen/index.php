@@ -121,7 +121,7 @@ if (!Permissions::check(['admin', 'users.view'])) {
                                 'Benutzer' => [
                                     'users.view' => 'Benutzer ansehen',
                                     'users.edit' => 'Benutzer bearbeiten',
-                                    'users.create' => 'Benutzer erstellen',
+                                    'users.create' => 'Registrierungscodes erstellen',
                                     'users.delete' => 'Benutzer löschen'
                                 ],
                                 'Personal' => [

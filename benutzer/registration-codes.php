@@ -13,7 +13,7 @@ if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
 use App\Auth\Permissions;
 use App\Helpers\Flash;
 
-if (!Permissions::check(['admin', 'users.manage'])) {
+if (!Permissions::check(['admin', 'users.create'])) {
     Flash::set('error', 'no-permissions');
     header("Location: " . BASE_PATH . "index.php");
     exit();
@@ -37,13 +37,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $codeId = $_POST['code_id'] ?? 0;
     $stmt = $pdo->prepare("DELETE FROM intra_registration_codes WHERE id = :id AND is_used = 0");
     $stmt->execute(['id' => $codeId]);
-    
+
     if ($stmt->rowCount() > 0) {
         Flash::set('success', 'Registrierungscode erfolgreich gelöscht.');
     } else {
         Flash::set('error', 'Registrierungscode konnte nicht gelöscht werden (bereits verwendet oder nicht gefunden).');
     }
-    
+
     header("Location: " . BASE_PATH . "benutzer/registration-codes.php");
     exit();
 }
@@ -84,39 +84,39 @@ $registrationMode = defined('REGISTRATION_MODE') ? REGISTRATION_MODE : 'open';
             <div class="row">
                 <div class="col mb-5">
                     <hr class="text-light my-3">
-                    <h1 class="mb-5">Registrierungscodes verwalten</h1>
+                    <div class="row mb-3">
+                        <div class="col">
+                            <h1>Registrierungscodes verwalten</h1>
+                        </div>
+                        <?php if ($registrationMode === 'code'): ?>
+                            <div class="col text-end">
+                                <form method="POST">
+                                    <input type="hidden" name="action" value="generate">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fa-solid fa-plus"></i> Code generieren
+                                    </button>
+                                </form>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                     <?php Flash::render(); ?>
-                    
+
                     <div class="alert alert-info mb-4">
-                        <strong>Aktueller Registrierungsmodus:</strong> 
-                        <?php 
+                        <strong>Aktueller Registrierungsmodus:</strong>
+                        <?php
                         switch ($registrationMode) {
                             case 'open':
-                                echo '<span class="badge bg-success">Offen - Registrierung für jeden möglich</span>';
+                                echo '<span class="badge bg-dark">Offen - Registrierung für jeden möglich</span>';
                                 break;
                             case 'code':
-                                echo '<span class="badge bg-warning">Code - Registrierung nur mit Code</span>';
+                                echo '<span class="badge bg-dark">Code - Registrierung nur mit Code</span>';
                                 break;
                             case 'closed':
                                 echo '<span class="badge bg-danger">Geschlossen - Keine Registrierung möglich</span>';
                                 break;
                         }
                         ?>
-                        <br>
-                        <small>Um den Modus zu ändern, bearbeiten Sie die REGISTRATION_MODE Variable in <code>/assets/config/config.php</code></small>
                     </div>
-
-                    <?php if ($registrationMode === 'code'): ?>
-                        <div class="intra__tile py-3 px-3 mb-4">
-                            <h5>Neuen Code generieren</h5>
-                            <form method="POST">
-                                <input type="hidden" name="action" value="generate">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="las la-plus"></i> Code generieren
-                                </button>
-                            </form>
-                        </div>
-                    <?php endif; ?>
 
                     <div class="intra__tile py-2 px-3">
                         <h5 class="mb-3">Alle Registrierungscodes</h5>

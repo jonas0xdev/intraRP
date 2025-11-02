@@ -14,22 +14,18 @@ if (isset($_SESSION['userid']) && isset($_SESSION['permissions'])) {
 }
 
 $registrationMode = defined('REGISTRATION_MODE') ? REGISTRATION_MODE : 'open';
-$requireCode = isset($_GET['require_code']) && $_GET['require_code'] == '1';
 $error = $_SESSION['registration_error'] ?? null;
 unset($_SESSION['registration_error']);
 
 // Handle code submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['registration_code'])) {
     $code = trim($_POST['registration_code']);
-    
-    if (empty($code)) {
-        $error = 'Bitte geben Sie einen Registrierungscode ein.';
-        $requireCode = true;
-    } else {
+
+    if (!empty($code)) {
         // Verify the code exists and is not used
         $codeStmt = $pdo->prepare("SELECT 1 FROM intra_registration_codes WHERE code = :code AND is_used = 0");
         $codeStmt->execute(['code' => $code]);
-        
+
         if ($codeStmt->fetchColumn()) {
             $_SESSION['registration_code'] = $code;
             // Redirect to Discord auth
@@ -37,7 +33,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['registration_code']))
             exit;
         } else {
             $error = 'Ungültiger oder bereits verwendeter Registrierungscode.';
-            $requireCode = true;
         }
     }
 }
@@ -72,49 +67,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['registration_code']))
                     <?php
                     if ($error) {
                         echo '<div class="alert alert-danger mb-3" role="alert">';
-                        echo '<i class="las la-exclamation-triangle"></i> ' . htmlspecialchars($error);
+                        echo '<i class="fa-solid fa-exclamation-triangle"></i> ' . htmlspecialchars($error);
                         echo '</div>';
                     }
-                    
-                    if (!$requireCode) {
-                        // Normal login view
-                        if ($registrationMode === 'closed') {
-                            echo '<div class="alert alert-warning mb-3" role="alert">';
-                            echo '<i class="las la-exclamation-triangle"></i> Registrierung für neue Benutzer ist derzeit geschlossen.';
-                            echo '</div>';
-                        } elseif ($registrationMode === 'code') {
+
+                    // Normal login view
+                    if ($registrationMode === 'closed' && !$error) {
+                        echo '<div class="alert alert-warning mb-3" role="alert">';
+                        echo '<i class="fa-solid fa-exclamation-triangle"></i> Registrierung für neue Benutzer ist derzeit geschlossen.';
+                        echo '</div>';
+                    } elseif ($registrationMode === 'code') {
+                        if (!$error) {
                             echo '<div class="alert alert-info mb-3" role="alert">';
-                            echo '<i class="las la-info-circle"></i> Neue Benutzer benötigen einen Registrierungscode.';
+                            echo '<i class="fa-solid fa-info-circle"></i> Neue Benutzer benötigen einen Registrierungscode.';
                             echo '</div>';
                         }
+
+                        // Optional code input field
+                        echo '<form method="POST" class="mb-3">';
+                        echo '<div class="mb-2 position-relative">';
+                        echo '<i class="fa-solid fa-key position-absolute" style="left: 12px; top: 50%; transform: translateY(-50%); color: #6c757d;"></i>';
+                        echo '<input type="text" class="form-control" name="registration_code" placeholder="Registrierungscode" style="padding-left: 35px;">';
+                        echo '</div>';
+                        echo '<button type="submit" class="btn btn-secondary w-100">Mit Code registrieren</button>';
+                        echo '</form>';
+                        echo '<div class="text-center mb-2"><small class="text-muted">oder</small></div>';
+                    }
                     ?>
 
                     <div class="text-center mb-3">
-                        <a href="<?= BASE_PATH ?>auth/discord.php" class="btn btn-primary btn-lg w-100"><i class="lab la-discord"></i> Login</a>
+                        <a href="<?= BASE_PATH ?>auth/discord.php" class="btn btn-primary btn-lg w-100"><i class="fa-brands fa-discord"></i> Login</a>
                     </div>
-                    
-                    <?php
-                    } else {
-                        // Show code entry form
-                        echo '<div class="alert alert-info mb-3" role="alert">';
-                        echo '<i class="las la-info-circle"></i> Bitte geben Sie Ihren Registrierungscode ein.';
-                        echo '</div>';
-                    ?>
-                    
-                    <form method="POST">
-                        <div class="mb-3">
-                            <input type="text" class="form-control" name="registration_code" placeholder="Registrierungscode" required autofocus>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Weiter</button>
-                    </form>
-                    
-                    <div class="mt-3">
-                        <a href="<?= BASE_PATH ?>login.php" class="btn btn-secondary w-100">Zurück</a>
-                    </div>
-                    
-                    <?php
-                    }
-                    ?>
                 </div>
             </div>
         </div>
