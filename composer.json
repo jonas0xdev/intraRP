@@ -20,8 +20,10 @@
   },
   "scripts": {
     "db:migrate": "@php setup/database-init.php",
+    "config:update": "@php setup/update-config.php",
     "post-install-cmd": [
-      "@db:migrate"
+      "@db:migrate",
+      "@config:update"
     ]
   }
 }

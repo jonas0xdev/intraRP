@@ -126,95 +126,6 @@ function isTransactionActive(PDO $pdo): bool
     return $pdo->inTransaction();
 }
 
-function processConfigCache(PDO $pdo, string $projectRoot)
-{
-    $cacheFile = $projectRoot . '/setup_config_cache.json';
-
-    if (!file_exists($cacheFile)) {
-        echo "ℹ️  Keine gecachte Config-Datei gefunden.\n";
-        return;
-    }
-
-    echo "\n=== Verarbeite gecachte Config-Daten ===\n";
-
-    try {
-        $cacheData = json_decode(file_get_contents($cacheFile), true);
-
-        if (!$cacheData || !isset($cacheData['config']) || !isset($cacheData['envConfig'])) {
-            echo "⚠️  Gecachte Config-Datei ist ungültig oder beschädigt.\n";
-            return;
-        }
-
-        $config = $cacheData['config'];
-        $timestamp = $cacheData['timestamp'] ?? 'unbekannt';
-
-        echo "✓ Cache-Datei geladen (erstellt: $timestamp)\n";
-
-        // Tabelle erstellen falls nicht vorhanden
-        $createTableSql = <<<SQL
-        CREATE TABLE IF NOT EXISTS `intra_config` (
-            `id` int(11) NOT NULL AUTO_INCREMENT,
-            `var` varchar(255) NOT NULL,
-            `value` varchar(255) DEFAULT NULL,
-            `description` text DEFAULT NULL,
-            PRIMARY KEY (`id`),
-            UNIQUE KEY `var` (`var`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-SQL;
-        $pdo->exec($createTableSql);
-        echo "✓ Tabelle intra_config sichergestellt\n";
-
-        // Config-Werte in Datenbank einfügen/aktualisieren
-        $insertStmt = $pdo->prepare("
-            INSERT INTO `intra_config` (`var`, `value`, `description`) 
-            VALUES (:var, :value, :description)
-            ON DUPLICATE KEY UPDATE `value` = VALUES(`value`), `description` = VALUES(`description`)
-        ");
-
-        $configData = [
-            ['var' => 'API_KEY', 'value' => $config['API_KEY'], 'description' => 'Wird automatisch beim Setup erstellt, sonst selbst einen sicheren Key festlegen'],
-            ['var' => 'SYSTEM_NAME', 'value' => $config['SYSTEM_NAME'], 'description' => 'Eigenname des Intranets'],
-            ['var' => 'SYSTEM_COLOR', 'value' => $config['SYSTEM_COLOR'], 'description' => 'Hauptfarbe des Systems'],
-            ['var' => 'SYSTEM_URL', 'value' => $config['SYSTEM_URL'], 'description' => 'Domain des Systems'],
-            ['var' => 'SYSTEM_LOGO', 'value' => $config['SYSTEM_LOGO'], 'description' => 'Ort des Logos (entweder als relativer Pfad oder Link)'],
-            ['var' => 'META_IMAGE_URL', 'value' => $config['META_IMAGE_URL'], 'description' => 'Ort des Bildes, welches in der Link-Vorschau angezeigt werden soll (immer als Link angeben!)'],
-            ['var' => 'SERVER_NAME', 'value' => $config['SERVER_NAME'], 'description' => 'Name des Servers'],
-            ['var' => 'SERVER_CITY', 'value' => $config['SERVER_CITY'], 'description' => 'Name der Stadt in welcher der Server spielt'],
-            ['var' => 'RP_ORGTYPE', 'value' => $config['RP_ORGTYPE'], 'description' => 'Art/Name der Organisation'],
-            ['var' => 'RP_STREET', 'value' => $config['RP_STREET'], 'description' => 'Straße der Organisation'],
-            ['var' => 'RP_ZIP', 'value' => $config['RP_ZIP'], 'description' => 'PLZ der Organisation'],
-            ['var' => 'CHAR_ID', 'value' => $config['CHAR_ID'], 'description' => 'Wird eine eindeutige Charakter-ID verwendet? (true = ja, false = nein)'],
-            ['var' => 'ENOTF_PREREG', 'value' => $config['ENOTF_PREREG'], 'description' => 'Wird das Voranmeldungssystem des eNOTF verwendet? (true = ja, false = nein)'],
-            ['var' => 'ENOTF_USE_PIN', 'value' => $config['ENOTF_USE_PIN'], 'description' => 'Wird die PIN-Funktion des eNOTF verwendet? (true = ja, false = nein)'],
-            ['var' => 'ENOTF_PIN', 'value' => $config['ENOTF_PIN'], 'description' => 'PIN für den Zugang zum eNOTF - 4-6 Zahlen (nur relevant, wenn ENOTF_USE_PIN auf true gesetzt ist)'],
-            ['var' => 'LANG', 'value' => 'de', 'description' => 'Sprache des Systems (de = Deutsch, en = Englisch) // AKTUELL OHNE FUNKTION!'],
-            ['var' => 'BASE_PATH', 'value' => $config['BASE_PATH'], 'description' => 'Basis-Pfad des Systems (z.B. /intraRP/ für https://domain.de/intraRP/)']
-        ];
-
-        $inserted = 0;
-        foreach ($configData as $configItem) {
-            $insertStmt->execute($configItem);
-            $inserted++;
-        }
-
-        echo "✓ $inserted Config-Einträge in Datenbank gespeichert\n";
-
-        // Cache-Datei löschen nach erfolgreicher Übertragung
-        if (unlink($cacheFile)) {
-            echo "✓ Cache-Datei erfolgreich gelöscht\n";
-        } else {
-            echo "⚠️  Cache-Datei konnte nicht gelöscht werden. Bitte manuell löschen: $cacheFile\n";
-        }
-
-        echo "=== Config-Cache erfolgreich verarbeitet ===\n\n";
-    } catch (PDOException $e) {
-        echo "❌ Fehler beim Verarbeiten des Config-Cache: " . $e->getMessage() . "\n";
-        echo "   Die Cache-Datei bleibt erhalten und kann später erneut verarbeitet werden.\n\n";
-    } catch (Exception $e) {
-        echo "❌ Allgemeiner Fehler: " . $e->getMessage() . "\n\n";
-    }
-}
-
 ensureMigrationsTable($pdo);
 
 $migrationPath = $projectRoot . '/assets/database';
@@ -303,6 +214,7 @@ $migrationFiles = [
     // 02.11.2025
     ['file' => 'alter_intra_mitarbeiter_02112025.php', 'type' => 'alter'],
     ['file' => 'create_intra_config_02112025.php', 'type' => 'create'],
+    ['file' => 'migrate_config_to_db_02112025.php', 'type' => 'data'],
 ];
 
 $executed = 0;
@@ -369,8 +281,5 @@ echo "Neue Migrationen ausgeführt: $executed\n";
 echo "Bereits ausgeführt (übersprungen): $alreadyRun\n";
 echo "Nicht gefunden: $skipped\n";
 echo "Gesamt: " . count($migrationFiles) . " Migrationen\n\n";
-
-// Nach erfolgreichen Migrationen: Gecachte Config-Daten verarbeiten
-processConfigCache($pdo, $projectRoot);
 
 exit(0);
