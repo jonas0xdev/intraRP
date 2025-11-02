@@ -213,8 +213,6 @@ $migrationFiles = [
 
     // 02.11.2025
     ['file' => 'alter_intra_mitarbeiter_02112025.php', 'type' => 'alter'],
-    ['file' => 'create_intra_config_02112025.php', 'type' => 'create'],
-    ['file' => 'migrate_config_to_db_02112025.php', 'type' => 'data'],
 ];
 
 $executed = 0;
