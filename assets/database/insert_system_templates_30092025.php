@@ -1,10 +1,6 @@
 <?php
 try {
-    // Lösche alte Templates falls vorhanden
-    $pdo->exec("DELETE FROM intra_dokument_template_fields WHERE template_id IN (1, 2, 5, 6, 7, 10, 11, 12, 13, 14)");
-    $pdo->exec("DELETE FROM intra_dokument_templates WHERE id IN (1, 2, 5, 6, 7, 10, 11, 12, 13, 14)");
-
-    // System-Templates anlegen
+    // System-Templates anlegen (nur wenn noch nicht vorhanden)
     $templates = [
         ['id' => 1, 'name' => 'Beförderungsurkunde', 'category' => 'urkunde', 'file' => 'befoerderung.html.twig'],
         ['id' => 2, 'name' => 'Entlassungsurkunde', 'category' => 'urkunde', 'file' => 'entlassung.html.twig'],
