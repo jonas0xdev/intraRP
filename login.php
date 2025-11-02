@@ -12,6 +12,35 @@ session_start();
 if (isset($_SESSION['userid']) && isset($_SESSION['permissions'])) {
     header('Location: ' . BASE_PATH . 'index.php');
 }
+
+$registrationMode = defined('REGISTRATION_MODE') ? REGISTRATION_MODE : 'open';
+$requireCode = isset($_GET['require_code']) && $_GET['require_code'] == '1';
+$error = $_SESSION['registration_error'] ?? null;
+unset($_SESSION['registration_error']);
+
+// Handle code submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['registration_code'])) {
+    $code = trim($_POST['registration_code']);
+    
+    if (empty($code)) {
+        $error = 'Bitte geben Sie einen Registrierungscode ein.';
+        $requireCode = true;
+    } else {
+        // Verify the code exists and is not used
+        $codeStmt = $pdo->prepare("SELECT 1 FROM intra_registration_codes WHERE code = :code AND is_used = 0");
+        $codeStmt->execute(['code' => $code]);
+        
+        if ($codeStmt->fetchColumn()) {
+            $_SESSION['registration_code'] = $code;
+            // Redirect to Discord auth
+            header('Location: ' . BASE_PATH . 'auth/discord.php');
+            exit;
+        } else {
+            $error = 'Ungültiger oder bereits verwendeter Registrierungscode.';
+            $requireCode = true;
+        }
+    }
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -40,9 +69,52 @@ if (isset($_SESSION['userid']) && isset($_SESSION['permissions'])) {
                     <h1 id="loginHeader"><?php echo SYSTEM_NAME ?></h1>
                     <p class="subtext">Das Intranet der Stadt <?php echo SERVER_CITY ?>!</p>
 
+                    <?php
+                    if ($error) {
+                        echo '<div class="alert alert-danger mb-3" role="alert">';
+                        echo '<i class="las la-exclamation-triangle"></i> ' . htmlspecialchars($error);
+                        echo '</div>';
+                    }
+                    
+                    if (!$requireCode) {
+                        // Normal login view
+                        if ($registrationMode === 'closed') {
+                            echo '<div class="alert alert-warning mb-3" role="alert">';
+                            echo '<i class="las la-exclamation-triangle"></i> Registrierung für neue Benutzer ist derzeit geschlossen.';
+                            echo '</div>';
+                        } elseif ($registrationMode === 'code') {
+                            echo '<div class="alert alert-info mb-3" role="alert">';
+                            echo '<i class="las la-info-circle"></i> Neue Benutzer benötigen einen Registrierungscode.';
+                            echo '</div>';
+                        }
+                    ?>
+
                     <div class="text-center mb-3">
                         <a href="<?= BASE_PATH ?>auth/discord.php" class="btn btn-primary btn-lg w-100"><i class="lab la-discord"></i> Login</a>
                     </div>
+                    
+                    <?php
+                    } else {
+                        // Show code entry form
+                        echo '<div class="alert alert-info mb-3" role="alert">';
+                        echo '<i class="las la-info-circle"></i> Bitte geben Sie Ihren Registrierungscode ein.';
+                        echo '</div>';
+                    ?>
+                    
+                    <form method="POST">
+                        <div class="mb-3">
+                            <input type="text" class="form-control" name="registration_code" placeholder="Registrierungscode" required autofocus>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Weiter</button>
+                    </form>
+                    
+                    <div class="mt-3">
+                        <a href="<?= BASE_PATH ?>login.php" class="btn btn-secondary w-100">Zurück</a>
+                    </div>
+                    
+                    <?php
+                    }
+                    ?>
                 </div>
             </div>
         </div>

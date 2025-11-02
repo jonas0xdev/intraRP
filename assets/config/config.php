@@ -28,5 +28,6 @@ define('CHAR_ID', true); // Wird eine eindeutige Charakter-ID verwendet? (true =
 define('ENOTF_PREREG', true); // Wird das Voranmeldungssystem des eNOTF verwendet? (true = ja, false = nein)
 define('ENOTF_USE_PIN', true); // Wird die PIN-Funktion des eNOTF verwendet? (true = ja, false = nein)
 define('ENOTF_PIN', '1234'); // PIN für den Zugang zum eNOTF - 4-6 Zahlen (nur relevant, wenn ENOTF_USE_PIN auf true gesetzt ist)
+define('REGISTRATION_MODE', 'open'); // Registrierungsmodus: open = für jeden möglich, code = nur mit Code, closed = keine Registrierung
 define('LANG', 'de'); // Sprache des Systems (de = Deutsch, en = Englisch) // AKTUELL OHNE FUNKTION!
 define('BASE_PATH', '/'); // Basis-Pfad des Systems (z.B. /intraRP/ für https://domain.de/intraRP/)
