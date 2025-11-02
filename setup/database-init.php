@@ -213,6 +213,7 @@ $migrationFiles = [
 
     // 02.11.2025
     ['file' => 'alter_intra_mitarbeiter_02112025.php', 'type' => 'alter'],
+    ['file' => 'create_intra_registration_codes_02112025.php', 'type' => 'create'],
 ];
 
 $executed = 0;

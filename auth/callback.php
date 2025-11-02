@@ -114,20 +114,70 @@ try {
             }
         }
     } else {
-        $insertStmt = $pdo->prepare("
-            INSERT INTO intra_users (discord_id, username, fullname, role, full_admin) 
-            VALUES (:discord_id, :username, NULL, :role, :full_admin)
-        ");
-        $insertStmt->execute([
-            'discord_id' => $discordId,
-            'username'   => $username,
-            'role'       => $defaultRole['id'],
-            'full_admin' => 0
-        ]);
+        // Check registration mode
+        $registrationMode = defined('REGISTRATION_MODE') ? REGISTRATION_MODE : 'open';
 
-        $stmt = $pdo->prepare("SELECT * FROM intra_users WHERE discord_id = :discord_id");
-        $stmt->execute(['discord_id' => $discordId]);
-        $user = $stmt->fetch();
+        if ($registrationMode === 'closed') {
+            // No registration allowed
+            exit('Registrierung ist derzeit geschlossen. Bitte wenden Sie sich an einen Administrator. <a href="' . BASE_PATH . 'login.php">Zurück zum Login</a>');
+        } elseif ($registrationMode === 'code') {
+            // Check for valid registration code
+            $code = $_SESSION['registration_code'] ?? null;
+            
+            if (!$code) {
+                // Redirect to code entry page
+                header('Location: ' . BASE_PATH . 'auth/register-code.php?discord_id=' . urlencode($discordId));
+                exit;
+            }
+
+            $codeStmt = $pdo->prepare("SELECT * FROM intra_registration_codes WHERE code = :code AND is_used = 0");
+            $codeStmt->execute(['code' => $code]);
+            $codeRecord = $codeStmt->fetch();
+
+            if (!$codeRecord) {
+                unset($_SESSION['registration_code']);
+                exit('Ungültiger oder bereits verwendeter Registrierungscode. <a href="' . BASE_PATH . 'login.php">Zurück zum Login</a>');
+            }
+
+            // Create user with the code
+            $insertStmt = $pdo->prepare("
+                INSERT INTO intra_users (discord_id, username, fullname, role, full_admin) 
+                VALUES (:discord_id, :username, NULL, :role, :full_admin)
+            ");
+            $insertStmt->execute([
+                'discord_id' => $discordId,
+                'username'   => $username,
+                'role'       => $defaultRole['id'],
+                'full_admin' => 0
+            ]);
+
+            // Mark code as used
+            $userId = $pdo->lastInsertId();
+            $updateCodeStmt = $pdo->prepare("UPDATE intra_registration_codes SET is_used = 1, used_by = :user_id, used_at = NOW() WHERE id = :code_id");
+            $updateCodeStmt->execute(['user_id' => $userId, 'code_id' => $codeRecord['id']]);
+
+            unset($_SESSION['registration_code']);
+
+            $stmt = $pdo->prepare("SELECT * FROM intra_users WHERE discord_id = :discord_id");
+            $stmt->execute(['discord_id' => $discordId]);
+            $user = $stmt->fetch();
+        } else {
+            // Open registration
+            $insertStmt = $pdo->prepare("
+                INSERT INTO intra_users (discord_id, username, fullname, role, full_admin) 
+                VALUES (:discord_id, :username, NULL, :role, :full_admin)
+            ");
+            $insertStmt->execute([
+                'discord_id' => $discordId,
+                'username'   => $username,
+                'role'       => $defaultRole['id'],
+                'full_admin' => 0
+            ]);
+
+            $stmt = $pdo->prepare("SELECT * FROM intra_users WHERE discord_id = :discord_id");
+            $stmt->execute(['discord_id' => $discordId]);
+            $user = $stmt->fetch();
+        }
 
         $_SESSION['userid'] = $user['id'];
         $_SESSION['cirs_user'] = $user['fullname'];
