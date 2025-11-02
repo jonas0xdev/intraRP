@@ -118,15 +118,19 @@ try {
         $registrationMode = defined('REGISTRATION_MODE') ? REGISTRATION_MODE : 'open';
 
         if ($registrationMode === 'closed') {
-            // No registration allowed
-            exit('Registrierung ist derzeit geschlossen. Bitte wenden Sie sich an einen Administrator. <a href="' . htmlspecialchars(BASE_PATH, ENT_QUOTES, 'UTF-8') . 'login.php">Zurück zum Login</a>');
+            // No registration allowed - redirect to login with error message
+            $_SESSION['registration_error'] = 'Registrierung ist derzeit geschlossen. Bitte wenden Sie sich an einen Administrator.';
+            header('Location: ' . BASE_PATH . 'login.php');
+            exit;
         } elseif ($registrationMode === 'code') {
             // Check for valid registration code
             $code = $_SESSION['registration_code'] ?? null;
             
             if (!$code) {
-                // Redirect to code entry page
-                header('Location: ' . BASE_PATH . 'auth/register-code.php?discord_id=' . urlencode($discordId));
+                // Redirect to login page to enter code
+                $_SESSION['pending_discord_id'] = $discordId;
+                $_SESSION['registration_error'] = 'Bitte geben Sie Ihren Registrierungscode ein.';
+                header('Location: ' . BASE_PATH . 'login.php?require_code=1');
                 exit;
             }
 
@@ -136,7 +140,10 @@ try {
 
             if (!$codeRecord) {
                 unset($_SESSION['registration_code']);
-                exit('Ungültiger oder bereits verwendeter Registrierungscode. <a href="' . htmlspecialchars(BASE_PATH, ENT_QUOTES, 'UTF-8') . 'login.php">Zurück zum Login</a>');
+                $_SESSION['pending_discord_id'] = $discordId;
+                $_SESSION['registration_error'] = 'Ungültiger oder bereits verwendeter Registrierungscode.';
+                header('Location: ' . BASE_PATH . 'login.php?require_code=1');
+                exit;
             }
 
             // Create user with the code
