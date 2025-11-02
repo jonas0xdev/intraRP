@@ -53,32 +53,10 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Fahrzeuginfo &rsaquo; eNOTF &rsaquo; <?php echo SYSTEM_NAME ?></title>
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/css/divi.min.css" />
-    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/_ext/lineawesome/css/line-awesome.min.css" />
-    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/fonts/mavenpro/css/all.min.css" />
-    <!-- Bootstrap -->
-    <link rel="stylesheet" href="<?= BASE_PATH ?>vendor/twbs/bootstrap/dist/css/bootstrap.min.css">
-    <script src="<?= BASE_PATH ?>vendor/components/jquery/jquery.min.js"></script>
-    <script src="<?= BASE_PATH ?>vendor/twbs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="<?= BASE_PATH ?>assets/favicon/favicon-96x96.png" sizes="96x96" />
-    <link rel="icon" type="image/svg+xml" href="<?= BASE_PATH ?>assets/favicon/favicon.svg" />
-    <link rel="shortcut icon" href="<?= BASE_PATH ?>assets/favicon/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="<?= BASE_PATH ?>assets/favicon/apple-touch-icon.png" />
-    <meta name="apple-mobile-web-app-title" content="<?php echo SYSTEM_NAME ?>" />
-    <link rel="manifest" href="<?= BASE_PATH ?>assets/favicon/site.webmanifest" />
-    <!-- Metas -->
-    <meta name="theme-color" content="#ffaf2f" />
-    <meta property="og:site_name" content="<?php echo SERVER_NAME ?>" />
-    <meta property="og:url" content="<?= $prot_url ?>" />
-    <meta property="og:title" content="Fahrzeuginfo &rsaquo; eNOTF &rsaquo; <?php echo SYSTEM_NAME ?>" />
-    <meta property="og:image" content="https://<?php echo SYSTEM_URL ?>/assets/img/aelrd.png" />
-    <meta property="og:description" content="Fahrzeuginformationen der <?php echo RP_ORGTYPE . " " .  SERVER_CITY ?>" />
+    <?php
+    $SITE_TITLE = "Fahrzeuginfo &rsaquo; eNOTF";
+    include __DIR__ . '/../assets/components/enotf/_head.php';
+    ?>
 </head>
 
 <body data-bs-theme="dark" style="overflow-x:hidden" id="edivi__login" data-pin-enabled="<?= $pinEnabled ?>">
@@ -88,7 +66,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                 <div class="row border-bottom edivi__header-overview" style="--bs-border-color: #333333">
                     <div class="col">
                         <a href="index.php" class="text-decoration-none text-light" style="font-size:1.6rem">
-                            <i class="las la-arrow-left"></i> Zurück zur Übersicht
+                            <i class="fa-solid fa-arrow-left"></i> Zurück zur Übersicht
                         </a>
                     </div>
                     <div class="col border-start" style="--bs-border-color: #333333">
@@ -109,15 +87,15 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
 
                 <div class="row">
                     <div class="col-12">
-                        <h4 class="fw-bold text-light mb-4">
-                            <i class="las la-ambulance"></i> Fahrzeuginformationen
+                        <h4 class="text-light mb-4">
+
                         </h4>
 
                         <?php if ($vehicle): ?>
                             <!-- Fahrzeugdaten -->
                             <div class="vehicle-info-card p-4 mb-4">
                                 <h5 class="text-light mb-3">
-                                    <i class="las la-info-circle"></i> Fahrzeugdaten
+                                    Fahrzeugdaten
                                 </h5>
                                 <div class="table-responsive">
                                     <table class="table table-dark-custom">
@@ -164,7 +142,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             <!-- Beladelisten -->
                             <div class="vehicle-info-card p-4">
                                 <h5 class="text-light mb-3">
-                                    <i class="las la-truck-loading"></i> Beladeliste
+                                    Beladeliste
                                 </h5>
 
                                 <?php if (count($categories) > 0): ?>
@@ -238,7 +216,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                     </div>
                                 <?php else: ?>
                                     <div class="text-muted text-center py-4">
-                                        <i class="las la-exclamation-triangle" style="font-size: 2rem;"></i>
+                                        <i class="fa-solid fa-exclamation-triangle" style="font-size: 2rem;"></i>
                                         <p class="mt-2">Keine Beladelisten für diesen Fahrzeugtyp vorhanden.</p>
                                     </div>
                                 <?php endif; ?>
@@ -248,7 +226,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             <!-- Fallback: Kein Fahrzeug gefunden -->
                             <div class="vehicle-info-card p-4">
                                 <div class="text-center py-4">
-                                    <i class="las la-exclamation-triangle text-warning" style="font-size: 3rem;"></i>
+                                    <i class="fa-solid fa-exclamation-triangle text-warning" style="font-size: 3rem;"></i>
                                     <h5 class="text-light mt-3">Fahrzeug nicht gefunden</h5>
                                     <p class="text-muted">
                                         Das Fahrzeug mit der ID "<?= htmlspecialchars($currentVehicleId) ?>" konnte nicht gefunden werden.

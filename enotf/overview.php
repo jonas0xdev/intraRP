@@ -59,32 +59,10 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>eNOTF &rsaquo; <?php echo SYSTEM_NAME ?></title>
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/css/divi.min.css" />
-    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/_ext/lineawesome/css/line-awesome.min.css" />
-    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/fonts/mavenpro/css/all.min.css" />
-    <!-- Bootstrap -->
-    <link rel="stylesheet" href="<?= BASE_PATH ?>vendor/twbs/bootstrap/dist/css/bootstrap.min.css">
-    <script src="<?= BASE_PATH ?>vendor/components/jquery/jquery.min.js"></script>
-    <script src="<?= BASE_PATH ?>vendor/twbs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="<?= BASE_PATH ?>assets/favicon/favicon-96x96.png" sizes="96x96" />
-    <link rel="icon" type="image/svg+xml" href="<?= BASE_PATH ?>assets/favicon/favicon.svg" />
-    <link rel="shortcut icon" href="<?= BASE_PATH ?>assets/favicon/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="<?= BASE_PATH ?>assets/favicon/apple-touch-icon.png" />
-    <meta name="apple-mobile-web-app-title" content="<?php echo SYSTEM_NAME ?>" />
-    <link rel="manifest" href="<?= BASE_PATH ?>assets/favicon/site.webmanifest" />
-    <!-- Metas -->
-    <meta name="theme-color" content="#ffaf2f" />
-    <meta property="og:site_name" content="<?php echo SERVER_NAME ?>" />
-    <meta property="og:url" content="<?= $prot_url ?>" />
-    <meta property="og:title" content="eNOTF &rsaquo; <?php echo SYSTEM_NAME ?>" />
-    <meta property="og:image" content="https://<?php echo SYSTEM_URL ?>/assets/img/aelrd.png" />
-    <meta property="og:description" content="Verwaltungsportal der <?php echo RP_ORGTYPE . " " .  SERVER_CITY ?>" />
+    <?php
+    $SITE_TITLE = "eNOTF";
+    include __DIR__ . '/../assets/components/enotf/_head.php';
+    ?>
 </head>
 
 <body data-bs-theme="dark" style="overflow-x:hidden" id="edivi__login" data-pin-enabled="<?= $pinEnabled ?>">
@@ -116,7 +94,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                     <h4 class="fw-bold">Einsatzprotokolle</h4>
                                 </div>
                                 <div class="col d-flex justify-content-end align-items-center">
-                                    <a href="create.php" class="edivi__nidabutton" style="display:inline-block"><i class="las la-plus"></i></a>
+                                    <a href="create.php" class="edivi__nidabutton" style="display:inline-block"><i class="fa-solid fa-plus"></i></a>
                                 </div>
                             </div>
                             <div class="row ps-3">
@@ -218,15 +196,15 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                                 <div class="accordion-body">
                                                     <div class="row">
                                                         <div class="col p-2">
-                                                            <a href="https://www.dgg.bam.de/quickinfo/de/" class="w-100 edivi__nidabutton" style="display:inline-block;text-align:center"><i class="las la-radiation"></i> Datenb. Gefahrgut</a>
+                                                            <a href="https://www.dgg.bam.de/quickinfo/de/" class="w-100 edivi__nidabutton" style="display:inline-block;text-align:center"><i class="fa-solid fa-radiation"></i> Datenb. Gefahrgut</a>
                                                         </div>
                                                         <div class="col p-2">
-                                                            <a href="https://www.openstreetmap.org/" class="w-100 edivi__nidabutton" style="display:inline-block;text-align:center"><i class="las la-map"></i> Openstreetmap</a>
+                                                            <a href="https://www.openstreetmap.org/" class="w-100 edivi__nidabutton" style="display:inline-block;text-align:center"><i class="fa-solid fa-map"></i> Openstreetmap</a>
                                                         </div>
                                                     </div>
                                                     <div class="row">
                                                         <div class="col-6 p-2">
-                                                            <a href="fahrzeuginfo.php" class="w-100 edivi__nidabutton" style="display:inline-block;text-align:center"><i class="las la-ambulance"></i> Fahrzeuginfo</a>
+                                                            <a href="fahrzeuginfo.php" class="w-100 edivi__nidabutton" style="display:inline-block;text-align:center"><i class="fa-solid fa-ambulance"></i> Fahrzeuginfo</a>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -248,7 +226,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                                 <div class="accordion-body">
                                                     <div class="row">
                                                         <div class="col-6 p-2">
-                                                            <a href="<?= BASE_PATH ?>admin" class="w-100 edivi__nidabutton" style="display:inline-block;text-align:center"><i class="las la-toolbox"></i> Administration</a>
+                                                            <a href="<?= BASE_PATH ?>admin" class="w-100 edivi__nidabutton" style="display:inline-block;text-align:center"><i class="fa-solid fa-toolbox"></i> Administration</a>
                                                         </div>
                                                     </div>
                                                 </div>

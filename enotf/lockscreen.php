@@ -42,27 +42,10 @@ $prot_url = "https://" . SYSTEM_URL . "/enotf/index.php";
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>eNOTF &rsaquo; <?php echo SYSTEM_NAME ?> &rsaquo; Gesperrt</title>
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/css/divi.min.css" />
-    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/_ext/lineawesome/css/line-awesome.min.css" />
-    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/fonts/mavenpro/css/all.min.css" />
-    <!-- Bootstrap -->
-    <link rel="stylesheet" href="<?= BASE_PATH ?>vendor/twbs/bootstrap/dist/css/bootstrap.min.css">
-    <script src="<?= BASE_PATH ?>vendor/components/jquery/jquery.min.js"></script>
-    <script src="<?= BASE_PATH ?>vendor/twbs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="<?= BASE_PATH ?>assets/favicon/favicon-96x96.png" sizes="96x96" />
-    <link rel="icon" type="image/svg+xml" href="<?= BASE_PATH ?>assets/favicon/favicon.svg" />
-    <link rel="shortcut icon" href="<?= BASE_PATH ?>assets/favicon/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="<?= BASE_PATH ?>assets/favicon/apple-touch-icon.png" />
-    <meta name="apple-mobile-web-app-title" content="<?php echo SYSTEM_NAME ?>" />
-    <link rel="manifest" href="<?= BASE_PATH ?>assets/favicon/site.webmanifest" />
-    <!-- Metas -->
-    <meta name="theme-color" content="#ffaf2f" />
+    <?php
+    $SITE_TITLE = "Gesperrt &rsaquo; eNOTF";
+    include __DIR__ . '/../assets/components/enotf/_head.php';
+    ?>
     <style>
         .lockscreen-container {
             display: flex;
@@ -174,7 +157,7 @@ $prot_url = "https://" . SYSTEM_URL . "/enotf/index.php";
         <div class="lockscreen-container">
             <div class="lockscreen-box">
                 <div class="lockscreen-icon">
-                    <i class="las la-lock"></i>
+                    <i class="fa-solid fa-lock"></i>
                 </div>
                 <h2 class="lockscreen-title">System gesperrt</h2>
                 <p style="text-align: center; color: #a2a2a2; margin-bottom: 20px;">
@@ -201,18 +184,18 @@ $prot_url = "https://" . SYSTEM_URL . "/enotf/index.php";
                         <button type="button" class="keypad-btn" onclick="addDigit('9')">9</button>
 
                         <button type="button" class="keypad-btn" onclick="deleteDigit()">
-                            <i class="las la-backspace"></i>
+                            <i class="fa-solid fa-backspace"></i>
                         </button>
                         <button type="button" class="keypad-btn" onclick="addDigit('0')">0</button>
                         <button type="button" class="keypad-btn" style="background: var(--main-color);" onclick="submitPin()">
-                            <i class="las la-check"></i>
+                            <i class="fa-solid fa-check"></i>
                         </button>
                     </div>
                 </form>
 
                 <?php if (isset($error)): ?>
                     <div class="error-message">
-                        <i class="las la-exclamation-triangle"></i> Falsche PIN
+                        <i class="fa-solid fa-exclamation-triangle"></i> Falsche PIN
                     </div>
                 <?php endif; ?>
             </div>
