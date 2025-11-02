@@ -64,8 +64,8 @@
                     <td>" . (!empty($row['cirs_manager']) ? htmlspecialchars($row['cirs_manager']) : '---') . "</td>
                     <td><span style='display:none'>{$row['time_added']}</span>{$adddat}</td>
                     <td>
-                        <a class='btn btn-primary btn-sm' href='" . BASE_PATH . "antraege/view.php?antrag={$row['uniqueid']}'>
-                            <i class='las la-eye me-1'></i>Ansehen
+                        <a class='btn btn-primary btn-sm' href='" . BASE_PATH . "antrag/view.php?antrag={$row['uniqueid']}'>
+                            <i class='fa-regular fa-eye'></i> Ansehen
                         </a>
                     </td>
                 </tr>";

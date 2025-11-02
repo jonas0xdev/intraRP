@@ -9,35 +9,35 @@ use App\Auth\Permissions; ?>
         </button>
         <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
             <ul class="navbar-nav">
-                <a class="nav-link" href="<?= BASE_PATH ?>admin/index.php" data-page="dashboard"><i class="las la-home" style="margin-right:3px"></i> Dashboard</a>
+                <a class="nav-link" href="<?= BASE_PATH ?>index.php" data-page="dashboard"><i class="fa-solid fa-home" style="margin-right:3px"></i> Dashboard</a>
                 <?php if (Permissions::check(['admin', 'users.view'])) { ?>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" data-page="benutzer" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="las la-user-secret" style="margin-right:3px"></i> Benutzer
+                            <i class="fa-solid fa-user-tie" style="margin-right:3px"></i> Benutzer
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="<?= BASE_PATH ?>admin/users/list.php">Übersicht</a></li>
+                            <li><a class="dropdown-item" href="<?= BASE_PATH ?>users/list.php">Übersicht</a></li>
                             <div class="dropdown-divider"></div>
                             <?php if (Permissions::check(['admin', 'audit.view'])) { ?>
-                                <li><a class="dropdown-item" href="<?= BASE_PATH ?>admin/users/auditlog.php">Audit-Log</a></li>
+                                <li><a class="dropdown-item" href="<?= BASE_PATH ?>users/auditlog.php">Audit-Log</a></li>
                             <?php } ?>
-                            <li><a class="dropdown-item" href="<?= BASE_PATH ?>admin/users/roles/index.php">Rollenverwaltung</a></li>
+                            <li><a class="dropdown-item" href="<?= BASE_PATH ?>users/roles/index.php">Rollenverwaltung</a></li>
                         </ul>
                     </li>
                 <?php }
                 if (Permissions::check(['admin', 'personnel.view'])) { ?>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" data-page="mitarbeiter" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="las la-suitcase" style="margin-right:3px"></i> Personal
+                            <i class="fa-solid fa-users" style="margin-right:3px"></i> Personal
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="<?= BASE_PATH ?>admin/personal/list.php">Übersicht</a></li>
+                            <li><a class="dropdown-item" href="<?= BASE_PATH ?>personal/list.php">Übersicht</a></li>
                             <?php if (Permissions::check(['admin', 'personnel.edit'])) { ?>
-                                <li><a class="dropdown-item" href="<?= BASE_PATH ?>admin/personal/create.php">Erstellen</a></li>
+                                <li><a class="dropdown-item" href="<?= BASE_PATH ?>personal/create.php">Erstellen</a></li>
                             <?php } ?>
                             <?php if (Permissions::check(['admin', 'application.view'])) { ?>
                                 <div class="dropdown-divider"></div>
-                                <li><a class="dropdown-item" href="<?= BASE_PATH ?>admin/antraege/list.php">Anträge bearbeiten</a></li>
+                                <li><a class="dropdown-item" href="<?= BASE_PATH ?>antrag/admin/list.php">Anträge bearbeiten</a></li>
                             <?php } ?>
 
                         </ul>
@@ -45,32 +45,36 @@ use App\Auth\Permissions; ?>
                 <?php } ?>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" data-page="edivi" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="las la-newspaper" style="margin-right:3px"></i> RD Protokolle
+                        <i class="fa-solid fa-house-medical-flag" style="margin-right:3px"></i> eNOTF
                     </a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="<?= BASE_PATH ?>enotf/" target="_blank">Neues Protokoll</a></li>
                         <?php if (Permissions::check(['admin', 'edivi.view'])) { ?>
-                            <li><a class="dropdown-item" href="<?= BASE_PATH ?>admin/enotf/list.php">Qualitätsmanagement</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="<?= BASE_PATH ?>enotf/list.php">Prüfliste</a></li>
+                            <li><a class="dropdown-item" href="<?= BASE_PATH ?>settings/enotf/ziele/index.php">Transportziele</a></li>
                         <?php } ?>
                     </ul>
                 </li>
                 <?php if (Permissions::check(['admin', 'personnel.view', 'vehicles.view', 'edivi.view', 'dashboard.manage'])) { ?>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" data-page="settings" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="las la-cog" style="margin-right:3px"></i> Einstellungen
+                            <i class="fa-solid fa-wrench" style="margin-right:3px"></i> Einstellungen
                         </a>
                         <ul class="dropdown-menu">
                             <?php if (Permissions::check(['admin', 'personnel.view'])) { ?>
                                 <li>
                                     <h6 class="dropdown-header">Personal</h6>
                                 </li>
-                                <li><a class="dropdown-item" href="<?= BASE_PATH ?>admin/settings/personal/dienstgrade/index.php">Dienstgrade verwalten</a></li>
-                                <li><a class="dropdown-item" href="<?= BASE_PATH ?>admin/settings/personal/qualifw/index.php">FW Qualifikationen verwalten</a></li>
-                                <li><a class="dropdown-item" href="<?= BASE_PATH ?>admin/settings/personal/qualird/index.php">RD Qualifikationen verwalten</a></li>
-                                <li><a class="dropdown-item" href="<?= BASE_PATH ?>admin/settings/personal/qualifd/index.php">Fachdienste verwalten</a></li>
+                                <li><a class="dropdown-item" href="<?= BASE_PATH ?>settings/personal/dienstgrade/index.php">Dienstgrade verwalten</a></li>
+                                <li><a class="dropdown-item" href="<?= BASE_PATH ?>settings/personal/qualifw/index.php">FW Qualifikationen verwalten</a></li>
+                                <li><a class="dropdown-item" href="<?= BASE_PATH ?>settings/personal/qualird/index.php">RD Qualifikationen verwalten</a></li>
+                                <li><a class="dropdown-item" href="<?= BASE_PATH ?>settings/personal/qualifd/index.php">Fachdienste verwalten</a></li>
                                 <?php if (Permissions::check(['admin'])) { ?>
-                                    <li><a class="dropdown-item" href="<?= BASE_PATH ?>admin/settings/documents/templates.php">Dokumente verwalten</a></li>
-                                    <li><a class="dropdown-item" href="<?= BASE_PATH ?>admin/settings/antraege/list.php">Antragstypen verwalten</a></li>
+                                    <li><a class="dropdown-item" href="<?= BASE_PATH ?>settings/documents/templates.php">Dokumente verwalten</a></li>
+                                    <li><a class="dropdown-item" href="<?= BASE_PATH ?>settings/antraege/list.php">Antragstypen verwalten</a></li>
                                 <?php } ?>
                                 <li>
                                     <hr class="dropdown-divider">
@@ -80,17 +84,8 @@ use App\Auth\Permissions; ?>
                                 <li>
                                     <h6 class="dropdown-header">Fahrzeuge</h6>
                                 </li>
-                                <li><a class="dropdown-item" href="<?= BASE_PATH ?>admin/settings/fahrzeuge/fahrzeuge/index.php">Bearbeiten</a></li>
-                                <li><a class="dropdown-item" href="<?= BASE_PATH ?>admin/settings/fahrzeuge/beladelisten/index.php">Beladelisten</a></li>
-                                <li>
-                                    <hr class="dropdown-divider">
-                                </li>
-                            <?php }
-                            if (Permissions::check(['admin', 'edivi.view'])) { ?>
-                                <li>
-                                    <h6 class="dropdown-header">eNOTF</h6>
-                                </li>
-                                <li><a class="dropdown-item" href="<?= BASE_PATH ?>admin/settings/enotf/ziele/index.php">Transportziele</a></li>
+                                <li><a class="dropdown-item" href="<?= BASE_PATH ?>settings/fahrzeuge/fahrzeuge/index.php">Bearbeiten</a></li>
+                                <li><a class="dropdown-item" href="<?= BASE_PATH ?>settings/fahrzeuge/beladelisten/index.php">Beladelisten</a></li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
@@ -99,7 +94,7 @@ use App\Auth\Permissions; ?>
                                 <h6 class="dropdown-header">Sonstiges</h6>
                             </li>
                             <?php if (Permissions::check(['admin', 'dashboard.manage'])) { ?>
-                                <li><a class="dropdown-item" href="<?= BASE_PATH ?>admin/settings/dashboard/index.php">Dashboard</a></li>
+                                <li><a class="dropdown-item" href="<?= BASE_PATH ?>settings/dashboard/index.php">Dashboard</a></li>
                             <?php } ?>
                         </ul>
                     </li>
@@ -109,8 +104,8 @@ use App\Auth\Permissions; ?>
                         <?= $_SESSION['cirs_username'] ?> <span class="badge text-bg-<?= $_SESSION['role_color'] ?>"><?= $_SESSION['role_name'] ?></span>
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="<?= BASE_PATH ?>admin/users/editprofile.php">Profil bearbeiten</a></li>
-                        <li><a class="dropdown-item" href="<?= BASE_PATH ?>admin/logout.php">Abmelden</a></li>
+                        <li><a class="dropdown-item" href="<?= BASE_PATH ?>users/editprofile.php">Profil bearbeiten</a></li>
+                        <li><a class="dropdown-item" href="<?= BASE_PATH ?>logout.php">Abmelden</a></li>
                     </ul>
                 </li>
             </ul>

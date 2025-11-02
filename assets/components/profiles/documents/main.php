@@ -95,7 +95,7 @@ use App\Auth\Permissions;
             // echo "<a href='$pdfPath' download class='btn btn-sm btn-success'><i class='las la-download'></i></a>";
 
             if (Permissions::check('admin')) {
-                echo " <a href='" . BASE_PATH . "admin/personal/dokument-delete.php?id={$doks['docid']}&pid=$openedID' class='btn btn-sm btn-danger'><i class='las la-trash'></i></a>";
+                echo " <a href='" . BASE_PATH . "personal/dokument-delete.php?id={$doks['docid']}&pid=$openedID' class='btn btn-sm btn-danger'><i class='las la-trash'></i></a>";
             }
 
             echo "</td>";

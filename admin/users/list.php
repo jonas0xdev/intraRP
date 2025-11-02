@@ -5,7 +5,7 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
     $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
 
-    header("Location: " . BASE_PATH . "admin/login.php");
+    header("Location: " . BASE_PATH . "login.php");
     exit();
 }
 
@@ -14,7 +14,7 @@ use App\Helpers\Flash;
 
 if (!Permissions::check(['admin', 'users.view'])) {
     Flash::set('error', 'no-permissions');
-    header("Location: " . BASE_PATH . "admin/index.php");
+    header("Location: " . BASE_PATH . "index.php");
 }
 ?>
 
@@ -103,7 +103,7 @@ if (!Permissions::check(['admin', 'users.view'])) {
                                     echo "<td><span class='badge text-bg-" . $role_color . "'>" . $role_name . "</span></td>";
                                     echo "<td><span style='display:none'>" . $row['created_at'] . "</span>" . $date . "</td>";
                                     if (Permissions::check(['admin', 'users.edit'])) {
-                                        echo "<td><a href='" . BASE_PATH . "admin/users/edit.php?id=" . $row['id'] . "' class='btn btn-sm btn-primary'>Bearbeiten</a>";
+                                        echo "<td><a href='" . BASE_PATH . "users/edit.php?id=" . $row['id'] . "' class='btn btn-sm btn-primary'>Bearbeiten</a>";
                                         echo "</td>";
                                     } else {
                                         echo "<td></td>";

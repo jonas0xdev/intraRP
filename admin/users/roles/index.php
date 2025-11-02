@@ -5,7 +5,7 @@ require_once __DIR__ . '/../../../vendor/autoload.php';
 if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
     $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
 
-    header("Location: " . BASE_PATH . "admin/login.php");
+    header("Location: " . BASE_PATH . "login.php");
     exit();
 }
 
@@ -13,7 +13,7 @@ use App\Auth\Permissions;
 use App\Helpers\Flash;
 
 if (!Permissions::check(['admin', 'users.view'])) {
-    header("Location: " . BASE_PATH . "admin/index.php");
+    header("Location: " . BASE_PATH . "index.php");
 }
 ?>
 
@@ -116,7 +116,7 @@ if (!Permissions::check(['admin', 'users.view'])) {
         <div class="modal fade" id="editRoleModal" tabindex="-1" aria-labelledby="editRoleModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <form action="<?= BASE_PATH ?>admin/users/roles/update.php" method="POST">
+                    <form action="<?= BASE_PATH ?>users/roles/update.php" method="POST">
                         <div class="modal-header">
                             <h5 class="modal-title" id="editRoleModalLabel">Rolle bearbeiten</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
@@ -217,7 +217,7 @@ if (!Permissions::check(['admin', 'users.view'])) {
                         </div>
                     </form>
 
-                    <form id="delete-role-form" action="<?= BASE_PATH ?>admin/users/roles/delete.php" method="POST" style="display:none;">
+                    <form id="delete-role-form" action="<?= BASE_PATH ?>users/roles/delete.php" method="POST" style="display:none;">
                         <input type="hidden" name="id" id="role-delete-id">
                     </form>
                 </div>
@@ -231,7 +231,7 @@ if (!Permissions::check(['admin', 'users.view'])) {
         <div class="modal fade" id="createRoleModal" tabindex="-1" aria-labelledby="createRoleModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <form action="<?= BASE_PATH ?>admin/users/roles/create.php" method="POST">
+                    <form action="<?= BASE_PATH ?>users/roles/create.php" method="POST">
 
                         <div class="modal-header">
                             <h5 class="modal-title" id="createRoleModalLabel">Neue Rolle erstellen</h5>

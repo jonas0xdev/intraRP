@@ -6,7 +6,7 @@ require __DIR__ . '/../../../assets/config/database.php';
 
 if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
     $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
-    header("Location: " . BASE_PATH . "admin/login.php");
+    header("Location: " . BASE_PATH . "login.php");
     exit();
 }
 
@@ -15,7 +15,7 @@ use App\Helpers\Flash;
 
 if (!Permissions::check(['admin'])) {
     Flash::set('error', 'no-permissions');
-    header("Location: " . BASE_PATH . "admin/index.php");
+    header("Location: " . BASE_PATH . "index.php");
     exit();
 }
 
@@ -25,7 +25,7 @@ if (isset($_GET['toggle']) && is_numeric($_GET['toggle'])) {
     $stmt = $pdo->prepare("UPDATE intra_antrag_typen SET aktiv = NOT aktiv WHERE id = ?");
     $stmt->execute([$id]);
     Flash::set('success', 'Status erfolgreich geändert');
-    header("Location: " . BASE_PATH . "admin/settings/antraege/list.php");
+    header("Location: " . BASE_PATH . "settings/antraege/list.php");
     exit();
 }
 
@@ -46,7 +46,7 @@ if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
         Flash::set('success', 'Antragstyp erfolgreich gelöscht');
     }
 
-    header("Location: " . BASE_PATH . "admin/settings/antraege/list.php");
+    header("Location: " . BASE_PATH . "settings/antraege/list.php");
     exit();
 }
 
@@ -58,7 +58,7 @@ if (isset($_POST['update_sortierung'])) {
         $stmt->execute([$sort, $id]);
     }
     Flash::set('success', 'Sortierung aktualisiert');
-    header("Location: " . BASE_PATH . "admin/settings/antraege/list.php");
+    header("Location: " . BASE_PATH . "settings/antraege/list.php");
     exit();
 }
 
@@ -107,7 +107,7 @@ $typen = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <hr class="text-light my-3">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h1><i class="las la-clipboard-list me-2"></i>Antragstypen verwalten</h1>
-                        <a href="<?= BASE_PATH ?>admin/settings/antraege/create.php" class="btn btn-success">
+                        <a href="<?= BASE_PATH ?>settings/antraege/create.php" class="btn btn-success">
                             <i class="las la-plus me-2"></i>Neuer Antragstyp
                         </a>
                     </div>
@@ -179,7 +179,7 @@ $typen = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                                     </td>
                                                     <td class="text-end">
                                                         <div class="btn-group btn-group-sm">
-                                                            <a href="<?= BASE_PATH ?>admin/settings/antraege/edit.php?id=<?= $typ['id'] ?>"
+                                                            <a href="<?= BASE_PATH ?>settings/antraege/edit.php?id=<?= $typ['id'] ?>"
                                                                 class="btn btn-primary mx-1"
                                                                 title="Bearbeiten">
                                                                 <i class="las la-edit"></i>
@@ -215,7 +215,7 @@ $typen = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <?php endif; ?>
 
                     <div class="mt-4">
-                        <a href="<?= BASE_PATH ?>admin/antraege/list.php" class="btn btn-secondary">
+                        <a href="<?= BASE_PATH ?>antrag/admin/list.php" class="btn btn-secondary">
                             <i class="las la-arrow-left me-2"></i>Zurück zur Antragsübersicht
                         </a>
                     </div>

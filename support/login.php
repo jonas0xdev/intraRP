@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'Support-Zugang wurde verwendet'
             );
 
-            header('Location: ' . BASE_PATH . 'admin/index.php');
+            header('Location: ' . BASE_PATH . 'index.php');
             exit;
         } else {
             $error = 'Ungültige Zugangsdaten oder Token bereits verwendet/abgelaufen.';
@@ -287,7 +287,7 @@ if (isset($_GET['expired']) && $_GET['expired'] == '1') {
         </form>
 
         <div class="footer">
-            <a href="<?= BASE_PATH ?>admin/login.php">← Zurück zum normalen Login</a>
+            <a href="<?= BASE_PATH ?>login.php">← Zurück zum normalen Login</a>
         </div>
     </div>
 </body>

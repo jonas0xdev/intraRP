@@ -6,7 +6,7 @@ require __DIR__ . '/../../assets/config/database.php';
 
 if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
     $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
-    header("Location: " . BASE_PATH . "admin/login.php");
+    header("Location: " . BASE_PATH . "login.php");
     exit();
 }
 
@@ -16,7 +16,7 @@ use App\Utils\AuditLogger;
 
 if (!Permissions::check(['admin', 'application.edit'])) {
     Flash::set('error', 'no-permissions');
-    header("Location: " . BASE_PATH . "admin/index.php");
+    header("Location: " . BASE_PATH . "index.php");
     exit();
 }
 
@@ -24,7 +24,7 @@ $caseid = $_GET['antrag'] ?? null;
 
 if (!$caseid) {
     Flash::set('error', 'Keine Antragsnummer angegeben.');
-    header("Location: " . BASE_PATH . "admin/antraege/list.php");
+    header("Location: " . BASE_PATH . "antrag/list.php");
     exit();
 }
 
@@ -40,7 +40,7 @@ $antrag = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$antrag) {
     Flash::set('error', 'Antrag nicht gefunden.');
-    header("Location: " . BASE_PATH . "admin/antraege/list.php");
+    header("Location: " . BASE_PATH . "antrag/list.php");
     exit();
 }
 
@@ -82,7 +82,7 @@ if (isset($_POST['save'])) {
     $stmt->execute([$cirs_manager, $cirs_status, $cirs_text, $jetzt, $antrag['id']]);
 
     Flash::set('success', 'Antrag erfolgreich aktualisiert');
-    header("Location: " . BASE_PATH . "admin/antraege/view.php?antrag=" . $caseid);
+    header("Location: " . BASE_PATH . "antrag/view.php?antrag=" . $caseid);
     exit();
 }
 
@@ -304,7 +304,7 @@ $createDate = new DateTime($antrag['time_added'] ?? 'now');
                                         <button type="submit" name="save" class="btn btn-success">
                                             <i class="las la-save me-2"></i>Änderungen speichern
                                         </button>
-                                        <a href="<?= BASE_PATH ?>admin/antraege/list.php" class="btn btn-secondary">
+                                        <a href="<?= BASE_PATH ?>antrag/admin/list.php" class="btn btn-secondary">
                                             <i class="las la-arrow-left me-2"></i>Zurück zur Übersicht
                                         </a>
                                     </div>

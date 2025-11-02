@@ -8,7 +8,7 @@ use App\Helpers\Flash;
 
 if (!Permissions::check(['admin', 'vehicles.manage'])) {
     Flash::set('error', 'no-permissions');
-    header("Location: " . BASE_PATH . "admin/settings/fahrzeuge/beladelisten/index.php");
+    header("Location: " . BASE_PATH . "settings/fahrzeuge/beladelisten/index.php");
     exit;
 }
 

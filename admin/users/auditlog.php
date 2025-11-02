@@ -6,7 +6,7 @@ require __DIR__ . '/../../assets/config/database.php';
 if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
     $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
 
-    header("Location: " . BASE_PATH . "admin/login.php");
+    header("Location: " . BASE_PATH . "login.php");
     exit();
 }
 
@@ -15,7 +15,7 @@ use App\Helpers\Flash;
 
 if (!Permissions::check(['admin', 'audit.view'])) {
     Flash::set('error', 'no-permissions');
-    header("Location: " . BASE_PATH . "admin/index.php");
+    header("Location: " . BASE_PATH . "index.php");
 }
 
 $stmtg = $pdo->prepare("SELECT id, username FROM intra_users");
@@ -104,7 +104,7 @@ $uinfo = $stmtg->fetchAll(PDO::FETCH_UNIQUE);
                                     echo "<td class='fw-bold'>" . $row['module'] . "</td>";
                                     echo "<td>" . $row['action'] . "</td>";
                                     echo "<td>" . $row['details'] . "</td>";
-                                    echo "<td><a href='" . BASE_PATH . "admin/users/edit.php?id=" . $row['user'] . "'>" . $uinfo2['username'] . " (ID: " . $row['user'] . ")</a></td>";
+                                    echo "<td><a href='" . BASE_PATH . "users/edit.php?id=" . $row['user'] . "'>" . $uinfo2['username'] . " (ID: " . $row['user'] . ")</a></td>";
                                     echo "</tr>";
                                 }
                                 ?>

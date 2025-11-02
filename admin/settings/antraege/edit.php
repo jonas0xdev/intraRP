@@ -6,7 +6,7 @@ require __DIR__ . '/../../../assets/config/database.php';
 
 if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
     $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
-    header("Location: " . BASE_PATH . "admin/login.php");
+    header("Location: " . BASE_PATH . "login.php");
     exit();
 }
 
@@ -16,7 +16,7 @@ use App\Utils\AuditLogger;
 
 if (!Permissions::check(['admin'])) {
     Flash::set('error', 'no-permissions');
-    header("Location: " . BASE_PATH . "admin/index.php");
+    header("Location: " . BASE_PATH . "index.php");
     exit();
 }
 
@@ -24,7 +24,7 @@ $id = $_GET['id'] ?? null;
 
 if (!$id || !is_numeric($id)) {
     Flash::set('error', 'Ungültige Antragstyp-ID');
-    header("Location: " . BASE_PATH . "admin/settings/antraege/list.php");
+    header("Location: " . BASE_PATH . "settings/antraege/list.php");
     exit();
 }
 
@@ -35,7 +35,7 @@ $typ = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$typ) {
     Flash::set('error', 'Antragstyp nicht gefunden');
-    header("Location: " . BASE_PATH . "admin/settings/antraege/list.php");
+    header("Location: " . BASE_PATH . "settings/antraege/list.php");
     exit();
 }
 
@@ -61,7 +61,7 @@ if (isset($_POST['update_typ'])) {
         $auditLogger->log($_SESSION['userid'], 'Antragstyp aktualisiert', $name . ' [ID: ' . $id . ']', 'Antragstypen', 1);
 
         Flash::set('success', 'Antragstyp erfolgreich aktualisiert');
-        header("Location: " . BASE_PATH . "admin/settings/antraege/edit.php?id=" . $id);
+        header("Location: " . BASE_PATH . "settings/antraege/edit.php?id=" . $id);
         exit();
     }
 }
@@ -110,7 +110,7 @@ if (isset($_POST['add_feld'])) {
         ]);
 
         Flash::set('success', 'Feld erfolgreich hinzugefügt');
-        header("Location: " . BASE_PATH . "admin/settings/antraege/edit.php?id=" . $id);
+        header("Location: " . BASE_PATH . "settings/antraege/edit.php?id=" . $id);
         exit();
     }
 }
@@ -121,7 +121,7 @@ if (isset($_GET['delete_feld'])) {
     $stmt = $pdo->prepare("DELETE FROM intra_antrag_felder WHERE id = ? AND antragstyp_id = ?");
     $stmt->execute([$feld_id, $id]);
     Flash::set('success', 'Feld gelöscht');
-    header("Location: " . BASE_PATH . "admin/settings/antraege/edit.php?id=" . $id);
+    header("Location: " . BASE_PATH . "settings/antraege/edit.php?id=" . $id);
     exit();
 }
 
@@ -133,7 +133,7 @@ if (isset($_POST['update_felder_sortierung'])) {
         $stmt->execute([$sort, $feld_id, $id]);
     }
     Flash::set('success', 'Sortierung aktualisiert');
-    header("Location: " . BASE_PATH . "admin/settings/antraege/edit.php?id=" . $id);
+    header("Location: " . BASE_PATH . "settings/antraege/edit.php?id=" . $id);
     exit();
 }
 
@@ -301,7 +301,7 @@ $felder = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <?php endif; ?>
                     </div>
 
-                    <a href="<?= BASE_PATH ?>admin/settings/antraege/list.php" class="btn btn-secondary">
+                    <a href="<?= BASE_PATH ?>settings/antraege/list.php" class="btn btn-secondary">
                         <i class="las la-arrow-left me-2"></i>Zurück zur Übersicht
                     </a>
                 </div>

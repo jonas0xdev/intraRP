@@ -10,7 +10,7 @@ use App\Utils\AuditLogger;
 
 if (!Permissions::check('admin')) {
     Flash::set('error', 'no-permissions');
-    header("Location: " . BASE_PATH . "admin/settings/enotf/ziele/index.php");
+    header("Location: " . BASE_PATH . "settings/enotf/ziele/index.php");
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($name) || empty($identifier)) {
         Flash::set('error', 'missing-fields');
-        header("Location: " . BASE_PATH . "admin/settings/enotf/ziele/index.php");
+        header("Location: " . BASE_PATH . "settings/enotf/ziele/index.php");
         exit;
     }
 
@@ -40,15 +40,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         Flash::set('target', 'created');
         $auditLogger = new AuditLogger($pdo);
         $auditLogger->log($_SESSION['userid'], 'Ziel erstellt ', 'Name: ' . $name, 'Ziele', 1);
-        header("Location: " . BASE_PATH . "admin/settings/enotf/ziele/index.php");
+        header("Location: " . BASE_PATH . "settings/enotf/ziele/index.php");
         exit;
     } catch (PDOException $e) {
         error_log("PDO Insert Error: " . $e->getMessage());
         Flash::set('error', 'exception');
-        header("Location: " . BASE_PATH . "admin/settings/enotf/ziele/index.php");
+        header("Location: " . BASE_PATH . "settings/enotf/ziele/index.php");
         exit;
     }
 } else {
-    header("Location: " . BASE_PATH . "admin/settings/enotf/ziele/index.php");
+    header("Location: " . BASE_PATH . "settings/enotf/ziele/index.php");
     exit;
 }

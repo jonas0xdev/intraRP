@@ -106,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 <div class="row edivi__box">
     <div class="col">
-        <form id="qmActionsForm" action="<?= BASE_PATH ?>admin/enotf/qm-actions-modal.php?id=<?= $_GET['id'] ?>" method="post">
+        <form id="qmActionsForm" action="<?= BASE_PATH ?>enotf/qm-actions-modal.php?id=<?= $_GET['id'] ?>" method="post">
             <div class="row mt-2 mb-1">
                 <div class="col-3 fw-bold">Gesichtet von</div>
                 <div class="col">

@@ -4,7 +4,7 @@ require_once __DIR__ . '/../../assets/config/config.php';
 require_once __DIR__ . '/../../vendor/autoload.php';
 require __DIR__ . '/../../assets/config/database.php';
 if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
-    header("Location: " . BASE_PATH . "admin/login.php");
+    header("Location: " . BASE_PATH . "login.php");
 }
 
 use App\Auth\Permissions;
@@ -12,12 +12,12 @@ use App\Helpers\Flash;
 
 if (!Permissions::check(['admin', 'personnel.view'])) {
     Flash::set('error', 'no-permissions');
-    header("Location: " . BASE_PATH . "admin/index.php");
+    header("Location: " . BASE_PATH . "index.php");
 }
 
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     Flash::set('error', 'invalid-id');
-    header("Location: " . BASE_PATH . "admin/index.php");
+    header("Location: " . BASE_PATH . "index.php");
 }
 
 //Abfrage der Nutzer ID vom Login
@@ -459,7 +459,7 @@ if (isset($_POST['new'])) {
                                 <h5 class="fw-bold">Achtung!</h5>
                                 Dieses Mitarbeiterprofil gehört einem Funktionsträger - dieser besitzt ein registriertes Benutzerkonto im Intranet.<br>
                                 <?php if (Permissions::check(['admin', 'users.view'])) { ?>
-                                    <strong>Name u. Benutzername:</strong> <a href="<?= BASE_PATH ?>admin/users/edit.php?id=<?= $panelakte['id'] ?>" class="text-decoration-none"><?= $panelakte['fullname'] ?> (<?= $panelakte['username'] ?>)</a>
+                                    <strong>Name u. Benutzername:</strong> <a href="<?= BASE_PATH ?>users/edit.php?id=<?= $panelakte['id'] ?>" class="text-decoration-none"><?= $panelakte['fullname'] ?> (<?= $panelakte['username'] ?>)</a>
                                 <?php } else { ?>
                                     <strong>Name u. Benutzername:</strong> <?= $panelakte['fullname'] ?> (<?= $panelakte['username'] ?>)
                                 <?php } ?>

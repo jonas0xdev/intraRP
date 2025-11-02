@@ -5,7 +5,7 @@ require_once __DIR__ . '/../../../vendor/autoload.php';
 if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
     $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
 
-    header("Location: " . BASE_PATH . "admin/login.php");
+    header("Location: " . BASE_PATH . "login.php");
     exit();
 }
 
@@ -14,7 +14,7 @@ use App\Helpers\Flash;
 
 if (!Permissions::check(['admin', 'dashboard.manage'])) {
     Flash::set('error', 'no-permissions');
-    header("Location: " . BASE_PATH . "admin/index.php");
+    header("Location: " . BASE_PATH . "index.php");
 }
 ?>
 
@@ -157,7 +157,7 @@ if (!Permissions::check(['admin', 'dashboard.manage'])) {
     <div class="modal fade" id="editTileModal" tabindex="-1" aria-labelledby="editTileModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form action="<?= BASE_PATH ?>admin/settings/dashboard/tiles/update.php" method="POST">
+                <form action="<?= BASE_PATH ?>settings/dashboard/tiles/update.php" method="POST">
                     <div class="modal-header">
                         <h5 class="modal-title" id="editTileModalLabel">Verlinkung bearbeiten</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
@@ -206,7 +206,7 @@ if (!Permissions::check(['admin', 'dashboard.manage'])) {
                     </div>
                 </form>
 
-                <form id="delete-tile-form" action="<?= BASE_PATH ?>admin/settings/dashboard/tiles/delete.php" method="POST" style="display: none;">
+                <form id="delete-tile-form" action="<?= BASE_PATH ?>settings/dashboard/tiles/delete.php" method="POST" style="display: none;">
                     <input type="hidden" name="id" id="delete-tile-id">
                 </form>
 
@@ -218,7 +218,7 @@ if (!Permissions::check(['admin', 'dashboard.manage'])) {
     <div class="modal fade" id="createTileModal" tabindex="-1" aria-labelledby="createTileModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form action="<?= BASE_PATH ?>admin/settings/dashboard/tiles/create.php" method="POST">
+                <form action="<?= BASE_PATH ?>settings/dashboard/tiles/create.php" method="POST">
                     <div class="modal-header">
                         <h5 class="modal-title" id="createTileModalLabel">Neue Verlinkung erstellen</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
@@ -269,7 +269,7 @@ if (!Permissions::check(['admin', 'dashboard.manage'])) {
     <div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form action="<?= BASE_PATH ?>admin/settings/dashboard/categories/update.php" method="POST">
+                <form action="<?= BASE_PATH ?>settings/dashboard/categories/update.php" method="POST">
                     <div class="modal-header">
                         <h5 class="modal-title" id="editCategoryModalLabel">Kategorie bearbeiten</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
@@ -298,7 +298,7 @@ if (!Permissions::check(['admin', 'dashboard.manage'])) {
                     </div>
                 </form>
 
-                <form id="delete-category-form" action="<?= BASE_PATH ?>admin/settings/dashboard/categories/delete.php" method="POST" style="display: none;">
+                <form id="delete-category-form" action="<?= BASE_PATH ?>settings/dashboard/categories/delete.php" method="POST" style="display: none;">
                     <input type="hidden" name="id" id="delete-category-id">
                 </form>
             </div>
@@ -309,7 +309,7 @@ if (!Permissions::check(['admin', 'dashboard.manage'])) {
     <div class="modal fade" id="createCategoryModal" tabindex="-1" aria-labelledby="createCategoryModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form action="<?= BASE_PATH ?>admin/settings/dashboard/categories/create.php" method="POST">
+                <form action="<?= BASE_PATH ?>settings/dashboard/categories/create.php" method="POST">
                     <div class="modal-header">
                         <h5 class="modal-title" id="createCategoryModalLabel">Neue Kategorie erstellen</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>

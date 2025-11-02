@@ -6,7 +6,7 @@ require __DIR__ . '/../../assets/config/database.php';
 if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
     $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
 
-    header("Location: " . BASE_PATH . "admin/login.php");
+    header("Location: " . BASE_PATH . "login.php");
     exit();
 }
 
@@ -15,7 +15,7 @@ use App\Helpers\Flash;
 
 if (!Permissions::check(['admin', 'personnel.view'])) {
     Flash::set('error', 'no-permissions');
-    header("Location: " . BASE_PATH . "admin/index.php");
+    header("Location: " . BASE_PATH . "index.php");
 }
 
 $stmtg = $pdo->prepare("SELECT * FROM intra_mitarbeiter_dienstgrade");
@@ -80,9 +80,9 @@ $rdginfo = $stmtr->fetchAll(PDO::FETCH_UNIQUE);
                         <div class="col">
                             <div class="d-flex justify-content-end">
                                 <?php if (isset($_GET['archiv'])) { ?>
-                                    <a href="<?= BASE_PATH ?>admin/personal/list.php" class="btn btn-success">Aktive Mitarbeiter</a>
+                                    <a href="<?= BASE_PATH ?>personal/list.php" class="btn btn-success">Aktive Mitarbeiter</a>
                                 <?php } else { ?>
-                                    <a href="<?= BASE_PATH ?>admin/personal/list.php?archiv" class="btn btn-danger">Archiv</a>
+                                    <a href="<?= BASE_PATH ?>personal/list.php?archiv" class="btn btn-danger">Archiv</a>
                                 <?php } ?>
                             </div>
                         </div>
@@ -147,7 +147,7 @@ $rdginfo = $stmtr->fetchAll(PDO::FETCH_UNIQUE);
                                         echo " <span class='badge text-bg-warning' style='color:var(--black)'>" . $rdqualtext . "</span></td>";
                                     }
                                     echo "<td><span style='display:none'>" . $row['einstdatum'] . "</span>" . $einstellungsdatum . "</td>";
-                                    echo "<td><a href='" . BASE_PATH . "admin/personal/profile.php?id=" . $row['id'] . "' class='btn btn-sm btn-primary'>Ansehen</a></td>";
+                                    echo "<td><a href='" . BASE_PATH . "personal/profile.php?id=" . $row['id'] . "' class='btn btn-sm btn-primary'>Ansehen</a></td>";
                                     echo "</tr>";
                                 }
                                 ?>

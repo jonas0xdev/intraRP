@@ -9,7 +9,7 @@ require __DIR__ . '/../assets/config/database.php';
 require __DIR__ . '/../vendor/autoload.php';
 
 if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions']) || !in_array('full_admin', $_SESSION['permissions'])) {
-    header('Location: ' . BASE_PATH . 'admin/login.php');
+    header('Location: ' . BASE_PATH . 'login.php');
     exit;
 }
 

@@ -2,11 +2,11 @@
 session_start();
 require_once __DIR__ . '/../../assets/config/config.php';
 require_once __DIR__ . '/../../vendor/autoload.php';
-require __DIR__ . '/../../assets/config/database.php';
+require_once __DIR__ . '/../../assets/config/database.php';
 
 if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
     $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
-    header("Location: " . BASE_PATH . "admin/login.php");
+    header("Location: " . BASE_PATH . "login.php");
     exit();
 }
 
@@ -15,7 +15,7 @@ use App\Helpers\Flash;
 
 if (!Permissions::check(['admin', 'application.edit'])) {
     Flash::set('error', 'no-permissions');
-    header("Location: " . BASE_PATH . "admin/index.php");
+    header("Location: " . BASE_PATH . "index.php");
     exit();
 }
 
@@ -39,22 +39,12 @@ $antraege = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <html lang="en" data-bs-theme="light">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Antragsübersicht &rsaquo; <?php echo SYSTEM_NAME ?></title>
-    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/css/style.min.css" />
-    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/css/admin.min.css" />
-    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/_ext/lineawesome/css/line-awesome.min.css" />
-    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/fonts/mavenpro/css/all.min.css" />
-    <link rel="stylesheet" href="<?= BASE_PATH ?>vendor/twbs/bootstrap/dist/css/bootstrap.min.css">
-    <script src="<?= BASE_PATH ?>vendor/components/jquery/jquery.min.js"></script>
-    <script src="<?= BASE_PATH ?>vendor/twbs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <link rel="stylesheet" href="<?= BASE_PATH ?>vendor/datatables.net/datatables.net-bs5/css/dataTables.bootstrap5.min.css">
-    <link rel="icon" type="image/png" href="<?= BASE_PATH ?>assets/favicon/favicon-96x96.png" sizes="96x96" />
-    <meta name="theme-color" content="<?php echo SYSTEM_COLOR ?>" />
+    <?php
+    $SITE_TITLE = 'Antragsübersicht';
+    include __DIR__ . '/../../assets/components/_base/admin/head.php'; ?>
 </head>
 
-<body data-bs-theme="dark" data-page="antraege">
+<body data-bs-theme="dark" data-page="mitarbeiter">
     <?php include __DIR__ . "/../../assets/components/navbar.php"; ?>
 
     <div class="container-full position-relative" id="mainpageContainer">
@@ -68,7 +58,7 @@ $antraege = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <i class="las la-clipboard-list me-2"></i>Antragsübersicht
                         </h1>
                         <?php if (Permissions::check(['admin'])): ?>
-                            <a href="<?= BASE_PATH ?>admin/settings/antraege/list.php" class="btn btn-primary">
+                            <a href="<?= BASE_PATH ?>settings/antraege/list.php" class="btn btn-primary">
                                 <i class="las la-cog me-2"></i>Typen verwalten
                             </a>
                         <?php endif; ?>
@@ -122,7 +112,7 @@ $antraege = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         }
 
                                         // URL zur Antragsansicht
-                                        $view_url = BASE_PATH . "admin/antraege/view.php?antrag={$row['uniqueid']}";
+                                        $view_url = BASE_PATH . "antrag/view.php?antrag={$row['uniqueid']}";
 
                                         echo "<tr";
                                         if (!empty($bgColor)) {

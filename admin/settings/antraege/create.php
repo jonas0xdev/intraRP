@@ -6,7 +6,7 @@ require __DIR__ . '/../../../assets/config/database.php';
 
 if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
     $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
-    header("Location: " . BASE_PATH . "admin/login.php");
+    header("Location: " . BASE_PATH . "login.php");
     exit();
 }
 
@@ -16,7 +16,7 @@ use App\Utils\AuditLogger;
 
 if (!Permissions::check(['admin'])) {
     Flash::set('error', 'no-permissions');
-    header("Location: " . BASE_PATH . "admin/index.php");
+    header("Location: " . BASE_PATH . "index.php");
     exit();
 }
 
@@ -58,7 +58,7 @@ if (isset($_POST['submit'])) {
             );
 
             Flash::set('success', 'Antragstyp erfolgreich erstellt. Sie können jetzt Felder hinzufügen.');
-            header("Location: " . BASE_PATH . "admin/settings/antraege/edit.php?id=" . $new_id);
+            header("Location: " . BASE_PATH . "settings/antraege/edit.php?id=" . $new_id);
             exit();
         } catch (PDOException $e) {
             Flash::set('error', 'Fehler beim Erstellen: ' . $e->getMessage());
@@ -195,7 +195,7 @@ $default_sort = ($max_sort ?? 0) + 1;
                             </div>
 
                             <div class="d-flex justify-content-between">
-                                <a href="<?= BASE_PATH ?>admin/settings/antraege/list.php" class="btn btn-secondary">
+                                <a href="<?= BASE_PATH ?>settings/antraege/list.php" class="btn btn-secondary">
                                     <i class="las la-times me-2"></i>Abbrechen
                                 </a>
                                 <button type="submit" name="submit" class="btn btn-success">

@@ -7,7 +7,7 @@ require __DIR__ . '/../../assets/config/database.php';
 if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
     $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
 
-    header("Location: " . BASE_PATH . "admin/login.php");
+    header("Location: " . BASE_PATH . "login.php");
     exit();
 }
 
@@ -17,7 +17,7 @@ use App\Utils\AuditLogger;
 
 if (!Permissions::check(['admin', 'personnel.edit'])) {
     Flash::set('error', 'no-permissions');
-    header("Location: " . BASE_PATH . "admin/index.php");
+    header("Location: " . BASE_PATH . "index.php");
 }
 
 $stmtr = $pdo->prepare("SELECT * FROM intra_mitarbeiter_rdquali WHERE none = 1 LIMIT 1");
@@ -144,7 +144,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $response['success'] = true;
         $response['message'] = "Benutzer erfolgreich erstellt!";
-        $response['redirect'] = BASE_PATH . "admin/personal/profile.php?id=" . $savedId;
+        $response['redirect'] = BASE_PATH . "personal/profile.php?id=" . $savedId;
     } catch (Exception $e) {
         $response['message'] = "Fehler: " . $e->getMessage();
     }

@@ -10,7 +10,7 @@ use App\Utils\AuditLogger;
 
 if (!Permissions::check(['admin', 'vehicles.manage'])) {
     Flash::set('error', 'no-permissions');
-    header("Location: " . BASE_PATH . "admin/settings/fahrzeuge/fahrzeuge/index.php");
+    header("Location: " . BASE_PATH . "settings/fahrzeuge/fahrzeuge/index.php");
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($id <= 0 || empty($name) || empty($veh_type) || empty($identifier)) {
         Flash::set('error', 'missing-fields');
-        header("Location: " . BASE_PATH . "admin/settings/fahrzeuge/fahrzeuge/index.php");
+        header("Location: " . BASE_PATH . "settings/fahrzeuge/fahrzeuge/index.php");
         exit;
     }
 
@@ -46,15 +46,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         Flash::set('success', 'updated');
         $auditLogger = new AuditLogger($pdo);
         $auditLogger->log($_SESSION['userid'], 'Fahrzeug aktualisiert [ID: ' . $id . ']', NULL, 'Fahrzeuge', 1);
-        header("Location: " . BASE_PATH . "admin/settings/fahrzeuge/fahrzeuge/index.php");
+        header("Location: " . BASE_PATH . "settings/fahrzeuge/fahrzeuge/index.php");
         exit;
     } catch (PDOException $e) {
         error_log("PDO Error: " . $e->getMessage());
         Flash::set('error', 'exception');
-        header("Location: " . BASE_PATH . "admin/settings/fahrzeuge/fahrzeuge/index.php");
+        header("Location: " . BASE_PATH . "settings/fahrzeuge/fahrzeuge/index.php");
         exit;
     }
 } else {
-    header("Location: " . BASE_PATH . "admin/settings/fahrzeuge/fahrzeuge/index.php");
+    header("Location: " . BASE_PATH . "settings/fahrzeuge/fahrzeuge/index.php");
     exit;
 }

@@ -10,7 +10,7 @@ use App\Utils\AuditLogger;
 
 if (!Permissions::check('full_admin')) {
     Flash::set('error', 'no-permissions');
-    header("Location: " . BASE_PATH . "admin/users/roles/index.php");
+    header("Location: " . BASE_PATH . "users/roles/index.php");
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($id <= 0) {
         Flash::set('role', 'invalid-id');
-        header("Location: " . BASE_PATH . "admin/users/roles/index.php");
+        header("Location: " . BASE_PATH . "users/roles/index.php");
         exit;
     }
 
@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $checkStmt->execute([':id' => $id]);
         if (!$checkStmt->fetch()) {
             Flash::set('role', 'not-found');
-            header("Location: " . BASE_PATH . "admin/users/roles/index.php");
+            header("Location: " . BASE_PATH . "users/roles/index.php");
             exit;
         }
 
@@ -37,15 +37,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         Flash::set('role', 'deleted');
         $auditLogger = new AuditLogger($pdo);
         $auditLogger->log($_SESSION['userid'], 'Rolle gelöscht [ID: ' . $id . ']', NULL, 'Rollen', 1);
-        header("Location: " . BASE_PATH . "admin/users/roles/index.php");
+        header("Location: " . BASE_PATH . "users/roles/index.php");
         exit;
     } catch (PDOException $e) {
         error_log("PDO Delete Error: " . $e->getMessage());
         Flash::set('error', 'exception');
-        header("Location: " . BASE_PATH . "admin/users/roles/index.php");
+        header("Location: " . BASE_PATH . "users/roles/index.php");
         exit;
     }
 } else {
-    header("Location: " . BASE_PATH . "admin/users/roles/index.php");
+    header("Location: " . BASE_PATH . "users/roles/index.php");
     exit;
 }

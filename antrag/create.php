@@ -2,22 +2,21 @@
 session_start();
 require_once __DIR__ . '/../assets/config/config.php';
 require_once __DIR__ . '/../vendor/autoload.php';
-require __DIR__ . '/../assets/config/database.php';
+require_once __DIR__ . '/../assets/config/database.php';
 
 if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
     $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
-    header("Location: " . BASE_PATH . "admin/login.php");
+    header("Location: " . BASE_PATH . "login.php");
     exit();
 }
 
 if (!isset($_SESSION['cirs_user']) || empty($_SESSION['cirs_user'])) {
-    header("Location: " . BASE_PATH . "admin/users/editprofile.php");
+    header("Location: " . BASE_PATH . "users/editprofile.php");
     exit();
 }
 
 use App\Helpers\Flash;
 
-// Mitarbeiterprofil laden
 $mitarbeiter = null;
 if (isset($_SESSION['discordtag']) && !empty($_SESSION['discordtag'])) {
     $stmt = $pdo->prepare("
@@ -39,7 +38,7 @@ if (isset($_SESSION['discordtag']) && !empty($_SESSION['discordtag'])) {
 
     if (!$mitarbeiter) {
         Flash::set('error', 'Kein Mitarbeiterprofil für Ihre Discord-ID gefunden.');
-        header("Location: " . BASE_PATH . "admin/index.php");
+        header("Location: " . BASE_PATH . "index.php");
         exit();
     }
 }
@@ -49,7 +48,7 @@ $typ_id = $_GET['typ'] ?? null;
 
 if (!$typ_id || !is_numeric($typ_id)) {
     Flash::set('error', 'Kein Antragstyp ausgewählt.');
-    header("Location: " . BASE_PATH . "admin/index.php");
+    header("Location: " . BASE_PATH . "index.php");
     exit();
 }
 
@@ -60,7 +59,7 @@ $typ = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$typ) {
     Flash::set('error', 'Antragstyp nicht gefunden oder nicht aktiv.');
-    header("Location: " . BASE_PATH . "admin/index.php");
+    header("Location: " . BASE_PATH . "index.php");
     exit();
 }
 
@@ -115,7 +114,7 @@ if (isset($_POST['submit_antrag'])) {
         $pdo->commit();
 
         Flash::set('success', 'Antrag erfolgreich eingereicht!');
-        header("Location: " . BASE_PATH . "antraege/view.php?antrag=" . $random_number);
+        header("Location: " . BASE_PATH . "antrag/view.php?antrag=" . $random_number);
         exit();
     } catch (Exception $e) {
         $pdo->rollBack();
@@ -147,19 +146,10 @@ function getAutoFillValue($auto_fill, $mitarbeiter)
 <html lang="en" data-bs-theme="light">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title><?= htmlspecialchars($typ['name']) ?> &rsaquo; <?php echo SYSTEM_NAME ?></title>
-    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/css/style.min.css" />
-    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/css/admin.min.css" />
-    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/_ext/lineawesome/css/line-awesome.min.css" />
-    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/fonts/mavenpro/css/all.min.css" />
-    <link rel="stylesheet" href="<?= BASE_PATH ?>vendor/twbs/bootstrap/dist/css/bootstrap.min.css">
-    <script src="<?= BASE_PATH ?>vendor/components/jquery/jquery.min.js"></script>
-    <script src="<?= BASE_PATH ?>vendor/twbs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <link rel="icon" type="image/png" href="<?= BASE_PATH ?>assets/favicon/favicon-96x96.png" sizes="96x96" />
-    <meta name="theme-color" content="<?php echo SYSTEM_COLOR ?>" />
+    <?php
+    $SITE_TITLE = htmlspecialchars($typ['name']) . ' stellen';
+    include __DIR__ . "/../assets/components/_base/admin/head.php";
+    ?>
 </head>
 
 <body data-bs-theme="dark" data-page="antrag-create">
@@ -171,7 +161,6 @@ function getAutoFillValue($auto_fill, $mitarbeiter)
                 <div class="col">
                     <hr class="text-light my-3">
                     <h1>
-                        <i class="<?= htmlspecialchars($typ['icon']) ?> me-2"></i>
                         <?= htmlspecialchars($typ['name']) ?> stellen
                     </h1>
 
@@ -287,11 +276,11 @@ function getAutoFillValue($auto_fill, $mitarbeiter)
                                     <hr class="text-light my-4">
 
                                     <div class="d-flex justify-content-between">
-                                        <a href="<?= BASE_PATH ?>admin/index.php" class="btn btn-secondary">
-                                            <i class="las la-times me-2"></i>Abbrechen
+                                        <a href="<?= BASE_PATH ?>index.php" class="btn btn-secondary">
+                                            <i class="fa-solid fa-xmark me-2"></i>Abbrechen
                                         </a>
                                         <button type="submit" name="submit_antrag" class="btn btn-success">
-                                            <i class="las la-paper-plane me-2"></i>Antrag absenden
+                                            <i class="fa-solid fa-paper-plane me-2"></i>Antrag absenden
                                         </button>
                                     </div>
                                 </form>

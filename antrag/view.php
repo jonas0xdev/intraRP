@@ -2,16 +2,16 @@
 session_start();
 require_once __DIR__ . '/../assets/config/config.php';
 require_once __DIR__ . '/../vendor/autoload.php';
-require __DIR__ . '/../assets/config/database.php';
+require_once __DIR__ . '/../assets/config/database.php';
 
 if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
     $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
-    header("Location: " . BASE_PATH . "admin/login.php");
+    header("Location: " . BASE_PATH . "login.php");
     exit();
 }
 
 if (!isset($_SESSION['cirs_user']) || empty($_SESSION['cirs_user'])) {
-    header("Location: " . BASE_PATH . "admin/users/editprofile.php");
+    header("Location: " . BASE_PATH . "users/editprofile.php");
     exit();
 }
 
@@ -22,7 +22,7 @@ $caseid = $_GET['antrag'] ?? null;
 
 if (!$caseid) {
     Flash::set('error', 'Keine Antragsnummer angegeben.');
-    header("Location: " . BASE_PATH . "admin/index.php");
+    header("Location: " . BASE_PATH . "index.php");
     exit();
 }
 
@@ -38,7 +38,7 @@ $antrag = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$antrag) {
     Flash::set('error', 'Antrag nicht gefunden.');
-    header("Location: " . BASE_PATH . "admin/index.php");
+    header("Location: " . BASE_PATH . "index.php");
     exit();
 }
 
@@ -46,7 +46,7 @@ if (!$antrag) {
 if (!Permissions::check(['admin', 'application.view'])) {
     if ($antrag['discordid'] !== $_SESSION['discordtag']) {
         Flash::set('error', 'Sie haben keine Berechtigung, diesen Antrag anzusehen.');
-        header("Location: " . BASE_PATH . "admin/index.php");
+        header("Location: " . BASE_PATH . "index.php");
         exit();
     }
 }
@@ -80,27 +80,11 @@ $createDate = new DateTime($antrag['time_added'] ?? 'now');
 <html lang="en" data-bs-theme="light">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Antrag [#<?php echo $caseid ?>] &rsaquo; <?php echo SYSTEM_NAME ?></title>
-    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/css/style.min.css" />
-    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/css/admin.min.css" />
-    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/_ext/lineawesome/css/line-awesome.min.css" />
-    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/fonts/mavenpro/css/all.min.css" />
-    <link rel="stylesheet" href="<?= BASE_PATH ?>vendor/twbs/bootstrap/dist/css/bootstrap.min.css">
-    <script src="<?= BASE_PATH ?>vendor/components/jquery/jquery.min.js"></script>
-    <script src="<?= BASE_PATH ?>vendor/twbs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <link rel="icon" type="image/png" href="<?= BASE_PATH ?>assets/favicon/favicon-96x96.png" sizes="96x96" />
-    <meta name="theme-color" content="<?php echo SYSTEM_COLOR ?>" />
+    <?php
+    $SITE_TITLE = "Antrag [#" . htmlspecialchars($caseid) . "] anzeigen";
+    include __DIR__ . "/../assets/components/_base/admin/head.php";
+    ?>
     <style>
-        .intra__tile {
-            background: rgba(var(--bs-dark-rgb), 0.5);
-            border: 1px solid rgba(var(--bs-light-rgb), 0.1);
-            border-radius: 0;
-            padding: 1.5rem;
-        }
-
         .field-label {
             font-weight: 600;
             color: #aaa;
@@ -111,7 +95,7 @@ $createDate = new DateTime($antrag['time_added'] ?? 'now');
         .field-value {
             background: rgba(0, 0, 0, 0.3);
             padding: 0.75rem;
-            border-radius: 0.375rem;
+            border-radius: 0;
             min-height: 2.5rem;
         }
 
@@ -133,7 +117,6 @@ $createDate = new DateTime($antrag['time_added'] ?? 'now');
                     <hr class="text-light my-3">
                     <div class="d-flex justify-content-between align-items-center">
                         <h1>
-                            <i class="<?= htmlspecialchars($antrag['typ_icon']) ?> me-2"></i>
                             <?= htmlspecialchars($antrag['typ_name']) ?> #<?= htmlspecialchars($caseid) ?>
                         </h1>
                     </div>
@@ -145,7 +128,7 @@ $createDate = new DateTime($antrag['time_added'] ?? 'now');
                             <!-- Hauptinformationen -->
                             <div class="intra__tile p-2 mb-4">
                                 <h5 class="mb-3">
-                                    <i class="las la-user me-2"></i>Antragsteller
+                                    Antragsteller
                                 </h5>
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
@@ -166,7 +149,7 @@ $createDate = new DateTime($antrag['time_added'] ?? 'now');
                             <!-- Antragsinhalt -->
                             <div class="intra__tile p-2 mb-4">
                                 <h5 class="mb-3">
-                                    <i class="las la-file-alt me-2"></i>Antragsinhalt
+                                    Antragsinhalt
                                 </h5>
 
                                 <!-- Dynamische Felder -->
@@ -214,7 +197,7 @@ $createDate = new DateTime($antrag['time_added'] ?? 'now');
                             <!-- Bearbeitung -->
                             <div class="intra__tile p-2 mb-5">
                                 <h5 class="mb-3">
-                                    <i class="las la-clipboard-check me-2"></i>Bearbeitung
+                                    Bearbeitung
                                 </h5>
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
@@ -253,7 +236,7 @@ $createDate = new DateTime($antrag['time_added'] ?? 'now');
                             <!-- Seitliche Informationen -->
                             <div class="intra__tile p-2 mb-4">
                                 <h6 class="mb-3">
-                                    <i class="las la-info-circle me-2"></i>Antragsdetails
+                                    Antragsdetails
                                 </h6>
                                 <div class="small">
                                     <div class="d-flex justify-content-between py-2 border-bottom border-secondary">
@@ -290,12 +273,12 @@ $createDate = new DateTime($antrag['time_added'] ?? 'now');
                                     <i class="las la-tools me-2"></i>Aktionen
                                 </h6>
                                 <div class="d-grid gap-2">
-                                    <a href="<?= BASE_PATH ?>admin/index.php" class="btn btn-secondary">
-                                        <i class="las la-arrow-left me-2"></i>Zurück zum Dashboard
+                                    <a href="<?= BASE_PATH ?>index.php" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left me-2"></i>Zurück zum Dashboard
                                     </a>
                                     <?php if (Permissions::check(['admin', 'application.edit'])): ?>
-                                        <a href="<?= BASE_PATH ?>admin/antraege/view.php?antrag=<?= $caseid ?>" class="btn btn-primary">
-                                            <i class="las la-edit me-2"></i>Bearbeiten (Admin)
+                                        <a href="<?= BASE_PATH ?>antrag/admin/view.php?antrag=<?= $caseid ?>" class="btn btn-main-color">
+                                            <i class="fas fa-edit me-2"></i>Bearbeiten
                                         </a>
                                     <?php endif; ?>
                                 </div>

@@ -6,7 +6,7 @@ require __DIR__ . '/../../assets/config/database.php';
 if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
     $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
 
-    header("Location: " . BASE_PATH . "admin/login.php");
+    header("Location: " . BASE_PATH . "login.php");
     exit();
 }
 
@@ -16,7 +16,7 @@ use App\Utils\AuditLogger;
 
 if (!Permissions::check(['admin', 'personnel.comment.delete'])) {
     Flash::set('error', 'no-permissions');
-    header("Location: " . BASE_PATH . "admin/users/list.php");
+    header("Location: " . BASE_PATH . "users/list.php");
 }
 
 $userid = $_SESSION['userid'];

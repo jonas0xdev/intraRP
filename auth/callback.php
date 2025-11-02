@@ -138,7 +138,7 @@ try {
         $_SESSION['permissions'] = [];
     }
 
-    $redirectUrl = $_SESSION['redirect_url'] ?? BASE_PATH . 'admin/index.php';
+    $redirectUrl = $_SESSION['redirect_url'] ?? BASE_PATH . 'index.php';
     unset($_SESSION['redirect_url']);
     header("Location: $redirectUrl");
     exit;

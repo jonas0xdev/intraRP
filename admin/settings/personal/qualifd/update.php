@@ -10,7 +10,7 @@ use App\Utils\AuditLogger;
 
 if (!Permissions::check('admin')) {
     Flash::set('error', 'no-permissions');
-    header("Location: " . BASE_PATH . "admin/settings/personal/qualifd/index.php");
+    header("Location: " . BASE_PATH . "settings/personal/qualifd/index.php");
     exit;
 }
 
@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($id <= 0 || empty($sgname)) {
         Flash::set('error', 'missing-fields');
-        header("Location: " . BASE_PATH . "admin/settings/personal/qualifd/index.php?error=invalid");
+        header("Location: " . BASE_PATH . "settings/personal/qualifd/index.php?error=invalid");
         exit;
     }
 
@@ -44,15 +44,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         Flash::set('success', 'updated');
         $auditLogger = new AuditLogger($pdo);
         $auditLogger->log($_SESSION['userid'], 'Fachdienst aktualisiert [ID: ' . $id . ']', NULL, 'Qualifikationen', 1);
-        header("Location: " . BASE_PATH . "admin/settings/personal/qualifd/index.php");
+        header("Location: " . BASE_PATH . "settings/personal/qualifd/index.php");
         exit;
     } catch (PDOException $e) {
         error_log("PDO Error: " . $e->getMessage());
         Flash::set('error', 'exception');
-        header("Location: " . BASE_PATH . "admin/settings/personal/qualifd/index.php");
+        header("Location: " . BASE_PATH . "settings/personal/qualifd/index.php");
         exit;
     }
 } else {
-    header("Location: " . BASE_PATH . "admin/settings/personal/qualifd/index.php");
+    header("Location: " . BASE_PATH . "settings/personal/qualifd/index.php");
     exit;
 }

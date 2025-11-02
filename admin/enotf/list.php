@@ -5,7 +5,7 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
     $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
 
-    header("Location: " . BASE_PATH . "admin/login.php");
+    header("Location: " . BASE_PATH . "login.php");
     exit();
 }
 
@@ -14,7 +14,7 @@ use App\Helpers\Flash;
 
 if (!Permissions::check(['admin', 'edivi.view'])) {
     Flash::set('error', 'no-permissions');
-    header("Location: " . BASE_PATH . "admin/index.php");
+    header("Location: " . BASE_PATH . "index.php");
 }
 ?>
 
@@ -142,7 +142,7 @@ if (!Permissions::check(['admin', 'edivi.view'])) {
                                     $patname = $row['patname'] ?? "Unbekannt";
 
                                     $actions = (Permissions::check(['admin', 'edivi.edit']))
-                                        ? "<button title='QM-Aktionen öffnen' onclick='openQMActions({$row['id']}, \"{$row['enr']}\", \"" . htmlspecialchars($row['patname'] ?? 'Unbekannt') . "\")' class='btn btn-sm btn-main-color'><i class='las la-exclamation'></i></button> <button title='QM-Log öffnen' onclick='openQMLog({$row['id']}, \"{$row['enr']}\", \"" . htmlspecialchars($row['patname'] ?? 'Unbekannt') . "\")' class='btn btn-sm btn-dark'><i class='las la-paperclip'></i></button> <a title='Protokoll löschen' href='" . BASE_PATH . "admin/enotf/delete.php?id={$row['id']}' class='btn btn-sm btn-danger'><i class='las la-trash'></i></a>"
+                                        ? "<button title='QM-Aktionen öffnen' onclick='openQMActions({$row['id']}, \"{$row['enr']}\", \"" . htmlspecialchars($row['patname'] ?? 'Unbekannt') . "\")' class='btn btn-sm btn-main-color'><i class='las la-exclamation'></i></button> <button title='QM-Log öffnen' onclick='openQMLog({$row['id']}, \"{$row['enr']}\", \"" . htmlspecialchars($row['patname'] ?? 'Unbekannt') . "\")' class='btn btn-sm btn-dark'><i class='las la-paperclip'></i></button> <a title='Protokoll löschen' href='" . BASE_PATH . "enotf/delete.php?id={$row['id']}' class='btn btn-sm btn-danger'><i class='las la-trash'></i></a>"
                                         : "";
 
                                     echo "<tr>";
@@ -261,7 +261,7 @@ if (!Permissions::check(['admin', 'edivi.view'])) {
                 modal.show();
 
                 // Load content via AJAX
-                fetch(`<?= BASE_PATH ?>admin/enotf/qm-actions-modal.php?id=${id}`)
+                fetch(`<?= BASE_PATH ?>enotf/qm-actions-modal.php?id=${id}`)
                     .then(response => response.text())
                     .then(data => {
                         document.getElementById('qmActionsContent').innerHTML = data;
@@ -292,7 +292,7 @@ if (!Permissions::check(['admin', 'edivi.view'])) {
                 modal.show();
 
                 // Load content via AJAX
-                fetch(`<?= BASE_PATH ?>admin/enotf/qm-log-modal.php?id=${id}`)
+                fetch(`<?= BASE_PATH ?>enotf/qm-log-modal.php?id=${id}`)
                     .then(response => response.text())
                     .then(data => {
                         document.getElementById('qmLogContent').innerHTML = data;

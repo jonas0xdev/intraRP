@@ -5,7 +5,7 @@ require_once __DIR__ . '/../../../../vendor/autoload.php';
 if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
     $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
 
-    header("Location: " . BASE_PATH . "admin/login.php");
+    header("Location: " . BASE_PATH . "login.php");
     exit();
 }
 
@@ -14,7 +14,7 @@ use App\Helpers\Flash;
 
 if (!Permissions::check(['admin', 'edivi.view'])) {
     Flash::set('error', 'no-permissions');
-    header("Location: " . BASE_PATH . "admin/index.php");
+    header("Location: " . BASE_PATH . "index.php");
 }
 ?>
 
@@ -138,7 +138,7 @@ if (!Permissions::check(['admin', 'edivi.view'])) {
         <div class="modal fade" id="editFahrzeugModal" tabindex="-1" aria-labelledby="editFahrzeugModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <form action="<?= BASE_PATH ?>admin/settings/enotf/ziele/update.php" method="POST">
+                    <form action="<?= BASE_PATH ?>settings/enotf/ziele/update.php" method="POST">
                         <div class="modal-header">
                             <h5 class="modal-title" id="editFahrzeugModalLabel">Ziel bearbeiten</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
@@ -182,7 +182,7 @@ if (!Permissions::check(['admin', 'edivi.view'])) {
                         </div>
                     </form>
 
-                    <form id="delete-fahrzeug-form" action="<?= BASE_PATH ?>admin/settings/enotf/ziele/delete.php" method="POST" style="display:none;">
+                    <form id="delete-fahrzeug-form" action="<?= BASE_PATH ?>settings/enotf/ziele/delete.php" method="POST" style="display:none;">
                         <input type="hidden" name="id" id="fahrzeug-delete-id">
                     </form>
 
@@ -196,7 +196,7 @@ if (!Permissions::check(['admin', 'edivi.view'])) {
         <div class="modal fade" id="createFahrzeugModal" tabindex="-1" aria-labelledby="createFahrzeugModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <form action="<?= BASE_PATH ?>admin/settings/enotf/ziele/create.php" method="POST">
+                    <form action="<?= BASE_PATH ?>settings/enotf/ziele/create.php" method="POST">
                         <div class="modal-header">
                             <h5 class="modal-title" id="createFahrzeugModalLabel">Neues Ziel anlegen</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>

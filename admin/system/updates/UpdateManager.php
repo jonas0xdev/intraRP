@@ -238,8 +238,8 @@ class UpdateManager
             '--exclude=node_modules',
             '--exclude=vendor',
             '--exclude=*.log',
-            '--exclude=admin/system/updates/temp_update',
-            '--exclude=admin/system/updates/backups',
+            '--exclude=system/updates/temp_update',
+            '--exclude=system/updates/backups',
             '--exclude=.git',
             '--exclude=.github',
             '--exclude=storage/logs/*',
@@ -363,7 +363,7 @@ class UpdateManager
         $excludeFiles = [
             'assets/config/config.php',
             'assets/config/database.php',
-            'admin/system/updates/version.json',
+            'system/updates/version.json',
             '.env',
             '.htaccess'
         ];
@@ -378,9 +378,9 @@ class UpdateManager
             'logs'
         ];
 
-        $updatesDir = $appRoot . '/admin/system/updates';
-        $excludeDirs[] = 'admin/system/updates/backups';
-        $excludeDirs[] = 'admin/system/updates/temp_update';
+        $updatesDir = $appRoot . '/system/updates';
+        $excludeDirs[] = 'system/updates/backups';
+        $excludeDirs[] = 'system/updates/temp_update';
 
         $this->recursiveCopy($this->updateSourceDir, $appRoot, $excludeFiles, $excludeDirs);
         $this->log('Dateien erfolgreich kopiert von ' . $this->updateSourceDir . ' nach ' . $appRoot);

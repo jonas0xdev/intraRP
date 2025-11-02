@@ -6,7 +6,7 @@ require __DIR__ . '/../../assets/config/database.php';
 if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
     $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
 
-    header("Location: " . BASE_PATH . "admin/login.php");
+    header("Location: " . BASE_PATH . "login.php");
     exit();
 }
 
@@ -40,7 +40,7 @@ if (isset($_POST['new']) && $_POST['new'] == 1) {
     } catch (PDOException $e) {
         error_log($e->getMessage());
         Flash::set('error', 'exception');
-        header("Location: " . BASE_PATH . "admin/users/editprofile.php");
+        header("Location: " . BASE_PATH . "users/editprofile.php");
         exit();
     }
 }
