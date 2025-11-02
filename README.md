@@ -93,7 +93,7 @@ Admininistrative Ansicht
 
 ### Benutzte Assets
 
-- [Line Awesome](https://icons8.com/line-awesome) von [Icons8](https://icons8.com/)
+- [Font Awesome 7 (Free)](https://fontawesome.com/)
 - [CKEditor5](https://ckeditor.com/)
 - Beinhaltete Schriftarten von [Google Fonts](https://fonts.google.com/)
 - [Chart.js](https://www.chartjs.org/)
