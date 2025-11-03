@@ -12,6 +12,7 @@ if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
 use App\Auth\Permissions;
 use App\Helpers\Flash;
 use App\Utils\AuditLogger;
+use App\Notifications\NotificationManager;
 
 if (!Permissions::check(['admin', 'edivi.view'])) {
     http_response_code(403);
@@ -98,6 +99,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'status' => $protokoll_status,
         'id' => $_GET['id']
     ]);
+
+    // Create notification for protocol author if status changed
+    if ($protokoll_status != $old_status && !empty($row['pfname'])) {
+        $notificationManager = new NotificationManager($pdo);
+        $userId = $notificationManager->getUserIdByFullname($row['pfname']);
+        
+        if ($userId) {
+            $notificationManager->create(
+                $userId,
+                'protokoll',
+                "Ihr Protokoll #{$row['enr']} wurde geprüft",
+                "Status: {$status_klar}. Prüfer: {$bearbeiter}",
+                BASE_PATH . "enotf/overview.php"
+            );
+        }
+    }
 
     exit(json_encode(['success' => true, 'message' => 'Erfolgreich gespeichert']));
 }

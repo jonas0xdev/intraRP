@@ -102,6 +102,23 @@ use App\Auth\Permissions; ?>
                         </ul>
                     </li>
                 <?php } ?>
+                <?php
+                // Get unread notification count
+                use App\Notifications\NotificationManager;
+                $notificationManager = new NotificationManager($pdo);
+                $unreadCount = $notificationManager->getUnreadCount($_SESSION['userid']);
+                ?>
+                <li class="nav-item">
+                    <a class="nav-link position-relative" href="<?= BASE_PATH ?>benachrichtigungen/index.php" data-page="benachrichtigungen">
+                        <i class="fa-solid fa-bell"></i>
+                        <?php if ($unreadCount > 0): ?>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
+                                <?= $unreadCount > 9 ? '9+' : $unreadCount ?>
+                                <span class="visually-hidden">ungelesene Benachrichtigungen</span>
+                            </span>
+                        <?php endif; ?>
+                    </a>
+                </li>
                 <li class="nav-item dropdown" id="intra-usermenu">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <?= $_SESSION['cirs_username'] ?> <span class="badge text-bg-<?= $_SESSION['role_color'] ?>"><?= $_SESSION['role_name'] ?></span>

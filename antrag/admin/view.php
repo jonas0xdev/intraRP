@@ -13,6 +13,7 @@ if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
 use App\Auth\Permissions;
 use App\Helpers\Flash;
 use App\Utils\AuditLogger;
+use App\Notifications\NotificationManager;
 
 if (!Permissions::check(['admin', 'application.edit'])) {
     Flash::set('error', 'no-permissions');
@@ -63,6 +64,7 @@ if (isset($_POST['save'])) {
     $jetzt = date("Y-m-d H:i:s");
 
     $auditLogger = new AuditLogger($pdo);
+    $notificationManager = new NotificationManager($pdo);
 
     if ($antrag['cirs_manager'] != $cirs_manager) {
         $auditLogger->log($_SESSION['userid'], 'Bearbeiter geändert [ID: ' . $caseid . ']', $cirs_manager, 'Anträge', 1);
@@ -80,6 +82,21 @@ if (isset($_POST['save'])) {
         WHERE id = ?
     ");
     $stmt->execute([$cirs_manager, $cirs_status, $cirs_text, $jetzt, $antrag['id']]);
+
+    // Create notification for the applicant
+    $statusText = ['In Bearbeitung', 'Abgelehnt', 'Aufgeschoben', 'Angenommen'];
+    $statusName = $statusText[$cirs_status] ?? 'Unbekannt';
+    
+    $userId = $notificationManager->getUserIdByDiscordTag($antrag['discordid']);
+    if ($userId) {
+        $notificationManager->create(
+            $userId,
+            'antrag',
+            "Ihr Antrag #{$caseid} wurde bearbeitet",
+            "Status: {$statusName}. Bearbeiter: {$cirs_manager}",
+            BASE_PATH . "antrag/view.php?antrag={$caseid}"
+        );
+    }
 
     Flash::set('success', 'Antrag erfolgreich aktualisiert');
     header("Location: " . BASE_PATH . "antrag/view.php?antrag=" . $caseid);
