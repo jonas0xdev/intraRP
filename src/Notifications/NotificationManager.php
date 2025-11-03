@@ -25,6 +25,13 @@ class NotificationManager
      */
     public function create(int $userId, string $type, string $title, ?string $message = null, ?string $link = null): bool
     {
+        // Validate notification type
+        $validTypes = ['antrag', 'protokoll', 'dokument'];
+        if (!in_array($type, $validTypes)) {
+            error_log("Invalid notification type: {$type}");
+            return false;
+        }
+
         try {
             $stmt = $this->pdo->prepare("
                 INSERT INTO intra_notifications (user_id, type, title, message, link)

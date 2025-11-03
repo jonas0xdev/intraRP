@@ -16,28 +16,31 @@ use App\Notifications\NotificationManager;
 $notificationManager = new NotificationManager($pdo);
 $userId = $_SESSION['userid'];
 
-// Handle mark as read
-if (isset($_GET['mark_read']) && is_numeric($_GET['mark_read'])) {
-    $notificationManager->markAsRead((int)$_GET['mark_read'], $userId);
-    Flash::set('success', 'Benachrichtigung als gelesen markiert');
-    header("Location: " . BASE_PATH . "benachrichtigungen/index.php");
-    exit();
-}
-
-// Handle mark all as read
-if (isset($_GET['mark_all_read'])) {
-    $notificationManager->markAllAsRead($userId);
-    Flash::set('success', 'Alle Benachrichtigungen als gelesen markiert');
-    header("Location: " . BASE_PATH . "benachrichtigungen/index.php");
-    exit();
-}
-
-// Handle delete
-if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
-    $notificationManager->delete((int)$_GET['delete'], $userId);
-    Flash::set('success', 'Benachrichtigung gelöscht');
-    header("Location: " . BASE_PATH . "benachrichtigungen/index.php");
-    exit();
+// Handle POST actions (state-changing operations)
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Verify action exists
+    $action = $_POST['action'] ?? null;
+    
+    if ($action === 'mark_read' && isset($_POST['id']) && is_numeric($_POST['id'])) {
+        $notificationManager->markAsRead((int)$_POST['id'], $userId);
+        Flash::set('success', 'Benachrichtigung als gelesen markiert');
+        header("Location: " . BASE_PATH . "benachrichtigungen/index.php");
+        exit();
+    }
+    
+    if ($action === 'mark_all_read') {
+        $notificationManager->markAllAsRead($userId);
+        Flash::set('success', 'Alle Benachrichtigungen als gelesen markiert');
+        header("Location: " . BASE_PATH . "benachrichtigungen/index.php");
+        exit();
+    }
+    
+    if ($action === 'delete' && isset($_POST['id']) && is_numeric($_POST['id'])) {
+        $notificationManager->delete((int)$_POST['id'], $userId);
+        Flash::set('success', 'Benachrichtigung gelöscht');
+        header("Location: " . BASE_PATH . "benachrichtigungen/index.php");
+        exit();
+    }
 }
 
 // Get filter
@@ -52,7 +55,7 @@ $unreadCount = $notificationManager->getUnreadCount($userId);
 ?>
 
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="light">
+<html lang="de" data-bs-theme="dark">
 
 <head>
     <?php
@@ -143,9 +146,12 @@ $unreadCount = $notificationManager->getUnreadCount($userId);
                             </a>
                         </div>
                         <?php if ($unreadCount > 0): ?>
-                            <a href="?mark_all_read=1" class="btn btn-sm btn-outline-light">
-                                <i class="fa-solid fa-check-double me-1"></i> Alle als gelesen markieren
-                            </a>
+                            <form method="POST" style="display: inline;">
+                                <input type="hidden" name="action" value="mark_all_read">
+                                <button type="submit" class="btn btn-sm btn-outline-light">
+                                    <i class="fa-solid fa-check-double me-1"></i> Alle als gelesen markieren
+                                </button>
+                            </form>
                         <?php endif; ?>
                     </div>
 
@@ -213,18 +219,21 @@ $unreadCount = $notificationManager->getUnreadCount($userId);
                                                         </a>
                                                     <?php endif; ?>
                                                     <?php if ($isUnread): ?>
-                                                        <a href="?mark_read=<?= $notification['id'] ?>" 
-                                                           class="btn btn-sm btn-outline-success me-1"
-                                                           title="Als gelesen markieren">
-                                                            <i class="fa-solid fa-check"></i>
-                                                        </a>
+                                                        <form method="POST" style="display: inline;">
+                                                            <input type="hidden" name="action" value="mark_read">
+                                                            <input type="hidden" name="id" value="<?= $notification['id'] ?>">
+                                                            <button type="submit" class="btn btn-sm btn-outline-success me-1" title="Als gelesen markieren">
+                                                                <i class="fa-solid fa-check"></i>
+                                                            </button>
+                                                        </form>
                                                     <?php endif; ?>
-                                                    <a href="?delete=<?= $notification['id'] ?>" 
-                                                       class="btn btn-sm btn-outline-danger"
-                                                       title="Löschen"
-                                                       onclick="return confirm('Benachrichtigung wirklich löschen?')">
-                                                        <i class="fa-solid fa-trash"></i>
-                                                    </a>
+                                                    <form method="POST" style="display: inline;" onsubmit="return confirm('Benachrichtigung wirklich löschen?')">
+                                                        <input type="hidden" name="action" value="delete">
+                                                        <input type="hidden" name="id" value="<?= $notification['id'] ?>">
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Löschen">
+                                                            <i class="fa-solid fa-trash"></i>
+                                                        </button>
+                                                    </form>
                                                 </div>
                                             </div>
                                         </div>
