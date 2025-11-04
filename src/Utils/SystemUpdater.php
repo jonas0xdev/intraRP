@@ -16,16 +16,11 @@ class SystemUpdater
     private string $githubRepo = 'EmergencyForge/intraRP';
     private string $githubApiUrl;
     private array $currentVersion;
-    private ?string $githubToken = null;
 
     public function __construct()
     {
         $this->versionFile = __DIR__ . '/../../system/updates/version.json';
         $this->githubApiUrl = "https://api.github.com/repos/{$this->githubRepo}";
-        
-        // Load GitHub token from environment if available
-        $this->githubToken = getenv('GITHUB_TOKEN') ?: null;
-        
         $this->loadCurrentVersion();
     }
 
@@ -107,20 +102,13 @@ class SystemUpdater
     {
         $url = "{$this->githubApiUrl}/releases/latest";
         
-        $headers = [
-            'User-Agent: intraRP-Updater',
-            'Accept: application/vnd.github+json'
-        ];
-        
-        // Add authentication if token is available
-        if ($this->githubToken) {
-            $headers[] = "Authorization: Bearer {$this->githubToken}";
-        }
-        
         $context = stream_context_create([
             'http' => [
                 'method' => 'GET',
-                'header' => $headers,
+                'header' => [
+                    'User-Agent: intraRP-Updater',
+                    'Accept: application/vnd.github+json'
+                ],
                 'timeout' => 10,
                 'ignore_errors' => true  // Allow reading error responses
             ]
@@ -152,20 +140,13 @@ class SystemUpdater
     {
         $url = "{$this->githubApiUrl}/releases?per_page=10";
         
-        $headers = [
-            'User-Agent: intraRP-Updater',
-            'Accept: application/vnd.github+json'
-        ];
-        
-        // Add authentication if token is available
-        if ($this->githubToken) {
-            $headers[] = "Authorization: Bearer {$this->githubToken}";
-        }
-        
         $context = stream_context_create([
             'http' => [
                 'method' => 'GET',
-                'header' => $headers,
+                'header' => [
+                    'User-Agent: intraRP-Updater',
+                    'Accept: application/vnd.github+json'
+                ],
                 'timeout' => 10
             ]
         ]);
