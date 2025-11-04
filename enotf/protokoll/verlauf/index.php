@@ -711,7 +711,7 @@ $totalVitals = $stmtCount->fetch(PDO::FETCH_ASSOC)['count'];
             <?php if (!$ist_freigegeben): ?>
                 window.location.href = 'add.php?enr=<?= $enr ?>';
             <?php else: ?>
-                alert('Diese Dokumentation ist bereits freigegeben und kann nicht mehr bearbeitet werden.');
+                showAlert('Diese Dokumentation ist bereits freigegeben und kann nicht mehr bearbeitet werden.', {type: 'warning', title: 'Nicht bearbeitbar'});
             <?php endif; ?>
         }
 

@@ -269,7 +269,7 @@ $felder = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                                     <td class="text-end">
                                                         <a href="?id=<?= $id ?>&delete_feld=<?= $feld['id'] ?>"
                                                             class="btn btn-danger btn-sm"
-                                                            onclick="return confirm('Feld wirklich löschen?')">
+                                                            onclick="event.preventDefault(); showConfirm('Feld wirklich löschen?', {danger: true, confirmText: 'Löschen', title: 'Feld löschen'}).then(result => { if(result) window.location.href = this.href; });">
                                                             <i class="fa-solid fa-trash"></i>
                                                         </a>
                                                     </td>

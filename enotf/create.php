@@ -116,13 +116,13 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
 
             if (protBy !== '0' && protBy !== '1') {
                 e.preventDefault();
-                alert("Bitte wähle ein Protokoll aus (RD oder NA).");
+                showAlert("Bitte wähle ein Protokoll aus (RD oder NA).", {type: 'warning', title: 'Protokollauswahl erforderlich'});
                 return;
             }
 
             if (!enr) {
                 e.preventDefault();
-                alert("Bitte gib eine Einsatznummer ein.");
+                showAlert("Bitte gib eine Einsatznummer ein.", {type: 'warning', title: 'Einsatznummer erforderlich'});
                 return;
             }
 

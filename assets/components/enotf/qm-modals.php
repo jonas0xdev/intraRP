@@ -134,11 +134,11 @@ use App\Auth\Permissions;
                             location.reload();
                         }
                     } else {
-                        alert('Fehler beim Speichern: ' + (data.message || 'Unbekannter Fehler'));
+                        showAlert('Fehler beim Speichern: ' + (data.message || 'Unbekannter Fehler'), {type: 'error', title: 'Fehler'});
                     }
                 })
                 .catch(error => {
-                    alert('Fehler beim Speichern: ' + error.message);
+                    showAlert('Fehler beim Speichern: ' + error.message, {type: 'error', title: 'Fehler'});
                 })
                 .finally(() => {
                     submitBtn.value = originalText;

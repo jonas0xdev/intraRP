@@ -222,7 +222,7 @@ $unreadCount = $notificationManager->getUnreadCount($userId);
                                                             </button>
                                                         </form>
                                                     <?php endif; ?>
-                                                    <form method="POST" style="display: inline;" onsubmit="return confirm('Benachrichtigung wirklich löschen?')">
+                                                    <form method="POST" style="display: inline;" onsubmit="event.preventDefault(); showConfirm('Benachrichtigung wirklich löschen?', {danger: true, confirmText: 'Löschen', title: 'Benachrichtigung löschen'}).then(result => { if(result) this.submit(); });">
                                                         <input type="hidden" name="action" value="delete">
                                                         <input type="hidden" name="id" value="<?= $notification['id'] ?>">
                                                         <button type="submit" class="btn btn-sm btn-dark" title="Löschen">

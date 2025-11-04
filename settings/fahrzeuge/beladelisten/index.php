@@ -576,17 +576,21 @@ $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             document.querySelectorAll('.delete-category-btn').forEach(button => {
                 button.addEventListener('click', function() {
-                    if (confirm('Möchten Sie diese Kategorie wirklich löschen? Alle zugehörigen Gegenstände werden ebenfalls gelöscht.')) {
-                        deleteCategory(this.dataset.id);
-                    }
+                    showConfirm('Möchten Sie diese Kategorie wirklich löschen? Alle zugehörigen Gegenstände werden ebenfalls gelöscht.', {danger: true, confirmText: 'Löschen', title: 'Kategorie löschen'}).then(result => {
+                        if (result) {
+                            deleteCategory(this.dataset.id);
+                        }
+                    });
                 });
             });
 
             document.querySelectorAll('.delete-tile-btn').forEach(button => {
                 button.addEventListener('click', function() {
-                    if (confirm('Möchten Sie diesen Gegenstand wirklich löschen?')) {
-                        deleteTile(this.dataset.id);
-                    }
+                    showConfirm('Möchten Sie diesen Gegenstand wirklich löschen?', {danger: true, confirmText: 'Löschen', title: 'Gegenstand löschen'}).then(result => {
+                        if (result) {
+                            deleteTile(this.dataset.id);
+                        }
+                    });
                 });
             });
 

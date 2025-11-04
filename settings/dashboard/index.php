@@ -333,9 +333,11 @@ if (!Permissions::check(['admin', 'dashboard.manage'])) {
             });
 
             document.getElementById('delete-tile-btn').addEventListener('click', function() {
-                if (confirm('Möchtest du diese Verlinkung wirklich löschen?')) {
-                    document.getElementById('delete-tile-form').submit();
-                }
+                showConfirm('Möchtest du diese Verlinkung wirklich löschen?', {danger: true, confirmText: 'Löschen', title: 'Verlinkung löschen'}).then(result => {
+                    if (result) {
+                        document.getElementById('delete-tile-form').submit();
+                    }
+                });
             });
 
             document.querySelectorAll('.edit-category-btn').forEach(button => {
@@ -353,9 +355,11 @@ if (!Permissions::check(['admin', 'dashboard.manage'])) {
             });
 
             document.getElementById('delete-category-btn').addEventListener('click', function() {
-                if (confirm('Möchtest du diese Kategorie wirklich löschen?')) {
-                    document.getElementById('delete-category-form').submit();
-                }
+                showConfirm('Möchtest du diese Kategorie wirklich löschen?', {danger: true, confirmText: 'Löschen', title: 'Kategorie löschen'}).then(result => {
+                    if (result) {
+                        document.getElementById('delete-category-form').submit();
+                    }
+                });
             });
 
         });

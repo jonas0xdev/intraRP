@@ -401,7 +401,7 @@ $currentDateTime = date('Y-m-d\TH:i');
         // Ziffer direkt hinzufügen - sofortige Übertragung
         function keypadAddDigit(digit) {
             if (!keypadCurrentField) {
-                alert('Bitte wählen Sie zuerst ein Eingabefeld aus.');
+                showAlert('Bitte wählen Sie zuerst ein Eingabefeld aus.', {type: 'warning', title: 'Eingabefeld auswählen'});
                 return;
             }
 

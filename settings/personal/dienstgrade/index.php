@@ -333,9 +333,11 @@ if (!Permissions::check(['admin', 'personnel.view'])) {
             });
 
             document.getElementById('delete-dienstgrad-btn').addEventListener('click', function() {
-                if (confirm('Möchtest du diesen Dienstgrad wirklich löschen?')) {
-                    document.getElementById('delete-dienstgrad-form').submit();
-                }
+                showConfirm('Möchtest du diesen Dienstgrad wirklich löschen?', {danger: true, confirmText: 'Löschen', title: 'Dienstgrad löschen'}).then(result => {
+                    if (result) {
+                        document.getElementById('delete-dienstgrad-form').submit();
+                    }
+                });
             });
         });
     </script>

@@ -372,7 +372,7 @@ $currentDateTime = date('Y-m-d\TH:i');
 
         function keypadSetNG() {
             if (!keypadCurrentField) {
-                alert('Bitte wählen Sie zuerst ein Eingabefeld aus.');
+                showAlert('Bitte wählen Sie zuerst ein Eingabefeld aus.', {type: 'warning', title: 'Eingabefeld auswählen'});
                 return;
             }
             keypadUpdateFieldValue('ng');
@@ -380,7 +380,7 @@ $currentDateTime = date('Y-m-d\TH:i');
 
         function keypadAddDigit(digit) {
             if (!keypadCurrentField) {
-                alert('Bitte wählen Sie zuerst ein Eingabefeld aus.');
+                showAlert('Bitte wählen Sie zuerst ein Eingabefeld aus.', {type: 'warning', title: 'Eingabefeld auswählen'});
                 return;
             }
 
@@ -597,7 +597,7 @@ $currentDateTime = date('Y-m-d\TH:i');
                 }
 
                 await Promise.all(jobs);
-                (window.showToast ? window.showToast('Vitalparameter gespeichert.', 'success') : alert('Vitalparameter gespeichert.'));
+                (window.showToast ? window.showToast('Vitalparameter gespeichert.', 'success') : showAlert('Vitalparameter gespeichert.', {type: 'success', title: 'Erfolgreich gespeichert'}));
             }
 
             document.getElementById('saveVitalsBtn')?.addEventListener('click', function() {
@@ -607,7 +607,7 @@ $currentDateTime = date('Y-m-d\TH:i');
 
                 saveAll().catch(err => {
                     console.error(err);
-                    (window.showToast ? window.showToast('Speichern fehlgeschlagen: ' + err.message, 'error') : alert('Speichern fehlgeschlagen: ' + err.message));
+                    (window.showToast ? window.showToast('Speichern fehlgeschlagen: ' + err.message, 'error') : showAlert('Speichern fehlgeschlagen: ' + err.message, {type: 'error', title: 'Fehler'}));
                 });
             });
         })();

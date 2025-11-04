@@ -282,9 +282,11 @@ if (!Permissions::check(['admin', 'personnel.view'])) {
             });
 
             document.getElementById('delete-dienstgrad-btn').addEventListener('click', function() {
-                if (confirm('Möchtest du diese Qualifikation wirklich löschen?')) {
-                    document.getElementById('delete-dienstgrad-form').submit();
-                }
+                showConfirm('Möchtest du diese Qualifikation wirklich löschen?', {danger: true, confirmText: 'Löschen', title: 'Qualifikation löschen'}).then(result => {
+                    if (result) {
+                        document.getElementById('delete-dienstgrad-form').submit();
+                    }
+                });
             });
         });
     </script>

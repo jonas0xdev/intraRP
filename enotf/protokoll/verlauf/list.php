@@ -420,7 +420,7 @@ $prot_url = "https://" . SYSTEM_URL . "/enotf/prot/index.php?enr=" . $enr;
                                                         <td>
                                                             <a href="?enr=<?= $enr ?>&action=delete&id=<?= $vital['id'] ?>"
                                                                 class="btn-delete-compact"
-                                                                onclick="return confirm('Parameter \'<?= htmlspecialchars($vital['parameter_name']) ?>\' (<?= htmlspecialchars($vital['parameter_wert']) ?> <?= htmlspecialchars($vital['parameter_einheit']) ?>) löschen?')">
+                                                                onclick="event.preventDefault(); showConfirm('Parameter \'<?= htmlspecialchars($vital['parameter_name']) ?>\' (<?= htmlspecialchars($vital['parameter_wert']) ?> <?= htmlspecialchars($vital['parameter_einheit']) ?>) löschen?', {danger: true, confirmText: 'Löschen', title: 'Parameter löschen'}).then(result => { if(result) window.location.href = this.href; });">
                                                                 <i class="las la-trash"></i>
                                                                 Löschen
                                                             </a>
