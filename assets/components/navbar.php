@@ -156,7 +156,7 @@ use App\Notifications\NotificationManager;
                                     // Notification is in the future, show as "jetzt"
                                     $timeAgo = 'jetzt';
                                 } elseif ($diff->days > 0) {
-                                    $timeAgo = $diff->days . 'd';
+                                    $timeAgo = $diff->days . 'T';
                                 } elseif ($diff->h > 0) {
                                     $timeAgo = $diff->h . 'h';
                                 } elseif ($diff->i > 0) {
@@ -166,9 +166,9 @@ use App\Notifications\NotificationManager;
                                 }
                                 
                                 $iconClass = [
-                                    'antrag' => 'fa-file-alt',
-                                    'protokoll' => 'fa-file-medical',
-                                    'dokument' => 'fa-file-upload'
+                                    'antrag' => 'fa-file',
+                                    'protokoll' => 'fa-truck-medical',
+                                    'dokument' => 'fa-folder-open'
                                 ];
                                 $icon = $iconClass[$notification['type']] ?? 'fa-bell';
                             ?>
