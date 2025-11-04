@@ -223,6 +223,7 @@ $migrationFiles = [
     ['file' => 'create_intra_config_04112025.php', 'type' => 'create'],
     ['file' => 'insert_intra_config_defaults_04112025.php', 'type' => 'insert'],
     ['file' => 'alter_intra_notifications_type_04112025.php', 'type' => 'alter'],
+    ['file' => 'remove_lang_config_04112025.php', 'type' => 'alter'],
 ];
 
 $executed = 0;

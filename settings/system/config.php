@@ -111,26 +111,17 @@ $configByCategory = $configManager->getConfigByCategory();
             border-radius: 0.375rem;
             padding: 1rem;
             margin-top: 0.5rem;
-            background: #f8f9fa;
+            background: #212529;
         }
         
-        .color-preview {
-            display: inline-block;
-            width: 50px;
-            height: 50px;
-            border-radius: 0.375rem;
-            border: 2px solid #dee2e6;
-            vertical-align: middle;
-            margin-left: 10px;
-        }
-        
-        .logo-preview {
+        .logo-preview,
+        .meta-image-preview {
             max-width: 200px;
             max-height: 100px;
             border: 1px solid #dee2e6;
             border-radius: 0.375rem;
             padding: 0.5rem;
-            background: white;
+            background: #2b3035;
         }
         
         .color-input-wrapper {
@@ -223,7 +214,6 @@ $configByCategory = $configManager->getConfigByCategory();
                                                             title="6-stelliger Hex-Farbcode (z.B. #ff0000)"
                                                             oninput="updateColorPicker('<?= htmlspecialchars($config['config_key']) ?>', this.value)"
                                                         >
-                                                        <div class="color-preview" id="<?= htmlspecialchars($config['config_key']) ?>_preview" style="background-color: <?= htmlspecialchars($config['config_value']) ?>"></div>
                                                     </div>
                                                     <div class="form-text">Wählen Sie eine Farbe aus oder geben Sie einen Hex-Farbcode ein.</div>
                                                     
@@ -244,6 +234,27 @@ $configByCategory = $configManager->getConfigByCategory();
                                                             alt="Logo Preview" 
                                                             class="logo-preview" 
                                                             id="logo_preview"
+                                                            onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22100%22%3E%3Crect fill=%22%23ddd%22 width=%22200%22 height=%22100%22/%3E%3Ctext fill=%22%23999%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22%3EBild nicht gefunden%3C/text%3E%3C/svg%3E'"
+                                                        >
+                                                    </div>
+                                                    
+                                                <?php elseif ($config['config_type'] === 'url' && $config['config_key'] === 'META_IMAGE_URL'): ?>
+                                                    <input 
+                                                        type="text" 
+                                                        class="form-control mb-2" 
+                                                        id="<?= htmlspecialchars($config['config_key']) ?>" 
+                                                        name="<?= htmlspecialchars($config['config_key']) ?>"
+                                                        value="<?= htmlspecialchars($config['config_value']) ?>"
+                                                        oninput="updateMetaImagePreview(this.value)"
+                                                    >
+                                                    <div class="form-text">Vollständige URL zum Bild für Link-Vorschau.</div>
+                                                    <div class="config-preview">
+                                                        <strong>Vorschau:</strong><br>
+                                                        <img 
+                                                            src="<?= htmlspecialchars($config['config_value']) ?>" 
+                                                            alt="Meta Image Preview" 
+                                                            class="meta-image-preview" 
+                                                            id="meta_image_preview"
                                                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22100%22%3E%3Crect fill=%22%23ddd%22 width=%22200%22 height=%22100%22/%3E%3Ctext fill=%22%23999%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22%3EBild nicht gefunden%3C/text%3E%3C/svg%3E'"
                                                         >
                                                     </div>
@@ -292,18 +303,21 @@ $configByCategory = $configManager->getConfigByCategory();
 <script>
 function updateColorValue(key, value) {
     document.getElementById(key).value = value;
-    document.getElementById(key + '_preview').style.backgroundColor = value;
+    document.getElementById(key + '_picker').value = value;
 }
 
 function updateColorPicker(key, value) {
     if (/^#[0-9A-Fa-f]{6}$/.test(value)) {
         document.getElementById(key + '_picker').value = value;
-        document.getElementById(key + '_preview').style.backgroundColor = value;
     }
 }
 
 function updateLogoPreview(value) {
     document.getElementById('logo_preview').src = value;
+}
+
+function updateMetaImagePreview(value) {
+    document.getElementById('meta_image_preview').src = value;
 }
 </script>
 </body>

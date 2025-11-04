@@ -44,6 +44,5 @@ try {
     if (!defined('ENOTF_PIN')) define('ENOTF_PIN', '1234');
     if (!defined('ENOTF_REQUIRE_USER_AUTH')) define('ENOTF_REQUIRE_USER_AUTH', false);
     if (!defined('REGISTRATION_MODE')) define('REGISTRATION_MODE', 'open');
-    if (!defined('LANG')) define('LANG', 'de');
     if (!defined('BASE_PATH')) define('BASE_PATH', '/');
 }
