@@ -119,15 +119,11 @@ $createDate = new DateTime($antrag['time_added'] ?? 'now');
 <html lang="en" data-bs-theme="light">
 
 <head>
-    <meta charset="UTF-8" />
-    <title><?= htmlspecialchars($antrag['typ_name']) ?> bearbeiten [#<?= htmlspecialchars($caseid) ?>] &rsaquo; <?php echo SYSTEM_NAME ?></title>
-    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/css/style.min.css" />
-    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/css/admin.min.css" />
-    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/_ext/lineawesome/css/line-awesome.min.css" />
-    <link rel="stylesheet" href="<?= BASE_PATH ?>vendor/twbs/bootstrap/dist/css/bootstrap.min.css">
-    <script src="<?= BASE_PATH ?>vendor/components/jquery/jquery.min.js"></script>
-    <script src="<?= BASE_PATH ?>vendor/twbs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <link rel="icon" type="image/png" href="<?= BASE_PATH ?>assets/favicon/favicon-96x96.png" sizes="96x96" />
+    <head>
+        <?php
+        $SITE_TITLE = htmlspecialchars($antrag['typ_name']) . ' bearbeiten [#' . htmlspecialchars($caseid) . ']';
+        include __DIR__ . '/../../assets/components/_base/admin/head.php'; ?>
+    </head>
     <style>
         .intra__tile {
             padding: 1.5rem;
