@@ -386,7 +386,7 @@ $rdQualis = $rdQualisStmt->fetchAll(PDO::FETCH_ASSOC);
             const genderSpecific = document.getElementById('genderSpecific').checked || fieldType === 'db_dg' || fieldType === 'db_rdq';
 
             if (!fieldLabel || !fieldName) {
-                alert('Bitte alle Pflichtfelder ausfüllen');
+                showAlert('Bitte alle Pflichtfelder ausfüllen', {type: 'warning', title: 'Pflichtfelder fehlen'});
                 return;
             }
 
@@ -412,7 +412,7 @@ $rdQualis = $rdQualisStmt->fetchAll(PDO::FETCH_ASSOC);
                 const optionContainers = document.querySelectorAll('#optionsList .option-item');
 
                 if (optionContainers.length === 0) {
-                    alert('Bitte mindestens eine Auswahloption hinzufügen');
+                    showAlert('Bitte mindestens eine Auswahloption hinzufügen', {type: 'warning', title: 'Optionen fehlen'});
                     return;
                 }
 
@@ -524,8 +524,9 @@ $rdQualis = $rdQualisStmt->fetchAll(PDO::FETCH_ASSOC);
             });
         }
 
-        function removeField(index) {
-            if (confirm('Feld wirklich löschen?')) {
+        async function removeField(index) {
+            const result = await showConfirm('Feld wirklich löschen?', {danger: true, confirmText: 'Löschen', title: 'Feld löschen'});
+            if (result) {
                 fields.splice(index, 1);
                 fields.forEach((field, idx) => {
                     field.sort_order = idx;
@@ -615,11 +616,11 @@ $rdQualis = $rdQualisStmt->fetchAll(PDO::FETCH_ASSOC);
                 if (result.success) {
                     window.location.reload();
                 } else {
-                    alert('Fehler beim Speichern: ' + result.error);
+                    showAlert('Fehler beim Speichern: ' + result.error, {type: 'error', title: 'Fehler'});
                 }
             } catch (error) {
                 console.error('Fetch error:', error);
-                alert('Fehler beim Speichern: ' + error.message);
+                showAlert('Fehler beim Speichern: ' + error.message, {type: 'error', title: 'Fehler'});
             }
         }
 
@@ -683,14 +684,15 @@ $rdQualis = $rdQualisStmt->fetchAll(PDO::FETCH_ASSOC);
                 fields = template.fields || [];
                 renderFields();
             } catch (error) {
-                alert('Fehler beim Laden des Templates: ' + error.message);
+                showAlert('Fehler beim Laden des Templates: ' + error.message, {type: 'error', title: 'Fehler'});
             }
         }
 
         async function deleteTemplate(id, event) {
             event.stopPropagation();
 
-            if (!confirm('Template wirklich löschen?')) {
+            const result = await showConfirm('Template wirklich löschen?', {danger: true, confirmText: 'Löschen', title: 'Template löschen'});
+            if (!result) {
                 return;
             }
 
@@ -703,10 +705,10 @@ $rdQualis = $rdQualisStmt->fetchAll(PDO::FETCH_ASSOC);
                 if (result.success) {
                     loadTemplates();
                 } else {
-                    alert('Fehler beim Löschen: ' + result.error);
+                    showAlert('Fehler beim Löschen: ' + result.error, {type: 'error', title: 'Fehler'});
                 }
             } catch (error) {
-                alert('Fehler beim Löschen: ' + error.message);
+                showAlert('Fehler beim Löschen: ' + error.message, {type: 'error', title: 'Fehler'});
             }
         }
 

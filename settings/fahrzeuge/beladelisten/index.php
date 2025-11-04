@@ -576,17 +576,21 @@ $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             document.querySelectorAll('.delete-category-btn').forEach(button => {
                 button.addEventListener('click', function() {
-                    if (confirm('Möchten Sie diese Kategorie wirklich löschen? Alle zugehörigen Gegenstände werden ebenfalls gelöscht.')) {
-                        deleteCategory(this.dataset.id);
-                    }
+                    showConfirm('Möchten Sie diese Kategorie wirklich löschen? Alle zugehörigen Gegenstände werden ebenfalls gelöscht.', {danger: true, confirmText: 'Löschen', title: 'Kategorie löschen'}).then(result => {
+                        if (result) {
+                            deleteCategory(this.dataset.id);
+                        }
+                    });
                 });
             });
 
             document.querySelectorAll('.delete-tile-btn').forEach(button => {
                 button.addEventListener('click', function() {
-                    if (confirm('Möchten Sie diesen Gegenstand wirklich löschen?')) {
-                        deleteTile(this.dataset.id);
-                    }
+                    showConfirm('Möchten Sie diesen Gegenstand wirklich löschen?', {danger: true, confirmText: 'Löschen', title: 'Gegenstand löschen'}).then(result => {
+                        if (result) {
+                            deleteTile(this.dataset.id);
+                        }
+                    });
                 });
             });
 
@@ -605,12 +609,12 @@ $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             bootstrap.Modal.getInstance(document.getElementById('addCategoryModal')).hide();
                             location.reload();
                         } else {
-                            alert('Fehler: ' + data.message);
+                            showAlert('Fehler: ' + data.message, {type: 'error', title: 'Fehler'});
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('Ein Fehler ist aufgetreten');
+                        showAlert('Ein Fehler ist aufgetreten', {type: 'error', title: 'Fehler'});
                     });
             });
 
@@ -629,12 +633,12 @@ $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             bootstrap.Modal.getInstance(document.getElementById('editCategoryModal')).hide();
                             location.reload();
                         } else {
-                            alert('Fehler: ' + data.message);
+                            showAlert('Fehler: ' + data.message, {type: 'error', title: 'Fehler'});
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('Ein Fehler ist aufgetreten');
+                        showAlert('Ein Fehler ist aufgetreten', {type: 'error', title: 'Fehler'});
                     });
             });
 
@@ -653,12 +657,12 @@ $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             bootstrap.Modal.getInstance(document.getElementById('addTileModal')).hide();
                             location.reload();
                         } else {
-                            alert('Fehler: ' + data.message);
+                            showAlert('Fehler: ' + data.message, {type: 'error', title: 'Fehler'});
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('Ein Fehler ist aufgetreten');
+                        showAlert('Ein Fehler ist aufgetreten', {type: 'error', title: 'Fehler'});
                     });
             });
 
@@ -677,12 +681,12 @@ $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             bootstrap.Modal.getInstance(document.getElementById('editTileModal')).hide();
                             location.reload();
                         } else {
-                            alert('Fehler: ' + data.message);
+                            showAlert('Fehler: ' + data.message, {type: 'error', title: 'Fehler'});
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('Ein Fehler ist aufgetreten');
+                        showAlert('Ein Fehler ist aufgetreten', {type: 'error', title: 'Fehler'});
                     });
             });
         });
@@ -701,12 +705,12 @@ $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     if (data.success) {
                         location.reload();
                     } else {
-                        alert('Fehler: ' + data.message);
+                        showAlert('Fehler: ' + data.message, {type: 'error', title: 'Fehler'});
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Ein Fehler ist aufgetreten');
+                    showAlert('Ein Fehler ist aufgetreten', {type: 'error', title: 'Fehler'});
                 });
         }
 
@@ -724,12 +728,12 @@ $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     if (data.success) {
                         location.reload();
                     } else {
-                        alert('Fehler: ' + data.message);
+                        showAlert('Fehler: ' + data.message, {type: 'error', title: 'Fehler'});
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Ein Fehler ist aufgetreten');
+                    showAlert('Ein Fehler ist aufgetreten', {type: 'error', title: 'Fehler'});
                 });
         }
     </script>

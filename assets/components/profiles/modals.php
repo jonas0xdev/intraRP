@@ -333,7 +333,7 @@ if (Permissions::check(['admin', 'personnel.documents.manage'])) {
                 const editor = editorInstances[id];
                 if (editor.isRequired && !editor.getData().trim()) {
                     const fieldName = id.replace('field_', '');
-                    alert(`Bitte füllen Sie das Pflichtfeld "${fieldName}" aus.`);
+                    showAlert(`Bitte füllen Sie das Pflichtfeld "${fieldName}" aus.`, {type: 'warning', title: 'Pflichtfeld fehlt'});
                     return;
                 }
             }
@@ -376,13 +376,14 @@ if (Permissions::check(['admin', 'personnel.documents.manage'])) {
                 const result = await response.json();
 
                 if (result.success) {
-                    alert('Dokument erfolgreich erstellt!');
-                    location.reload();
+                    showAlert('Dokument erfolgreich erstellt!', {type: 'success', title: 'Erfolgreich'}).then(() => {
+                        location.reload();
+                    });
                 } else {
-                    alert('Fehler: ' + result.error);
+                    showAlert('Fehler: ' + result.error, {type: 'error', title: 'Fehler'});
                 }
             } catch (error) {
-                alert('Fehler beim Erstellen: ' + error.message);
+                showAlert('Fehler beim Erstellen: ' + error.message, {type: 'error', title: 'Fehler'});
             }
         });
 

@@ -183,7 +183,7 @@ $typen = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                                                 <a href="?delete=<?= $typ['id'] ?>"
                                                                     class="btn btn-danger mx-1"
                                                                     title="Löschen"
-                                                                    onclick="return confirm('Antragstyp wirklich löschen?')">
+                                                                    onclick="event.preventDefault(); showConfirm('Antragstyp wirklich löschen?', {danger: true, confirmText: 'Löschen', title: 'Antragstyp löschen'}).then(result => { if(result) window.location.href = this.href; });">
                                                                     <i class="fa-solid fa-trash"></i>
                                                                 </a>
                                                             <?php endif; ?>

@@ -346,9 +346,11 @@ if (!Permissions::check(['admin', 'users.view'])) {
             });
 
             document.getElementById('delete-role-btn').addEventListener('click', function() {
-                if (confirm('Möchtest du diese Rolle wirklich löschen?')) {
-                    document.getElementById('delete-role-form').submit();
-                }
+                showConfirm('Möchtest du diese Rolle wirklich löschen?', {danger: true, confirmText: 'Löschen', title: 'Rolle löschen'}).then(result => {
+                    if (result) {
+                        document.getElementById('delete-role-form').submit();
+                    }
+                });
             });
         });
     </script>

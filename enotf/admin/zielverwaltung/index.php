@@ -275,9 +275,11 @@ if (!Permissions::check(['admin', 'edivi.view'])) {
             });
 
             document.getElementById('delete-fahrzeug-btn').addEventListener('click', function() {
-                if (confirm('Möchtest du dieses Ziel wirklich löschen?')) {
-                    document.getElementById('delete-fahrzeug-form').submit();
-                }
+                showConfirm('Möchtest du dieses Ziel wirklich löschen?', {danger: true, confirmText: 'Löschen', title: 'Ziel löschen'}).then(result => {
+                    if (result) {
+                        document.getElementById('delete-fahrzeug-form').submit();
+                    }
+                });
             });
         });
     </script>

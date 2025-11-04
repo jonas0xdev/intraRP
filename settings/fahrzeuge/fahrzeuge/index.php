@@ -315,9 +315,11 @@ if (!Permissions::check(['admin', 'vehicles.view'])) {
             });
 
             document.getElementById('delete-fahrzeug-btn').addEventListener('click', function() {
-                if (confirm('Möchtest du dieses Fahrzeug wirklich löschen?')) {
-                    document.getElementById('delete-fahrzeug-form').submit();
-                }
+                showConfirm('Möchtest du dieses Fahrzeug wirklich löschen?', {danger: true, confirmText: 'Löschen', title: 'Fahrzeug löschen'}).then(result => {
+                    if (result) {
+                        document.getElementById('delete-fahrzeug-form').submit();
+                    }
+                });
             });
         });
     </script>

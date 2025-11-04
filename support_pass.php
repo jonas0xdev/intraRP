@@ -487,7 +487,7 @@ $passwords = $supportManager->getAdminSupportPasswords($_SESSION['userid']);
                                 <td><?= $pw['session_count'] ?></td>
                                 <td>
                                     <?php if (!$is_used && !$is_expired): ?>
-                                        <form method="POST" style="display: inline;" onsubmit="return confirm('Wirklich löschen?')">
+                                        <form method="POST" style="display: inline;" onsubmit="event.preventDefault(); showConfirm('Wirklich löschen?', {danger: true, confirmText: 'Löschen', title: 'Support-Passwort löschen'}).then(result => { if(result) this.submit(); });">
                                             <input type="hidden" name="action" value="delete">
                                             <input type="hidden" name="password_id" value="<?= $pw['id'] ?>">
                                             <button type="submit" class="btn btn-danger btn-small">

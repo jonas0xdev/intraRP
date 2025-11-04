@@ -154,7 +154,7 @@ $registrationMode = defined('REGISTRATION_MODE') ? REGISTRATION_MODE : 'open';
                                             <td><?= $code['used_at'] ? date('d.m.Y H:i', strtotime($code['used_at'])) : '-' ?></td>
                                             <td>
                                                 <?php if (!$code['is_used']): ?>
-                                                    <form method="POST" class="d-inline" onsubmit="return confirm('Diesen Code wirklich löschen?');">
+                                                    <form method="POST" class="d-inline" onsubmit="event.preventDefault(); showConfirm('Diesen Code wirklich löschen?', {danger: true, confirmText: 'Löschen', title: 'Registrierungscode löschen'}).then(result => { if(result) this.submit(); });">
                                                         <input type="hidden" name="action" value="delete">
                                                         <input type="hidden" name="code_id" value="<?= $code['id'] ?>">
                                                         <button type="submit" class="btn btn-sm btn-danger">
