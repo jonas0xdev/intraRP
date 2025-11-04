@@ -20,9 +20,6 @@ if (defined('ENOTF_REQUIRE_USER_AUTH') && ENOTF_REQUIRE_USER_AUTH === true) {
             $_SESSION['redirect_url'] = BASE_PATH . 'enotf/login.php';
         }
         
-        // Ensure session is written before redirect
-        session_write_close();
-        
         header("Location: " . BASE_PATH . "login.php?redirect=enotf");
         exit();
     }
