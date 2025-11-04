@@ -30,7 +30,7 @@ $logManager = new PersonalLogManager($pdo);
 $logManager->deleteEntry($logid);
 
 $auditlogger = new AuditLogger($pdo);
-$auditlogger->log($userid, 'Profil-Kommentar gelöscht [ID: ' . $id . ']', NULL, 'Mitarbeiter', 1);
+$auditlogger->log($userid, 'Profil-Kommentar gelöscht [ID: ' . $logid . ']', NULL, 'Mitarbeiter', 1);
 
 header("Location: " . $_SERVER['HTTP_REFERER']);
 exit;
