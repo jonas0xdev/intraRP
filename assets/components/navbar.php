@@ -147,7 +147,11 @@ use App\Notifications\NotificationManager;
                                 $now = new DateTime();
                                 $diff = $now->diff($datetime);
                                 
-                                if ($diff->days > 0) {
+                                // Check if the notification is in the future (clock skew)
+                                if ($diff->invert == 0) {
+                                    // Notification is in the future, show as "jetzt"
+                                    $timeAgo = 'jetzt';
+                                } elseif ($diff->days > 0) {
                                     $timeAgo = $diff->days . 'd';
                                 } elseif ($diff->h > 0) {
                                     $timeAgo = $diff->h . 'h';
