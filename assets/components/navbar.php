@@ -102,6 +102,7 @@ use App\Notifications\NotificationManager;
                                 <li><a class="dropdown-item" href="<?= BASE_PATH ?>settings/dashboard/index.php">Dashboard</a></li>
                             <?php } ?>
                             <?php if (Permissions::check(['admin'])) { ?>
+                                <li><a class="dropdown-item" href="<?= BASE_PATH ?>settings/system/config.php">Konfiguration</a></li>
                                 <li><a class="dropdown-item" href="<?= BASE_PATH ?>settings/system/index.php">Updater</a></li>
                             <?php } ?>
                         </ul>
@@ -171,7 +172,8 @@ use App\Notifications\NotificationManager;
                                 $iconClass = [
                                     'antrag' => 'fa-file',
                                     'protokoll' => 'fa-truck-medical',
-                                    'dokument' => 'fa-folder-open'
+                                    'dokument' => 'fa-folder-open',
+                                    'system' => 'fa-gears'
                                 ];
                                 $icon = $iconClass[$notification['type']] ?? 'fa-bell';
                             ?>

@@ -15,6 +15,7 @@ use App\Documents\DocumentIdGenerator;
 use App\Auth\Permissions;
 use App\Notifications\NotificationManager;
 use App\Personnel\PersonalLogManager;
+use App\Utils\AuditLogger;
 
 ob_clean();
 
@@ -104,14 +105,18 @@ try {
     );
 
     // Logge die Aktion im Audit-Log
-    logAction($pdo, 'document_created', [
-        'db_id' => $dbId,
-        'document_id' => $documentId,
-        'template_id' => $input['template_id'],
-        'template_name' => $template['name'],
-        'profileid' => $input['profileid'],
-        'created_by' => $_SESSION['discordtag'] ?? null
-    ]);
+    try {
+        $auditLogger = new AuditLogger($pdo);
+        $auditLogger->log(
+            (int)($_SESSION['userid']),
+            'Dokument erstellt [' . $documentId . ']',
+            'Für Profil: ' . $input['profileid'],
+            'Dokumente',
+            0
+        );
+    } catch (Exception $e) {
+        error_log('Audit log failed: ' . $e->getMessage());
+    }
 
     // Create notification for employee if they have a user account
     try {
@@ -161,23 +166,4 @@ try {
     ]);
     ob_end_flush();
     exit;
-}
-
-function logAction($pdo, $action, $data)
-{
-    try {
-        $stmt = $pdo->prepare("
-            INSERT INTO intra_audit_log 
-            (user, action, details, timestamp) 
-            VALUES (:user, :action, :details, CURRENT_TIMESTAMP)
-        ");
-
-        $stmt->execute([
-            'user' => $_SESSION['userid'] ?? 0,
-            'action' => $action,
-            'details' => json_encode($data)
-        ]);
-    } catch (Exception $e) {
-        error_log("Audit Log Fehler: " . $e->getMessage());
-    }
 }
