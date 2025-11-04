@@ -41,7 +41,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
         if (!$config['is_editable']) continue;
         
         $key = $config['config_key'];
-        $oldValue = $configManager->get($key);
+        
+        // Get the raw database value (string) instead of converted value
+        $oldValue = $config['config_value'];
         
         // Handle different input types
         if ($config['config_type'] === 'boolean') {
