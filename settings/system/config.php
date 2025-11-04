@@ -106,21 +106,17 @@ $configByCategory = $configManager->getConfigByCategory();
     ?>
     <style>
         .config-preview {
-            border: 1px solid #dee2e6;
-            border-radius: 0.375rem;
             padding: 1rem;
             margin-top: 0.5rem;
-            background: #212529;
         }
         
         .logo-preview,
         .meta-image-preview {
             max-width: 200px;
             max-height: 100px;
-            border: 1px solid #dee2e6;
-            border-radius: 0.375rem;
+            border: 1px solid var(--bs-border-color);
+            border-radius: 0;
             padding: 0.5rem;
-            background: #2b3035;
         }
         
         .color-input-wrapper {
