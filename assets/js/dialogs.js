@@ -66,16 +66,24 @@
             const modalElement = document.getElementById(modalId);
             const modal = new bootstrap.Modal(modalElement);
             
+            let resolved = false;
+            
             // Handle confirm button
             document.getElementById(`${modalId}-confirm`).addEventListener('click', function() {
+                if (!resolved) {
+                    resolved = true;
+                    resolve(true);
+                }
                 modal.hide();
-                resolve(true);
             });
             
             // Handle cancel/close
             modalElement.addEventListener('hidden.bs.modal', function() {
                 modalElement.remove();
-                resolve(false);
+                if (!resolved) {
+                    resolved = true;
+                    resolve(false);
+                }
             }, { once: true });
             
             modal.show();
@@ -183,16 +191,22 @@
             const modal = new bootstrap.Modal(modalElement);
             const inputElement = document.getElementById(`${modalId}-input`);
             
+            let resolved = false;
+            
             // Handle confirm button
             document.getElementById(`${modalId}-confirm`).addEventListener('click', function() {
+                if (!resolved) {
+                    resolved = true;
+                    resolve(inputElement.value);
+                }
                 modal.hide();
-                resolve(inputElement.value);
             });
             
             // Handle cancel/close
             modalElement.addEventListener('hidden.bs.modal', function() {
                 modalElement.remove();
-                if (!inputElement.dataset.confirmed) {
+                if (!resolved) {
+                    resolved = true;
                     resolve(null);
                 }
             }, { once: true });
@@ -200,9 +214,11 @@
             // Handle Enter key
             inputElement.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
-                    inputElement.dataset.confirmed = 'true';
+                    if (!resolved) {
+                        resolved = true;
+                        resolve(inputElement.value);
+                    }
                     modal.hide();
-                    resolve(inputElement.value);
                 }
             });
             
