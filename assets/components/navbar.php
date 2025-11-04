@@ -105,8 +105,9 @@ use App\Notifications\NotificationManager;
                     </li>
                 <?php } ?>
                 <?php
-                // Get unread notification count
+                // Get unread notification count and recent notifications
                 $unreadCount = 0;
+                $recentNotifications = [];
                 try {
                     // Ensure database connection is available
                     if (!isset($pdo)) {
@@ -116,6 +117,8 @@ use App\Notifications\NotificationManager;
                     if (isset($pdo)) {
                         $notificationManager = new NotificationManager($pdo);
                         $unreadCount = $notificationManager->getUnreadCount($_SESSION['userid']);
+                        // Get last 5 notifications for the dropdown
+                        $recentNotifications = $notificationManager->getAll($_SESSION['userid'], 5);
                     }
                 } catch (Exception $e) {
                     // Silently fail if database connection is not available
@@ -123,8 +126,8 @@ use App\Notifications\NotificationManager;
                     error_log("Notification count error: " . $e->getMessage());
                 }
                 ?>
-                <li class="nav-item">
-                    <a class="nav-link position-relative" href="<?= BASE_PATH ?>benachrichtigungen/index.php" data-page="benachrichtigungen">
+                <li class="nav-item dropdown">
+                    <a class="nav-link position-relative dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-page="benachrichtigungen">
                         <i class="fa-solid fa-bell"></i>
                         <?php if ($unreadCount > 0): ?>
                             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
@@ -133,6 +136,59 @@ use App\Notifications\NotificationManager;
                             </span>
                         <?php endif; ?>
                     </a>
+                    <ul class="dropdown-menu dropdown-menu-end" style="min-width: 320px; max-width: 400px;">
+                        <li><h6 class="dropdown-header">Benachrichtigungen</h6></li>
+                        <?php if (empty($recentNotifications)): ?>
+                            <li><span class="dropdown-item-text text-muted small">Keine Benachrichtigungen</span></li>
+                        <?php else: ?>
+                            <?php foreach ($recentNotifications as $notification): 
+                                $isUnread = $notification['is_read'] == 0;
+                                $datetime = new DateTime($notification['created_at']);
+                                $now = new DateTime();
+                                $diff = $now->diff($datetime);
+                                
+                                if ($diff->days > 0) {
+                                    $timeAgo = $diff->days . 'd';
+                                } elseif ($diff->h > 0) {
+                                    $timeAgo = $diff->h . 'h';
+                                } elseif ($diff->i > 0) {
+                                    $timeAgo = $diff->i . 'm';
+                                } else {
+                                    $timeAgo = 'jetzt';
+                                }
+                                
+                                $iconClass = [
+                                    'antrag' => 'fa-file-alt',
+                                    'protokoll' => 'fa-file-medical',
+                                    'dokument' => 'fa-file-upload'
+                                ];
+                                $icon = $iconClass[$notification['type']] ?? 'fa-bell';
+                            ?>
+                                <li>
+                                    <a class="dropdown-item <?= $isUnread ? 'fw-bold' : '' ?>" href="<?= htmlspecialchars($notification['link'] ?: BASE_PATH . 'benachrichtigungen/index.php') ?>" style="white-space: normal;">
+                                        <div class="d-flex align-items-start">
+                                            <i class="fa-solid <?= $icon ?> me-2 mt-1" style="font-size: 0.9rem;"></i>
+                                            <div class="flex-grow-1" style="min-width: 0;">
+                                                <div class="small"><?= htmlspecialchars($notification['title']) ?></div>
+                                                <?php if ($notification['message']): ?>
+                                                    <div class="text-muted" style="font-size: 0.75rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                                        <?= htmlspecialchars($notification['message']) ?>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </div>
+                                            <small class="text-muted ms-2" style="font-size: 0.7rem; white-space: nowrap;"><?= $timeAgo ?></small>
+                                        </div>
+                                    </a>
+                                </li>
+                            <?php endforeach; ?>
+                            <li><hr class="dropdown-divider"></li>
+                        <?php endif; ?>
+                        <li>
+                            <a class="dropdown-item text-center small" href="<?= BASE_PATH ?>benachrichtigungen/index.php">
+                                Alle Benachrichtigungen anzeigen
+                            </a>
+                        </li>
+                    </ul>
                 </li>
                 <li class="nav-item dropdown" id="intra-usermenu">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
