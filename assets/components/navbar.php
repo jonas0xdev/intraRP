@@ -185,10 +185,10 @@ use App\Notifications\NotificationManager;
                                             <div class="d-flex align-items-center ms-2" style="gap: 0.25rem;">
                                                 <small class="text-muted" style="font-size: 0.7rem; white-space: nowrap;"><?= $timeAgo ?></small>
                                                 <?php if ($isUnread): ?>
-                                                    <button class="btn btn-sm btn-link p-0 ms-1 mark-as-read-btn" 
+                                                    <button class="btn btn-sm btn-link p-1 ms-1 mark-as-read-btn" 
                                                             data-notification-id="<?= $notification['id'] ?>" 
                                                             title="Als gelesen markieren"
-                                                            style="font-size: 0.7rem; line-height: 1;">
+                                                            style="font-size: 1.1rem; line-height: 1;">
                                                         <i class="fa-solid fa-check text-success"></i>
                                                     </button>
                                                 <?php endif; ?>

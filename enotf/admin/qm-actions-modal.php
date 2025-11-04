@@ -103,19 +103,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Create notification for protocol author if status changed
     if ($protokoll_status != $old_status && !empty($row['pfname'])) {
         try {
-            $notificationManager = new NotificationManager($pdo);
-            $userId = $notificationManager->getUserIdByFullname($row['pfname']);
+            // First, look up the mitarbeiter's discord tag by their fullname
+            $mitarbeiterStmt = $pdo->prepare("SELECT discordtag FROM intra_mitarbeiter WHERE fullname = ? LIMIT 1");
+            $mitarbeiterStmt->execute([$row['pfname']]);
+            $mitarbeiter = $mitarbeiterStmt->fetch(PDO::FETCH_ASSOC);
             
-            if ($userId) {
-                $notificationManager->create(
-                    $userId,
-                    'protokoll',
-                    "Ihr Protokoll #{$row['enr']} wurde geprüft",
-                    "Status: {$status_klar}. Prüfer: {$bearbeiter}",
-                    BASE_PATH . "enotf/overview.php"
-                );
+            if ($mitarbeiter && !empty($mitarbeiter['discordtag'])) {
+                // Now look up the user by discord tag
+                $notificationManager = new NotificationManager($pdo);
+                $userId = $notificationManager->getUserIdByDiscordTag($mitarbeiter['discordtag']);
+                
+                if ($userId) {
+                    $notificationManager->create(
+                        $userId,
+                        'protokoll',
+                        "Ihr Protokoll #{$row['enr']} wurde geprüft",
+                        "Status: {$status_klar}. Prüfer: {$bearbeiter}",
+                        BASE_PATH . "enotf/overview.php"
+                    );
+                } else {
+                    error_log("QM Notification: User not found for discord tag: " . $mitarbeiter['discordtag']);
+                }
             } else {
-                error_log("QM Notification: User not found for pfname: " . $row['pfname']);
+                error_log("QM Notification: No mitarbeiter found with fullname: " . $row['pfname'] . " or no discord tag set");
             }
         } catch (Exception $e) {
             error_log("QM Notification Error: " . $e->getMessage());
