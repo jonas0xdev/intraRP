@@ -16,11 +16,16 @@ class SystemUpdater
     private string $githubRepo = 'EmergencyForge/intraRP';
     private string $githubApiUrl;
     private array $currentVersion;
+    private ?string $githubToken = null;
 
     public function __construct()
     {
         $this->versionFile = __DIR__ . '/../../system/updates/version.json';
         $this->githubApiUrl = "https://api.github.com/repos/{$this->githubRepo}";
+        
+        // Load GitHub token from environment if available
+        $this->githubToken = getenv('GITHUB_TOKEN') ?: null;
+        
         $this->loadCurrentVersion();
     }
 
@@ -66,7 +71,8 @@ class SystemUpdater
             if (!$latestRelease) {
                 return [
                     'available' => false,
-                    'message' => 'Keine Updates verfügbar oder Repository nicht erreichbar.'
+                    'error' => true,
+                    'message' => 'Konnte nicht auf GitHub-API zugreifen. Bitte prüfen Sie Ihre Internetverbindung oder versuchen Sie es später erneut (möglicherweise API-Ratenlimit erreicht).'
                 ];
             }
 
@@ -101,13 +107,65 @@ class SystemUpdater
     {
         $url = "{$this->githubApiUrl}/releases/latest";
         
+        $headers = [
+            'User-Agent: intraRP-Updater',
+            'Accept: application/vnd.github+json'
+        ];
+        
+        // Add authentication if token is available
+        if ($this->githubToken) {
+            $headers[] = "Authorization: Bearer {$this->githubToken}";
+        }
+        
         $context = stream_context_create([
             'http' => [
                 'method' => 'GET',
-                'header' => [
-                    'User-Agent: intraRP-Updater',
-                    'Accept: application/vnd.github+json'
-                ],
+                'header' => $headers,
+                'timeout' => 10,
+                'ignore_errors' => true  // Allow reading error responses
+            ]
+        ]);
+
+        $response = @file_get_contents($url, false, $context);
+        
+        if ($response === false) {
+            // If API fails, try fetching all releases and get the first non-prerelease
+            return $this->fetchLatestReleaseFromList();
+        }
+
+        $release = json_decode($response, true);
+        
+        // Check if we got an error response
+        if (isset($release['message'])) {
+            // API error (rate limit, etc), try fallback
+            return $this->fetchLatestReleaseFromList();
+        }
+        
+        return $release ?? null;
+    }
+    
+    /**
+     * Fallback method to fetch latest release from releases list
+     * This is used when the /releases/latest endpoint fails
+     */
+    private function fetchLatestReleaseFromList(): ?array
+    {
+        $url = "{$this->githubApiUrl}/releases?per_page=10";
+        
+        $headers = [
+            'User-Agent: intraRP-Updater',
+            'Accept: application/vnd.github+json'
+        ];
+        
+        // Add authentication if token is available
+        if ($this->githubToken) {
+            $headers[] = "Authorization: Bearer {$this->githubToken}";
+        }
+        
+        $context = stream_context_create([
+            'http' => [
+                'method' => 'GET',
+                'header' => $headers,
                 'timeout' => 10
             ]
         ]);
@@ -118,9 +176,21 @@ class SystemUpdater
             return null;
         }
 
-        $release = json_decode($response, true);
+        $releases = json_decode($response, true);
         
-        return $release ?? null;
+        if (!is_array($releases) || empty($releases)) {
+            return null;
+        }
+        
+        // Find the first non-prerelease, non-draft release
+        foreach ($releases as $release) {
+            if (!($release['draft'] ?? false) && !($release['prerelease'] ?? false)) {
+                return $release;
+            }
+        }
+        
+        // If no stable release found, return the first release
+        return $releases[0] ?? null;
     }
 
     /**
