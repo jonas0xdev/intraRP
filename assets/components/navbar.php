@@ -169,20 +169,32 @@ use App\Notifications\NotificationManager;
                                 $icon = $iconClass[$notification['type']] ?? 'fa-bell';
                             ?>
                                 <li>
-                                    <a class="dropdown-item <?= $isUnread ? 'fw-bold' : '' ?>" href="<?= htmlspecialchars($notification['link'] ?: BASE_PATH . 'benachrichtigungen/index.php') ?>" style="white-space: normal;">
-                                        <div class="d-flex align-items-start">
+                                    <div class="dropdown-item p-0" style="white-space: normal;">
+                                        <div class="d-flex align-items-start p-2">
                                             <i class="fa-solid <?= $icon ?> me-2 mt-1" style="font-size: 0.9rem;"></i>
                                             <div class="flex-grow-1" style="min-width: 0;">
-                                                <div class="small"><?= htmlspecialchars($notification['title']) ?></div>
-                                                <?php if ($notification['message']): ?>
-                                                    <div class="text-muted" style="font-size: 0.75rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                                        <?= htmlspecialchars($notification['message']) ?>
-                                                    </div>
+                                                <a href="<?= htmlspecialchars($notification['link'] ?: BASE_PATH . 'benachrichtigungen/index.php') ?>" class="text-decoration-none text-reset d-block <?= $isUnread ? 'fw-bold' : '' ?>">
+                                                    <div class="small"><?= htmlspecialchars($notification['title']) ?></div>
+                                                    <?php if ($notification['message']): ?>
+                                                        <div class="text-muted" style="font-size: 0.75rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                                            <?= htmlspecialchars($notification['message']) ?>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                </a>
+                                            </div>
+                                            <div class="d-flex align-items-center ms-2" style="gap: 0.25rem;">
+                                                <small class="text-muted" style="font-size: 0.7rem; white-space: nowrap;"><?= $timeAgo ?></small>
+                                                <?php if ($isUnread): ?>
+                                                    <button class="btn btn-sm btn-link p-0 ms-1 mark-as-read-btn" 
+                                                            data-notification-id="<?= $notification['id'] ?>" 
+                                                            title="Als gelesen markieren"
+                                                            style="font-size: 0.7rem; line-height: 1;">
+                                                        <i class="fa-solid fa-check text-success"></i>
+                                                    </button>
                                                 <?php endif; ?>
                                             </div>
-                                            <small class="text-muted ms-2" style="font-size: 0.7rem; white-space: nowrap;"><?= $timeAgo ?></small>
                                         </div>
-                                    </a>
+                                    </div>
                                 </li>
                             <?php endforeach; ?>
                             <li><hr class="dropdown-divider"></li>
@@ -212,6 +224,47 @@ use App\Notifications\NotificationManager;
         var currentPage = $("body").data("page");
         $(".nav-link").removeClass("active");
         $(".nav-link[data-page='" + currentPage + "']").addClass("active");
+        
+        // Handle mark as read buttons in notification dropdown
+        $('.mark-as-read-btn').on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const notificationId = $(this).data('notification-id');
+            const $button = $(this);
+            const $listItem = $button.closest('li');
+            
+            // Send AJAX request to mark as read
+            fetch('<?= BASE_PATH ?>benachrichtigungen/mark-read.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ id: notificationId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Remove bold styling and hide button
+                    $listItem.find('a').removeClass('fw-bold');
+                    $button.fadeOut(200);
+                    
+                    // Update badge count
+                    const $badge = $('.nav-link[data-page="benachrichtigungen"] .badge');
+                    const currentCount = parseInt($badge.text()) || 0;
+                    const newCount = Math.max(0, currentCount - 1);
+                    
+                    if (newCount > 0) {
+                        $badge.text(newCount > 9 ? '9+' : newCount);
+                    } else {
+                        $badge.remove();
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error marking notification as read:', error);
+            });
+        });
     });
 
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')

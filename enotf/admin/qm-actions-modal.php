@@ -102,17 +102,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Create notification for protocol author if status changed
     if ($protokoll_status != $old_status && !empty($row['pfname'])) {
-        $notificationManager = new NotificationManager($pdo);
-        $userId = $notificationManager->getUserIdByFullname($row['pfname']);
-        
-        if ($userId) {
-            $notificationManager->create(
-                $userId,
-                'protokoll',
-                "Ihr Protokoll #{$row['enr']} wurde geprüft",
-                "Status: {$status_klar}. Prüfer: {$bearbeiter}",
-                BASE_PATH . "enotf/overview.php"
-            );
+        try {
+            $notificationManager = new NotificationManager($pdo);
+            $userId = $notificationManager->getUserIdByFullname($row['pfname']);
+            
+            if ($userId) {
+                $notificationManager->create(
+                    $userId,
+                    'protokoll',
+                    "Ihr Protokoll #{$row['enr']} wurde geprüft",
+                    "Status: {$status_klar}. Prüfer: {$bearbeiter}",
+                    BASE_PATH . "enotf/overview.php"
+                );
+            } else {
+                error_log("QM Notification: User not found for pfname: " . $row['pfname']);
+            }
+        } catch (Exception $e) {
+            error_log("QM Notification Error: " . $e->getMessage());
+        }
+    } else {
+        if ($protokoll_status == $old_status) {
+            error_log("QM Notification: Status unchanged (old: $old_status, new: $protokoll_status)");
+        }
+        if (empty($row['pfname'])) {
+            error_log("QM Notification: No pfname found for protocol " . $_GET['id']);
         }
     }
 
