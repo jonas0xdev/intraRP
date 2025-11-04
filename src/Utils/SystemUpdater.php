@@ -388,6 +388,11 @@ class SystemUpdater
             return null;
         }
 
+        // Invalidate cache if current version has changed
+        if (isset($cacheData['current_version']) && $cacheData['current_version'] !== $this->currentVersion['version']) {
+            return null;
+        }
+
         return $cacheData['data'] ?? null;
     }
 
@@ -400,6 +405,7 @@ class SystemUpdater
         
         $cacheData = [
             'timestamp' => time(),
+            'current_version' => $this->currentVersion['version'],
             'data' => $data
         ];
 
