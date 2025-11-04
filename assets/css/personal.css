@@ -10,6 +10,31 @@
   position: relative;
 }
 
+.ma-logs {
+  background-color: var(--bs-secondary-bg);
+  border-color: var(--bs-border-color) !important;
+}
+
+.ma-logs details summary {
+  font-weight: 600;
+  color: var(--bs-secondary-color);
+  user-select: none;
+}
+
+.ma-logs details summary::-webkit-details-marker {
+  color: var(--bs-secondary-color);
+}
+
+.ma-logs .comment {
+  font-size: 0.9rem;
+  padding: 8px;
+  margin-bottom: 8px;
+}
+
+.ma-logs .comment p {
+  margin-bottom: 0;
+}
+
 .comment-container,
 .log-container,
 .comment-settings {

@@ -632,20 +632,24 @@ if (isset($_POST['new'])) {
                                 </div>
                             </form>
                         </div>
-                        <div class="col ms-4 p-3 shadow-sm border ma-comments">
-                            <div class="comment-settings mb-3">
-                                <h4>Kommentare/Notizen</h4>
+                        <div class="col ms-4">
+                            <div class="p-3 shadow-sm border ma-comments mb-3">
+                                <div class="comment-settings mb-3">
+                                    <h4>Kommentare/Notizen</h4>
+                                </div>
+                                <div class="comment-container">
+                                    <?php include __DIR__ . '/../assets/components/profiles/comments/main.php' ?>
+                                </div>
                             </div>
-                            <div class="comment-container">
-                                <?php include __DIR__ . '/../assets/components/profiles/comments/main.php' ?>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row mt-3 mb-4">
-                        <div class="col p-3 shadow-sm border ma-logs">
-                            <h4>Systemprotokoll</h4>
-                            <div class="log-container">
-                                <?php include __DIR__ . '/../assets/components/profiles/logs/main.php' ?>
+                            <div class="p-3 shadow-sm border ma-logs">
+                                <details open>
+                                    <summary class="mb-3" style="cursor: pointer;">
+                                        <h5 class="d-inline">Systemprotokoll</h5>
+                                    </summary>
+                                    <div class="log-container">
+                                        <?php include __DIR__ . '/../assets/components/profiles/logs/main.php' ?>
+                                    </div>
+                                </details>
                             </div>
                         </div>
                     </div>
