@@ -101,6 +101,9 @@ use App\Notifications\NotificationManager;
                             <?php if (Permissions::check(['admin', 'dashboard.manage'])) { ?>
                                 <li><a class="dropdown-item" href="<?= BASE_PATH ?>settings/dashboard/index.php">Dashboard</a></li>
                             <?php } ?>
+                            <?php if (Permissions::check(['admin'])) { ?>
+                                <li><a class="dropdown-item" href="<?= BASE_PATH ?>settings/system/index.php">Updater</a></li>
+                            <?php } ?>
                         </ul>
                     </li>
                 <?php } ?>

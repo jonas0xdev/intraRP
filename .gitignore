@@ -7,3 +7,5 @@ support_errors.log
 *.backup
 .vscode
 .idea
+system/updates/*.zip
+system/updates/temp/
