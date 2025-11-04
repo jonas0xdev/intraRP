@@ -105,6 +105,12 @@ use App\Auth\Permissions; ?>
                 <?php
                 // Get unread notification count
                 use App\Notifications\NotificationManager;
+                
+                // Ensure database connection is available
+                if (!isset($pdo)) {
+                    require_once __DIR__ . '/../config/database.php';
+                }
+                
                 $notificationManager = new NotificationManager($pdo);
                 $unreadCount = $notificationManager->getUnreadCount($_SESSION['userid']);
                 ?>
