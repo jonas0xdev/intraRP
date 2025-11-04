@@ -1,6 +1,6 @@
 {
-  "version": "v0.5.0",
-  "updated_at": "2025-11-04 00:00:00",
-  "build_number": "0",
-  "commit_hash": "initial"
+  "version": "v0.5.1",
+  "updated_at": "2025-11-04 17:17:47",
+  "build_number": "20",
+  "commit_hash": "ce8b2108c6cfd939cbeb6ba6ffe10273289c772c"
 }
