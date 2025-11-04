@@ -10,7 +10,20 @@ ini_set('session.cookie_secure', true);
 session_start();
 
 if (isset($_SESSION['userid']) && isset($_SESSION['permissions'])) {
+    // Check if there's an eNOTF redirect pending
+    if (isset($_GET['redirect']) && $_GET['redirect'] === 'enotf') {
+        header('Location: ' . BASE_PATH . 'enotf/login.php');
+        exit;
+    }
     header('Location: ' . BASE_PATH . 'index.php');
+    exit;
+}
+
+// Preserve redirect parameter in session for OAuth flow
+if (isset($_GET['redirect']) && $_GET['redirect'] === 'enotf') {
+    if (!isset($_SESSION['redirect_url']) || empty($_SESSION['redirect_url'])) {
+        $_SESSION['redirect_url'] = BASE_PATH . 'enotf/login.php';
+    }
 }
 
 $registrationMode = defined('REGISTRATION_MODE') ? REGISTRATION_MODE : 'open';
