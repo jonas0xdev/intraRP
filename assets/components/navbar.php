@@ -189,7 +189,7 @@ use App\Notifications\NotificationManager;
                                                             data-notification-id="<?= $notification['id'] ?>" 
                                                             title="Als gelesen markieren"
                                                             style="font-size: 1.1rem; line-height: 1;">
-                                                        <i class="fa-solid fa-check text-success"></i>
+                                                        <i class="fa-solid fa-check text-muted"></i>
                                                     </button>
                                                 <?php endif; ?>
                                             </div>

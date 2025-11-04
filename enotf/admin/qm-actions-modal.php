@@ -119,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'protokoll',
                         "Ihr Protokoll #{$row['enr']} wurde geprüft",
                         "Status: {$status_klar}. Prüfer: {$bearbeiter}",
-                        BASE_PATH . "enotf/overview.php"
+                        BASE_PATH . "enotf/protokoll/index.php?enr={$row['enr']}"
                     );
                 } else {
                     error_log("QM Notification: User not found for discord tag: " . $mitarbeiter['discordtag']);
