@@ -34,7 +34,6 @@ try {
         INSERT INTO intra_config (config_key, config_value, config_type, category, description, is_editable, display_order)
         VALUES (:key, :value, :type, :category, :description, :editable, :order)
         ON DUPLICATE KEY UPDATE
-            config_value = VALUES(config_value),
             config_type = VALUES(config_type),
             category = VALUES(category),
             description = VALUES(description),

@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
         
         // Handle different input types
         if ($config['config_type'] === 'boolean') {
-            // Checkboxes are only in POST when checked
+            // Checkboxes/switches send 'on' when checked, nothing when unchecked
             $value = isset($_POST[$key]) && $_POST[$key] === 'on' ? 'true' : 'false';
         } else {
             // Skip if not in POST
@@ -53,8 +53,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
             $value = $_POST[$key];
         }
         
-        // Only update if value changed
-        if ($oldValue != $value) {
+        // Only update if value changed (strict comparison for type safety)
+        if ($oldValue !== $value) {
             $updates[$key] = $value;
             $changes[] = [
                 'key' => $key,
@@ -220,6 +220,7 @@ $configByCategory = $configManager->getConfigByCategory();
                                                             value="<?= htmlspecialchars($config['config_value']) ?>"
                                                             pattern="^#[0-9A-Fa-f]{6}$"
                                                             placeholder="#000000"
+                                                            title="6-stelliger Hex-Farbcode (z.B. #ff0000)"
                                                             oninput="updateColorPicker('<?= htmlspecialchars($config['config_key']) ?>', this.value)"
                                                         >
                                                         <div class="color-preview" id="<?= htmlspecialchars($config['config_key']) ?>_preview" style="background-color: <?= htmlspecialchars($config['config_value']) ?>"></div>

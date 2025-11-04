@@ -153,8 +153,14 @@ class ConfigManager
         $this->pdo->beginTransaction();
         
         try {
+            $stmt = $this->pdo->prepare("
+                UPDATE intra_config 
+                SET config_value = ?, updated_by = ?, updated_at = NOW()
+                WHERE config_key = ? AND is_editable = 1
+            ");
+            
             foreach ($updates as $key => $value) {
-                if ($this->update($key, $value, $userId)) {
+                if ($stmt->execute([$value, $userId, $key])) {
                     $updated[] = $key;
                 } else {
                     $failed[] = $key;
@@ -163,6 +169,8 @@ class ConfigManager
             
             if (empty($failed)) {
                 $this->pdo->commit();
+                // Clear cache after successful commit
+                self::$configCache = null;
                 return ['success' => true, 'updated' => $updated, 'failed' => []];
             } else {
                 $this->pdo->rollBack();
