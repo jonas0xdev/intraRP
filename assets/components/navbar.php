@@ -1,6 +1,8 @@
 <?php
 
-use App\Auth\Permissions; ?>
+use App\Auth\Permissions;
+use App\Notifications\NotificationManager;
+?>
 <nav class="navbar navbar-expand-lg" id="intra-nav">
     <div class="container">
         <a class="navbar-brand" href="#"><img src="<?php echo SYSTEM_LOGO ?>" alt="<?php echo SYSTEM_NAME ?>" style="height:48px;width:auto"></a>
@@ -104,15 +106,22 @@ use App\Auth\Permissions; ?>
                 <?php } ?>
                 <?php
                 // Get unread notification count
-                use App\Notifications\NotificationManager;
-                
-                // Ensure database connection is available
-                if (!isset($pdo)) {
-                    require_once __DIR__ . '/../config/database.php';
+                $unreadCount = 0;
+                try {
+                    // Ensure database connection is available
+                    if (!isset($pdo)) {
+                        require_once __DIR__ . '/../config/database.php';
+                    }
+                    
+                    if (isset($pdo)) {
+                        $notificationManager = new NotificationManager($pdo);
+                        $unreadCount = $notificationManager->getUnreadCount($_SESSION['userid']);
+                    }
+                } catch (Exception $e) {
+                    // Silently fail if database connection is not available
+                    // This prevents navbar from breaking on pages where DB is not set up
+                    error_log("Notification count error: " . $e->getMessage());
                 }
-                
-                $notificationManager = new NotificationManager($pdo);
-                $unreadCount = $notificationManager->getUnreadCount($_SESSION['userid']);
                 ?>
                 <li class="nav-item">
                     <a class="nav-link position-relative" href="<?= BASE_PATH ?>benachrichtigungen/index.php" data-page="benachrichtigungen">
