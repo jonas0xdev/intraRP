@@ -642,7 +642,7 @@ if (isset($_POST['new'])) {
                                 </div>
                             </div>
                             <div class="p-3 shadow-sm border ma-logs">
-                                <details open>
+                                <details>
                                     <summary class="mb-3" style="cursor: pointer;">
                                         <h5 class="d-inline">Systemprotokoll</h5>
                                     </summary>
