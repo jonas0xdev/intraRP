@@ -13,6 +13,7 @@ use App\Documents\DocumentRenderer;
 use App\Documents\DocumentPDFGenerator;
 use App\Documents\DocumentIdGenerator;
 use App\Auth\Permissions;
+use App\Notifications\NotificationManager;
 
 ob_clean();
 
@@ -108,6 +109,32 @@ try {
         'profileid' => $input['profileid'],
         'created_by' => $_SESSION['discordtag'] ?? null
     ]);
+
+    // Create notification for employee if they have a user account
+    try {
+        // Get employee's discord tag from profile
+        $profileStmt = $pdo->prepare("SELECT discordtag FROM intra_mitarbeiter WHERE id = ?");
+        $profileStmt->execute([$input['profileid']]);
+        $profile = $profileStmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($profile && !empty($profile['discordtag'])) {
+            $notificationManager = new NotificationManager($pdo);
+            $recipientUserId = $notificationManager->getUserIdByDiscordTag($profile['discordtag']);
+            
+            if ($recipientUserId) {
+                $notificationManager->create(
+                    $recipientUserId,
+                    'dokument',
+                    "Neues Dokument erstellt",
+                    "Ein neues Dokument ({$template['name']} #{$documentId}) wurde für Sie erstellt.",
+                    BASE_PATH . "storage/documents/{$documentId}.pdf"
+                );
+            }
+        }
+    } catch (Exception $e) {
+        // Log error but don't fail the document creation
+        error_log("Failed to create notification for document: " . $e->getMessage());
+    }
 
     // Clear buffer before sending JSON
     ob_clean();
