@@ -74,12 +74,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
             foreach ($changes as $change) {
                 $auditLogger->log(
                     $_SESSION['userid'],
-                    'config_update',
-                    json_encode([
-                        'key' => $change['key'],
-                        'old_value' => $change['old'],
-                        'new_value' => $change['new']
-                    ]),
+                    'Config ' . $change['key'] . ' bearbeitet',
+                    'Altere Wert: ' . $change['old'] . ', Neuer Wert: ' . $change['new'],
                     'System',
                     1  // Config updates are global
                 );
