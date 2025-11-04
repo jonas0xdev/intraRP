@@ -1,5 +1,6 @@
 .ma-basedata,
 .ma-comments,
+.ma-logs,
 .ma-documents {
   background-color: var(--body-bg-lighter);
   box-shadow: var(--bs-box-shadow) !important;
@@ -9,6 +10,7 @@
 }
 
 .comment-container,
+.log-container,
 .comment-settings {
   margin: 0 auto;
   max-width: 95%;
