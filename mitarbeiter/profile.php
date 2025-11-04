@@ -9,6 +9,7 @@ if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
 
 use App\Auth\Permissions;
 use App\Helpers\Flash;
+use App\Notifications\NotificationManager;
 
 if (!Permissions::check(['admin', 'personnel.view'])) {
     Flash::set('error', 'no-permissions');
@@ -403,6 +404,36 @@ if (isset($_POST['new'])) {
             'content' => $logContent,
             'paneluser' => $edituser
         ]);
+
+        // Create notification for employee if they have a user account
+        if (!empty($discordtag)) {
+            $notificationManager = new NotificationManager($pdo);
+            $recipientUserId = $notificationManager->getUserIdByDiscordTag($discordtag);
+            
+            if ($recipientUserId) {
+                $docTypeNames = [
+                    1 => 'Beförderungsurkunde',
+                    2 => 'Ernennungsurkunde',
+                    3 => 'Entlassungsurkunde',
+                    4 => 'Zertifikat',
+                    5 => 'Fachlehrgangszertifikat',
+                    6 => 'Ausbildungszertifikat',
+                    7 => 'Abmahnung',
+                    8 => 'Kündigung',
+                    9 => 'Dienstenthebung',
+                    10 => 'Dienstentfernung'
+                ];
+                $docTypeName = $docTypeNames[$docType] ?? 'Dokument';
+                
+                $notificationManager->create(
+                    $recipientUserId,
+                    'dokument',
+                    "Neues Dokument erstellt",
+                    "Ein neues Dokument ({$docTypeName} #{$new_number}) wurde für Sie erstellt.",
+                    BASE_PATH . "assets/functions/docredir.php?docid={$new_number}"
+                );
+            }
+        }
 
         header('Location: ' . BASE_PATH . 'assets/functions/docredir.php?docid=' . $new_number, true, 302);
         exit();

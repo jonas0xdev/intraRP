@@ -6,3 +6,4 @@ storage/documents/**.pdf
 support_errors.log
 *.backup
 .vscode
+.idea

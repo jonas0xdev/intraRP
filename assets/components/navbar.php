@@ -1,6 +1,8 @@
 <?php
 
-use App\Auth\Permissions; ?>
+use App\Auth\Permissions;
+use App\Notifications\NotificationManager;
+?>
 <nav class="navbar navbar-expand-lg" id="intra-nav">
     <div class="container">
         <a class="navbar-brand" href="#"><img src="<?php echo SYSTEM_LOGO ?>" alt="<?php echo SYSTEM_NAME ?>" style="height:48px;width:auto"></a>
@@ -102,6 +104,112 @@ use App\Auth\Permissions; ?>
                         </ul>
                     </li>
                 <?php } ?>
+                <?php
+                // Get unread notification count and recent notifications
+                $unreadCount = 0;
+                $recentNotifications = [];
+                try {
+                    // Ensure database connection is available
+                    if (!isset($pdo)) {
+                        require_once __DIR__ . '/../config/database.php';
+                    }
+                    
+                    if (isset($pdo)) {
+                        $notificationManager = new NotificationManager($pdo);
+                        $unreadCount = $notificationManager->getUnreadCount($_SESSION['userid']);
+                        // Get last 5 notifications for the dropdown
+                        $recentNotifications = $notificationManager->getAll($_SESSION['userid'], 5);
+                    }
+                } catch (Exception $e) {
+                    // Silently fail if database connection is not available
+                    // This prevents navbar from breaking on pages where DB is not set up
+                    error_log("Notification count error: " . $e->getMessage());
+                }
+                ?>
+                <li class="nav-item dropdown">
+                    <a class="nav-link position-relative dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-page="benachrichtigungen">
+                        <i class="fa-solid fa-bell"></i>
+                        <?php if ($unreadCount > 0): ?>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
+                                <?= $unreadCount > 9 ? '9+' : $unreadCount ?>
+                                <span class="visually-hidden">ungelesene Benachrichtigungen</span>
+                            </span>
+                        <?php endif; ?>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" style="min-width: 320px; max-width: 400px;">
+                        <li><h6 class="dropdown-header">Benachrichtigungen</h6></li>
+                        <?php if (empty($recentNotifications)): ?>
+                            <li><span class="dropdown-item-text text-muted small">Keine Benachrichtigungen</span></li>
+                        <?php else: ?>
+                            <?php foreach ($recentNotifications as $notification): 
+                                $isUnread = $notification['is_read'] == 0;
+                                
+                                // MySQL stores timestamps in its system timezone, we need to convert to PHP's timezone
+                                // Create DateTime in MySQL's timezone (system timezone), then convert to PHP's timezone
+                                $datetime = new DateTime($notification['created_at'], new DateTimeZone('Europe/Berlin')); // MySQL SYSTEM timezone
+                                $datetime->setTimezone(new DateTimeZone(date_default_timezone_get())); // Convert to PHP timezone (UTC)
+                                $now = new DateTime('now', new DateTimeZone(date_default_timezone_get()));
+                                $diff = $now->diff($datetime);
+                                
+                                // Check if the notification is in the future (clock skew)
+                                if ($diff->invert == 0) {
+                                    // Notification is in the future, show as "jetzt"
+                                    $timeAgo = 'jetzt';
+                                } elseif ($diff->days > 0) {
+                                    $timeAgo = $diff->days . 'd';
+                                } elseif ($diff->h > 0) {
+                                    $timeAgo = $diff->h . 'h';
+                                } elseif ($diff->i > 0) {
+                                    $timeAgo = $diff->i . 'm';
+                                } else {
+                                    $timeAgo = 'jetzt';
+                                }
+                                
+                                $iconClass = [
+                                    'antrag' => 'fa-file-alt',
+                                    'protokoll' => 'fa-file-medical',
+                                    'dokument' => 'fa-file-upload'
+                                ];
+                                $icon = $iconClass[$notification['type']] ?? 'fa-bell';
+                            ?>
+                                <li>
+                                    <div class="dropdown-item p-0" style="white-space: normal;">
+                                        <div class="d-flex align-items-start p-2">
+                                            <i class="fa-solid <?= $icon ?> me-2 mt-1" style="font-size: 0.9rem;"></i>
+                                            <div class="flex-grow-1" style="min-width: 0;">
+                                                <a href="<?= htmlspecialchars($notification['link'] ?: BASE_PATH . 'benachrichtigungen/index.php') ?>" class="text-decoration-none text-reset d-block <?= $isUnread ? 'fw-bold' : '' ?>">
+                                                    <div class="small"><?= htmlspecialchars($notification['title']) ?></div>
+                                                    <?php if ($notification['message']): ?>
+                                                        <div class="text-muted" style="font-size: 0.75rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                                            <?= htmlspecialchars($notification['message']) ?>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                </a>
+                                            </div>
+                                            <div class="d-flex align-items-center ms-2" style="gap: 0.25rem;">
+                                                <small class="text-muted" style="font-size: 0.7rem; white-space: nowrap;"><?= $timeAgo ?></small>
+                                                <?php if ($isUnread): ?>
+                                                    <button class="btn btn-sm btn-link p-1 ms-1 mark-as-read-btn" 
+                                                            data-notification-id="<?= $notification['id'] ?>" 
+                                                            title="Als gelesen markieren"
+                                                            style="font-size: 1.1rem; line-height: 1;">
+                                                        <i class="fa-solid fa-check text-muted"></i>
+                                                    </button>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            <?php endforeach; ?>
+                            <li><hr class="dropdown-divider"></li>
+                        <?php endif; ?>
+                        <li>
+                            <a class="dropdown-item text-center small" href="<?= BASE_PATH ?>benachrichtigungen/index.php">
+                                Alle Benachrichtigungen anzeigen
+                            </a>
+                        </li>
+                    </ul>
+                </li>
                 <li class="nav-item dropdown" id="intra-usermenu">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <?= $_SESSION['cirs_username'] ?> <span class="badge text-bg-<?= $_SESSION['role_color'] ?>"><?= $_SESSION['role_name'] ?></span>
@@ -120,6 +228,47 @@ use App\Auth\Permissions; ?>
         var currentPage = $("body").data("page");
         $(".nav-link").removeClass("active");
         $(".nav-link[data-page='" + currentPage + "']").addClass("active");
+        
+        // Handle mark as read buttons in notification dropdown
+        $('.mark-as-read-btn').on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const notificationId = $(this).data('notification-id');
+            const $button = $(this);
+            const $listItem = $button.closest('li');
+            
+            // Send AJAX request to mark as read
+            fetch('<?= BASE_PATH ?>benachrichtigungen/mark-read.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ id: notificationId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Remove bold styling and hide button
+                    $listItem.find('a').removeClass('fw-bold');
+                    $button.fadeOut(200);
+                    
+                    // Update badge count
+                    const $badge = $('.nav-link[data-page="benachrichtigungen"] .badge');
+                    const currentCount = parseInt($badge.text()) || 0;
+                    const newCount = Math.max(0, currentCount - 1);
+                    
+                    if (newCount > 0) {
+                        $badge.text(newCount > 9 ? '9+' : newCount);
+                    } else {
+                        $badge.remove();
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error marking notification as read:', error);
+            });
+        });
     });
 
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')

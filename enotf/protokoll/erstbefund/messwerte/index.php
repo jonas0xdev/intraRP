@@ -64,7 +64,7 @@ $currentDateTime = date('Y-m-d\TH:i');
     ?>
 </head>
 
-<body data-bs-theme="dark" data-page="erstbefund" data-pin-enabled="<?= $pinEnabled ?>">
+<body data-bs-theme="dark" data-page="verlauf" data-pin-enabled="<?= $pinEnabled ?>">
     <div class="container-fluid" id="edivi__container">
         <div class="row h-100">
             <div class="col" id="edivi__content">
@@ -167,8 +167,8 @@ $currentDateTime = date('Y-m-d\TH:i');
                                     <button type="button" class="keypad-btn danger" onclick="keypadClearField()">
                                         Löschen
                                     </button>
-                                    <button type="button" class="keypad-btn danger" onclick="keypadBackspace()">⌫</button>
-                                    <button type="button" class="keypad-btn special" onclick="keypadSetNG()">ng</button>
+                                    <button type="button" class="keypad-btn danger" onclick="keypadBackspace()"><i class="fa-solid fa-delete-left"></i></button>
+                                    <button type="button" class="keypad-btn special" onclick="keypadSetNG()">nicht gemessen</button>
                                 </div>
                             </div>
                         </div>

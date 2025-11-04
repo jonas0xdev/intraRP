@@ -2,7 +2,7 @@
 session_start();
 require_once __DIR__ . '/../../assets/config/config.php';
 require_once __DIR__ . '/../../vendor/autoload.php';
-require __DIR__ . '/../../assets/config/database.php';
+require_once __DIR__ . '/../../assets/config/database.php';
 
 if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
     $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
@@ -13,6 +13,7 @@ if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
 use App\Auth\Permissions;
 use App\Helpers\Flash;
 use App\Utils\AuditLogger;
+use App\Notifications\NotificationManager;
 
 if (!Permissions::check(['admin', 'application.edit'])) {
     Flash::set('error', 'no-permissions');
@@ -63,6 +64,7 @@ if (isset($_POST['save'])) {
     $jetzt = date("Y-m-d H:i:s");
 
     $auditLogger = new AuditLogger($pdo);
+    $notificationManager = new NotificationManager($pdo);
 
     if ($antrag['cirs_manager'] != $cirs_manager) {
         $auditLogger->log($_SESSION['userid'], 'Bearbeiter geändert [ID: ' . $caseid . ']', $cirs_manager, 'Anträge', 1);
@@ -80,6 +82,21 @@ if (isset($_POST['save'])) {
         WHERE id = ?
     ");
     $stmt->execute([$cirs_manager, $cirs_status, $cirs_text, $jetzt, $antrag['id']]);
+
+    // Create notification for the applicant
+    $statusText = ['In Bearbeitung', 'Abgelehnt', 'Aufgeschoben', 'Angenommen'];
+    $statusName = $statusText[$cirs_status] ?? 'Unbekannt';
+    
+    $userId = $notificationManager->getUserIdByDiscordTag($antrag['discordid']);
+    if ($userId) {
+        $notificationManager->create(
+            $userId,
+            'antrag',
+            "Ihr Antrag #{$caseid} wurde bearbeitet",
+            "Status: {$statusName}. Bearbeiter: {$cirs_manager}",
+            BASE_PATH . "antrag/view.php?antrag={$caseid}"
+        );
+    }
 
     Flash::set('success', 'Antrag erfolgreich aktualisiert');
     header("Location: " . BASE_PATH . "antrag/view.php?antrag=" . $caseid);
@@ -102,15 +119,11 @@ $createDate = new DateTime($antrag['time_added'] ?? 'now');
 <html lang="en" data-bs-theme="light">
 
 <head>
-    <meta charset="UTF-8" />
-    <title><?= htmlspecialchars($antrag['typ_name']) ?> bearbeiten [#<?= htmlspecialchars($caseid) ?>] &rsaquo; <?php echo SYSTEM_NAME ?></title>
-    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/css/style.min.css" />
-    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/css/admin.min.css" />
-    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/_ext/lineawesome/css/line-awesome.min.css" />
-    <link rel="stylesheet" href="<?= BASE_PATH ?>vendor/twbs/bootstrap/dist/css/bootstrap.min.css">
-    <script src="<?= BASE_PATH ?>vendor/components/jquery/jquery.min.js"></script>
-    <script src="<?= BASE_PATH ?>vendor/twbs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <link rel="icon" type="image/png" href="<?= BASE_PATH ?>assets/favicon/favicon-96x96.png" sizes="96x96" />
+    <head>
+        <?php
+        $SITE_TITLE = htmlspecialchars($antrag['typ_name']) . ' bearbeiten [#' . htmlspecialchars($caseid) . ']';
+        include __DIR__ . '/../../assets/components/_base/admin/head.php'; ?>
+    </head>
     <style>
         .intra__tile {
             padding: 1.5rem;

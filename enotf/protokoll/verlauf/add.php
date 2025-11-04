@@ -228,7 +228,7 @@ $currentDateTime = date('Y-m-d\TH:i');
                                     <button type="button" class="keypad-btn danger" onclick="keypadClearField()">
                                         Löschen
                                     </button>
-                                    <button type="button" class="keypad-btn danger" onclick="keypadBackspace()">⌫</button>
+                                    <button type="button" class="keypad-btn danger" onclick="keypadBackspace()"><i class="fa-solid fa-delete-left"></i></button>
                                 </div>
                             </div>
                         </div>
