@@ -143,8 +143,10 @@ use App\Notifications\NotificationManager;
                         <?php else: ?>
                             <?php foreach ($recentNotifications as $notification): 
                                 $isUnread = $notification['is_read'] == 0;
-                                $datetime = new DateTime($notification['created_at']);
-                                $now = new DateTime();
+                                
+                                // Ensure both timestamps use the same timezone for accurate calculation
+                                $datetime = new DateTime($notification['created_at'], new DateTimeZone(date_default_timezone_get()));
+                                $now = new DateTime('now', new DateTimeZone(date_default_timezone_get()));
                                 $diff = $now->diff($datetime);
                                 
                                 // Check if the notification is in the future (clock skew)
