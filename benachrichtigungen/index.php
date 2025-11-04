@@ -167,8 +167,10 @@ $unreadCount = $notificationManager->getUnreadCount($userId);
                             <?php foreach ($notifications as $notification):
                                 $isUnread = $notification['is_read'] == 0;
                                 
-                                // Ensure both timestamps use the same timezone for accurate calculation
-                                $datetime = new DateTime($notification['created_at'], new DateTimeZone(date_default_timezone_get()));
+                                // MySQL stores timestamps in its system timezone, we need to convert to PHP's timezone
+                                // Create DateTime in MySQL's timezone (system timezone), then convert to PHP's timezone
+                                $datetime = new DateTime($notification['created_at'], new DateTimeZone('Europe/Berlin')); // MySQL SYSTEM timezone
+                                $datetime->setTimezone(new DateTimeZone(date_default_timezone_get())); // Convert to PHP timezone (UTC)
                                 $now = new DateTime('now', new DateTimeZone(date_default_timezone_get()));
                                 $diff = $now->diff($datetime);
 
