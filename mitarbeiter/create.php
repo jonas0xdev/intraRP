@@ -14,6 +14,7 @@ if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
 use App\Auth\Permissions;
 use App\Helpers\Flash;
 use App\Utils\AuditLogger;
+use App\Personnel\PersonalLogManager;
 
 if (!Permissions::check(['admin', 'personnel.edit'])) {
     Flash::set('error', 'no-permissions');
@@ -134,13 +135,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $savedId = $pdo->lastInsertId();
 
         $edituser = $_SESSION['cirs_user'] ?? 'Unknown';
-        $logContent = 'Mitarbeiter wurde angelegt.';
-        $logStmt = $pdo->prepare("INSERT INTO intra_mitarbeiter_log (profilid, type, content, paneluser) VALUES (:id, '6', :content, :paneluser)");
-        $logStmt->execute([
-            'id' => $savedId,
-            'content' => $logContent,
-            'paneluser' => $edituser
-        ]);
+        // Use PersonalLogManager for profile creation
+        $logManager = new PersonalLogManager($pdo);
+        $logManager->logProfileCreation($savedId, $edituser);
 
         $response['success'] = true;
         $response['message'] = "Benutzer erfolgreich erstellt!";

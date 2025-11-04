@@ -13,6 +13,7 @@ if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
 use App\Auth\Permissions;
 use App\Helpers\Flash;
 use App\Utils\AuditLogger;
+use App\Personnel\PersonalLogManager;
 
 if (!Permissions::check(['admin', 'personnel.comment.delete'])) {
     Flash::set('error', 'no-permissions');
@@ -24,12 +25,12 @@ $userid = $_SESSION['userid'];
 $logid = $_GET['id'];
 $pid = $_GET['pid'];
 
-$stmt = $pdo->prepare("DELETE FROM intra_mitarbeiter_log WHERE logid = :logid");
-$stmt->bindParam(':logid', $logid);
-$stmt->execute();
+// Use PersonalLogManager for deletion
+$logManager = new PersonalLogManager($pdo);
+$logManager->deleteEntry($logid);
 
 $auditlogger = new AuditLogger($pdo);
-$auditlogger->log($userid, 'Profil-Kommentar gelöscht [ID: ' . $id . ']', NULL, 'Mitarbeiter', 1);
+$auditlogger->log($userid, 'Profil-Kommentar gelöscht [ID: ' . $logid . ']', NULL, 'Mitarbeiter', 1);
 
 header("Location: " . $_SERVER['HTTP_REFERER']);
 exit;

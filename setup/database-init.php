@@ -217,6 +217,9 @@ $migrationFiles = [
 
     // 03.11.2025
     ['file' => 'create_intra_notifications_03112025.php', 'type' => 'create'],
+
+    // 04.11.2025
+    ['file' => 'alter_intra_mitarbeiter_log_04112025.php', 'type' => 'alter'],
 ];
 
 $executed = 0;

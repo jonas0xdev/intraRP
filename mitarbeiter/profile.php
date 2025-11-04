@@ -10,6 +10,7 @@ if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
 use App\Auth\Permissions;
 use App\Helpers\Flash;
 use App\Notifications\NotificationManager;
+use App\Personnel\PersonalLogManager;
 
 if (!Permissions::check(['admin', 'personnel.view'])) {
     Flash::set('error', 'no-permissions');
@@ -44,6 +45,9 @@ if ($_SESSION['discordtag'] != null) {
 
 $openedID = $_GET['id'];
 $edituser = $_SESSION['cirs_user'];
+
+// Initialize PersonalLogManager
+$logManager = new PersonalLogManager($pdo);
 
 $stmtg = $pdo->prepare("SELECT * FROM intra_mitarbeiter_dienstgrade WHERE id = :id");
 $stmtg->execute(['id' => $row['dienstgrad']]);
@@ -149,13 +153,8 @@ if (isset($_POST['new'])) {
             $stmtndg->execute(['id' => $dienstgrad]);
             $ndginfo = $stmtndg->fetch();
 
-            $logContent = 'Dienstgrad wurde von <strong>' . $cdginfo['name'] . '</strong> auf <strong>' . $ndginfo['name'] . '</strong> geändert.';
-            $logStmt = $pdo->prepare("INSERT INTO intra_mitarbeiter_log (profilid, type, content, paneluser) VALUES (:id, '4', :content, :paneluser)");
-            $logStmt->execute([
-                'id' => $id,
-                'content' => $logContent,
-                'paneluser' => $edituser
-            ]);
+            // Use PersonalLogManager for rank change
+            $logManager->logRankChange($id, $cdginfo['name'], $ndginfo['name'], $edituser);
         }
 
         if ($currentQualird != $qualird) {
@@ -173,13 +172,8 @@ if (isset($_POST['new'])) {
             $stmtnrg->execute(['id' => $qualird]);
             $nrginfo = $stmtnrg->fetch();
 
-            $logContent = 'Qualifikation (RD) wurde von <strong>' . $crginfo['name'] . '</strong> auf <strong>' . $nrginfo['name'] . '</strong> geändert.';
-            $logStmt = $pdo->prepare("INSERT INTO intra_mitarbeiter_log (profilid, type, content, paneluser) VALUES (:id, '4', :content, :paneluser)");
-            $logStmt->execute([
-                'id' => $id,
-                'content' => $logContent,
-                'paneluser' => $edituser
-            ]);
+            // Use PersonalLogManager for RD qualification change
+            $logManager->logQualificationChange($id, 'RD', $crginfo['name'], $nrginfo['name'], $edituser);
         }
 
         if ($currentQualifw != $qualifw2) {
@@ -197,13 +191,8 @@ if (isset($_POST['new'])) {
             $stmtnfg->execute(['id' => $qualifw2]);
             $nfginfo = $stmtnfg->fetch();
 
-            $logContent = 'Qualifikation (FW) wurde von <strong>' . $cfginfo['name'] . '</strong> auf <strong>' . $nfginfo['name'] . '</strong> geändert.';
-            $logStmt = $pdo->prepare("INSERT INTO intra_mitarbeiter_log (profilid, type, content, paneluser) VALUES (:id, '5', :content, :paneluser)");
-            $logStmt->execute([
-                'id' => $id,
-                'content' => $logContent,
-                'paneluser' => $edituser
-            ]);
+            // Use PersonalLogManager for FW qualification change
+            $logManager->logQualificationChange($id, 'FW', $cfginfo['name'], $nfginfo['name'], $edituser);
         }
 
         if (CHAR_ID) {
@@ -285,14 +274,8 @@ if (isset($_POST['new'])) {
                 ]);
             }
 
-            $logContent = 'Profildaten wurden bearbeitet.';
-            $logStmt = $pdo->prepare("INSERT INTO intra_mitarbeiter_log (profilid, type, content, paneluser) 
-                              VALUES (:id, '5', :content, :paneluser)");
-            $logStmt->execute([
-                'id' => $id,
-                'content' => $logContent,
-                'paneluser' => $edituser
-            ]);
+            // Use PersonalLogManager for profile modification
+            $logManager->logProfileModification($id, $edituser);
         }
 
         $currentURL = $_SERVER['REQUEST_URI'];
@@ -319,14 +302,8 @@ if (isset($_POST['new'])) {
                 'id' => $openedID
             ]);
 
-            $logContent = 'Fachdienste wurden bearbeitet.';
-            $logStmt = $pdo->prepare("INSERT INTO intra_mitarbeiter_log (profilid, type, content, paneluser) 
-                              VALUES (:id, '5', :content, :paneluser)");
-            $logStmt->execute([
-                'id' => $openedID,
-                'content' => $logContent,
-                'paneluser' => $edituser
-            ]);
+            // Use PersonalLogManager for department modification
+            $logManager->logDepartmentModification($openedID, $edituser);
         }
 
         header('Location: ' . $_SERVER['REQUEST_URI']);
@@ -334,13 +311,8 @@ if (isset($_POST['new'])) {
     } elseif ($_POST['new'] == 5) {
         $logContent = $_POST['content'];
         $logType = $_POST['noteType'];
-        $logStmt2 = $pdo->prepare("INSERT INTO intra_mitarbeiter_log (profilid, type, content, paneluser) VALUES (:id, :logType, :content, :paneluser)");
-        $logStmt2->execute([
-            'id' => $openedID,
-            'logType' => $logType,
-            'content' => $logContent,
-            'paneluser' => $edituser
-        ]);
+        // Use PersonalLogManager for manual notes
+        $logManager->addNote($openedID, $logType, $logContent, $edituser);
 
         header('Location: ' . $_SERVER['REQUEST_URI']);
         exit;
@@ -396,14 +368,8 @@ if (isset($_POST['new'])) {
             'discordtag' => $discordtag
         ]);
 
-        $logContent = 'Ein neues Dokument (<a href="' . BASE_PATH . 'assets/functions/docredir.php?docid=' . $new_number . '" target="_blank">#' . $new_number . '</a>) wurde erstellt.';
-        $logStmt = $pdo->prepare("INSERT INTO intra_mitarbeiter_log (profilid, type, content, paneluser) 
-                              VALUES (:id, '7', :content, :paneluser)");
-        $logStmt->execute([
-            'id' => $profileid,
-            'content' => $logContent,
-            'paneluser' => $edituser
-        ]);
+        // Use PersonalLogManager for document creation
+        $logManager->logDocumentCreation($profileid, $new_number, $edituser);
 
         // Create notification for employee if they have a user account
         if (!empty($discordtag)) {
@@ -666,12 +632,24 @@ if (isset($_POST['new'])) {
                                 </div>
                             </form>
                         </div>
-                        <div class="col ms-4 p-3 shadow-sm border ma-comments">
-                            <div class="comment-settings mb-3">
-                                <h4>Kommentare/Notizen</h4>
+                        <div class="col ms-4">
+                            <div class="p-3 shadow-sm border ma-comments mb-3">
+                                <div class="comment-settings mb-3">
+                                    <h4>Kommentare/Notizen</h4>
+                                </div>
+                                <div class="comment-container">
+                                    <?php include __DIR__ . '/../assets/components/profiles/comments/main.php' ?>
+                                </div>
                             </div>
-                            <div class="comment-container">
-                                <?php include __DIR__ . '/../assets/components/profiles/comments/main.php' ?>
+                            <div class="p-3 shadow-sm border ma-logs">
+                                <details<?php echo isset($_GET['logpage']) ? ' open' : ''; ?>>
+                                    <summary class="mb-3" style="cursor: pointer;">
+                                        <h5 class="d-inline">Systemprotokoll</h5>
+                                    </summary>
+                                    <div class="log-container">
+                                        <?php include __DIR__ . '/../assets/components/profiles/logs/main.php' ?>
+                                    </div>
+                                </details>
                             </div>
                         </div>
                     </div>
