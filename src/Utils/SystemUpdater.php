@@ -191,11 +191,14 @@ class SystemUpdater
      * Download and apply update
      * 
      * @param string $downloadUrl URL to download the update from
+     * @param string $newVersion Version being installed
      * @return array Result of the update operation
      */
-    public function downloadAndApplyUpdate(string $downloadUrl): array
+    public function downloadAndApplyUpdate(string $downloadUrl, string $newVersion): array
     {
         try {
+            $appRoot = dirname(dirname(__DIR__));
+            
             // Create temporary directory for update
             $tempDir = sys_get_temp_dir() . '/intrarp_update_' . bin2hex(random_bytes(8));
             if (!mkdir($tempDir, 0755, true)) {
@@ -203,8 +206,9 @@ class SystemUpdater
             }
 
             $zipFile = $tempDir . '/update.zip';
+            $extractDir = $tempDir . '/extracted';
 
-            // Download update
+            // Step 1: Download update
             $context = stream_context_create([
                 'http' => [
                     'method' => 'GET',
@@ -223,12 +227,75 @@ class SystemUpdater
 
             file_put_contents($zipFile, $updateContent);
 
+            // Step 2: Extract ZIP
+            if (!class_exists('ZipArchive')) {
+                throw new Exception('ZipArchive PHP-Erweiterung nicht verfügbar.');
+            }
+
+            $zip = new \ZipArchive();
+            if ($zip->open($zipFile) !== true) {
+                throw new Exception('Konnte ZIP-Datei nicht öffnen.');
+            }
+
+            $zip->extractTo($extractDir);
+            $zip->close();
+
+            // GitHub zipballs extract to a subdirectory like "EmergencyForge-intraRP-abc123/"
+            $extractedDirs = glob($extractDir . '/*', GLOB_ONLYDIR);
+            if (empty($extractedDirs)) {
+                throw new Exception('Keine extrahierten Verzeichnisse gefunden.');
+            }
+            $sourceDir = $extractedDirs[0];
+
+            // Step 3: Create backup
+            $backupDir = $appRoot . '/system/updates/backup_' . date('Y-m-d_H-i-s');
+            if (!mkdir($backupDir, 0755, true)) {
+                throw new Exception('Konnte Backup-Verzeichnis nicht erstellen.');
+            }
+
+            $filesToBackup = ['.htaccess', 'index.php', 'composer.json', 'composer.lock'];
+            $dirsToBackup = ['src', 'assets', 'settings', 'api', 'system'];
+
+            foreach ($filesToBackup as $file) {
+                if (file_exists($appRoot . '/' . $file)) {
+                    copy($appRoot . '/' . $file, $backupDir . '/' . $file);
+                }
+            }
+
+            foreach ($dirsToBackup as $dir) {
+                if (is_dir($appRoot . '/' . $dir)) {
+                    $this->recursiveCopy($appRoot . '/' . $dir, $backupDir . '/' . $dir);
+                }
+            }
+
+            // Step 4: Apply update (copy files)
+            $excludeDirs = ['vendor', 'storage', 'system/updates'];
+            $excludeFiles = ['.env', '.git', '.gitignore'];
+
+            $this->copyUpdateFiles($sourceDir, $appRoot, $excludeDirs, $excludeFiles);
+
+            // Step 5: Update version.json
+            $this->updateVersionFile([
+                'version' => $newVersion,
+                'updated_at' => date('Y-m-d H:i:s'),
+                'build_number' => (int)($this->currentVersion['build_number'] ?? 0) + 1,
+                'commit_hash' => 'auto-update'
+            ]);
+
+            // Step 6: Clear cache
+            $cacheFile = sys_get_temp_dir() . '/intrarp_update_cache.json';
+            if (file_exists($cacheFile)) {
+                @unlink($cacheFile);
+            }
+
+            // Clean up temp files
+            $this->recursiveDelete($tempDir);
+
             return [
                 'success' => true,
-                'message' => 'Update wurde heruntergeladen. Bitte folgen Sie den Anweisungen zur manuellen Installation.',
-                'zip_file' => $zipFile,
-                'temp_dir' => $tempDir,
-                'note' => 'HINWEIS: Automatische Installation ist aus Sicherheitsgründen deaktiviert. Bitte laden Sie das Update manuell herunter und installieren Sie es gemäß der Dokumentation.'
+                'message' => 'Update erfolgreich installiert! Bitte laden Sie die Seite neu.',
+                'version' => $newVersion,
+                'backup_dir' => $backupDir
             ];
         } catch (Exception $e) {
             return [
@@ -237,6 +304,107 @@ class SystemUpdater
                 'message' => 'Fehler beim Update: ' . $e->getMessage()
             ];
         }
+    }
+
+    /**
+     * Recursively copy directory
+     */
+    private function recursiveCopy(string $source, string $dest): void
+    {
+        if (!is_dir($dest)) {
+            mkdir($dest, 0755, true);
+        }
+
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($source, \RecursiveDirectoryIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::SELF_FIRST
+        );
+
+        foreach ($iterator as $item) {
+            $destPath = $dest . '/' . $iterator->getSubPathName();
+            if ($item->isDir()) {
+                if (!is_dir($destPath)) {
+                    mkdir($destPath, 0755, true);
+                }
+            } else {
+                copy($item, $destPath);
+            }
+        }
+    }
+
+    /**
+     * Copy update files while excluding certain directories and files
+     */
+    private function copyUpdateFiles(string $source, string $dest, array $excludeDirs, array $excludeFiles): void
+    {
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($source, \RecursiveDirectoryIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::SELF_FIRST
+        );
+
+        foreach ($iterator as $item) {
+            $subPath = $iterator->getSubPathName();
+            
+            // Check if path contains excluded directory
+            $skip = false;
+            foreach ($excludeDirs as $excludeDir) {
+                if (strpos($subPath, $excludeDir) === 0) {
+                    $skip = true;
+                    break;
+                }
+            }
+            
+            // Check if file is excluded
+            foreach ($excludeFiles as $excludeFile) {
+                if ($subPath === $excludeFile || basename($subPath) === $excludeFile) {
+                    $skip = true;
+                    break;
+                }
+            }
+
+            if ($skip) {
+                continue;
+            }
+
+            $destPath = $dest . '/' . $subPath;
+            
+            if ($item->isDir()) {
+                if (!is_dir($destPath)) {
+                    mkdir($destPath, 0755, true);
+                }
+            } else {
+                $destDir = dirname($destPath);
+                if (!is_dir($destDir)) {
+                    mkdir($destDir, 0755, true);
+                }
+                copy($item, $destPath);
+            }
+        }
+    }
+
+    /**
+     * Recursively delete directory
+     */
+    private function recursiveDelete(string $dir): void
+    {
+        if (!is_dir($dir)) {
+            return;
+        }
+
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::CHILD_FIRST
+        );
+
+        foreach ($iterator as $item) {
+            if ($item->isDir()) {
+                rmdir($item);
+            } else {
+                unlink($item);
+            }
+        }
+
+        rmdir($dir);
     }
 
     /**

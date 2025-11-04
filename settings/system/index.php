@@ -46,6 +46,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 null,
                 ['result' => $updateInfo, 'cached' => $updateInfo['cached'] ?? false]
         );
+    } elseif (isset($_POST['install_update'])) {
+        $downloadUrl = $_POST['download_url'] ?? '';
+        $newVersion = $_POST['new_version'] ?? '';
+        
+        if ($downloadUrl && $newVersion) {
+            $installResult = $updater->downloadAndApplyUpdate($downloadUrl, $newVersion);
+            
+            // Log the installation attempt
+            require_once __DIR__ . '/../../assets/config/database.php';
+            $auditLogger = new AuditLogger($pdo);
+            $auditLogger->log(
+                    $_SESSION['userid'],
+                    'system_update_install',
+                    'system',
+                    null,
+                    null,
+                    ['version' => $newVersion, 'result' => $installResult]
+            );
+            
+            if ($installResult['success']) {
+                Flash::set('success', $installResult['message']);
+                // Redirect to reload with new version
+                header("Location: " . $_SERVER['REQUEST_URI']);
+                exit();
+            } else {
+                Flash::set('error', $installResult['message']);
+            }
+        }
     }
 }
 ?>
@@ -190,17 +218,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     </div>
                                     <div class="col-md-6">
                                         <h6>Aktionen:</h6>
+                                        
+                                        <!-- Install Update Button -->
+                                        <form method="post" class="mb-2">
+                                            <input type="hidden" name="download_url" value="<?= htmlspecialchars($updateInfo['download_url']) ?>">
+                                            <input type="hidden" name="new_version" value="<?= htmlspecialchars($updateInfo['latest_version']) ?>">
+                                            <button type="submit" name="install_update" class="btn btn-success w-100" 
+                                                    onclick="return confirm('Update auf Version <?= htmlspecialchars($updateInfo['latest_version']) ?> installieren?\n\nEin Backup wird automatisch erstellt.\nDieser Vorgang kann einige Minuten dauern.');">
+                                                <i class="fa-solid fa-download"></i> Update jetzt installieren
+                                            </button>
+                                        </form>
+                                        
                                         <?php if (isset($updateInfo['html_url'])): ?>
                                             <a href="<?= htmlspecialchars($updateInfo['html_url']) ?>"
                                                target="_blank"
-                                               class="btn btn-primary mb-2 w-100">
+                                               class="btn btn-outline-primary w-100 mb-2">
                                                 <i class="fa-solid fa-external-link-alt"></i> Release auf GitHub ansehen
                                             </a>
                                         <?php endif; ?>
+                                        
                                         <?php if (isset($updateInfo['download_url'])): ?>
                                             <a href="<?= htmlspecialchars($updateInfo['download_url']) ?>"
-                                               class="btn btn-success w-100">
-                                                <i class="fa-solid fa-download"></i> Update herunterladen
+                                               class="btn btn-outline-secondary w-100">
+                                                <i class="fa-solid fa-file-zipper"></i> ZIP manuell herunterladen
                                             </a>
                                         <?php endif; ?>
                                     </div>
@@ -216,8 +256,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                                 <div class="alert alert-info mt-3">
                                     <strong><i class="fa-solid fa-info-circle"></i> Hinweis:</strong>
-                                    Bitte erstellen Sie vor dem Update ein Backup Ihrer Daten und Konfiguration.
-                                    Folgen Sie den Anweisungen in der Dokumentation zur manuellen Installation des Updates.
+                                    Das Update wird automatisch installiert und ein Backup wird im Verzeichnis <code>system/updates/</code> erstellt.
+                                    Bei Problemen können Sie das Backup manuell wiederherstellen.
+                                    <br><strong>Wichtig:</strong> Erstellen Sie zusätzlich ein manuelles Backup Ihrer Datenbank!
                                 </div>
                             <?php else: ?>
                                 <div class="alert alert-info">
