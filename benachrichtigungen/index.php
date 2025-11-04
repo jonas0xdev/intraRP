@@ -170,7 +170,11 @@ $unreadCount = $notificationManager->getUnreadCount($userId);
                                 $now = new DateTime();
                                 $diff = $now->diff($datetime);
 
-                                if ($diff->days > 0) {
+                                // Check if the notification is in the future (clock skew)
+                                if ($diff->invert == 0) {
+                                    // Notification is in the future, show as "Gerade eben"
+                                    $timeAgo = 'Gerade eben';
+                                } elseif ($diff->days > 0) {
                                     $timeAgo = $diff->days . ' Tag' . ($diff->days > 1 ? 'en' : '') . ' her';
                                 } elseif ($diff->h > 0) {
                                     $timeAgo = $diff->h . ' Stunde' . ($diff->h > 1 ? 'n' : '') . ' her';
