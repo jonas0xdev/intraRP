@@ -219,6 +219,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         
                                         <!-- Install Update Button -->
                                         <form method="post" id="install-update-form" class="mb-2">
+                                            <input type="hidden" name="install_update" value="1">
                                             <input type="hidden" name="download_url" value="<?= htmlspecialchars($updateInfo['download_url']) ?>">
                                             <input type="hidden" name="new_version" value="<?= htmlspecialchars($updateInfo['latest_version']) ?>">
                                             <button type="button" id="install-update-btn" class="btn btn-success w-100">
