@@ -642,6 +642,14 @@ if (isset($_POST['new'])) {
                         </div>
                     </div>
                     <div class="row mt-3 mb-4">
+                        <div class="col p-3 shadow-sm border ma-logs">
+                            <h4>Systemprotokoll</h4>
+                            <div class="log-container">
+                                <?php include __DIR__ . '/../assets/components/profiles/logs/main.php' ?>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3 mb-4">
                         <div class="col p-3 shadow-sm border ma-documents">
                             <h4>Dokumente</h4>
                             <?php include __DIR__ . '/../assets/components/profiles/documents/main.php' ?>

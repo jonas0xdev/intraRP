@@ -244,25 +244,36 @@ class PersonalLogManager
      * @param int $profileId Employee profile ID
      * @param int $page Page number (1-indexed)
      * @param int $perPage Items per page
+     * @param array|null $typeFilter Optional array of types to filter by
      * @return array Array with 'entries' and 'total' keys
      */
-    public function getEntries(int $profileId, int $page = 1, int $perPage = 6): array
+    public function getEntries(int $profileId, int $page = 1, int $perPage = 6, ?array $typeFilter = null): array
     {
         $offset = ($page - 1) * $perPage;
 
+        // Build WHERE clause for type filter
+        $whereClause = "profilid = ?";
+        $params = [$profileId];
+        
+        if ($typeFilter !== null && !empty($typeFilter)) {
+            $placeholders = str_repeat('?,', count($typeFilter) - 1) . '?';
+            $whereClause .= " AND type IN ($placeholders)";
+            $params = array_merge($params, $typeFilter);
+        }
+
         // Get total count
-        $countStmt = $this->pdo->prepare("SELECT COUNT(*) FROM intra_mitarbeiter_log WHERE profilid = ?");
-        $countStmt->execute([$profileId]);
+        $countStmt = $this->pdo->prepare("SELECT COUNT(*) FROM intra_mitarbeiter_log WHERE $whereClause");
+        $countStmt->execute($params);
         $total = (int) $countStmt->fetchColumn();
 
         // Get entries for current page
         $stmt = $this->pdo->prepare(
             "SELECT * FROM intra_mitarbeiter_log 
-             WHERE profilid = ? 
+             WHERE $whereClause
              ORDER BY datetime DESC 
              LIMIT ?, ?"
         );
-        $stmt->execute([$profileId, $offset, $perPage]);
+        $stmt->execute(array_merge($params, [$offset, $perPage]));
         $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         // Parse metadata JSON
@@ -276,6 +287,43 @@ class PersonalLogManager
             'entries' => $entries,
             'total' => $total
         ];
+    }
+
+    /**
+     * Get comments (manual notes) for a profile with pagination
+     * Comments are types 0, 1, 2 (NOTE, POSITIVE, NEGATIVE)
+     * 
+     * @param int $profileId Employee profile ID
+     * @param int $page Page number (1-indexed)
+     * @param int $perPage Items per page
+     * @return array Array with 'entries' and 'total' keys
+     */
+    public function getComments(int $profileId, int $page = 1, int $perPage = 6): array
+    {
+        return $this->getEntries($profileId, $page, $perPage, [
+            self::TYPE_NOTE,
+            self::TYPE_POSITIVE,
+            self::TYPE_NEGATIVE
+        ]);
+    }
+
+    /**
+     * Get system logs (auto-generated entries) for a profile with pagination
+     * System logs are types 4, 5, 6, 7 (RANK_CHANGE, MODIFICATION, CREATED, DOCUMENT)
+     * 
+     * @param int $profileId Employee profile ID
+     * @param int $page Page number (1-indexed)
+     * @param int $perPage Items per page
+     * @return array Array with 'entries' and 'total' keys
+     */
+    public function getSystemLogs(int $profileId, int $page = 1, int $perPage = 6): array
+    {
+        return $this->getEntries($profileId, $page, $perPage, [
+            self::TYPE_RANK_CHANGE,
+            self::TYPE_MODIFICATION,
+            self::TYPE_CREATED,
+            self::TYPE_DOCUMENT
+        ]);
     }
 
     /**
