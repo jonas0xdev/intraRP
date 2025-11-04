@@ -2,46 +2,19 @@
 require __DIR__ . '/../../../../assets/config/database.php';
 
 use App\Auth\Permissions;
+use App\Personnel\PersonalLogManager;
 
 $commentsPerPage = 6;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$offset = ($page - 1) * $commentsPerPage;
 
-// WICHTIG: Erst die Gesamtanzahl der Kommentare ermitteln
-$countStmt = $pdo->prepare("SELECT COUNT(*) FROM intra_mitarbeiter_log WHERE profilid = ?");
-$countStmt->execute([$_GET['id']]);
-$totalComments = $countStmt->fetchColumn();
-
-// Dann die Kommentare für die aktuelle Seite laden
-$stmt = $pdo->prepare("SELECT * FROM intra_mitarbeiter_log WHERE profilid = ? ORDER BY datetime DESC LIMIT ?, ?");
-$stmt->execute([$_GET['id'], $offset, $commentsPerPage]);
-$comments = $stmt->fetchAll();
+// Use PersonalLogManager to get entries
+$logManager = new PersonalLogManager($pdo);
+$result = $logManager->getEntries($_GET['id'], $page, $commentsPerPage);
+$comments = $result['entries'];
+$totalComments = $result['total'];
 
 foreach ($comments as $comment) {
-    $commentType = '';
-    switch ($comment['type']) {
-        case 0:
-            $commentType = 'note';
-            break;
-        case 1:
-            $commentType = 'positive';
-            break;
-        case 2:
-            $commentType = 'negative';
-            break;
-        case 4:
-            $commentType = 'rank';
-            break;
-        case 5:
-            $commentType = 'modify';
-            break;
-        case 6:
-            $commentType = 'created';
-            break;
-        case 7:
-            $commentType = 'document';
-            break;
-    }
+    $commentType = PersonalLogManager::getTypeName($comment['type']);
 
     echo "<div class='comment $commentType border shadow-sm'>";
     $comtime = date("d.m.Y H:i", strtotime($comment['datetime']));
