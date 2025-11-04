@@ -132,7 +132,6 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                                             <option selected value="NULL">Fzg. Transp.</option>
                                                             <?php
                                                             require __DIR__ . '/../../../assets/config/database.php';
-require_once __DIR__ . '/../../../assets/functions/enotf/user_auth_middleware.php';
                                                             require_once __DIR__ . '/../../../assets/functions/enotf/pin_middleware.php';
 
                                                             $stmt = $pdo->prepare("SELECT * FROM intra_fahrzeuge WHERE rd_type = 2 AND active = 1 ORDER BY priority ASC");
@@ -148,7 +147,6 @@ require_once __DIR__ . '/../../../assets/functions/enotf/user_auth_middleware.ph
                                                             <option selected value="NULL">Fzg. Transp.</option>
                                                             <?php
                                                             require __DIR__ . '/../../../assets/config/database.php';
-require_once __DIR__ . '/../../../assets/functions/enotf/user_auth_middleware.php';
                                                             require_once __DIR__ . '/../../../assets/functions/enotf/pin_middleware.php';
 
                                                             $stmt = $pdo->prepare("SELECT * FROM intra_fahrzeuge WHERE rd_type = 2 ORDER BY priority ASC");
@@ -188,7 +186,6 @@ require_once __DIR__ . '/../../../assets/functions/enotf/user_auth_middleware.ph
                                                             <option selected value="NULL">Fzg. NA</option>
                                                             <?php
                                                             require __DIR__ . '/../../../assets/config/database.php';
-require_once __DIR__ . '/../../../assets/functions/enotf/user_auth_middleware.php';
                                                             require_once __DIR__ . '/../../../assets/functions/enotf/pin_middleware.php';
 
                                                             $stmt = $pdo->prepare("SELECT * FROM intra_fahrzeuge WHERE rd_type = 1 AND active = 1 ORDER BY priority ASC");
@@ -204,7 +201,6 @@ require_once __DIR__ . '/../../../assets/functions/enotf/user_auth_middleware.ph
                                                             <option selected value="NULL">Fzg. NA</option>
                                                             <?php
                                                             require __DIR__ . '/../../../assets/config/database.php';
-require_once __DIR__ . '/../../../assets/functions/enotf/user_auth_middleware.php';
                                                             require_once __DIR__ . '/../../../assets/functions/enotf/pin_middleware.php';
 
                                                             $stmt = $pdo->prepare("SELECT * FROM intra_fahrzeuge WHERE rd_type = 1 ORDER BY priority ASC");
@@ -252,7 +248,6 @@ require_once __DIR__ . '/../../../assets/functions/enotf/user_auth_middleware.ph
                                                             <option disabled hidden selected value="NULL">---</option>
                                                             <?php
                                                             require __DIR__ . '/../../../assets/config/database.php';
-require_once __DIR__ . '/../../../assets/functions/enotf/user_auth_middleware.php';
                                                             require_once __DIR__ . '/../../../assets/functions/enotf/pin_middleware.php';
 
                                                             $stmt = $pdo->prepare("SELECT * FROM intra_edivi_ziele WHERE active = 1 ORDER BY priority ASC");
@@ -270,7 +265,6 @@ require_once __DIR__ . '/../../../assets/functions/enotf/user_auth_middleware.ph
                                                             <option disabled hidden selected value="NULL">---</option>
                                                             <?php
                                                             require __DIR__ . '/../../../assets/config/database.php';
-require_once __DIR__ . '/../../../assets/functions/enotf/user_auth_middleware.php';
                                                             require_once __DIR__ . '/../../../assets/functions/enotf/pin_middleware.php';
 
                                                             $stmt = $pdo->prepare("SELECT * FROM intra_edivi_ziele ORDER BY priority ASC");
