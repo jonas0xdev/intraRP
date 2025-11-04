@@ -29,17 +29,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
     $updates = [];
     $changes = [];
     
-    foreach ($_POST as $key => $value) {
-        if ($key === 'save_config') continue;
+    // Get all configs to check types
+    $allConfigs = $configManager->getAllConfig();
+    $configTypes = [];
+    foreach ($allConfigs as $config) {
+        $configTypes[$config['config_key']] = $config['config_type'];
+    }
+    
+    // Process POST data
+    foreach ($allConfigs as $config) {
+        if (!$config['is_editable']) continue;
         
-        // Get old value for audit log
+        $key = $config['config_key'];
         $oldValue = $configManager->get($key);
         
-        // Handle boolean values
-        if (strpos($key, 'CHAR_ID') !== false || 
-            strpos($key, 'ENOTF_') !== false && strpos($key, 'PIN') === false ||
-            strpos($key, 'REQUIRE_USER_AUTH') !== false) {
+        // Handle different input types
+        if ($config['config_type'] === 'boolean') {
+            // Checkboxes are only in POST when checked
             $value = isset($_POST[$key]) && $_POST[$key] === 'on' ? 'true' : 'false';
+        } else {
+            // Skip if not in POST
+            if (!isset($_POST[$key])) continue;
+            $value = $_POST[$key];
         }
         
         // Only update if value changed
