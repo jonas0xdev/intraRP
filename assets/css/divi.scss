@@ -721,13 +721,13 @@ body {
 }
 
 [class*="edivi__interactbutton"] > label:after {
-  content: "\f04d";
-  font-family: "Line Awesome Free";
+  content: "\f0c8";
+  font-family: "Font Awesome 7 Free";
   position: absolute;
   right: 7px;
   top: 50%;
   font-size: 1.5rem;
-  font-weight: 900;
+  font-weight: 300;
   transform: translateY(-50%);
   color: var(--white);
   z-index: 0;
@@ -821,7 +821,7 @@ body {
 
 .edivi__interactbutton-more > a:after {
   content: "\f105";
-  font-family: "Line Awesome Free";
+  font-family: "Font Awesome 7 Free";
   position: absolute;
   right: 7px;
   top: 50%;

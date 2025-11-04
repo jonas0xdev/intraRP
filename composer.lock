@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "49a174abe0ee3870e10c0acd995d4c66",
+    "content-hash": "742b8860718929b72190b7983041d083",
     "packages": [
         {
             "name": "components/jquery",
@@ -335,6 +335,51 @@
                 "source": "https://github.com/dropzone/dropzone-packagist/tree/v5.9.3"
             },
             "time": "2021-09-21T17:03:36+00:00"
+        },
+        {
+            "name": "fortawesome/font-awesome",
+            "version": "7.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/FortAwesome/Font-Awesome.git",
+                "reference": "41cfe644047fc3a4c49c22acc721cacc3e1021fe"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/FortAwesome/Font-Awesome/zipball/41cfe644047fc3a4c49c22acc721cacc3e1021fe",
+                "reference": "41cfe644047fc3a4c49c22acc721cacc3e1021fe",
+                "shasum": ""
+            },
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "CC-BY-4.0",
+                "OFL-1.1",
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "The Font Awesome Team",
+                    "homepage": "https://github.com/orgs/FortAwesome/people"
+                }
+            ],
+            "description": "The iconic font, CSS, and SVG framework",
+            "homepage": "https://fontawesome.com",
+            "keywords": [
+                "FontAwesome",
+                "awesome",
+                "bootstrap",
+                "font",
+                "icon",
+                "svg"
+            ],
+            "support": {
+                "docs": "http://fontawesome.com/docs",
+                "email": "hello@fontawesome.com",
+                "issues": "https://github.com/FortAwesome/Font-Awesome/issues",
+                "source": "https://github.com/FortAwesome/Font-Awesome"
+            },
+            "time": "2025-10-01T19:14:40+00:00"
         },
         {
             "name": "graham-campbell/result-type",
@@ -1736,10 +1781,10 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
-    "platform": {},
-    "platform-dev": {},
+    "platform": [],
+    "platform-dev": [],
     "plugin-api-version": "2.6.0"
 }

@@ -91,11 +91,11 @@ use App\Auth\Permissions;
             echo "<td>" . htmlspecialchars($doks['ersteller_name']) . "</td>";
             echo "<td>" . htmlspecialchars($austdatum) . "</td>";
             echo "<td>";
-            echo "<a href='$pdfPath' class='btn btn-sm btn-primary' target='_blank'><i class='las la-eye'></i> Ansehen</a> ";
+            echo "<a href='$pdfPath' class='btn btn-sm btn-primary' target='_blank'><i class='fa-solid fa-eye'></i> Ansehen</a> ";
             // echo "<a href='$pdfPath' download class='btn btn-sm btn-success'><i class='las la-download'></i></a>";
 
             if (Permissions::check('admin')) {
-                echo " <a href='" . BASE_PATH . "admin/personal/dokument-delete.php?id={$doks['docid']}&pid=$openedID' class='btn btn-sm btn-danger'><i class='las la-trash'></i></a>";
+                echo " <a href='" . BASE_PATH . "mitarbeiter/dokument-delete.php?id={$doks['docid']}&pid=$openedID' class='btn btn-sm btn-danger'><i class='fa-solid fa-trash'></i></a>";
             }
 
             echo "</td>";

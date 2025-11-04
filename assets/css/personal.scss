@@ -1,5 +1,6 @@
 .ma-basedata,
 .ma-comments,
+.ma-logs,
 .ma-documents {
   background-color: var(--body-bg-lighter);
   box-shadow: var(--bs-box-shadow) !important;
@@ -8,7 +9,25 @@
   position: relative;
 }
 
+.ma-logs details summary {
+  font-weight: 600;
+  color: var(--bs-secondary-color);
+  user-select: none;
+}
+.ma-logs details summary::-webkit-details-marker {
+  color: var(--bs-secondary-color);
+}
+.ma-logs .comment {
+  font-size: 0.9rem;
+  padding: 8px;
+  margin-bottom: 8px;
+}
+.ma-logs .comment p {
+  margin-bottom: 0;
+}
+
 .comment-container,
+.log-container,
 .comment-settings {
   margin: 0 auto;
   max-width: 95%;
@@ -56,7 +75,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: "Line Awesome Free";
+  font-family: "Font Awesome 7 Free";
 }
 
 .comment.note::after {

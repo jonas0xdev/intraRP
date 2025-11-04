@@ -210,6 +210,16 @@ $migrationFiles = [
 
     // 28.10.2025
     ['file' => 'create_intra_support_db_28102025.php', 'type' => 'create'],
+
+    // 02.11.2025
+    ['file' => 'alter_intra_mitarbeiter_02112025.php', 'type' => 'alter'],
+    ['file' => 'create_intra_registration_codes_02112025.php', 'type' => 'create'],
+
+    // 03.11.2025
+    ['file' => 'create_intra_notifications_03112025.php', 'type' => 'create'],
+
+    // 04.11.2025
+    ['file' => 'alter_intra_mitarbeiter_log_04112025.php', 'type' => 'alter'],
 ];
 
 $executed = 0;
@@ -275,6 +285,6 @@ echo "Project Root: $projectRoot\n";
 echo "Neue Migrationen ausgeführt: $executed\n";
 echo "Bereits ausgeführt (übersprungen): $alreadyRun\n";
 echo "Nicht gefunden: $skipped\n";
-echo "Gesamt: " . count($migrationFiles) . " Migrationen\n";
+echo "Gesamt: " . count($migrationFiles) . " Migrationen\n\n";
 
 exit(0);

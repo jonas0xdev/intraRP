@@ -1,6 +1,6 @@
-@charset "UTF-8";
 .ma-basedata,
 .ma-comments,
+.ma-logs,
 .ma-documents {
   background-color: var(--body-bg-lighter);
   box-shadow: var(--bs-box-shadow) !important;
@@ -9,7 +9,28 @@
   position: relative;
 }
 
+.ma-logs details summary {
+  font-weight: 600;
+  color: var(--bs-secondary-color);
+  user-select: none;
+}
+
+.ma-logs details summary::-webkit-details-marker {
+  color: var(--bs-secondary-color);
+}
+
+.ma-logs .comment {
+  font-size: 0.9rem;
+  padding: 8px;
+  margin-bottom: 8px;
+}
+
+.ma-logs .comment p {
+  margin-bottom: 0;
+}
+
 .comment-container,
+.log-container,
 .comment-settings {
   margin: 0 auto;
   max-width: 95%;
@@ -54,11 +75,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: "Line Awesome Free";
+  font-family: "Font Awesome 7 Free";
 }
 
 .comment.note::after {
-  content: "";
+  content: "\f249";
   background-color: #acadb0;
 }
 
@@ -66,7 +87,7 @@
   background-color: #b7d0b3;
 }
 .comment.positive::after {
-  content: "";
+  content: "\f560";
   background-color: #7fb257;
 }
 
@@ -74,7 +95,7 @@
   background-color: #e2a2a7;
 }
 .comment.negative::after {
-  content: "";
+  content: "\f00d";
   background-color: #ce646d;
 }
 
@@ -82,7 +103,7 @@
   background-color: #b4ddf9;
 }
 .comment.rank::after {
-  content: "";
+  content: "\f0e7";
   background-color: #55b3f1;
 }
 
@@ -90,7 +111,7 @@
   background-color: #fed69a;
 }
 .comment.modify::after {
-  content: "";
+  content: "\f6e3";
   background-color: #fdad35;
 }
 
@@ -98,7 +119,7 @@
   background-color: #feafea;
 }
 .comment.document::after {
-  content: "";
+  content: "\f02d";
   background-color: #fd49d0;
 }
 
@@ -106,7 +127,7 @@
   background-color: #a4f4f3;
 }
 .comment.created::after {
-  content: "";
+  content: "\f055";
   background-color: #14a3a1;
 }
 
@@ -139,3 +160,5 @@
 .ck-editor {
   color: #000;
 }
+
+/*# sourceMappingURL=personal.css.map */

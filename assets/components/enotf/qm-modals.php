@@ -62,7 +62,7 @@ use App\Auth\Permissions;
                 modal.show();
 
                 // Load content via AJAX
-                fetch(`<?= BASE_PATH ?>admin/enotf/qm-actions-modal.php?id=${id}`)
+                fetch(`<?= BASE_PATH ?>enotf/admin/qm-actions-modal.php?id=${id}`)
                     .then(response => response.text())
                     .then(data => {
                         document.getElementById('qmActionsContent').innerHTML = data;
@@ -95,7 +95,7 @@ use App\Auth\Permissions;
                 modal.show();
 
                 // Load content via AJAX
-                fetch(`<?= BASE_PATH ?>admin/enotf/qm-log-modal.php?id=${id}`)
+                fetch(`<?= BASE_PATH ?>enotf/admin/qm-log-modal.php?id=${id}`)
                     .then(response => response.text())
                     .then(data => {
                         document.getElementById('qmLogContent').innerHTML = data;
@@ -134,11 +134,11 @@ use App\Auth\Permissions;
                             location.reload();
                         }
                     } else {
-                        alert('Fehler beim Speichern: ' + (data.message || 'Unbekannter Fehler'));
+                        showAlert('Fehler beim Speichern: ' + (data.message || 'Unbekannter Fehler'), {type: 'error', title: 'Fehler'});
                     }
                 })
                 .catch(error => {
-                    alert('Fehler beim Speichern: ' + error.message);
+                    showAlert('Fehler beim Speichern: ' + error.message, {type: 'error', title: 'Fehler'});
                 })
                 .finally(() => {
                     submitBtn.value = originalText;

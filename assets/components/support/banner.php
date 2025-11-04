@@ -260,7 +260,7 @@ if (isset($_SESSION['support_mode']) && $_SESSION['support_mode'] === true) {
             </div>
 
             <div class="support-actions">
-                <a href="<?= BASE_PATH ?>admin/logout.php" class="support-btn" title="Support-Session sofort beenden und abmelden">
+                <a href="<?= BASE_PATH ?>logout.php" class="support-btn" title="Support-Session sofort beenden und abmelden">
                     <i class="las la-sign-out-alt"></i>
                     Abmelden
                 </a>

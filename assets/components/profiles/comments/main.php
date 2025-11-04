@@ -2,53 +2,26 @@
 require __DIR__ . '/../../../../assets/config/database.php';
 
 use App\Auth\Permissions;
+use App\Personnel\PersonalLogManager;
 
 $commentsPerPage = 6;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$offset = ($page - 1) * $commentsPerPage;
 
-// WICHTIG: Erst die Gesamtanzahl der Kommentare ermitteln
-$countStmt = $pdo->prepare("SELECT COUNT(*) FROM intra_mitarbeiter_log WHERE profilid = ?");
-$countStmt->execute([$_GET['id']]);
-$totalComments = $countStmt->fetchColumn();
-
-// Dann die Kommentare für die aktuelle Seite laden
-$stmt = $pdo->prepare("SELECT * FROM intra_mitarbeiter_log WHERE profilid = ? ORDER BY datetime DESC LIMIT ?, ?");
-$stmt->execute([$_GET['id'], $offset, $commentsPerPage]);
-$comments = $stmt->fetchAll();
+// Use PersonalLogManager to get comments only (not system logs)
+$logManager = new PersonalLogManager($pdo);
+$result = $logManager->getComments($_GET['id'], $page, $commentsPerPage);
+$comments = $result['entries'];
+$totalComments = $result['total'];
 
 foreach ($comments as $comment) {
-    $commentType = '';
-    switch ($comment['type']) {
-        case 0:
-            $commentType = 'note';
-            break;
-        case 1:
-            $commentType = 'positive';
-            break;
-        case 2:
-            $commentType = 'negative';
-            break;
-        case 4:
-            $commentType = 'rank';
-            break;
-        case 5:
-            $commentType = 'modify';
-            break;
-        case 6:
-            $commentType = 'created';
-            break;
-        case 7:
-            $commentType = 'document';
-            break;
-    }
+    $commentType = PersonalLogManager::getTypeName($comment['type']);
 
     echo "<div class='comment $commentType border shadow-sm'>";
     $comtime = date("d.m.Y H:i", strtotime($comment['datetime']));
-    echo "<p>{$comment['content']}<br><small><span><i class='las la-user'></i> {$comment['paneluser']} <i class='las la-clock'></i> $comtime";
+    echo "<p>{$comment['content']}<br><small><span><i class='fa-solid fa-user'></i> {$comment['paneluser']} <i class='fa-solid fa-clock'></i> $comtime";
 
     if (Permissions::check('admin') && $comment['type'] <= 3) {
-        echo " / <a href='" . BASE_PATH . "admin/personal/comment-delete.php?id={$comment['logid']}&pid={$comment['profilid']}'><i class='las la-trash' style='color:red;margin-left:5px'></i></a></span></small></p>";
+        echo " / <a href='" . BASE_PATH . "mitarbeiter/comment-delete.php?id={$comment['logid']}&pid={$comment['profilid']}'><i class='fa-solid fa-trash' style='color:red;margin-left:5px'></i></a></span></small></p>";
     } else {
         echo "</span></small></p>";
     }
@@ -60,9 +33,10 @@ if ($totalPages > 1) {
     echo '<nav aria-label="Comment Pagination">';
     echo '<ul class="pagination justify-content-center">';
     $editArgument = isset($_GET['edit']) ? '&edit' : '';
+    $logPageArgument = isset($_GET['logpage']) ? '&logpage=' . $_GET['logpage'] : '';
 
     if ($page > 1) {
-        echo '<li class="page-item"><a class="page-link" href="?id=' . $_GET['id'] . '&page=' . ($page - 1) . $editArgument . '">Zurück</a></li>';
+        echo '<li class="page-item"><a class="page-link" href="?id=' . $_GET['id'] . '&page=' . ($page - 1) . $logPageArgument . $editArgument . '">Zurück</a></li>';
     } else {
         echo '<li class="page-item disabled"><span class="page-link">Zurück</span></li>';
     }
@@ -72,7 +46,7 @@ if ($totalPages > 1) {
             if ($i == $page) {
                 echo '<li class="page-item active"><a class="page-link" href="#">' . $i . '</a></li>';
             } else {
-                echo '<li class="page-item"><a class="page-link" href="?id=' . $_GET['id'] . '&page=' . $i . $editArgument . '">' . $i . '</a></li>';
+                echo '<li class="page-item"><a class="page-link" href="?id=' . $_GET['id'] . '&page=' . $i . $logPageArgument . $editArgument . '">' . $i . '</a></li>';
             }
         }
     } else {
@@ -85,7 +59,7 @@ if ($totalPages > 1) {
         }
 
         if ($startPage > 1) {
-            echo '<li class="page-item"><a class="page-link" href="?id=' . $_GET['id'] . '&page=1' . $editArgument . '">1</a></li>';
+            echo '<li class="page-item"><a class="page-link" href="?id=' . $_GET['id'] . '&page=1' . $logPageArgument . $editArgument . '">1</a></li>';
             if ($startPage > 2) {
                 echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
             }
@@ -95,7 +69,7 @@ if ($totalPages > 1) {
             if ($i == $page) {
                 echo '<li class="page-item active"><a class="page-link" href="#">' . $i . '</a></li>';
             } else {
-                echo '<li class="page-item"><a class="page-link" href="?id=' . $_GET['id'] . '&page=' . $i . $editArgument . '">' . $i . '</a></li>';
+                echo '<li class="page-item"><a class="page-link" href="?id=' . $_GET['id'] . '&page=' . $i . $logPageArgument . $editArgument . '">' . $i . '</a></li>';
             }
         }
 
@@ -103,12 +77,12 @@ if ($totalPages > 1) {
             if ($endPage < $totalPages - 1) {
                 echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
             }
-            echo '<li class="page-item"><a class="page-link" href="?id=' . $_GET['id'] . '&page=' . $totalPages . $editArgument . '">' . $totalPages . '</a></li>';
+            echo '<li class="page-item"><a class="page-link" href="?id=' . $_GET['id'] . '&page=' . $totalPages . $logPageArgument . $editArgument . '">' . $totalPages . '</a></li>';
         }
     }
 
     if ($page < $totalPages) {
-        echo '<li class="page-item"><a class="page-link" href="?id=' . $_GET['id'] . '&page=' . ($page + 1) . $editArgument . '">Weiter</a></li>';
+        echo '<li class="page-item"><a class="page-link" href="?id=' . $_GET['id'] . '&page=' . ($page + 1) . $logPageArgument . $editArgument . '">Weiter</a></li>';
     } else {
         echo '<li class="page-item disabled"><span class="page-link">Weiter</span></li>';
     }

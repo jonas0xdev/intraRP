@@ -170,7 +170,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                         <?php else : ?>
                             <h1 class="print__heading-main">Notarztprotokoll</h1>
                         <?php endif; ?>
-                        <p class="print__text-small">Automatisch erstellt mit intraRP Version <?= SYSTEM_VERSION ?></p>
+                        <p class="print__text-small">Automatisch erstellt mit intraRP</p>
                     </div>
                 </div>
                 <div class="row border border-dark border-top-0">

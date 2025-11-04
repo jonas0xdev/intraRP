@@ -75,7 +75,7 @@ VALUES (6, 'ausstellungsdatum', 'Ausstellungsdatum', 'date', 1, 1)
 ");
     $stmt->execute();
 
-    // Config für Lehrgangszertifikat
+    // Config für Lehrgangszertifikat (nur setzen, wenn noch leer)
     $configLehrgang = json_encode([
         "fields" => [
             "erhalter_quali" => [
@@ -86,7 +86,7 @@ VALUES (6, 'ausstellungsdatum', 'Ausstellungsdatum', 'date', 1, 1)
             ]
         ]
     ]);
-    $pdo->prepare("UPDATE intra_dokument_templates SET config = ? WHERE id = 6")->execute([$configLehrgang]);
+    $pdo->prepare("UPDATE intra_dokument_templates SET config = ? WHERE id = 6 AND (config IS NULL OR config = '{}' OR config = '')")->execute([$configLehrgang]);
 
     // 6. FACHLEHRGANG (Template ID 7)
     $qualiOptionsFachlehrgang = json_encode([
@@ -112,7 +112,7 @@ VALUES (7, 'ausstellungsdatum', 'Ausstellungsdatum', 'date', 1, 1)
 ");
     $stmt->execute();
 
-    // Config für Fachlehrgang
+    // Config für Fachlehrgang (nur setzen, wenn noch leer)
     $configFachlehrgang = json_encode([
         "fields" => [
             "erhalter_quali" => [
@@ -123,7 +123,7 @@ VALUES (7, 'ausstellungsdatum', 'Ausstellungsdatum', 'date', 1, 1)
             ]
         ]
     ]);
-    $pdo->prepare("UPDATE intra_dokument_templates SET config = ? WHERE id = 7")->execute([$configFachlehrgang]);
+    $pdo->prepare("UPDATE intra_dokument_templates SET config = ? WHERE id = 7 AND (config IS NULL OR config = '{}' OR config = '')")->execute([$configFachlehrgang]);
 
     // 7. SCHRIFTLICHE ABMAHNUNG (Template ID 10)
     $stmt = $pdo->prepare("
