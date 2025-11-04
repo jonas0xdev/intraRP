@@ -5,6 +5,7 @@ require __DIR__ . '/../assets/config/database.php';
 
 use League\OAuth2\Client\Provider\GenericProvider;
 use App\Helpers\ProtocolDetection;
+use App\Notifications\NotificationManager;
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -114,6 +115,22 @@ try {
             'role'       => $adminRole['id'],
             'full_admin' => 1
         ]);
+        
+        $firstUserId = $pdo->lastInsertId();
+        
+        // Send notification to first user about configuration
+        try {
+            $notificationManager = new NotificationManager($pdo);
+            $notificationManager->create(
+                $firstUserId,
+                'system',
+                'Willkommen bei intraRP!',
+                'Als erster Benutzer haben Sie Administratorrechte. Bitte besuchen Sie die System-Konfiguration, um wichtige Einstellungen wie den Systemnamen, Logo und weitere Optionen anzupassen.',
+                BASE_PATH . 'settings/system/config.php'
+            );
+        } catch (Exception $e) {
+            error_log("Failed to create first user notification: " . $e->getMessage());
+        }
     }
 
     $stmt = $pdo->prepare("SELECT * FROM intra_users WHERE discord_id = :discord_id");

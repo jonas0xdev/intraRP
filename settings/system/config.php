@@ -1,0 +1,299 @@
+<?php
+session_start();
+require_once __DIR__ . '/../../assets/config/config.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
+require_once __DIR__ . '/../../assets/config/database.php';
+
+if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
+    $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
+    header("Location: " . BASE_PATH . "login.php");
+    exit();
+}
+
+use App\Auth\Permissions;
+use App\Helpers\Flash;
+use App\Config\ConfigManager;
+use App\Utils\AuditLogger;
+
+if (!Permissions::check(['admin'])) {
+    Flash::set('error', 'no-permissions');
+    header("Location: " . BASE_PATH . "index.php");
+    exit();
+}
+
+$configManager = new ConfigManager($pdo);
+$auditLogger = new AuditLogger($pdo);
+
+// Handle form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
+    $updates = [];
+    $changes = [];
+    
+    foreach ($_POST as $key => $value) {
+        if ($key === 'save_config') continue;
+        
+        // Get old value for audit log
+        $oldValue = $configManager->get($key);
+        
+        // Handle boolean values
+        if (strpos($key, 'CHAR_ID') !== false || 
+            strpos($key, 'ENOTF_') !== false && strpos($key, 'PIN') === false ||
+            strpos($key, 'REQUIRE_USER_AUTH') !== false) {
+            $value = isset($_POST[$key]) && $_POST[$key] === 'on' ? 'true' : 'false';
+        }
+        
+        // Only update if value changed
+        if ($oldValue != $value) {
+            $updates[$key] = $value;
+            $changes[] = [
+                'key' => $key,
+                'old' => $oldValue,
+                'new' => $value
+            ];
+        }
+    }
+    
+    if (!empty($updates)) {
+        $result = $configManager->updateMultiple($updates, $_SESSION['userid']);
+        
+        if ($result['success']) {
+            // Log each change in audit log
+            foreach ($changes as $change) {
+                $auditLogger->log(
+                    $_SESSION['userid'],
+                    'config_update',
+                    json_encode([
+                        'key' => $change['key'],
+                        'old_value' => $change['old'],
+                        'new_value' => $change['new']
+                    ]),
+                    'System'
+                );
+            }
+            
+            Flash::set('success', 'Konfiguration erfolgreich aktualisiert.');
+        } else {
+            Flash::set('error', 'Fehler beim Aktualisieren der Konfiguration.');
+        }
+    } else {
+        Flash::set('info', 'Keine Änderungen vorgenommen.');
+    }
+    
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
+}
+
+$configByCategory = $configManager->getConfigByCategory();
+?>
+
+<!DOCTYPE html>
+<html lang="de" data-bs-theme="light">
+
+<head>
+    <?php
+    $SITE_TITLE = 'System-Konfiguration';
+    include __DIR__ . '/../../assets/components/_base/admin/head.php';
+    ?>
+    <style>
+        .config-preview {
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            margin-top: 0.5rem;
+            background: #f8f9fa;
+        }
+        
+        .color-preview {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border-radius: 0.375rem;
+            border: 2px solid #dee2e6;
+            vertical-align: middle;
+            margin-left: 10px;
+        }
+        
+        .logo-preview {
+            max-width: 200px;
+            max-height: 100px;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+            background: white;
+        }
+        
+        .color-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .color-input-wrapper input[type="color"] {
+            width: 60px;
+            height: 40px;
+            border: none;
+            border-radius: 0.375rem;
+            cursor: pointer;
+        }
+        
+        .color-input-wrapper input[type="text"] {
+            flex: 1;
+        }
+        
+        .form-label {
+            font-weight: 600;
+        }
+        
+        .form-text {
+            font-size: 0.875rem;
+        }
+        
+        .config-section {
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+
+<body data-bs-theme="dark" data-page="settings">
+<?php include __DIR__ . "/../../assets/components/navbar.php"; ?>
+<div class="container-full position-relative" id="mainpageContainer">
+    <div class="container">
+        <div class="row">
+            <div class="col mb-5">
+                <hr class="text-light my-3">
+                <div class="d-flex justify-content-between align-items-center mb-5">
+                    <h1 class="mb-0">System-Konfiguration</h1>
+                </div>
+                <?php Flash::render(); ?>
+
+                <form method="post" id="configForm">
+                    <?php foreach ($configByCategory as $category => $configs): ?>
+                        <div class="config-section">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><?= htmlspecialchars($configManager->getCategoryDisplayName($category)) ?></h5>
+                                </div>
+                                <div class="card-body">
+                                    <?php foreach ($configs as $config): ?>
+                                        <?php if ($config['is_editable']): ?>
+                                            <div class="mb-4">
+                                                <label for="<?= htmlspecialchars($config['config_key']) ?>" class="form-label">
+                                                    <?= htmlspecialchars($config['description']) ?>
+                                                </label>
+                                                
+                                                <?php if ($config['config_type'] === 'boolean'): ?>
+                                                    <div class="form-check form-switch">
+                                                        <input 
+                                                            class="form-check-input" 
+                                                            type="checkbox" 
+                                                            role="switch"
+                                                            id="<?= htmlspecialchars($config['config_key']) ?>" 
+                                                            name="<?= htmlspecialchars($config['config_key']) ?>"
+                                                            <?= ($config['config_value'] === 'true' || $config['config_value'] === '1') ? 'checked' : '' ?>
+                                                        >
+                                                    </div>
+                                                    
+                                                <?php elseif ($config['config_type'] === 'color'): ?>
+                                                    <div class="color-input-wrapper">
+                                                        <input 
+                                                            type="color" 
+                                                            id="<?= htmlspecialchars($config['config_key']) ?>_picker" 
+                                                            value="<?= htmlspecialchars($config['config_value']) ?>"
+                                                            onchange="updateColorValue('<?= htmlspecialchars($config['config_key']) ?>', this.value)"
+                                                        >
+                                                        <input 
+                                                            type="text" 
+                                                            class="form-control" 
+                                                            id="<?= htmlspecialchars($config['config_key']) ?>" 
+                                                            name="<?= htmlspecialchars($config['config_key']) ?>"
+                                                            value="<?= htmlspecialchars($config['config_value']) ?>"
+                                                            pattern="^#[0-9A-Fa-f]{6}$"
+                                                            placeholder="#000000"
+                                                            oninput="updateColorPicker('<?= htmlspecialchars($config['config_key']) ?>', this.value)"
+                                                        >
+                                                        <div class="color-preview" id="<?= htmlspecialchars($config['config_key']) ?>_preview" style="background-color: <?= htmlspecialchars($config['config_value']) ?>"></div>
+                                                    </div>
+                                                    <div class="form-text">Wählen Sie eine Farbe aus oder geben Sie einen Hex-Farbcode ein.</div>
+                                                    
+                                                <?php elseif ($config['config_type'] === 'url' && $config['config_key'] === 'SYSTEM_LOGO'): ?>
+                                                    <input 
+                                                        type="text" 
+                                                        class="form-control mb-2" 
+                                                        id="<?= htmlspecialchars($config['config_key']) ?>" 
+                                                        name="<?= htmlspecialchars($config['config_key']) ?>"
+                                                        value="<?= htmlspecialchars($config['config_value']) ?>"
+                                                        oninput="updateLogoPreview(this.value)"
+                                                    >
+                                                    <div class="form-text">Relativer Pfad oder vollständige URL zum Logo.</div>
+                                                    <div class="config-preview">
+                                                        <strong>Vorschau:</strong><br>
+                                                        <img 
+                                                            src="<?= htmlspecialchars($config['config_value']) ?>" 
+                                                            alt="Logo Preview" 
+                                                            class="logo-preview" 
+                                                            id="logo_preview"
+                                                            onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22100%22%3E%3Crect fill=%22%23ddd%22 width=%22200%22 height=%22100%22/%3E%3Ctext fill=%22%23999%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22%3EBild nicht gefunden%3C/text%3E%3C/svg%3E'"
+                                                        >
+                                                    </div>
+                                                    
+                                                <?php elseif ($config['config_key'] === 'REGISTRATION_MODE'): ?>
+                                                    <select 
+                                                        class="form-select" 
+                                                        id="<?= htmlspecialchars($config['config_key']) ?>" 
+                                                        name="<?= htmlspecialchars($config['config_key']) ?>"
+                                                    >
+                                                        <option value="open" <?= $config['config_value'] === 'open' ? 'selected' : '' ?>>Offen (für jeden möglich)</option>
+                                                        <option value="code" <?= $config['config_value'] === 'code' ? 'selected' : '' ?>>Mit Code (nur mit Registrierungscode)</option>
+                                                        <option value="closed" <?= $config['config_value'] === 'closed' ? 'selected' : '' ?>>Geschlossen (keine Registrierung)</option>
+                                                    </select>
+                                                    <div class="form-text"><?= htmlspecialchars($config['description']) ?></div>
+                                                    
+                                                <?php else: ?>
+                                                    <input 
+                                                        type="text" 
+                                                        class="form-control" 
+                                                        id="<?= htmlspecialchars($config['config_key']) ?>" 
+                                                        name="<?= htmlspecialchars($config['config_key']) ?>"
+                                                        value="<?= htmlspecialchars($config['config_value']) ?>"
+                                                    >
+                                                <?php endif; ?>
+                                            </div>
+                                        <?php endif; ?>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-5">
+                        <button type="submit" name="save_config" class="btn btn-primary btn-lg">
+                            <i class="fa-solid fa-save"></i> Änderungen speichern
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<?php include __DIR__ . "/../../assets/components/footer.php"; ?>
+
+<script>
+function updateColorValue(key, value) {
+    document.getElementById(key).value = value;
+    document.getElementById(key + '_preview').style.backgroundColor = value;
+}
+
+function updateColorPicker(key, value) {
+    if (/^#[0-9A-Fa-f]{6}$/.test(value)) {
+        document.getElementById(key + '_picker').value = value;
+        document.getElementById(key + '_preview').style.backgroundColor = value;
+    }
+}
+
+function updateLogoPreview(value) {
+    document.getElementById('logo_preview').src = value;
+}
+</script>
+</body>
+
+</html>

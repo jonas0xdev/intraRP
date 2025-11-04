@@ -17,7 +17,7 @@ class NotificationManager
      * Create a new notification for a user
      * 
      * @param int $userId User ID to notify
-     * @param string $type Type of notification (antrag, protokoll, dokument)
+     * @param string $type Type of notification (antrag, protokoll, dokument, system)
      * @param string $title Notification title
      * @param string|null $message Optional notification message
      * @param string|null $link Optional link to related item
@@ -26,7 +26,7 @@ class NotificationManager
     public function create(int $userId, string $type, string $title, ?string $message = null, ?string $link = null): bool
     {
         // Validate notification type
-        $validTypes = ['antrag', 'protokoll', 'dokument'];
+        $validTypes = ['antrag', 'protokoll', 'dokument', 'system'];
         if (!in_array($type, $validTypes)) {
             error_log("Invalid notification type: {$type}");
             return false;

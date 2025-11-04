@@ -1,6 +1,7 @@
 <?php
 
 use App\Auth\Permissions;
+use App\Config\ConfigManager;
 
 if (session_status() === PHP_SESSION_NONE) {
     if (isset($_SESSION['userid']) && !isset($_SESSION['permissions'])) {
@@ -9,26 +10,40 @@ if (session_status() === PHP_SESSION_NONE) {
     }
 }
 
-// BASIS DATEN
-define('API_KEY', 'CHANGE_ME'); // Wird automatisch beim Setup erstellt, sonst selbst einen sicheren Key festlegen
-define('SYSTEM_NAME', 'intraRP'); // Eigenname des Intranets
-define('SYSTEM_COLOR', '#d10000'); // Hauptfarbe des Systems
-define('SYSTEM_URL', 'CHANGE_ME'); // Domain des Systems
-define('SYSTEM_LOGO', '/assets/img/defaultLogo.webp'); // Ort des Logos (entweder als relativer Pfad oder Link)
-define('META_IMAGE_URL', ''); // Ort des Bildes, welches in der Link-Vorschau angezeigt werden soll (immer als Link angeben!)
-// SERVER DATEN
-define('SERVER_NAME', 'CHANGE_ME'); // Name des Servers
-define('SERVER_CITY', 'Musterstadt'); // Name der Stadt in welcher der Server spielt
-// RP DATEN
-define('RP_ORGTYPE', 'Berufsfeuerwehr'); // Art/Name der Organisation
-define('RP_STREET', 'Musterweg 0815'); // Straße der Organisation
-define('RP_ZIP', '1337'); // PLZ der Organisation
-// FUNKTIONEN
-define('CHAR_ID', true); // Wird eine eindeutige Charakter-ID verwendet? (true = ja, false = nein)
-define('ENOTF_PREREG', true); // Wird das Voranmeldungssystem des eNOTF verwendet? (true = ja, false = nein)
-define('ENOTF_USE_PIN', true); // Wird die PIN-Funktion des eNOTF verwendet? (true = ja, false = nein)
-define('ENOTF_PIN', '1234'); // PIN für den Zugang zum eNOTF - 4-6 Zahlen (nur relevant, wenn ENOTF_USE_PIN auf true gesetzt ist)
-define('ENOTF_REQUIRE_USER_AUTH', false); // Wird eine Registrierung/Anmeldung im Hauptsystem für den Zugang zum eNOTF vorausgesetzt? (true = ja, false = nein)
-define('REGISTRATION_MODE', 'open'); // Registrierungsmodus: open = für jeden möglich, code = nur mit Code, closed = keine Registrierung
-define('LANG', 'de'); // Sprache des Systems (de = Deutsch, en = Englisch) // AKTUELL OHNE FUNKTION!
-define('BASE_PATH', '/'); // Basis-Pfad des Systems (z.B. /intraRP/ für https://domain.de/intraRP/)
+// Load configuration from database
+require_once __DIR__ . '/database.php';
+
+try {
+    $configManager = new ConfigManager($pdo);
+    $configManager->loadAndDefineConfig();
+} catch (Exception $e) {
+    // Fallback to default values if database is not available or table doesn't exist
+    error_log("Could not load config from database: " . $e->getMessage());
+    
+    // BASIS DATEN - Fallback defaults
+    if (!defined('API_KEY')) define('API_KEY', 'CHANGE_ME');
+    if (!defined('SYSTEM_NAME')) define('SYSTEM_NAME', 'intraRP');
+    if (!defined('SYSTEM_COLOR')) define('SYSTEM_COLOR', '#d10000');
+    if (!defined('SYSTEM_URL')) define('SYSTEM_URL', 'CHANGE_ME');
+    if (!defined('SYSTEM_LOGO')) define('SYSTEM_LOGO', '/assets/img/defaultLogo.webp');
+    if (!defined('META_IMAGE_URL')) define('META_IMAGE_URL', '');
+    
+    // SERVER DATEN
+    if (!defined('SERVER_NAME')) define('SERVER_NAME', 'CHANGE_ME');
+    if (!defined('SERVER_CITY')) define('SERVER_CITY', 'Musterstadt');
+    
+    // RP DATEN
+    if (!defined('RP_ORGTYPE')) define('RP_ORGTYPE', 'Berufsfeuerwehr');
+    if (!defined('RP_STREET')) define('RP_STREET', 'Musterweg 0815');
+    if (!defined('RP_ZIP')) define('RP_ZIP', '1337');
+    
+    // FUNKTIONEN
+    if (!defined('CHAR_ID')) define('CHAR_ID', true);
+    if (!defined('ENOTF_PREREG')) define('ENOTF_PREREG', true);
+    if (!defined('ENOTF_USE_PIN')) define('ENOTF_USE_PIN', true);
+    if (!defined('ENOTF_PIN')) define('ENOTF_PIN', '1234');
+    if (!defined('ENOTF_REQUIRE_USER_AUTH')) define('ENOTF_REQUIRE_USER_AUTH', false);
+    if (!defined('REGISTRATION_MODE')) define('REGISTRATION_MODE', 'open');
+    if (!defined('LANG')) define('LANG', 'de');
+    if (!defined('BASE_PATH')) define('BASE_PATH', '/');
+}
