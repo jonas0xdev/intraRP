@@ -42,8 +42,8 @@ class SystemUpdater
         $content = file_get_contents($this->versionFile);
         $this->currentVersion = json_decode($content, true);
 
-        if (!$this->currentVersion) {
-            throw new Exception('Failed to parse version.json');
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new Exception('Failed to parse version.json: ' . json_last_error_msg());
         }
     }
 
@@ -106,7 +106,7 @@ class SystemUpdater
                 'method' => 'GET',
                 'header' => [
                     'User-Agent: intraRP-Updater',
-                    'Accept: application/vnd.github.v3+json'
+                    'Accept: application/vnd.github+json'
                 ],
                 'timeout' => 10
             ]
@@ -146,7 +146,7 @@ class SystemUpdater
     {
         try {
             // Create temporary directory for update
-            $tempDir = sys_get_temp_dir() . '/intrarp_update_' . time();
+            $tempDir = sys_get_temp_dir() . '/intrarp_update_' . bin2hex(random_bytes(8));
             if (!mkdir($tempDir, 0755, true)) {
                 throw new Exception('Konnte temporäres Verzeichnis nicht erstellen.');
             }
@@ -157,7 +157,9 @@ class SystemUpdater
             $context = stream_context_create([
                 'http' => [
                     'method' => 'GET',
-                    'header' => 'User-Agent: intraRP-Updater',
+                    'header' => [
+                        'User-Agent: intraRP-Updater'
+                    ],
                     'timeout' => 300
                 ]
             ]);
@@ -225,7 +227,7 @@ class SystemUpdater
                     'method' => 'GET',
                     'header' => [
                         'User-Agent: intraRP-Updater',
-                        'Accept: application/vnd.github.v3+json'
+                        'Accept: application/vnd.github+json'
                     ],
                     'timeout' => 10
                 ]

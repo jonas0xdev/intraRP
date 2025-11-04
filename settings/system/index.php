@@ -163,15 +163,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <h6>Release-Notizen:</h6>
                                         <div class="border rounded p-3 bg-dark" style="max-height: 400px; overflow-y: auto;">
                                             <?php
-                                            // Convert markdown-style formatting to basic HTML
+                                            // Simple and safe markdown-style formatting to HTML
                                             $notes = htmlspecialchars($updateInfo['release_notes']);
-                                            $notes = preg_replace('/^### (.+)$/m', '<h6>$1</h6>', $notes);
-                                            $notes = preg_replace('/^## (.+)$/m', '<h5>$1</h5>', $notes);
-                                            $notes = preg_replace('/^# (.+)$/m', '<h4>$1</h4>', $notes);
-                                            $notes = preg_replace('/^\* (.+)$/m', '<li>$1</li>', $notes);
-                                            $notes = preg_replace('/^- (.+)$/m', '<li>$1</li>', $notes);
-                                            $notes = str_replace("\n\n", '</p><p>', $notes);
-                                            echo '<p>' . $notes . '</p>';
+                                            $lines = explode("\n", $notes);
+                                            $inList = false;
+                                            $output = '';
+                                            
+                                            foreach ($lines as $line) {
+                                                $line = trim($line);
+                                                
+                                                // Headers
+                                                if (preg_match('/^### (.+)$/', $line, $matches)) {
+                                                    if ($inList) { $output .= '</ul>'; $inList = false; }
+                                                    $output .= '<h6>' . $matches[1] . '</h6>';
+                                                } elseif (preg_match('/^## (.+)$/', $line, $matches)) {
+                                                    if ($inList) { $output .= '</ul>'; $inList = false; }
+                                                    $output .= '<h5>' . $matches[1] . '</h5>';
+                                                } elseif (preg_match('/^# (.+)$/', $line, $matches)) {
+                                                    if ($inList) { $output .= '</ul>'; $inList = false; }
+                                                    $output .= '<h4>' . $matches[1] . '</h4>';
+                                                }
+                                                // List items
+                                                elseif (preg_match('/^[\*\-] (.+)$/', $line, $matches)) {
+                                                    if (!$inList) { $output .= '<ul>'; $inList = true; }
+                                                    $output .= '<li>' . $matches[1] . '</li>';
+                                                }
+                                                // Regular text
+                                                elseif (!empty($line)) {
+                                                    if ($inList) { $output .= '</ul>'; $inList = false; }
+                                                    $output .= '<p>' . $line . '</p>';
+                                                }
+                                                // Empty line
+                                                else {
+                                                    if ($inList) { $output .= '</ul>'; $inList = false; }
+                                                }
+                                            }
+                                            
+                                            if ($inList) { $output .= '</ul>'; }
+                                            echo $output;
                                             ?>
                                         </div>
                                     <?php endif; ?>
