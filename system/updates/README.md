@@ -12,6 +12,11 @@ Das intraRP Update-System ermöglicht es Administratoren, einfach auf neue Versi
 - **Sichere Downloads**: Bietet direkte Download-Links zu offiziellen GitHub Releases
 - **Audit-Logging**: Protokolliert alle Update-Prüfungen für die Nachverfolgbarkeit
 - **Benutzerfreundliche UI**: Moderne, intuitive Benutzeroberfläche in den Einstellungen
+- **Update-Dringlichkeit**: Intelligente Bewertung der Update-Priorität
+- **Versions-Alter-Tracking**: Zeigt das Alter der installierten Version an
+- **Pre-Release-Erkennung**: Erkennt und markiert Entwicklerversionen
+- **Caching**: Vermeidet API-Rate-Limits durch intelligentes Caching
+- **Optimierte Release-Notizen**: Verbesserte Darstellung von Markdown-Inhalten
 
 ## Verwendung
 
@@ -72,8 +77,14 @@ $releases = $updater->getAllReleases(10);
 **Methoden**:
 - `getCurrentVersion()`: Gibt die aktuelle Version zurück
 - `checkForUpdates()`: Prüft auf verfügbare Updates
+- `checkForUpdatesCached()`: Prüft auf Updates mit Caching (empfohlen)
 - `getAllReleases($limit)`: Gibt eine Liste aller Releases zurück
 - `updateVersionFile($versionData)`: Aktualisiert die version.json
+- `getVersionAge()`: Gibt das Alter der Version in Tagen zurück
+- `isPreRelease()`: Prüft, ob es sich um eine Pre-Release-Version handelt
+- `isUpdateRecommended()`: Prüft, ob ein Update empfohlen wird
+- `getUpdateUrgency()`: Gibt die Dringlichkeit eines Updates zurück ('none', 'low', 'medium', 'high', 'critical')
+- `getFormattedReleaseNotes($markdown)`: Konvertiert Markdown in formatiertes HTML
 
 #### Version-Tracking (`system/updates/version.json`)
 
@@ -81,7 +92,7 @@ Speichert Informationen über die aktuelle Version:
 
 ```json
 {
-  "version": "v1.0.0",
+  "version": "v0.5.0",
   "updated_at": "2025-11-04 00:00:00",
   "build_number": "0",
   "commit_hash": "initial"

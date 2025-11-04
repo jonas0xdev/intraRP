@@ -31,7 +31,7 @@ class SystemUpdater
     {
         if (!file_exists($this->versionFile)) {
             $this->currentVersion = [
-                'version' => 'v1.0.0',
+                'version' => 'v0.5.0',
                 'updated_at' => date('Y-m-d H:i:s'),
                 'build_number' => '0',
                 'commit_hash' => 'initial'
@@ -245,5 +245,183 @@ class SystemUpdater
         } catch (Exception $e) {
             return [];
         }
+    }
+
+    /**
+     * Check if current version is a pre-release (beta, alpha, rc)
+     */
+    public function isPreRelease(): bool
+    {
+        $version = $this->currentVersion['version'];
+        return preg_match('/(alpha|beta|rc|dev)/i', $version) === 1;
+    }
+
+    /**
+     * Get version age in days
+     */
+    public function getVersionAge(): int
+    {
+        if (!isset($this->currentVersion['updated_at'])) {
+            return 0;
+        }
+
+        $updatedAt = strtotime($this->currentVersion['updated_at']);
+        $now = time();
+        
+        return (int) floor(($now - $updatedAt) / 86400);
+    }
+
+    /**
+     * Check if update is recommended based on version age
+     */
+    public function isUpdateRecommended(): bool
+    {
+        $age = $this->getVersionAge();
+        
+        // Recommend update if version is older than 90 days
+        return $age > 90;
+    }
+
+    /**
+     * Get update urgency level
+     * Returns: 'none', 'low', 'medium', 'high', 'critical'
+     */
+    public function getUpdateUrgency(): string
+    {
+        $updateInfo = $this->checkForUpdates();
+        
+        if (!$updateInfo['available']) {
+            return 'none';
+        }
+
+        $age = $this->getVersionAge();
+        $currentVersion = ltrim($this->currentVersion['version'], 'v');
+        $latestVersion = ltrim($updateInfo['latest_version'], 'v');
+
+        // Parse versions
+        $currentParts = explode('.', $currentVersion);
+        $latestParts = explode('.', $latestVersion);
+
+        // Major version change = high urgency
+        if (($latestParts[0] ?? 0) > ($currentParts[0] ?? 0)) {
+            return 'high';
+        }
+
+        // Minor version change with old version = medium urgency
+        if (($latestParts[1] ?? 0) > ($currentParts[1] ?? 0)) {
+            return $age > 60 ? 'medium' : 'low';
+        }
+
+        // Patch version change
+        if (($latestParts[2] ?? 0) > ($currentParts[2] ?? 0)) {
+            return $age > 30 ? 'medium' : 'low';
+        }
+
+        return 'low';
+    }
+
+    /**
+     * Get formatted release notes as HTML
+     */
+    public function getFormattedReleaseNotes(string $markdown): string
+    {
+        $lines = explode("\n", $markdown);
+        $output = '';
+        $inList = false;
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+
+            // Headers
+            if (preg_match('/^### (.+)$/', $line, $matches)) {
+                if ($inList) { $output .= '</ul>'; $inList = false; }
+                $output .= '<h6>' . htmlspecialchars($matches[1]) . '</h6>';
+            } elseif (preg_match('/^## (.+)$/', $line, $matches)) {
+                if ($inList) { $output .= '</ul>'; $inList = false; }
+                $output .= '<h5>' . htmlspecialchars($matches[1]) . '</h5>';
+            } elseif (preg_match('/^# (.+)$/', $line, $matches)) {
+                if ($inList) { $output .= '</ul>'; $inList = false; }
+                $output .= '<h4>' . htmlspecialchars($matches[1]) . '</h4>';
+            }
+            // List items
+            elseif (preg_match('/^[\*\-] (.+)$/', $line, $matches)) {
+                if (!$inList) { $output .= '<ul>'; $inList = true; }
+                $output .= '<li>' . htmlspecialchars($matches[1]) . '</li>';
+            }
+            // Bold text
+            elseif (preg_match('/\*\*(.+?)\*\*/', $line)) {
+                if ($inList) { $output .= '</ul>'; $inList = false; }
+                $line = preg_replace('/\*\*(.+?)\*\*/', '<strong>$1</strong>', $line);
+                $output .= '<p>' . htmlspecialchars_decode($line) . '</p>';
+            }
+            // Regular text
+            elseif (!empty($line)) {
+                if ($inList) { $output .= '</ul>'; $inList = false; }
+                $output .= '<p>' . htmlspecialchars($line) . '</p>';
+            }
+        }
+
+        if ($inList) { $output .= '</ul>'; }
+        
+        return $output;
+    }
+
+    /**
+     * Cache update check results to avoid rate limiting
+     */
+    private function getCachedUpdateCheck(): ?array
+    {
+        $cacheFile = sys_get_temp_dir() . '/intrarp_update_cache.json';
+        
+        if (!file_exists($cacheFile)) {
+            return null;
+        }
+
+        $cacheData = json_decode(file_get_contents($cacheFile), true);
+        
+        if (!$cacheData || !isset($cacheData['timestamp'])) {
+            return null;
+        }
+
+        // Cache valid for 1 hour
+        if (time() - $cacheData['timestamp'] > 3600) {
+            return null;
+        }
+
+        return $cacheData['data'] ?? null;
+    }
+
+    /**
+     * Save update check results to cache
+     */
+    private function cacheUpdateCheck(array $data): void
+    {
+        $cacheFile = sys_get_temp_dir() . '/intrarp_update_cache.json';
+        
+        $cacheData = [
+            'timestamp' => time(),
+            'data' => $data
+        ];
+
+        @file_put_contents($cacheFile, json_encode($cacheData));
+    }
+
+    /**
+     * Check for updates with caching support
+     */
+    public function checkForUpdatesCached(): array
+    {
+        $cached = $this->getCachedUpdateCheck();
+        
+        if ($cached !== null) {
+            $cached['cached'] = true;
+            return $cached;
+        }
+
+        $result = $this->checkForUpdates();
+        $this->cacheUpdateCheck($result);
+        $result['cached'] = false;
+
+        return $result;
     }
 }

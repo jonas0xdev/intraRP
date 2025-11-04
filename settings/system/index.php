@@ -24,12 +24,15 @@ $updater = new SystemUpdater();
 $currentVersion = $updater->getCurrentVersion();
 $updateInfo = null;
 $checking = false;
+$versionAge = $updater->getVersionAge();
+$isUpdateRecommended = $updater->isUpdateRecommended();
+$isPreRelease = $updater->isPreRelease();
 
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['check_updates'])) {
         $checking = true;
-        $updateInfo = $updater->checkForUpdates();
+        $updateInfo = $updater->checkForUpdatesCached();
         
         // Log the check action
         require_once __DIR__ . '/../../assets/config/database.php';
@@ -40,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'system',
             null,
             null,
-            ['result' => $updateInfo]
+            ['result' => $updateInfo, 'cached' => $updateInfo['cached'] ?? false]
         );
     }
 }
@@ -74,14 +77,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <h5 class="mb-0"><i class="fa-solid fa-info-circle"></i> Aktuelle Version</h5>
                         </div>
                         <div class="card-body">
+                            <?php if ($isPreRelease): ?>
+                                <div class="alert alert-warning mb-3">
+                                    <i class="fa-solid fa-flask"></i> <strong>Pre-Release Version:</strong> 
+                                    Sie verwenden eine Entwickler- oder Vorschau-Version.
+                                </div>
+                            <?php endif; ?>
+                            
+                            <?php if ($isUpdateRecommended && !$checking): ?>
+                                <div class="alert alert-info mb-3">
+                                    <i class="fa-solid fa-clock"></i> <strong>Update empfohlen:</strong> 
+                                    Ihre Version ist <?= $versionAge ?> Tage alt. Es wird empfohlen, auf Updates zu prüfen.
+                                </div>
+                            <?php endif; ?>
+
                             <div class="row">
                                 <div class="col-md-6">
                                     <dl class="row mb-0">
                                         <dt class="col-sm-4">Version:</dt>
-                                        <dd class="col-sm-8"><strong><?= htmlspecialchars($currentVersion['version']) ?></strong></dd>
+                                        <dd class="col-sm-8">
+                                            <strong><?= htmlspecialchars($currentVersion['version']) ?></strong>
+                                            <?php if ($isPreRelease): ?>
+                                                <span class="badge bg-warning text-dark ms-1">Pre-Release</span>
+                                            <?php endif; ?>
+                                        </dd>
                                         
                                         <dt class="col-sm-4">Aktualisiert am:</dt>
-                                        <dd class="col-sm-8"><?= htmlspecialchars($currentVersion['updated_at']) ?></dd>
+                                        <dd class="col-sm-8">
+                                            <?= htmlspecialchars($currentVersion['updated_at']) ?>
+                                            <small class="text-muted">(vor <?= $versionAge ?> Tagen)</small>
+                                        </dd>
                                         
                                         <dt class="col-sm-4">Build-Nummer:</dt>
                                         <dd class="col-sm-8"><?= htmlspecialchars($currentVersion['build_number']) ?></dd>
@@ -116,9 +141,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <?= htmlspecialchars($updateInfo['message']) ?>
                                     </div>
                                 <?php elseif ($updateInfo['available']): ?>
-                                    <div class="alert alert-success">
+                                    <?php 
+                                    $urgency = $updater->getUpdateUrgency();
+                                    $urgencyColors = [
+                                        'low' => 'info',
+                                        'medium' => 'warning',
+                                        'high' => 'danger',
+                                        'critical' => 'danger'
+                                    ];
+                                    $urgencyLabels = [
+                                        'low' => 'Niedrige Priorität',
+                                        'medium' => 'Mittlere Priorität',
+                                        'high' => 'Hohe Priorität',
+                                        'critical' => 'Kritisch'
+                                    ];
+                                    $alertClass = $urgencyColors[$urgency] ?? 'success';
+                                    ?>
+                                    <div class="alert alert-<?= $alertClass ?>">
                                         <h5><i class="fa-solid fa-check-circle"></i> Neues Update verfügbar!</h5>
-                                        <p class="mb-0">Eine neue Version ist verfügbar: <strong><?= htmlspecialchars($updateInfo['latest_version']) ?></strong></p>
+                                        <p class="mb-0">
+                                            Eine neue Version ist verfügbar: <strong><?= htmlspecialchars($updateInfo['latest_version']) ?></strong>
+                                            <span class="badge bg-<?= $alertClass ?> ms-2"><?= $urgencyLabels[$urgency] ?? 'Update verfügbar' ?></span>
+                                            <?php if (isset($updateInfo['cached']) && $updateInfo['cached']): ?>
+                                                <span class="badge bg-secondary ms-1" title="Gecachte Daten"><i class="fa-solid fa-clock"></i> Gecacht</span>
+                                            <?php endif; ?>
+                                        </p>
                                     </div>
                                     
                                     <div class="row">
@@ -162,46 +209,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <hr>
                                         <h6>Release-Notizen:</h6>
                                         <div class="border rounded p-3 bg-dark" style="max-height: 400px; overflow-y: auto;">
-                                            <?php
-                                            // Simple and safe markdown-style formatting to HTML
-                                            $notes = htmlspecialchars($updateInfo['release_notes']);
-                                            $lines = explode("\n", $notes);
-                                            $inList = false;
-                                            $output = '';
-                                            
-                                            foreach ($lines as $line) {
-                                                $line = trim($line);
-                                                
-                                                // Headers
-                                                if (preg_match('/^### (.+)$/', $line, $matches)) {
-                                                    if ($inList) { $output .= '</ul>'; $inList = false; }
-                                                    $output .= '<h6>' . $matches[1] . '</h6>';
-                                                } elseif (preg_match('/^## (.+)$/', $line, $matches)) {
-                                                    if ($inList) { $output .= '</ul>'; $inList = false; }
-                                                    $output .= '<h5>' . $matches[1] . '</h5>';
-                                                } elseif (preg_match('/^# (.+)$/', $line, $matches)) {
-                                                    if ($inList) { $output .= '</ul>'; $inList = false; }
-                                                    $output .= '<h4>' . $matches[1] . '</h4>';
-                                                }
-                                                // List items
-                                                elseif (preg_match('/^[\*\-] (.+)$/', $line, $matches)) {
-                                                    if (!$inList) { $output .= '<ul>'; $inList = true; }
-                                                    $output .= '<li>' . $matches[1] . '</li>';
-                                                }
-                                                // Regular text
-                                                elseif (!empty($line)) {
-                                                    if ($inList) { $output .= '</ul>'; $inList = false; }
-                                                    $output .= '<p>' . $line . '</p>';
-                                                }
-                                                // Empty line
-                                                else {
-                                                    if ($inList) { $output .= '</ul>'; $inList = false; }
-                                                }
-                                            }
-                                            
-                                            if ($inList) { $output .= '</ul>'; }
-                                            echo $output;
-                                            ?>
+                                            <?= $updater->getFormattedReleaseNotes($updateInfo['release_notes']) ?>
                                         </div>
                                     <?php endif; ?>
 
