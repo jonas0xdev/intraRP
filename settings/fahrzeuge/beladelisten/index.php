@@ -609,12 +609,12 @@ $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             bootstrap.Modal.getInstance(document.getElementById('addCategoryModal')).hide();
                             location.reload();
                         } else {
-                            alert('Fehler: ' + data.message);
+                            showAlert('Fehler: ' + data.message, {type: 'error', title: 'Fehler'});
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('Ein Fehler ist aufgetreten');
+                        showAlert('Ein Fehler ist aufgetreten', {type: 'error', title: 'Fehler'});
                     });
             });
 
@@ -633,12 +633,12 @@ $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             bootstrap.Modal.getInstance(document.getElementById('editCategoryModal')).hide();
                             location.reload();
                         } else {
-                            alert('Fehler: ' + data.message);
+                            showAlert('Fehler: ' + data.message, {type: 'error', title: 'Fehler'});
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('Ein Fehler ist aufgetreten');
+                        showAlert('Ein Fehler ist aufgetreten', {type: 'error', title: 'Fehler'});
                     });
             });
 
@@ -657,12 +657,12 @@ $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             bootstrap.Modal.getInstance(document.getElementById('addTileModal')).hide();
                             location.reload();
                         } else {
-                            alert('Fehler: ' + data.message);
+                            showAlert('Fehler: ' + data.message, {type: 'error', title: 'Fehler'});
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('Ein Fehler ist aufgetreten');
+                        showAlert('Ein Fehler ist aufgetreten', {type: 'error', title: 'Fehler'});
                     });
             });
 
@@ -681,12 +681,12 @@ $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             bootstrap.Modal.getInstance(document.getElementById('editTileModal')).hide();
                             location.reload();
                         } else {
-                            alert('Fehler: ' + data.message);
+                            showAlert('Fehler: ' + data.message, {type: 'error', title: 'Fehler'});
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('Ein Fehler ist aufgetreten');
+                        showAlert('Ein Fehler ist aufgetreten', {type: 'error', title: 'Fehler'});
                     });
             });
         });
@@ -705,12 +705,12 @@ $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     if (data.success) {
                         location.reload();
                     } else {
-                        alert('Fehler: ' + data.message);
+                        showAlert('Fehler: ' + data.message, {type: 'error', title: 'Fehler'});
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Ein Fehler ist aufgetreten');
+                    showAlert('Ein Fehler ist aufgetreten', {type: 'error', title: 'Fehler'});
                 });
         }
 
@@ -728,12 +728,12 @@ $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     if (data.success) {
                         location.reload();
                     } else {
-                        alert('Fehler: ' + data.message);
+                        showAlert('Fehler: ' + data.message, {type: 'error', title: 'Fehler'});
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Ein Fehler ist aufgetreten');
+                    showAlert('Ein Fehler ist aufgetreten', {type: 'error', title: 'Fehler'});
                 });
         }
     </script>
