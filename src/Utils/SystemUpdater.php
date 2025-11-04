@@ -389,8 +389,11 @@ class SystemUpdater
         }
 
         // Invalidate cache if current version has changed
-        if (isset($cacheData['current_version']) && isset($this->currentVersion['version']) 
-            && $cacheData['current_version'] !== $this->currentVersion['version']) {
+        // This ensures users see accurate update notifications after local upgrades
+        $cachedVersion = $cacheData['current_version'] ?? null;
+        $actualVersion = $this->currentVersion['version'] ?? null;
+        
+        if ($cachedVersion !== null && $actualVersion !== null && $cachedVersion !== $actualVersion) {
             return null;
         }
 
