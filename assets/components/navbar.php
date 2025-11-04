@@ -172,7 +172,8 @@ use App\Notifications\NotificationManager;
                                 $iconClass = [
                                     'antrag' => 'fa-file',
                                     'protokoll' => 'fa-truck-medical',
-                                    'dokument' => 'fa-folder-open'
+                                    'dokument' => 'fa-folder-open',
+                                    'system' => 'fa-gears'
                                 ];
                                 $icon = $iconClass[$notification['type']] ?? 'fa-bell';
                             ?>
