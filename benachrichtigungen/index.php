@@ -69,8 +69,7 @@ $unreadCount = $notificationManager->getUnreadCount($userId);
         }
 
         .notification-item.unread {
-            border-left-color: var(--bs-primary);
-            background-color: rgba(13, 110, 253, 0.05);
+            border-left-color: var(--main-color);
         }
 
         .notification-item:hover {
@@ -83,23 +82,13 @@ $unreadCount = $notificationManager->getUnreadCount($userId);
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 50%;
+            border-radius: 5px;
             font-size: 1.2rem;
         }
 
-        .notification-icon.antrag {
-            background-color: rgba(13, 110, 253, 0.1);
-            color: var(--bs-primary);
-        }
-
-        .notification-icon.protokoll {
-            background-color: rgba(25, 135, 84, 0.1);
-            color: var(--bs-success);
-        }
-
-        .notification-icon.dokument {
-            background-color: rgba(255, 193, 7, 0.1);
-            color: var(--bs-warning);
+        .notification-icon {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--white);
         }
 
         .notification-date {
@@ -127,21 +116,17 @@ $unreadCount = $notificationManager->getUnreadCount($userId);
                 <div class="col">
                     <hr class="text-light my-3">
                     <h1>
-                        <i class="fa-solid fa-bell me-2"></i>
                         Benachrichtigungen
-                        <?php if ($unreadCount > 0): ?>
-                            <span class="badge bg-primary"><?= $unreadCount ?></span>
-                        <?php endif; ?>
                     </h1>
 
                     <?php Flash::render(); ?>
 
                     <div class="my-3 d-flex justify-content-between align-items-center">
                         <div>
-                            <a href="?filter=all" class="btn btn-sm <?= $filter === 'all' ? 'btn-primary' : 'btn-secondary' ?>">
+                            <a href="?filter=all" class="btn btn-sm <?= $filter === 'all' ? 'btn-main-color' : 'btn-secondary' ?>">
                                 Alle
                             </a>
-                            <a href="?filter=unread" class="btn btn-sm <?= $filter === 'unread' ? 'btn-primary' : 'btn-secondary' ?>">
+                            <a href="?filter=unread" class="btn btn-sm <?= $filter === 'unread' ? 'btn-main-color' : 'btn-secondary' ?>">
                                 Ungelesen (<?= $unreadCount ?>)
                             </a>
                         </div>
@@ -149,7 +134,7 @@ $unreadCount = $notificationManager->getUnreadCount($userId);
                             <form method="POST" style="display: inline;">
                                 <input type="hidden" name="action" value="mark_all_read">
                                 <button type="submit" class="btn btn-sm btn-outline-light">
-                                    <i class="fa-solid fa-check-double me-1"></i> Alle als gelesen markieren
+                                    <i class="fa-solid fa-check me-1"></i> Alle als gelesen markieren
                                 </button>
                             </form>
                         <?php endif; ?>
@@ -157,7 +142,7 @@ $unreadCount = $notificationManager->getUnreadCount($userId);
 
                     <hr class="text-light my-3">
 
-                    <div class="intra__tile p-0">
+                    <div class="intra__tile p-0 mb-5">
                         <?php if (empty($notifications)): ?>
                             <div class="p-4 text-center text-muted">
                                 <i class="fa-solid fa-inbox fa-3x mb-3"></i>
@@ -179,19 +164,21 @@ $unreadCount = $notificationManager->getUnreadCount($userId);
                                     // Notification is in the future, show as "Gerade eben"
                                     $timeAgo = 'Gerade eben';
                                 } elseif ($diff->days > 0) {
-                                    $timeAgo = $diff->days . ' Tag' . ($diff->days > 1 ? 'en' : '') . ' her';
+                                    // more than 1 day ago = (en), also change formatting to Vor X Tagen
+
+                                    $timeAgo = 'Vor ' . $diff->days . ' Tag' . ($diff->days > 1 ? 'en' : '');
                                 } elseif ($diff->h > 0) {
-                                    $timeAgo = $diff->h . ' Stunde' . ($diff->h > 1 ? 'n' : '') . ' her';
+                                    $timeAgo = 'Vor ' . $diff->h . ' Stunde' . ($diff->h > 1 ? 'n' : '');
                                 } elseif ($diff->i > 0) {
-                                    $timeAgo = $diff->i . ' Minute' . ($diff->i > 1 ? 'n' : '') . ' her';
+                                    $timeAgo = 'Vor ' . $diff->i . ' Minute' . ($diff->i > 1 ? 'n' : '');
                                 } else {
                                     $timeAgo = 'Gerade eben';
                                 }
 
                                 $iconClass = [
-                                    'antrag' => 'fa-file-alt',
-                                    'protokoll' => 'fa-file-medical',
-                                    'dokument' => 'fa-file-upload'
+                                    'antrag' => 'fa-file',
+                                    'protokoll' => 'fa-truck-medical',
+                                    'dokument' => 'fa-folder-open'
                                 ];
                                 $icon = $iconClass[$notification['type']] ?? 'fa-bell';
                             ?>
@@ -221,7 +208,7 @@ $unreadCount = $notificationManager->getUnreadCount($userId);
                                                 <div class="notification-actions ms-3">
                                                     <?php if ($notification['link']): ?>
                                                         <a href="<?= htmlspecialchars($notification['link']) ?>" 
-                                                           class="btn btn-sm btn-outline-primary me-1"
+                                                           class="btn btn-sm btn-dark me-1"
                                                            title="Öffnen">
                                                             <i class="fa-solid fa-external-link-alt"></i>
                                                         </a>
@@ -230,7 +217,7 @@ $unreadCount = $notificationManager->getUnreadCount($userId);
                                                         <form method="POST" style="display: inline;">
                                                             <input type="hidden" name="action" value="mark_read">
                                                             <input type="hidden" name="id" value="<?= $notification['id'] ?>">
-                                                            <button type="submit" class="btn btn-sm btn-outline-success me-1" title="Als gelesen markieren">
+                                                            <button type="submit" class="btn btn-sm btn-dark me-1" title="Als gelesen markieren">
                                                                 <i class="fa-solid fa-check"></i>
                                                             </button>
                                                         </form>
@@ -238,7 +225,7 @@ $unreadCount = $notificationManager->getUnreadCount($userId);
                                                     <form method="POST" style="display: inline;" onsubmit="return confirm('Benachrichtigung wirklich löschen?')">
                                                         <input type="hidden" name="action" value="delete">
                                                         <input type="hidden" name="id" value="<?= $notification['id'] ?>">
-                                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Löschen">
+                                                        <button type="submit" class="btn btn-sm btn-dark" title="Löschen">
                                                             <i class="fa-solid fa-trash"></i>
                                                         </button>
                                                     </form>
