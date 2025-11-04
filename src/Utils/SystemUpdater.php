@@ -66,7 +66,8 @@ class SystemUpdater
             if (!$latestRelease) {
                 return [
                     'available' => false,
-                    'message' => 'Keine Updates verfügbar oder Repository nicht erreichbar.'
+                    'error' => true,
+                    'message' => 'Konnte nicht auf GitHub-API zugreifen. Bitte prüfen Sie Ihre Internetverbindung oder versuchen Sie es später erneut (möglicherweise API-Ratenlimit erreicht).'
                 ];
             }
 
@@ -108,6 +109,44 @@ class SystemUpdater
                     'User-Agent: intraRP-Updater',
                     'Accept: application/vnd.github+json'
                 ],
+                'timeout' => 10,
+                'ignore_errors' => true  // Allow reading error responses
+            ]
+        ]);
+
+        $response = @file_get_contents($url, false, $context);
+        
+        if ($response === false) {
+            // If API fails, try fetching all releases and get the first non-prerelease
+            return $this->fetchLatestReleaseFromList();
+        }
+
+        $release = json_decode($response, true);
+        
+        // Check if we got an error response
+        if (isset($release['message'])) {
+            // API error (rate limit, etc), try fallback
+            return $this->fetchLatestReleaseFromList();
+        }
+        
+        return $release ?? null;
+    }
+    
+    /**
+     * Fallback method to fetch latest release from releases list
+     * This is used when the /releases/latest endpoint fails
+     */
+    private function fetchLatestReleaseFromList(): ?array
+    {
+        $url = "{$this->githubApiUrl}/releases?per_page=10";
+        
+        $context = stream_context_create([
+            'http' => [
+                'method' => 'GET',
+                'header' => [
+                    'User-Agent: intraRP-Updater',
+                    'Accept: application/vnd.github+json'
+                ],
                 'timeout' => 10
             ]
         ]);
@@ -118,9 +157,21 @@ class SystemUpdater
             return null;
         }
 
-        $release = json_decode($response, true);
+        $releases = json_decode($response, true);
         
-        return $release ?? null;
+        if (!is_array($releases) || empty($releases)) {
+            return null;
+        }
+        
+        // Find the first non-prerelease, non-draft release
+        foreach ($releases as $release) {
+            if (!($release['draft'] ?? false) && !($release['prerelease'] ?? false)) {
+                return $release;
+            }
+        }
+        
+        // If no stable release found, return the first release
+        return $releases[0] ?? null;
     }
 
     /**
@@ -140,20 +191,29 @@ class SystemUpdater
      * Download and apply update
      * 
      * @param string $downloadUrl URL to download the update from
+     * @param string $newVersion Version being installed
      * @return array Result of the update operation
      */
-    public function downloadAndApplyUpdate(string $downloadUrl): array
+    public function downloadAndApplyUpdate(string $downloadUrl, string $newVersion): array
     {
         try {
+            $appRoot = dirname(dirname(__DIR__));
+            
+            // Check write permissions
+            if (!is_writable($appRoot)) {
+                throw new Exception('Keine Schreibberechtigung für das Anwendungsverzeichnis. Bitte Dateiberechtigungen prüfen.');
+            }
+            
             // Create temporary directory for update
             $tempDir = sys_get_temp_dir() . '/intrarp_update_' . bin2hex(random_bytes(8));
             if (!mkdir($tempDir, 0755, true)) {
-                throw new Exception('Konnte temporäres Verzeichnis nicht erstellen.');
+                throw new Exception('Konnte temporäres Verzeichnis nicht erstellen. Bitte Berechtigungen für ' . sys_get_temp_dir() . ' prüfen.');
             }
 
             $zipFile = $tempDir . '/update.zip';
+            $extractDir = $tempDir . '/extracted';
 
-            // Download update
+            // Step 1: Download update
             $context = stream_context_create([
                 'http' => [
                     'method' => 'GET',
@@ -167,25 +227,230 @@ class SystemUpdater
             $updateContent = @file_get_contents($downloadUrl, false, $context);
             
             if ($updateContent === false) {
-                throw new Exception('Fehler beim Herunterladen des Updates.');
+                throw new Exception('Fehler beim Herunterladen des Updates. Bitte Internetverbindung prüfen.');
             }
 
-            file_put_contents($zipFile, $updateContent);
+            if (!file_put_contents($zipFile, $updateContent)) {
+                throw new Exception('Konnte Update-Datei nicht speichern. Bitte Speicherplatz und Berechtigungen prüfen.');
+            }
+
+            // Step 2: Extract ZIP
+            if (!class_exists('ZipArchive')) {
+                throw new Exception('ZipArchive PHP-Erweiterung nicht verfügbar. Bitte installieren Sie php-zip.');
+            }
+
+            $zip = new \ZipArchive();
+            if ($zip->open($zipFile) !== true) {
+                throw new Exception('Konnte ZIP-Datei nicht öffnen. Datei möglicherweise beschädigt.');
+            }
+
+            if (!$zip->extractTo($extractDir)) {
+                $zip->close();
+                throw new Exception('Konnte ZIP-Datei nicht extrahieren. Bitte Speicherplatz und Berechtigungen prüfen.');
+            }
+            $zip->close();
+
+            // GitHub zipballs extract to a subdirectory like "EmergencyForge-intraRP-abc123/"
+            $extractedDirs = glob($extractDir . '/*', GLOB_ONLYDIR);
+            if (empty($extractedDirs)) {
+                throw new Exception('Keine extrahierten Verzeichnisse gefunden. ZIP-Struktur ungültig.');
+            }
+            $sourceDir = $extractedDirs[0];
+
+            // Step 3: Create backup
+            $backupDir = $appRoot . '/system/updates/backup_' . date('Y-m-d_H-i-s');
+            if (!is_writable(dirname($backupDir))) {
+                throw new Exception('Keine Schreibberechtigung für Backup-Verzeichnis: ' . dirname($backupDir));
+            }
+            
+            if (!mkdir($backupDir, 0755, true)) {
+                throw new Exception('Konnte Backup-Verzeichnis nicht erstellen: ' . $backupDir);
+            }
+
+            $filesToBackup = ['.htaccess', 'index.php', 'composer.json', 'composer.lock'];
+            $dirsToBackup = ['src', 'assets', 'settings', 'api'];
+
+            foreach ($filesToBackup as $file) {
+                if (file_exists($appRoot . '/' . $file)) {
+                    if (!copy($appRoot . '/' . $file, $backupDir . '/' . $file)) {
+                        throw new Exception('Konnte Datei nicht sichern: ' . $file);
+                    }
+                }
+            }
+
+            foreach ($dirsToBackup as $dir) {
+                if (is_dir($appRoot . '/' . $dir)) {
+                    try {
+                        $this->recursiveCopy($appRoot . '/' . $dir, $backupDir . '/' . $dir);
+                    } catch (Exception $e) {
+                        throw new Exception('Konnte Verzeichnis nicht sichern: ' . $dir . ' - ' . $e->getMessage());
+                    }
+                }
+            }
+            
+            // Backup only version.json from system directory (not the whole system/updates)
+            if (!is_dir($backupDir . '/system')) {
+                mkdir($backupDir . '/system', 0755, true);
+            }
+            if (file_exists($appRoot . '/system/updates/version.json')) {
+                if (!is_dir($backupDir . '/system/updates')) {
+                    mkdir($backupDir . '/system/updates', 0755, true);
+                }
+                copy($appRoot . '/system/updates/version.json', $backupDir . '/system/updates/version.json');
+            }
+
+            // Step 4: Apply update (copy files)
+            $excludeDirs = ['vendor', 'storage', 'system/updates'];
+            $excludeFiles = ['.env', '.git', '.gitignore'];
+
+            try {
+                $this->copyUpdateFiles($sourceDir, $appRoot, $excludeDirs, $excludeFiles);
+            } catch (Exception $e) {
+                throw new Exception('Fehler beim Kopieren der Update-Dateien: ' . $e->getMessage() . ' - Backup verfügbar in: ' . $backupDir);
+            }
+
+            // Step 5: Update version.json
+            if (!$this->updateVersionFile([
+                'version' => $newVersion,
+                'updated_at' => date('Y-m-d H:i:s'),
+                'build_number' => (int)($this->currentVersion['build_number'] ?? 0) + 1,
+                'commit_hash' => 'auto-update'
+            ])) {
+                throw new Exception('Konnte version.json nicht aktualisieren. Update möglicherweise unvollständig.');
+            }
+
+            // Step 6: Clear cache
+            $cacheFile = sys_get_temp_dir() . '/intrarp_update_cache.json';
+            if (file_exists($cacheFile)) {
+                @unlink($cacheFile);
+            }
+
+            // Clean up temp files
+            $this->recursiveDelete($tempDir);
 
             return [
                 'success' => true,
-                'message' => 'Update wurde heruntergeladen. Bitte folgen Sie den Anweisungen zur manuellen Installation.',
-                'zip_file' => $zipFile,
-                'temp_dir' => $tempDir,
-                'note' => 'HINWEIS: Automatische Installation ist aus Sicherheitsgründen deaktiviert. Bitte laden Sie das Update manuell herunter und installieren Sie es gemäß der Dokumentation.'
+                'message' => 'Update erfolgreich installiert! Bitte laden Sie die Seite neu.',
+                'version' => $newVersion,
+                'backup_dir' => $backupDir
             ];
         } catch (Exception $e) {
+            // Clean up temp files if they exist
+            if (isset($tempDir) && is_dir($tempDir)) {
+                try {
+                    $this->recursiveDelete($tempDir);
+                } catch (Exception $cleanupEx) {
+                    // Ignore cleanup errors
+                }
+            }
+            
             return [
                 'success' => false,
                 'error' => true,
                 'message' => 'Fehler beim Update: ' . $e->getMessage()
             ];
         }
+    }
+
+    /**
+     * Recursively copy directory
+     */
+    private function recursiveCopy(string $source, string $dest): void
+    {
+        if (!is_dir($dest)) {
+            mkdir($dest, 0755, true);
+        }
+
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($source, \RecursiveDirectoryIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::SELF_FIRST
+        );
+
+        foreach ($iterator as $item) {
+            $destPath = $dest . '/' . $iterator->getSubPathName();
+            if ($item->isDir()) {
+                if (!is_dir($destPath)) {
+                    mkdir($destPath, 0755, true);
+                }
+            } else {
+                copy($item, $destPath);
+            }
+        }
+    }
+
+    /**
+     * Copy update files while excluding certain directories and files
+     */
+    private function copyUpdateFiles(string $source, string $dest, array $excludeDirs, array $excludeFiles): void
+    {
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($source, \RecursiveDirectoryIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::SELF_FIRST
+        );
+
+        foreach ($iterator as $item) {
+            $subPath = $iterator->getSubPathName();
+            
+            // Check if path contains excluded directory
+            $skip = false;
+            foreach ($excludeDirs as $excludeDir) {
+                if (strpos($subPath, $excludeDir) === 0) {
+                    $skip = true;
+                    break;
+                }
+            }
+            
+            // Check if file is excluded
+            foreach ($excludeFiles as $excludeFile) {
+                if ($subPath === $excludeFile || basename($subPath) === $excludeFile) {
+                    $skip = true;
+                    break;
+                }
+            }
+
+            if ($skip) {
+                continue;
+            }
+
+            $destPath = $dest . '/' . $subPath;
+            
+            if ($item->isDir()) {
+                if (!is_dir($destPath)) {
+                    mkdir($destPath, 0755, true);
+                }
+            } else {
+                $destDir = dirname($destPath);
+                if (!is_dir($destDir)) {
+                    mkdir($destDir, 0755, true);
+                }
+                copy($item, $destPath);
+            }
+        }
+    }
+
+    /**
+     * Recursively delete directory
+     */
+    private function recursiveDelete(string $dir): void
+    {
+        if (!is_dir($dir)) {
+            return;
+        }
+
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::CHILD_FIRST
+        );
+
+        foreach ($iterator as $item) {
+            if ($item->isDir()) {
+                rmdir($item);
+            } else {
+                unlink($item);
+            }
+        }
+
+        rmdir($dir);
     }
 
     /**
@@ -388,6 +653,15 @@ class SystemUpdater
             return null;
         }
 
+        // Invalidate cache if current version has changed
+        // This ensures users see accurate update notifications after local upgrades
+        $cachedVersion = $cacheData['current_version'] ?? null;
+        $actualVersion = $this->currentVersion['version'] ?? null;
+        
+        if ($cachedVersion !== null && $actualVersion !== null && $cachedVersion !== $actualVersion) {
+            return null;
+        }
+
         return $cacheData['data'] ?? null;
     }
 
@@ -400,6 +674,7 @@ class SystemUpdater
         
         $cacheData = [
             'timestamp' => time(),
+            'current_version' => $this->currentVersion['version'] ?? 'unknown',
             'data' => $data
         ];
 

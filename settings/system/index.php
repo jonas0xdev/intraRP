@@ -41,11 +41,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $auditLogger->log(
                 $_SESSION['userid'],
                 'system_update_check',
-                'system',
-                null,
-                null,
-                ['result' => $updateInfo, 'cached' => $updateInfo['cached'] ?? false]
+                json_encode(['result' => $updateInfo, 'cached' => $updateInfo['cached'] ?? false]),
+                'System',
+                0
         );
+    } elseif (isset($_POST['install_update'])) {
+        $downloadUrl = $_POST['download_url'] ?? '';
+        $newVersion = $_POST['new_version'] ?? '';
+        
+        if ($downloadUrl && $newVersion) {
+            $installResult = $updater->downloadAndApplyUpdate($downloadUrl, $newVersion);
+            
+            // Log the installation attempt
+            require_once __DIR__ . '/../../assets/config/database.php';
+            $auditLogger = new AuditLogger($pdo);
+            $auditLogger->log(
+                    $_SESSION['userid'],
+                    'system_update_install',
+                    json_encode(['version' => $newVersion, 'result' => $installResult]),
+                    'System',
+                    0
+            );
+            
+            if ($installResult['success']) {
+                Flash::set('success', $installResult['message']);
+                // Redirect to reload with new version
+                header("Location: " . $_SERVER['REQUEST_URI']);
+                exit();
+            } else {
+                Flash::set('error', $installResult['message']);
+            }
+        }
     }
 }
 ?>
@@ -190,17 +216,126 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     </div>
                                     <div class="col-md-6">
                                         <h6>Aktionen:</h6>
+                                        
+                                        <!-- Install Update Button -->
+                                        <form method="post" id="install-update-form" class="mb-2">
+                                            <input type="hidden" name="install_update" value="1">
+                                            <input type="hidden" name="download_url" value="<?= htmlspecialchars($updateInfo['download_url']) ?>">
+                                            <input type="hidden" name="new_version" value="<?= htmlspecialchars($updateInfo['latest_version']) ?>">
+                                            <button type="button" id="install-update-btn" class="btn btn-success w-100">
+                                                <i class="fa-solid fa-download"></i> Update jetzt installieren
+                                            </button>
+                                        </form>
+                                        
+                                        <!-- Progress Modal -->
+                                        <div class="modal fade" id="update-progress-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">
+                                                            <i class="fa-solid fa-download me-2"></i>
+                                                            Update wird installiert
+                                                        </h5>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="text-center mb-3">
+                                                            <div class="spinner-border text-primary" role="status">
+                                                                <span class="visually-hidden">Wird geladen...</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="progress mb-3" style="height: 25px;">
+                                                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                                                 role="progressbar" 
+                                                                 id="update-progress-bar"
+                                                                 style="width: 0%">
+                                                                <span id="update-progress-text">0%</span>
+                                                            </div>
+                                                        </div>
+                                                        <div id="update-status-text" class="text-center">
+                                                            <small class="text-muted">Update wird vorbereitet...</small>
+                                                        </div>
+                                                        <div class="alert alert-info mt-3 mb-0">
+                                                            <small>
+                                                                <i class="fa-solid fa-info-circle me-1"></i>
+                                                                <strong>Hinweis:</strong> Bitte schließen Sie dieses Fenster nicht.
+                                                                Der Vorgang kann mehrere Minuten dauern.
+                                                            </small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <script>
+                                        document.getElementById('install-update-btn').addEventListener('click', async function() {
+                                            const newVersion = '<?= htmlspecialchars($updateInfo['latest_version']) ?>';
+                                            const confirmed = await showConfirm(
+                                                'Update auf Version ' + newVersion + ' installieren?\n\n' +
+                                                'Ein Backup wird automatisch erstellt.\n' +
+                                                'Dieser Vorgang kann einige Minuten dauern.',
+                                                {
+                                                    title: 'Update installieren?',
+                                                    confirmText: 'Installieren',
+                                                    cancelText: 'Abbrechen',
+                                                    confirmClass: 'btn-success',
+                                                    danger: false
+                                                }
+                                            );
+                                            
+                                            if (confirmed) {
+                                                // Show progress modal
+                                                const progressModal = new bootstrap.Modal(document.getElementById('update-progress-modal'));
+                                                progressModal.show();
+                                                
+                                                // Simulate progress (since we can't get real-time updates from PHP)
+                                                let progress = 0;
+                                                const progressBar = document.getElementById('update-progress-bar');
+                                                const progressText = document.getElementById('update-progress-text');
+                                                const statusText = document.getElementById('update-status-text');
+                                                
+                                                const steps = [
+                                                    { percent: 10, text: 'Download wird vorbereitet...' },
+                                                    { percent: 25, text: 'Update wird heruntergeladen...' },
+                                                    { percent: 40, text: 'Dateien werden extrahiert...' },
+                                                    { percent: 55, text: 'Backup wird erstellt...' },
+                                                    { percent: 70, text: 'Update wird installiert...' },
+                                                    { percent: 85, text: 'Dateien werden kopiert...' },
+                                                    { percent: 95, text: 'Installation wird abgeschlossen...' }
+                                                ];
+                                                
+                                                let currentStep = 0;
+                                                const updateProgress = () => {
+                                                    if (currentStep < steps.length) {
+                                                        const step = steps[currentStep];
+                                                        progressBar.style.width = step.percent + '%';
+                                                        progressText.textContent = step.percent + '%';
+                                                        statusText.innerHTML = '<small class="text-muted">' + step.text + '</small>';
+                                                        currentStep++;
+                                                    }
+                                                };
+                                                
+                                                // Update progress every 2 seconds
+                                                const progressInterval = setInterval(updateProgress, 2000);
+                                                updateProgress(); // Start immediately
+                                                
+                                                // Submit the form
+                                                document.getElementById('install-update-form').submit();
+                                            }
+                                        });
+                                        </script>
+                                        
                                         <?php if (isset($updateInfo['html_url'])): ?>
                                             <a href="<?= htmlspecialchars($updateInfo['html_url']) ?>"
                                                target="_blank"
-                                               class="btn btn-primary mb-2 w-100">
+                                               class="btn btn-outline-primary w-100 mb-2">
                                                 <i class="fa-solid fa-external-link-alt"></i> Release auf GitHub ansehen
                                             </a>
                                         <?php endif; ?>
+                                        
                                         <?php if (isset($updateInfo['download_url'])): ?>
                                             <a href="<?= htmlspecialchars($updateInfo['download_url']) ?>"
-                                               class="btn btn-success w-100">
-                                                <i class="fa-solid fa-download"></i> Update herunterladen
+                                               class="btn btn-outline-secondary w-100">
+                                                <i class="fa-solid fa-file-zipper"></i> ZIP manuell herunterladen
                                             </a>
                                         <?php endif; ?>
                                     </div>
@@ -216,8 +351,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                                 <div class="alert alert-info mt-3">
                                     <strong><i class="fa-solid fa-info-circle"></i> Hinweis:</strong>
-                                    Bitte erstellen Sie vor dem Update ein Backup Ihrer Daten und Konfiguration.
-                                    Folgen Sie den Anweisungen in der Dokumentation zur manuellen Installation des Updates.
+                                    Das Update wird automatisch installiert und ein Backup wird im Verzeichnis <code>system/updates/</code> erstellt.
+                                    Bei Problemen können Sie das Backup manuell wiederherstellen.
+                                    <br><strong>Wichtig:</strong> Erstellen Sie zusätzlich ein manuelles Backup Ihrer Datenbank!
                                 </div>
                             <?php else: ?>
                                 <div class="alert alert-info">
