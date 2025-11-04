@@ -268,7 +268,7 @@ class SystemUpdater
             }
 
             $filesToBackup = ['.htaccess', 'index.php', 'composer.json', 'composer.lock'];
-            $dirsToBackup = ['src', 'assets', 'settings', 'api', 'system'];
+            $dirsToBackup = ['src', 'assets', 'settings', 'api'];
 
             foreach ($filesToBackup as $file) {
                 if (file_exists($appRoot . '/' . $file)) {
@@ -286,6 +286,17 @@ class SystemUpdater
                         throw new Exception('Konnte Verzeichnis nicht sichern: ' . $dir . ' - ' . $e->getMessage());
                     }
                 }
+            }
+            
+            // Backup only version.json from system directory (not the whole system/updates)
+            if (!is_dir($backupDir . '/system')) {
+                mkdir($backupDir . '/system', 0755, true);
+            }
+            if (file_exists($appRoot . '/system/updates/version.json')) {
+                if (!is_dir($backupDir . '/system/updates')) {
+                    mkdir($backupDir . '/system/updates', 0755, true);
+                }
+                copy($appRoot . '/system/updates/version.json', $backupDir . '/system/updates/version.json');
             }
 
             // Step 4: Apply update (copy files)
