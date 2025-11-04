@@ -78,7 +78,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
                         'old_value' => $change['old'],
                         'new_value' => $change['new']
                     ]),
-                    'System'
+                    'System',
+                    1  // Config updates are global
                 );
             }
             
