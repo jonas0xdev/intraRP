@@ -41,10 +41,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $auditLogger->log(
                 $_SESSION['userid'],
                 'system_update_check',
-                'system',
-                null,
-                null,
-                ['result' => $updateInfo, 'cached' => $updateInfo['cached'] ?? false]
+                json_encode(['result' => $updateInfo, 'cached' => $updateInfo['cached'] ?? false]),
+                'System',
+                0
         );
     } elseif (isset($_POST['install_update'])) {
         $downloadUrl = $_POST['download_url'] ?? '';
@@ -59,10 +58,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $auditLogger->log(
                     $_SESSION['userid'],
                     'system_update_install',
-                    'system',
-                    null,
-                    null,
-                    ['version' => $newVersion, 'result' => $installResult]
+                    json_encode(['version' => $newVersion, 'result' => $installResult]),
+                    'System',
+                    0
             );
             
             if ($installResult['success']) {
@@ -220,14 +218,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <h6>Aktionen:</h6>
                                         
                                         <!-- Install Update Button -->
-                                        <form method="post" class="mb-2">
+                                        <form method="post" id="install-update-form" class="mb-2">
                                             <input type="hidden" name="download_url" value="<?= htmlspecialchars($updateInfo['download_url']) ?>">
                                             <input type="hidden" name="new_version" value="<?= htmlspecialchars($updateInfo['latest_version']) ?>">
-                                            <button type="submit" name="install_update" class="btn btn-success w-100" 
-                                                    onclick="return confirm('Update auf Version <?= htmlspecialchars($updateInfo['latest_version']) ?> installieren?\n\nEin Backup wird automatisch erstellt.\nDieser Vorgang kann einige Minuten dauern.');">
+                                            <button type="button" id="install-update-btn" class="btn btn-success w-100">
                                                 <i class="fa-solid fa-download"></i> Update jetzt installieren
                                             </button>
                                         </form>
+                                        
+                                        <script>
+                                        document.getElementById('install-update-btn').addEventListener('click', async function() {
+                                            const newVersion = '<?= htmlspecialchars($updateInfo['latest_version']) ?>';
+                                            const confirmed = await showConfirm(
+                                                'Update auf Version ' + newVersion + ' installieren?\n\n' +
+                                                'Ein Backup wird automatisch erstellt.\n' +
+                                                'Dieser Vorgang kann einige Minuten dauern.',
+                                                {
+                                                    title: 'Update installieren?',
+                                                    confirmText: 'Installieren',
+                                                    cancelText: 'Abbrechen',
+                                                    confirmClass: 'btn-success',
+                                                    danger: false
+                                                }
+                                            );
+                                            
+                                            if (confirmed) {
+                                                // Disable button and show loading
+                                                this.disabled = true;
+                                                this.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Installiere Update...';
+                                                
+                                                // Submit the form
+                                                document.getElementById('install-update-form').submit();
+                                            }
+                                        });
+                                        </script>
                                         
                                         <?php if (isset($updateInfo['html_url'])): ?>
                                             <a href="<?= htmlspecialchars($updateInfo['html_url']) ?>"

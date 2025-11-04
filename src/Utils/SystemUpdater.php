@@ -199,10 +199,15 @@ class SystemUpdater
         try {
             $appRoot = dirname(dirname(__DIR__));
             
+            // Check write permissions
+            if (!is_writable($appRoot)) {
+                throw new Exception('Keine Schreibberechtigung für das Anwendungsverzeichnis. Bitte Dateiberechtigungen prüfen.');
+            }
+            
             // Create temporary directory for update
             $tempDir = sys_get_temp_dir() . '/intrarp_update_' . bin2hex(random_bytes(8));
             if (!mkdir($tempDir, 0755, true)) {
-                throw new Exception('Konnte temporäres Verzeichnis nicht erstellen.');
+                throw new Exception('Konnte temporäres Verzeichnis nicht erstellen. Bitte Berechtigungen für ' . sys_get_temp_dir() . ' prüfen.');
             }
 
             $zipFile = $tempDir . '/update.zip';
@@ -222,35 +227,44 @@ class SystemUpdater
             $updateContent = @file_get_contents($downloadUrl, false, $context);
             
             if ($updateContent === false) {
-                throw new Exception('Fehler beim Herunterladen des Updates.');
+                throw new Exception('Fehler beim Herunterladen des Updates. Bitte Internetverbindung prüfen.');
             }
 
-            file_put_contents($zipFile, $updateContent);
+            if (!file_put_contents($zipFile, $updateContent)) {
+                throw new Exception('Konnte Update-Datei nicht speichern. Bitte Speicherplatz und Berechtigungen prüfen.');
+            }
 
             // Step 2: Extract ZIP
             if (!class_exists('ZipArchive')) {
-                throw new Exception('ZipArchive PHP-Erweiterung nicht verfügbar.');
+                throw new Exception('ZipArchive PHP-Erweiterung nicht verfügbar. Bitte installieren Sie php-zip.');
             }
 
             $zip = new \ZipArchive();
             if ($zip->open($zipFile) !== true) {
-                throw new Exception('Konnte ZIP-Datei nicht öffnen.');
+                throw new Exception('Konnte ZIP-Datei nicht öffnen. Datei möglicherweise beschädigt.');
             }
 
-            $zip->extractTo($extractDir);
+            if (!$zip->extractTo($extractDir)) {
+                $zip->close();
+                throw new Exception('Konnte ZIP-Datei nicht extrahieren. Bitte Speicherplatz und Berechtigungen prüfen.');
+            }
             $zip->close();
 
             // GitHub zipballs extract to a subdirectory like "EmergencyForge-intraRP-abc123/"
             $extractedDirs = glob($extractDir . '/*', GLOB_ONLYDIR);
             if (empty($extractedDirs)) {
-                throw new Exception('Keine extrahierten Verzeichnisse gefunden.');
+                throw new Exception('Keine extrahierten Verzeichnisse gefunden. ZIP-Struktur ungültig.');
             }
             $sourceDir = $extractedDirs[0];
 
             // Step 3: Create backup
             $backupDir = $appRoot . '/system/updates/backup_' . date('Y-m-d_H-i-s');
+            if (!is_writable(dirname($backupDir))) {
+                throw new Exception('Keine Schreibberechtigung für Backup-Verzeichnis: ' . dirname($backupDir));
+            }
+            
             if (!mkdir($backupDir, 0755, true)) {
-                throw new Exception('Konnte Backup-Verzeichnis nicht erstellen.');
+                throw new Exception('Konnte Backup-Verzeichnis nicht erstellen: ' . $backupDir);
             }
 
             $filesToBackup = ['.htaccess', 'index.php', 'composer.json', 'composer.lock'];
@@ -258,13 +272,19 @@ class SystemUpdater
 
             foreach ($filesToBackup as $file) {
                 if (file_exists($appRoot . '/' . $file)) {
-                    copy($appRoot . '/' . $file, $backupDir . '/' . $file);
+                    if (!copy($appRoot . '/' . $file, $backupDir . '/' . $file)) {
+                        throw new Exception('Konnte Datei nicht sichern: ' . $file);
+                    }
                 }
             }
 
             foreach ($dirsToBackup as $dir) {
                 if (is_dir($appRoot . '/' . $dir)) {
-                    $this->recursiveCopy($appRoot . '/' . $dir, $backupDir . '/' . $dir);
+                    try {
+                        $this->recursiveCopy($appRoot . '/' . $dir, $backupDir . '/' . $dir);
+                    } catch (Exception $e) {
+                        throw new Exception('Konnte Verzeichnis nicht sichern: ' . $dir . ' - ' . $e->getMessage());
+                    }
                 }
             }
 
@@ -272,15 +292,21 @@ class SystemUpdater
             $excludeDirs = ['vendor', 'storage', 'system/updates'];
             $excludeFiles = ['.env', '.git', '.gitignore'];
 
-            $this->copyUpdateFiles($sourceDir, $appRoot, $excludeDirs, $excludeFiles);
+            try {
+                $this->copyUpdateFiles($sourceDir, $appRoot, $excludeDirs, $excludeFiles);
+            } catch (Exception $e) {
+                throw new Exception('Fehler beim Kopieren der Update-Dateien: ' . $e->getMessage() . ' - Backup verfügbar in: ' . $backupDir);
+            }
 
             // Step 5: Update version.json
-            $this->updateVersionFile([
+            if (!$this->updateVersionFile([
                 'version' => $newVersion,
                 'updated_at' => date('Y-m-d H:i:s'),
                 'build_number' => (int)($this->currentVersion['build_number'] ?? 0) + 1,
                 'commit_hash' => 'auto-update'
-            ]);
+            ])) {
+                throw new Exception('Konnte version.json nicht aktualisieren. Update möglicherweise unvollständig.');
+            }
 
             // Step 6: Clear cache
             $cacheFile = sys_get_temp_dir() . '/intrarp_update_cache.json';
@@ -298,6 +324,15 @@ class SystemUpdater
                 'backup_dir' => $backupDir
             ];
         } catch (Exception $e) {
+            // Clean up temp files if they exist
+            if (isset($tempDir) && is_dir($tempDir)) {
+                try {
+                    $this->recursiveDelete($tempDir);
+                } catch (Exception $cleanupEx) {
+                    // Ignore cleanup errors
+                }
+            }
+            
             return [
                 'success' => false,
                 'error' => true,
