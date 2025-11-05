@@ -493,6 +493,7 @@ class SystemUpdater
             return [
                 'executed' => false,
                 'success' => false,
+                'error' => true,
                 'message' => 'Composer-Executable nicht gefunden.'
             ];
         }
@@ -534,6 +535,7 @@ class SystemUpdater
                 return [
                     'executed' => true,
                     'success' => false,
+                    'error' => true,
                     'message' => 'Composer-Installation fehlgeschlagen.',
                     'output' => $outputString,
                     'return_code' => $returnCode
@@ -543,6 +545,7 @@ class SystemUpdater
             return [
                 'executed' => false,
                 'success' => false,
+                'error' => true,
                 'message' => 'Fehler beim Ausführen von Composer: ' . $e->getMessage()
             ];
         }
@@ -571,13 +574,14 @@ class SystemUpdater
         $pathNames = ['composer', 'composer.phar'];
         
         foreach ($pathNames as $name) {
-            // Validate that the name doesn't contain shell metacharacters
-            if (preg_match('/^[a-zA-Z0-9._-]+$/', $name)) {
+            // Strict validation: only alphanumeric, underscore, hyphen
+            // Single dot allowed only for .phar extension at the end
+            if (preg_match('/^[a-zA-Z0-9_-]+(\\.phar)?$/', $name)) {
                 $result = @shell_exec('which ' . escapeshellarg($name) . ' 2>/dev/null');
                 if ($result && trim($result)) {
                     $execPath = trim($result);
-                    // Verify the result is an executable file
-                    if (file_exists($execPath) && is_executable($execPath)) {
+                    // Verify the result is an executable file and doesn't contain path traversal
+                    if (file_exists($execPath) && is_executable($execPath) && strpos($execPath, '..') === false) {
                         return $execPath;
                     }
                 }

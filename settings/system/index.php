@@ -493,7 +493,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <code>composer install --no-dev --optimize-autoloader</code>
                     </p>
                     <button type="button" class="btn btn-secondary w-100 mb-2" onclick="retryComposerInstall()">
-                        <i class="fa-solid fa-redo me-2"></i>Erneut versuchen
+                        <i class="fa-solid fa-rotate-right me-2"></i>Erneut versuchen
                     </button>
                     <button type="button" class="btn btn-outline-secondary w-100" onclick="dismissComposerModal()">
                         <i class="fa-solid fa-times me-2"></i>Schließen (Update manuell abschließen)
