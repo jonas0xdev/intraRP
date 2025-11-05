@@ -3,7 +3,7 @@
     <div class="container">
         <div class="row d-flex align-items-end justify-content-between">
             <div class="col-md-4">
-                <h5><?php echo SYSTEM_NAME ?></h5>
+                <img src="/assets/img/defaultLogo.webp" alt="Logo" height="48px" width="auto">
                 <p class="small">Verwaltungsportal der <?php echo RP_ORGTYPE . " " . SERVER_CITY ?></p>
             </div>
             <div class="col-md-4 text-center">
