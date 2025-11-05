@@ -198,6 +198,16 @@ class SystemUpdater
     public function downloadAndApplyUpdate(string $downloadUrl, string $newVersion, bool $isPreRelease = false): array
     {
         try {
+            // Security: Validate download URL is from GitHub
+            if (!preg_match('#^https://api\.github\.com/repos/' . preg_quote($this->githubRepo, '#') . '/zipball/#', $downloadUrl)) {
+                throw new Exception('Ungültige Download-URL. Updates können nur von GitHub heruntergeladen werden.');
+            }
+            
+            // Security: Validate version format
+            if (!preg_match('/^v?\d+\.\d+(\.\d+)?(\.\d+)?(-[a-zA-Z0-9]+)?$/', $newVersion)) {
+                throw new Exception('Ungültiges Versionsformat.');
+            }
+            
             $appRoot = dirname(dirname(__DIR__));
             
             // Check write permissions
