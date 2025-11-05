@@ -57,11 +57,18 @@ class SystemUpdater
 
     /**
      * Check for available updates from GitHub releases
+     * 
+     * @param bool $includePreRelease If true, include pre-release versions in the check
      */
-    public function checkForUpdates(): array
+    public function checkForUpdates(bool $includePreRelease = null): array
     {
         try {
-            $latestRelease = $this->fetchLatestRelease();
+            // If not explicitly set, use current version's pre-release status
+            if ($includePreRelease === null) {
+                $includePreRelease = $this->isPreRelease();
+            }
+            
+            $latestRelease = $this->fetchLatestRelease($includePreRelease);
             
             if (!$latestRelease) {
                 return [
@@ -99,14 +106,13 @@ class SystemUpdater
 
     /**
      * Fetch latest release from GitHub API
+     * 
+     * @param bool $includePreRelease If true, include pre-release versions
      */
-    private function fetchLatestRelease(): ?array
+    private function fetchLatestRelease(bool $includePreRelease = false): ?array
     {
-        // If current version is a pre-release, check for newer pre-releases too
-        $isCurrentPreRelease = $this->isPreRelease();
-        
         // Always fetch from list to get both stable and pre-release versions
-        return $this->fetchLatestReleaseFromList($isCurrentPreRelease);
+        return $this->fetchLatestReleaseFromList($includePreRelease);
     }
     
     /**
@@ -698,8 +704,9 @@ class SystemUpdater
      * Check for updates with caching support
      * 
      * @param bool $forceRefresh If true, bypass cache and fetch fresh data
+     * @param bool $includePreRelease If true, include pre-release versions in the check
      */
-    public function checkForUpdatesCached(bool $forceRefresh = false): array
+    public function checkForUpdatesCached(bool $forceRefresh = false, bool $includePreRelease = null): array
     {
         if (!$forceRefresh) {
             $cached = $this->getCachedUpdateCheck();
@@ -710,7 +717,7 @@ class SystemUpdater
             }
         }
 
-        $result = $this->checkForUpdates();
+        $result = $this->checkForUpdates($includePreRelease);
         $this->cacheUpdateCheck($result);
         $result['cached'] = false;
 

@@ -34,7 +34,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['check_updates'])) {
         $checking = true;
         $forceRefresh = isset($_POST['force_refresh']);
-        $updateInfo = $updater->checkForUpdatesCached($forceRefresh);
+        $includePreRelease = isset($_POST['include_prerelease']) && $_POST['include_prerelease'] === '1' ? true : null;
+        $updateInfo = $updater->checkForUpdatesCached($forceRefresh, $includePreRelease);
 
         // Log the check action
         require_once __DIR__ . '/../../assets/config/database.php';
@@ -42,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $auditLogger->log(
                 $_SESSION['userid'],
                 'system_update_check',
-                json_encode(['result' => $updateInfo, 'cached' => $updateInfo['cached'] ?? false, 'force_refresh' => $forceRefresh]),
+                json_encode(['result' => $updateInfo, 'cached' => $updateInfo['cached'] ?? false, 'force_refresh' => $forceRefresh, 'include_prerelease' => $includePreRelease !== null]),
                 'System',
                 0
         );
@@ -159,10 +160,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             <i class="fa-solid fa-sync"></i> Auf Updates prüfen
                                         </button>
                                     </form>
+                                    
+                                    <?php if (!$isPreRelease): ?>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="include-prerelease-check" name="include_prerelease_ui" value="1">
+                                            <label class="form-check-label" for="include-prerelease-check">
+                                                <small><i class="fa-solid fa-flask"></i> Pre-Release-Versionen einschließen</small>
+                                            </label>
+                                        </div>
+                                    <?php endif; ?>
+                                    
                                     <div class="d-flex gap-2">
-                                        <form method="post" class="flex-fill">
-                                            <button type="submit" name="check_updates" class="btn btn-outline-primary btn-sm w-100">
-                                                <input type="hidden" name="force_refresh" value="1">
+                                        <form method="post" class="flex-fill" id="force-refresh-form">
+                                            <input type="hidden" name="check_updates" value="1">
+                                            <input type="hidden" name="force_refresh" value="1">
+                                            <input type="hidden" name="include_prerelease" id="force-refresh-prerelease" value="0">
+                                            <button type="submit" class="btn btn-outline-primary btn-sm w-100">
                                                 <i class="fa-solid fa-refresh"></i> Neu laden
                                             </button>
                                         </form>
@@ -172,6 +185,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             </button>
                                         </form>
                                     </div>
+                                    
+                                    <script>
+                                    // Sync checkbox with force refresh form
+                                    <?php if (!$isPreRelease): ?>
+                                    document.getElementById('include-prerelease-check')?.addEventListener('change', function(e) {
+                                        document.getElementById('force-refresh-prerelease').value = e.target.checked ? '1' : '0';
+                                    });
+                                    <?php endif; ?>
+                                    
+                                    // Handle main check button with prerelease option
+                                    document.querySelector('form button[name="check_updates"]')?.closest('form').addEventListener('submit', function(e) {
+                                        const checkbox = document.getElementById('include-prerelease-check');
+                                        if (checkbox && checkbox.checked) {
+                                            e.preventDefault();
+                                            const form = this;
+                                            const input = document.createElement('input');
+                                            input.type = 'hidden';
+                                            input.name = 'include_prerelease';
+                                            input.value = '1';
+                                            form.appendChild(input);
+                                            form.submit();
+                                        }
+                                    });
+                                    </script>
                                 </div>
                             </div>
                         </div>
