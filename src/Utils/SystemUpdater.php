@@ -75,6 +75,7 @@ class SystemUpdater
             $currentVersion = $this->currentVersion['version'];
 
             $isNewer = $this->compareVersions($latestVersion, $currentVersion);
+            $isLatestPreRelease = $latestRelease['prerelease'] ?? false;
 
             return [
                 'available' => $isNewer,
@@ -84,7 +85,8 @@ class SystemUpdater
                 'release_notes' => $latestRelease['body'] ?? 'Keine Release-Notizen verfügbar.',
                 'published_at' => $latestRelease['published_at'] ?? null,
                 'download_url' => $latestRelease['zipball_url'] ?? null,
-                'html_url' => $latestRelease['html_url'] ?? null
+                'html_url' => $latestRelease['html_url'] ?? null,
+                'is_prerelease' => $isLatestPreRelease
             ];
         } catch (Exception $e) {
             return [
@@ -100,45 +102,21 @@ class SystemUpdater
      */
     private function fetchLatestRelease(): ?array
     {
-        $url = "{$this->githubApiUrl}/releases/latest";
+        // If current version is a pre-release, check for newer pre-releases too
+        $isCurrentPreRelease = $this->isPreRelease();
         
-        $context = stream_context_create([
-            'http' => [
-                'method' => 'GET',
-                'header' => [
-                    'User-Agent: intraRP-Updater',
-                    'Accept: application/vnd.github+json'
-                ],
-                'timeout' => 10,
-                'ignore_errors' => true  // Allow reading error responses
-            ]
-        ]);
-
-        $response = @file_get_contents($url, false, $context);
-        
-        if ($response === false) {
-            // If API fails, try fetching all releases and get the first non-prerelease
-            return $this->fetchLatestReleaseFromList();
-        }
-
-        $release = json_decode($response, true);
-        
-        // Check if we got an error response
-        if (isset($release['message'])) {
-            // API error (rate limit, etc), try fallback
-            return $this->fetchLatestReleaseFromList();
-        }
-        
-        return $release ?? null;
+        // Always fetch from list to get both stable and pre-release versions
+        return $this->fetchLatestReleaseFromList($isCurrentPreRelease);
     }
     
     /**
-     * Fallback method to fetch latest release from releases list
-     * This is used when the /releases/latest endpoint fails
+     * Fetch latest release from releases list
+     * 
+     * @param bool $includePreRelease If true, returns latest pre-release if current version is pre-release
      */
-    private function fetchLatestReleaseFromList(): ?array
+    private function fetchLatestReleaseFromList(bool $includePreRelease = false): ?array
     {
-        $url = "{$this->githubApiUrl}/releases?per_page=10";
+        $url = "{$this->githubApiUrl}/releases?per_page=20";
         
         $context = stream_context_create([
             'http' => [
@@ -163,15 +141,30 @@ class SystemUpdater
             return null;
         }
         
-        // Find the first non-prerelease, non-draft release
+        // Filter out draft releases
+        $releases = array_filter($releases, function($release) {
+            return !($release['draft'] ?? false);
+        });
+        
+        if (empty($releases)) {
+            return null;
+        }
+        
+        // If current version is a pre-release, offer the latest pre-release
+        if ($includePreRelease) {
+            // Return the first non-draft release (can be pre-release or stable)
+            return reset($releases);
+        }
+        
+        // Otherwise, find the first stable (non-prerelease) release
         foreach ($releases as $release) {
-            if (!($release['draft'] ?? false) && !($release['prerelease'] ?? false)) {
+            if (!($release['prerelease'] ?? false)) {
                 return $release;
             }
         }
         
         // If no stable release found, return the first release
-        return $releases[0] ?? null;
+        return reset($releases);
     }
 
     /**
@@ -192,9 +185,10 @@ class SystemUpdater
      * 
      * @param string $downloadUrl URL to download the update from
      * @param string $newVersion Version being installed
+     * @param bool $isPreRelease Whether the new version is a pre-release
      * @return array Result of the update operation
      */
-    public function downloadAndApplyUpdate(string $downloadUrl, string $newVersion): array
+    public function downloadAndApplyUpdate(string $downloadUrl, string $newVersion, bool $isPreRelease = false): array
     {
         try {
             $appRoot = dirname(dirname(__DIR__));
@@ -314,7 +308,8 @@ class SystemUpdater
                 'version' => $newVersion,
                 'updated_at' => date('Y-m-d H:i:s'),
                 'build_number' => (int)($this->currentVersion['build_number'] ?? 0) + 1,
-                'commit_hash' => 'auto-update'
+                'commit_hash' => 'auto-update',
+                'prerelease' => $isPreRelease
             ])) {
                 throw new Exception('Konnte version.json nicht aktualisieren. Update möglicherweise unvollständig.');
             }
@@ -514,10 +509,28 @@ class SystemUpdater
 
     /**
      * Check if current version is a pre-release (beta, alpha, rc)
+     * First checks the prerelease flag in version.json, then falls back to version string pattern matching
      */
     public function isPreRelease(): bool
     {
+        // Check if version.json has an explicit prerelease flag
+        if (isset($this->currentVersion['prerelease'])) {
+            return (bool)$this->currentVersion['prerelease'];
+        }
+        
+        // Fall back to pattern matching in version string
         $version = $this->currentVersion['version'];
+        return preg_match('/(alpha|beta|rc|dev)/i', $version) === 1;
+    }
+    
+    /**
+     * Check if a specific version string is a pre-release
+     * 
+     * @param string $version Version string to check
+     * @return bool True if version is a pre-release
+     */
+    public function isVersionPreRelease(string $version): bool
+    {
         return preg_match('/(alpha|beta|rc|dev)/i', $version) === 1;
     }
 
@@ -683,14 +696,18 @@ class SystemUpdater
 
     /**
      * Check for updates with caching support
+     * 
+     * @param bool $forceRefresh If true, bypass cache and fetch fresh data
      */
-    public function checkForUpdatesCached(): array
+    public function checkForUpdatesCached(bool $forceRefresh = false): array
     {
-        $cached = $this->getCachedUpdateCheck();
-        
-        if ($cached !== null) {
-            $cached['cached'] = true;
-            return $cached;
+        if (!$forceRefresh) {
+            $cached = $this->getCachedUpdateCheck();
+            
+            if ($cached !== null) {
+                $cached['cached'] = true;
+                return $cached;
+            }
         }
 
         $result = $this->checkForUpdates();
@@ -698,5 +715,19 @@ class SystemUpdater
         $result['cached'] = false;
 
         return $result;
+    }
+    
+    /**
+     * Clear the update check cache
+     */
+    public function clearCache(): bool
+    {
+        $cacheFile = sys_get_temp_dir() . '/intrarp_update_cache.json';
+        
+        if (file_exists($cacheFile)) {
+            return @unlink($cacheFile);
+        }
+        
+        return true;
     }
 }

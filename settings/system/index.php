@@ -33,7 +33,8 @@ $isPreRelease = $updater->isPreRelease();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['check_updates'])) {
         $checking = true;
-        $updateInfo = $updater->checkForUpdatesCached();
+        $forceRefresh = isset($_POST['force_refresh']);
+        $updateInfo = $updater->checkForUpdatesCached($forceRefresh);
 
         // Log the check action
         require_once __DIR__ . '/../../assets/config/database.php';
@@ -41,16 +42,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $auditLogger->log(
                 $_SESSION['userid'],
                 'system_update_check',
-                json_encode(['result' => $updateInfo, 'cached' => $updateInfo['cached'] ?? false]),
+                json_encode(['result' => $updateInfo, 'cached' => $updateInfo['cached'] ?? false, 'force_refresh' => $forceRefresh]),
                 'System',
                 0
         );
+    } elseif (isset($_POST['clear_cache'])) {
+        if ($updater->clearCache()) {
+            Flash::set('success', 'Update-Cache wurde erfolgreich geleert.');
+        } else {
+            Flash::set('error', 'Fehler beim Leeren des Update-Caches.');
+        }
+        header("Location: " . $_SERVER['REQUEST_URI']);
+        exit();
     } elseif (isset($_POST['install_update'])) {
         $downloadUrl = $_POST['download_url'] ?? '';
         $newVersion = $_POST['new_version'] ?? '';
+        $isPreRelease = isset($_POST['is_prerelease']) && $_POST['is_prerelease'] === '1';
         
         if ($downloadUrl && $newVersion) {
-            $installResult = $updater->downloadAndApplyUpdate($downloadUrl, $newVersion);
+            $installResult = $updater->downloadAndApplyUpdate($downloadUrl, $newVersion, $isPreRelease);
             
             // Log the installation attempt
             require_once __DIR__ . '/../../assets/config/database.php';
@@ -143,11 +153,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </dl>
                             </div>
                             <div class="col-md-6 d-flex align-items-center">
-                                <form method="post" class="w-100">
-                                    <button type="submit" name="check_updates" class="btn btn-primary w-100">
-                                        <i class="fa-solid fa-sync"></i> Auf Updates prüfen
-                                    </button>
-                                </form>
+                                <div class="w-100">
+                                    <form method="post" class="mb-2">
+                                        <button type="submit" name="check_updates" class="btn btn-primary w-100">
+                                            <i class="fa-solid fa-sync"></i> Auf Updates prüfen
+                                        </button>
+                                    </form>
+                                    <div class="d-flex gap-2">
+                                        <form method="post" class="flex-fill">
+                                            <button type="submit" name="check_updates" class="btn btn-outline-primary btn-sm w-100">
+                                                <input type="hidden" name="force_refresh" value="1">
+                                                <i class="fa-solid fa-refresh"></i> Neu laden
+                                            </button>
+                                        </form>
+                                        <form method="post" class="flex-fill">
+                                            <button type="submit" name="clear_cache" class="btn btn-outline-secondary btn-sm w-100">
+                                                <i class="fa-solid fa-trash"></i> Cache leeren
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -188,12 +213,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <h5><i class="fa-solid fa-check-circle"></i> Neues Update verfügbar!</h5>
                                     <p class="mb-0">
                                         Eine neue Version ist verfügbar: <strong><?= htmlspecialchars($updateInfo['latest_version']) ?></strong>
+                                        <?php if (isset($updateInfo['is_prerelease']) && $updateInfo['is_prerelease']): ?>
+                                            <span class="badge bg-warning text-dark ms-1"><i class="fa-solid fa-flask"></i> Pre-Release</span>
+                                        <?php endif; ?>
                                         <span class="badge bg-<?= $alertClass ?> ms-2"><?= $urgencyLabels[$urgency] ?? 'Update verfügbar' ?></span>
                                         <?php if (isset($updateInfo['cached']) && $updateInfo['cached']): ?>
                                             <span class="badge bg-secondary ms-1" title="Gecachte Daten"><i class="fa-solid fa-clock"></i> Gecacht</span>
                                         <?php endif; ?>
                                     </p>
                                 </div>
+
+                                <?php if (isset($updateInfo['is_prerelease']) && $updateInfo['is_prerelease'] && $isPreRelease): ?>
+                                    <div class="alert alert-warning mb-3">
+                                        <i class="fa-solid fa-exclamation-triangle"></i>
+                                        <strong>Pre-Release zu Pre-Release Update:</strong>
+                                        Sie wechseln von einer Pre-Release zur nächsten Pre-Release Version. 
+                                        Diese Versionen können instabil sein und unerwartete Fehler enthalten.
+                                    </div>
+                                <?php elseif (isset($updateInfo['is_prerelease']) && $updateInfo['is_prerelease'] && !$isPreRelease): ?>
+                                    <div class="alert alert-warning mb-3">
+                                        <i class="fa-solid fa-exclamation-triangle"></i>
+                                        <strong>Pre-Release Update:</strong>
+                                        Diese Version ist eine Vorabversion und kann instabil sein oder unerwartete Fehler enthalten.
+                                    </div>
+                                <?php endif; ?>
 
                                 <div class="row">
                                     <div class="col-md-6">
@@ -222,6 +265,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             <input type="hidden" name="install_update" value="1">
                                             <input type="hidden" name="download_url" value="<?= htmlspecialchars($updateInfo['download_url']) ?>">
                                             <input type="hidden" name="new_version" value="<?= htmlspecialchars($updateInfo['latest_version']) ?>">
+                                            <input type="hidden" name="is_prerelease" value="<?= isset($updateInfo['is_prerelease']) && $updateInfo['is_prerelease'] ? '1' : '0' ?>">
                                             <button type="button" id="install-update-btn" class="btn btn-success w-100">
                                                 <i class="fa-solid fa-download"></i> Update jetzt installieren
                                             </button>
