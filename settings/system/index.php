@@ -155,8 +155,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                             <div class="col-md-6 d-flex align-items-center">
                                 <div class="w-100">
-                                    <form method="post" class="mb-2">
-                                        <button type="submit" name="check_updates" class="btn btn-primary w-100">
+                                    <form method="post" id="check-updates-form" class="mb-2">
+                                        <input type="hidden" name="check_updates" value="1">
+                                        <input type="hidden" name="include_prerelease" id="include-prerelease-hidden" value="0">
+                                        <button type="submit" class="btn btn-primary w-100">
                                             <i class="fa-solid fa-sync"></i> Auf Updates prüfen
                                         </button>
                                     </form>
@@ -186,29 +188,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         </form>
                                     </div>
                                     
-                                    <script>
-                                    // Sync checkbox with force refresh form
                                     <?php if (!$isPreRelease): ?>
-                                    document.getElementById('include-prerelease-check')?.addEventListener('change', function(e) {
-                                        document.getElementById('force-refresh-prerelease').value = e.target.checked ? '1' : '0';
-                                    });
-                                    <?php endif; ?>
+                                    <script>
+                                    // Sync checkbox with hidden inputs in both forms
+                                    const prereleaseCheckbox = document.getElementById('include-prerelease-check');
+                                    const mainFormHidden = document.getElementById('include-prerelease-hidden');
+                                    const forceRefreshHidden = document.getElementById('force-refresh-prerelease');
                                     
-                                    // Handle main check button with prerelease option
-                                    document.querySelector('form button[name="check_updates"]')?.closest('form').addEventListener('submit', function(e) {
-                                        const checkbox = document.getElementById('include-prerelease-check');
-                                        if (checkbox && checkbox.checked) {
-                                            e.preventDefault();
-                                            const form = this;
-                                            const input = document.createElement('input');
-                                            input.type = 'hidden';
-                                            input.name = 'include_prerelease';
-                                            input.value = '1';
-                                            form.appendChild(input);
-                                            form.submit();
-                                        }
-                                    });
+                                    if (prereleaseCheckbox) {
+                                        prereleaseCheckbox.addEventListener('change', function() {
+                                            const value = this.checked ? '1' : '0';
+                                            if (mainFormHidden) mainFormHidden.value = value;
+                                            if (forceRefreshHidden) forceRefreshHidden.value = value;
+                                        });
+                                    }
                                     </script>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>

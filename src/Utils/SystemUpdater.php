@@ -118,7 +118,8 @@ class SystemUpdater
     /**
      * Fetch latest release from releases list
      * 
-     * @param bool $includePreRelease If true, returns latest pre-release if current version is pre-release
+     * @param bool $includePreRelease If true, returns latest release (can be pre-release or stable).
+     *                                 If false, returns latest stable release only.
      */
     private function fetchLatestReleaseFromList(bool $includePreRelease = false): ?array
     {
@@ -156,13 +157,13 @@ class SystemUpdater
             return null;
         }
         
-        // If current version is a pre-release, offer the latest pre-release
+        // If including pre-releases, return the first (latest) non-draft release
+        // This can be either a pre-release or stable version
         if ($includePreRelease) {
-            // Return the first non-draft release (can be pre-release or stable)
             return reset($releases);
         }
         
-        // Otherwise, find the first stable (non-prerelease) release
+        // Otherwise, find the latest stable (non-prerelease) release
         foreach ($releases as $release) {
             if (!($release['prerelease'] ?? false)) {
                 return $release;
