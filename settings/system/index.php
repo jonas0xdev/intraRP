@@ -75,17 +75,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             );
             
             if ($installResult['success']) {
-                Flash::set('success', $installResult['message']);
-                
-                // Add additional warning if composer failed but update succeeded
-                if (isset($installResult['composer_result'])) {
-                    $composerResult = $installResult['composer_result'];
-                    if ($composerResult['executed'] && !$composerResult['success']) {
-                        Flash::set('warning', 'Hinweis: Bitte führen Sie "composer install" manuell im Anwendungsverzeichnis aus, um die Abhängigkeiten zu aktualisieren.');
-                    } elseif (!$composerResult['executed']) {
-                        Flash::set('warning', 'Hinweis: Composer konnte nicht automatisch ausgeführt werden. Bitte führen Sie "composer install" manuell im Anwendungsverzeichnis aus.');
-                    }
-                }
+                // Store flag to show composer modal
+                $_SESSION['composer_pending'] = isset($installResult['composer_pending']) && $installResult['composer_pending'];
                 
                 // Redirect to reload with new version
                 header("Location: " . $_SERVER['REQUEST_URI']);
@@ -455,6 +446,159 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 </div>
+
+<!-- Composer Installation Modal -->
+<div class="modal fade" id="composer-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fa-solid fa-box-open me-2"></i>
+                    Composer-Abhängigkeiten werden installiert
+                </h5>
+            </div>
+            <div class="modal-body">
+                <div id="composer-status-content">
+                    <div class="text-center mb-3">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Wird geladen...</span>
+                        </div>
+                    </div>
+                    <div id="composer-status-text" class="text-center">
+                        <p class="mb-2">Composer-Abhängigkeiten werden installiert...</p>
+                        <small class="text-muted">Dies kann einige Minuten dauern. Bitte warten Sie.</small>
+                    </div>
+                </div>
+                
+                <div id="composer-success-content" style="display: none;">
+                    <div class="alert alert-success mb-3">
+                        <i class="fa-solid fa-check-circle me-2"></i>
+                        <strong>Erfolg!</strong> Composer-Abhängigkeiten wurden erfolgreich installiert.
+                    </div>
+                    <p class="mb-3">Das Update ist vollständig abgeschlossen. Bitte laden Sie die Seite neu, um die Änderungen zu übernehmen.</p>
+                    <button type="button" class="btn btn-primary w-100" onclick="location.reload()">
+                        <i class="fa-solid fa-refresh me-2"></i>Seite neu laden
+                    </button>
+                </div>
+                
+                <div id="composer-error-content" style="display: none;">
+                    <div class="alert alert-danger mb-3">
+                        <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                        <strong>Fehler!</strong> Composer-Installation fehlgeschlagen.
+                    </div>
+                    <p id="composer-error-message" class="mb-3"></p>
+                    <p class="mb-3">
+                        <strong>Manuelle Installation erforderlich:</strong><br>
+                        Bitte führen Sie im Terminal im Anwendungsverzeichnis aus:<br>
+                        <code>composer install --no-dev --optimize-autoloader</code>
+                    </p>
+                    <button type="button" class="btn btn-secondary w-100 mb-2" onclick="retryComposerInstall()">
+                        <i class="fa-solid fa-refresh me-2"></i>Erneut versuchen
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary w-100" onclick="dismissComposerModal()">
+                        <i class="fa-solid fa-times me-2"></i>Schließen (Update manuell abschließen)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let composerModal = null;
+let composerCheckInterval = null;
+
+// Check if we should show the composer modal on page load
+<?php if (isset($_SESSION['composer_pending']) && $_SESSION['composer_pending']): ?>
+    <?php unset($_SESSION['composer_pending']); ?>
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        showComposerModal();
+    });
+<?php endif; ?>
+
+function showComposerModal() {
+    composerModal = new bootstrap.Modal(document.getElementById('composer-modal'));
+    composerModal.show();
+    
+    // Start checking composer status
+    checkComposerStatus();
+}
+
+function checkComposerStatus() {
+    fetch('<?= BASE_PATH ?>api/composer-status.php?action=check', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.pending) {
+            // Composer installation is pending, trigger it
+            executeComposerInstall();
+        } else {
+            // No pending installation, close modal
+            dismissComposerModal();
+        }
+    })
+    .catch(error => {
+        console.error('Error checking composer status:', error);
+        showComposerError('Fehler beim Prüfen des Composer-Status: ' + error.message);
+    });
+}
+
+function executeComposerInstall() {
+    fetch('<?= BASE_PATH ?>api/composer-status.php?action=execute', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showComposerSuccess();
+        } else {
+            showComposerError(data.message || 'Unbekannter Fehler bei der Composer-Installation.');
+        }
+    })
+    .catch(error => {
+        console.error('Error executing composer install:', error);
+        showComposerError('Fehler beim Ausführen von Composer: ' + error.message);
+    });
+}
+
+function showComposerSuccess() {
+    document.getElementById('composer-status-content').style.display = 'none';
+    document.getElementById('composer-error-content').style.display = 'none';
+    document.getElementById('composer-success-content').style.display = 'block';
+}
+
+function showComposerError(message) {
+    document.getElementById('composer-status-content').style.display = 'none';
+    document.getElementById('composer-success-content').style.display = 'none';
+    document.getElementById('composer-error-message').textContent = message;
+    document.getElementById('composer-error-content').style.display = 'block';
+}
+
+function retryComposerInstall() {
+    // Reset to status view
+    document.getElementById('composer-status-content').style.display = 'block';
+    document.getElementById('composer-success-content').style.display = 'none';
+    document.getElementById('composer-error-content').style.display = 'none';
+    
+    // Retry installation
+    executeComposerInstall();
+}
+
+function dismissComposerModal() {
+    if (composerModal) {
+        composerModal.hide();
+    }
+}
+</script>
+
 <?php include __DIR__ . "/../../assets/components/footer.php"; ?>
 </body>
 

@@ -331,8 +331,15 @@ class SystemUpdater
                 throw new Exception('Konnte version.json nicht aktualisieren. Update möglicherweise unvollständig.');
             }
 
-            // Step 6: Run composer install
-            $composerResult = $this->runComposerInstall($appRoot);
+            // Step 6: Mark that composer needs to run
+            // Don't run composer immediately to avoid dependency issues with the current page load
+            $composerStatusFile = $appRoot . '/system/updates/composer_pending.json';
+            $composerStatus = [
+                'pending' => true,
+                'created_at' => date('Y-m-d H:i:s'),
+                'version' => $newVersion
+            ];
+            @file_put_contents($composerStatusFile, json_encode($composerStatus, JSON_PRETTY_PRINT));
             
             // Step 7: Clear cache
             $cacheFile = sys_get_temp_dir() . '/intrarp_update_cache.json';
@@ -343,24 +350,12 @@ class SystemUpdater
             // Clean up temp files
             $this->recursiveDelete($tempDir);
 
-            $message = 'Update erfolgreich installiert!';
-            if ($composerResult['executed']) {
-                if ($composerResult['success']) {
-                    $message .= ' Composer-Abhängigkeiten wurden aktualisiert.';
-                } else {
-                    $message .= ' WARNUNG: Composer-Update fehlgeschlagen. Bitte führen Sie "composer install" manuell aus.';
-                }
-            } else {
-                $message .= ' WARNUNG: Composer nicht verfügbar. Bitte führen Sie "composer install" manuell aus.';
-            }
-            $message .= ' Bitte laden Sie die Seite neu.';
-
             return [
                 'success' => true,
-                'message' => $message,
+                'message' => 'Update erfolgreich installiert! Composer-Abhängigkeiten werden jetzt aktualisiert...',
                 'version' => $newVersion,
                 'backup_dir' => $backupDir,
-                'composer_result' => $composerResult
+                'composer_pending' => true
             ];
         } catch (Exception $e) {
             // Clean up temp files if they exist
@@ -566,6 +561,56 @@ class SystemUpdater
         }
         
         return null;
+    }
+    
+    /**
+     * Check if composer installation is pending
+     * 
+     * @return array Status information
+     */
+    public function getComposerStatus(): array
+    {
+        $appRoot = dirname(dirname(__DIR__));
+        $composerStatusFile = $appRoot . '/system/updates/composer_pending.json';
+        
+        if (!file_exists($composerStatusFile)) {
+            return [
+                'pending' => false,
+                'message' => 'Keine ausstehende Composer-Installation.'
+            ];
+        }
+        
+        $status = json_decode(file_get_contents($composerStatusFile), true);
+        return array_merge(['pending' => true], $status ?? []);
+    }
+    
+    /**
+     * Execute pending composer installation
+     * 
+     * @return array Result of composer execution
+     */
+    public function executePendingComposerInstall(): array
+    {
+        $appRoot = dirname(dirname(__DIR__));
+        $composerStatusFile = $appRoot . '/system/updates/composer_pending.json';
+        
+        if (!file_exists($composerStatusFile)) {
+            return [
+                'success' => false,
+                'error' => true,
+                'message' => 'Keine ausstehende Composer-Installation gefunden.'
+            ];
+        }
+        
+        // Run composer install
+        $result = $this->runComposerInstall($appRoot);
+        
+        // Remove pending status file if successful
+        if ($result['success']) {
+            @unlink($composerStatusFile);
+        }
+        
+        return $result;
     }
 
     /**
