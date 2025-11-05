@@ -341,7 +341,16 @@ class SystemUpdater
                 'created_at' => date('Y-m-d H:i:s'),
                 'version' => $newVersion
             ];
-            @file_put_contents($this->composerPendingFile, json_encode($composerStatus, JSON_PRETTY_PRINT));
+            
+            $dir = dirname($this->composerPendingFile);
+            if (!is_dir($dir)) {
+                mkdir($dir, 0755, true);
+            }
+            
+            if (!file_put_contents($this->composerPendingFile, json_encode($composerStatus, JSON_PRETTY_PRINT))) {
+                // Non-critical: composer will need manual installation
+                error_log('Warning: Could not write composer pending file: ' . $this->composerPendingFile);
+            }
             
             // Step 7: Clear cache
             $cacheFile = sys_get_temp_dir() . '/intrarp_update_cache.json';
@@ -623,7 +632,9 @@ class SystemUpdater
         
         if (json_last_error() !== JSON_ERROR_NONE) {
             // Corrupted file, remove it and return not pending
-            @unlink($this->composerPendingFile);
+            if (file_exists($this->composerPendingFile) && !unlink($this->composerPendingFile)) {
+                error_log('Warning: Could not remove corrupted composer pending file: ' . $this->composerPendingFile);
+            }
             return [
                 'pending' => false,
                 'error' => true,
@@ -656,7 +667,9 @@ class SystemUpdater
         
         // Remove pending status file if successful
         if ($result['success']) {
-            @unlink($this->composerPendingFile);
+            if (file_exists($this->composerPendingFile) && !unlink($this->composerPendingFile)) {
+                error_log('Warning: Could not remove composer pending file after successful install: ' . $this->composerPendingFile);
+            }
         }
         
         return $result;
