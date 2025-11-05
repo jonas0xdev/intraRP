@@ -48,25 +48,42 @@ if (!Permissions::check(['admin'])) {
     exit;
 }
 
-$action = $_GET['action'] ?? $_POST['action'] ?? 'check';
+// Determine action based on request method for security
+$action = $_GET['action'] ?? 'check';
+
+// For POST requests, action must come from POST data
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $action = $_POST['action'] ?? 'execute';
+}
+
 $updater = new SystemUpdater();
 
 try {
     switch ($action) {
         case 'check':
-            // Check if composer install is pending
+            // Check if composer install is pending (GET only)
+            if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+                http_response_code(405);
+                echo json_encode([
+                    'success' => false,
+                    'error' => true,
+                    'message' => 'Methode nicht erlaubt. Verwenden Sie GET für "check".'
+                ]);
+                break;
+            }
+            
             $status = $updater->getComposerStatus();
             echo json_encode($status);
             break;
             
         case 'execute':
-            // Execute composer install
+            // Execute composer install (POST only)
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 http_response_code(405);
                 echo json_encode([
                     'success' => false,
                     'error' => true,
-                    'message' => 'Methode nicht erlaubt. Verwenden Sie POST.'
+                    'message' => 'Methode nicht erlaubt. Verwenden Sie POST für "execute".'
                 ]);
                 break;
             }

@@ -577,12 +577,25 @@ class SystemUpdater
             // Strict validation: only alphanumeric, underscore, hyphen
             // Single dot allowed only for .phar extension at the end
             if (preg_match('/^[a-zA-Z0-9_-]+(\\.phar)?$/', $name)) {
-                $result = @shell_exec('which ' . escapeshellarg($name) . ' 2>/dev/null');
-                if ($result && trim($result)) {
-                    $execPath = trim($result);
-                    // Verify the result is an executable file and doesn't contain path traversal
-                    if (file_exists($execPath) && is_executable($execPath) && strpos($execPath, '..') === false) {
-                        return $execPath;
+                $output = [];
+                $returnCode = 0;
+                exec('which ' . escapeshellarg($name) . ' 2>/dev/null', $output, $returnCode);
+                
+                if ($returnCode === 0 && !empty($output)) {
+                    $execPath = trim($output[0]);
+                    
+                    // Use realpath to resolve any symlinks and path traversal
+                    $realPath = realpath($execPath);
+                    
+                    // Verify it's a real file, executable, and in safe directories
+                    if ($realPath && file_exists($realPath) && is_executable($realPath)) {
+                        // Only allow paths in standard bin directories
+                        $safePaths = ['/usr/local/bin/', '/usr/bin/', '/bin/'];
+                        foreach ($safePaths as $safePath) {
+                            if (strpos($realPath, $safePath) === 0) {
+                                return $realPath;
+                            }
+                        }
                     }
                 }
             }
@@ -605,7 +618,19 @@ class SystemUpdater
             ];
         }
         
-        $status = json_decode(file_get_contents($this->composerPendingFile), true);
+        $content = file_get_contents($this->composerPendingFile);
+        $status = json_decode($content, true);
+        
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            // Corrupted file, remove it and return not pending
+            @unlink($this->composerPendingFile);
+            return [
+                'pending' => false,
+                'error' => true,
+                'message' => 'Composer-Status-Datei war beschädigt und wurde entfernt.'
+            ];
+        }
+        
         return array_merge(['pending' => true], $status ?? []);
     }
     
