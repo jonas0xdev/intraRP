@@ -501,11 +501,11 @@ class SystemUpdater
         }
         
         try {
-            // Change to app directory and run composer install
+            // Use composer's --working-dir option for safer execution
             $command = sprintf(
-                'cd %s && %s install --no-dev --optimize-autoloader --no-interaction 2>&1',
-                escapeshellarg($appRoot),
-                escapeshellarg($composerPath)
+                '%s install --working-dir=%s --no-dev --optimize-autoloader --no-interaction 2>&1',
+                escapeshellarg($composerPath),
+                escapeshellarg($appRoot)
             );
             
             // Execute composer command
@@ -556,21 +556,12 @@ class SystemUpdater
         ];
         
         foreach ($possiblePaths as $path) {
-            // Check if executable exists and is executable
+            // Check if executable exists using which
             $testCommand = sprintf('which %s 2>/dev/null', escapeshellarg($path));
             $result = @shell_exec($testCommand);
             
             if ($result && trim($result)) {
                 return trim($result);
-            }
-            
-            // For 'composer' without path, test if it's available in PATH
-            if ($path === 'composer') {
-                $testCommand = 'composer --version 2>/dev/null';
-                $result = @shell_exec($testCommand);
-                if ($result && strpos($result, 'Composer') !== false) {
-                    return 'composer';
-                }
             }
         }
         
