@@ -1,7 +1,6 @@
 {
-  "version": "v0.5.2.1",
-  "updated_at": "2025-11-04 22:32:58",
-  "build_number": "22",
-  "commit_hash": "de2cdde760d719172bf486b12264c76e5c310ac6",
-  "prerelease": true
+  "version": "v0.5.2.2",
+  "updated_at": "2025-11-05 21:44:32",
+  "build_number": "23",
+  "commit_hash": "b49fb8b373624880a7bf2b6ef5032880b4115150"
 }
