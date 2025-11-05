@@ -331,7 +331,10 @@ class SystemUpdater
                 throw new Exception('Konnte version.json nicht aktualisieren. Update möglicherweise unvollständig.');
             }
 
-            // Step 6: Clear cache
+            // Step 6: Run composer install
+            $composerResult = $this->runComposerInstall($appRoot);
+            
+            // Step 7: Clear cache
             $cacheFile = sys_get_temp_dir() . '/intrarp_update_cache.json';
             if (file_exists($cacheFile)) {
                 @unlink($cacheFile);
@@ -340,11 +343,24 @@ class SystemUpdater
             // Clean up temp files
             $this->recursiveDelete($tempDir);
 
+            $message = 'Update erfolgreich installiert!';
+            if ($composerResult['executed']) {
+                if ($composerResult['success']) {
+                    $message .= ' Composer-Abhängigkeiten wurden aktualisiert.';
+                } else {
+                    $message .= ' WARNUNG: Composer-Update fehlgeschlagen. Bitte führen Sie "composer install" manuell aus.';
+                }
+            } else {
+                $message .= ' WARNUNG: Composer nicht verfügbar. Bitte führen Sie "composer install" manuell aus.';
+            }
+            $message .= ' Bitte laden Sie die Seite neu.';
+
             return [
                 'success' => true,
-                'message' => 'Update erfolgreich installiert! Bitte laden Sie die Seite neu.',
+                'message' => $message,
                 'version' => $newVersion,
-                'backup_dir' => $backupDir
+                'backup_dir' => $backupDir,
+                'composer_result' => $composerResult
             ];
         } catch (Exception $e) {
             // Clean up temp files if they exist
@@ -463,6 +479,102 @@ class SystemUpdater
         }
 
         rmdir($dir);
+    }
+
+    /**
+     * Run composer install after system update
+     * 
+     * @param string $appRoot Application root directory
+     * @return array Result containing execution status and output
+     */
+    private function runComposerInstall(string $appRoot): array
+    {
+        // Check if composer is available
+        $composerPath = $this->findComposerExecutable();
+        
+        if (!$composerPath) {
+            return [
+                'executed' => false,
+                'success' => false,
+                'message' => 'Composer-Executable nicht gefunden.'
+            ];
+        }
+        
+        try {
+            // Change to app directory and run composer install
+            $command = sprintf(
+                'cd %s && %s install --no-dev --optimize-autoloader --no-interaction 2>&1',
+                escapeshellarg($appRoot),
+                escapeshellarg($composerPath)
+            );
+            
+            // Execute composer command
+            $output = [];
+            $returnCode = 0;
+            exec($command, $output, $returnCode);
+            
+            $outputString = implode("\n", $output);
+            
+            if ($returnCode === 0) {
+                return [
+                    'executed' => true,
+                    'success' => true,
+                    'message' => 'Composer-Abhängigkeiten erfolgreich installiert.',
+                    'output' => $outputString
+                ];
+            } else {
+                return [
+                    'executed' => true,
+                    'success' => false,
+                    'message' => 'Composer-Installation fehlgeschlagen.',
+                    'output' => $outputString,
+                    'return_code' => $returnCode
+                ];
+            }
+        } catch (Exception $e) {
+            return [
+                'executed' => false,
+                'success' => false,
+                'message' => 'Fehler beim Ausführen von Composer: ' . $e->getMessage()
+            ];
+        }
+    }
+    
+    /**
+     * Find composer executable on the system
+     * 
+     * @return string|null Path to composer executable or null if not found
+     */
+    private function findComposerExecutable(): ?string
+    {
+        // Try common paths
+        $possiblePaths = [
+            '/usr/local/bin/composer',
+            '/usr/bin/composer',
+            'composer', // Will use PATH
+            'composer.phar'
+        ];
+        
+        foreach ($possiblePaths as $path) {
+            // Check if executable exists and is executable
+            $testCommand = sprintf('which %s 2>/dev/null', escapeshellarg($path));
+            $result = @shell_exec($testCommand);
+            
+            if ($result && trim($result)) {
+                return trim($result);
+            }
+            
+            // For 'composer' without path, test if it's available in PATH
+            if ($path === 'composer') {
+                $testCommand = 'composer --version 2>/dev/null';
+                $result = @shell_exec($testCommand);
+                if ($result && strpos($result, 'Composer') !== false) {
+                    return 'composer';
+                }
+            }
+        }
+        
+        return null;
     }
 
     /**

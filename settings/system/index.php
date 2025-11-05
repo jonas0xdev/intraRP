@@ -76,6 +76,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             if ($installResult['success']) {
                 Flash::set('success', $installResult['message']);
+                
+                // Add additional warning if composer failed but update succeeded
+                if (isset($installResult['composer_result'])) {
+                    $composerResult = $installResult['composer_result'];
+                    if ($composerResult['executed'] && !$composerResult['success']) {
+                        Flash::set('warning', 'Hinweis: Bitte führen Sie "composer install" manuell im Anwendungsverzeichnis aus, um die Abhängigkeiten zu aktualisieren.');
+                    } elseif (!$composerResult['executed']) {
+                        Flash::set('warning', 'Hinweis: Composer konnte nicht automatisch ausgeführt werden. Bitte führen Sie "composer install" manuell im Anwendungsverzeichnis aus.');
+                    }
+                }
+                
                 // Redirect to reload with new version
                 header("Location: " . $_SERVER['REQUEST_URI']);
                 exit();
