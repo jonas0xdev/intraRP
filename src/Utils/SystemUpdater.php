@@ -13,13 +13,16 @@ use Exception;
 class SystemUpdater
 {
     private string $versionFile;
+    private string $composerPendingFile;
     private string $githubRepo = 'EmergencyForge/intraRP';
     private string $githubApiUrl;
     private array $currentVersion;
 
     public function __construct()
     {
-        $this->versionFile = __DIR__ . '/../../system/updates/version.json';
+        $appRoot = dirname(dirname(__DIR__));
+        $this->versionFile = $appRoot . '/system/updates/version.json';
+        $this->composerPendingFile = $appRoot . '/system/updates/composer_pending.json';
         $this->githubApiUrl = "https://api.github.com/repos/{$this->githubRepo}";
         $this->loadCurrentVersion();
     }
@@ -331,7 +334,25 @@ class SystemUpdater
                 throw new Exception('Konnte version.json nicht aktualisieren. Update möglicherweise unvollständig.');
             }
 
-            // Step 6: Clear cache
+            // Step 6: Mark that composer needs to run
+            // Don't run composer immediately to avoid dependency issues with the current page load
+            $composerStatus = [
+                'pending' => true,
+                'created_at' => date('Y-m-d H:i:s'),
+                'version' => $newVersion
+            ];
+            
+            $dir = dirname($this->composerPendingFile);
+            if (!is_dir($dir)) {
+                mkdir($dir, 0755, true);
+            }
+            
+            if (!file_put_contents($this->composerPendingFile, json_encode($composerStatus, JSON_PRETTY_PRINT))) {
+                // Non-critical: composer will need manual installation
+                error_log('Warning: Could not write composer pending file: ' . $this->composerPendingFile);
+            }
+            
+            // Step 7: Clear cache
             $cacheFile = sys_get_temp_dir() . '/intrarp_update_cache.json';
             if (file_exists($cacheFile)) {
                 @unlink($cacheFile);
@@ -342,9 +363,10 @@ class SystemUpdater
 
             return [
                 'success' => true,
-                'message' => 'Update erfolgreich installiert! Bitte laden Sie die Seite neu.',
+                'message' => 'Update erfolgreich installiert! Composer-Abhängigkeiten werden jetzt aktualisiert...',
                 'version' => $newVersion,
-                'backup_dir' => $backupDir
+                'backup_dir' => $backupDir,
+                'composer_pending' => true
             ];
         } catch (Exception $e) {
             // Clean up temp files if they exist
@@ -463,6 +485,194 @@ class SystemUpdater
         }
 
         rmdir($dir);
+    }
+
+    /**
+     * Run composer install after system update
+     * 
+     * @param string $appRoot Application root directory
+     * @return array Result containing execution status and output
+     */
+    private function runComposerInstall(string $appRoot): array
+    {
+        // Check if composer is available
+        $composerPath = $this->findComposerExecutable();
+        
+        if (!$composerPath) {
+            return [
+                'executed' => false,
+                'success' => false,
+                'error' => true,
+                'message' => 'Composer-Executable nicht gefunden.'
+            ];
+        }
+        
+        try {
+            // Use composer's --working-dir option for safer execution
+            $command = sprintf(
+                'timeout 600 %s install --working-dir=%s --no-dev --optimize-autoloader --no-interaction 2>&1',
+                escapeshellarg($composerPath),
+                escapeshellarg($appRoot)
+            );
+            
+            // Execute composer command with timeout
+            $output = [];
+            $returnCode = 0;
+            exec($command, $output, $returnCode);
+            
+            $outputString = implode("\n", $output);
+            
+            // Check if timeout occurred (exit code 124)
+            if ($returnCode === 124) {
+                return [
+                    'executed' => true,
+                    'success' => false,
+                    'message' => 'Composer-Installation hat zu lange gedauert (Timeout nach 10 Minuten).',
+                    'output' => $outputString,
+                    'return_code' => $returnCode
+                ];
+            }
+            
+            if ($returnCode === 0) {
+                return [
+                    'executed' => true,
+                    'success' => true,
+                    'message' => 'Composer-Abhängigkeiten erfolgreich installiert.',
+                    'output' => $outputString
+                ];
+            } else {
+                return [
+                    'executed' => true,
+                    'success' => false,
+                    'error' => true,
+                    'message' => 'Composer-Installation fehlgeschlagen.',
+                    'output' => $outputString,
+                    'return_code' => $returnCode
+                ];
+            }
+        } catch (Exception $e) {
+            return [
+                'executed' => false,
+                'success' => false,
+                'error' => true,
+                'message' => 'Fehler beim Ausführen von Composer: ' . $e->getMessage()
+            ];
+        }
+    }
+    
+    /**
+     * Find composer executable on the system
+     * 
+     * @return string|null Path to composer executable or null if not found
+     */
+    private function findComposerExecutable(): ?string
+    {
+        // Try absolute paths first using is_executable for security
+        $absolutePaths = [
+            '/usr/local/bin/composer',
+            '/usr/bin/composer'
+        ];
+        
+        foreach ($absolutePaths as $path) {
+            if (file_exists($path) && is_executable($path)) {
+                return $path;
+            }
+        }
+        
+        // For composer in PATH, use which command with strict validation
+        $pathNames = ['composer', 'composer.phar'];
+        
+        foreach ($pathNames as $name) {
+            // Strict validation: only alphanumeric, underscore, hyphen
+            // Single dot allowed only for .phar extension at the end
+            if (preg_match('/^[a-zA-Z0-9_-]+(\\.phar)?$/', $name)) {
+                $output = [];
+                $returnCode = 0;
+                exec('which ' . escapeshellarg($name) . ' 2>/dev/null', $output, $returnCode);
+                
+                if ($returnCode === 0 && !empty($output)) {
+                    $execPath = trim($output[0]);
+                    
+                    // Use realpath to resolve any symlinks and path traversal
+                    $realPath = realpath($execPath);
+                    
+                    // Verify it's a real file, executable, and in safe directories
+                    if ($realPath && file_exists($realPath) && is_executable($realPath)) {
+                        // Only allow paths in standard bin directories
+                        $safePaths = ['/usr/local/bin/', '/usr/bin/', '/bin/'];
+                        foreach ($safePaths as $safePath) {
+                            if (strpos($realPath, $safePath) === 0) {
+                                return $realPath;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Check if composer installation is pending
+     * 
+     * @return array Status information
+     */
+    public function getComposerStatus(): array
+    {
+        if (!file_exists($this->composerPendingFile)) {
+            return [
+                'pending' => false,
+                'message' => 'Keine ausstehende Composer-Installation.'
+            ];
+        }
+        
+        $content = file_get_contents($this->composerPendingFile);
+        $status = json_decode($content, true);
+        
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            // Corrupted file, remove it and return not pending
+            if (file_exists($this->composerPendingFile) && !unlink($this->composerPendingFile)) {
+                error_log('Warning: Could not remove corrupted composer pending file: ' . $this->composerPendingFile);
+            }
+            return [
+                'pending' => false,
+                'error' => true,
+                'message' => 'Composer-Status-Datei war beschädigt und wurde entfernt.'
+            ];
+        }
+        
+        return array_merge(['pending' => true], $status ?? []);
+    }
+    
+    /**
+     * Execute pending composer installation
+     * 
+     * @return array Result of composer execution
+     */
+    public function executePendingComposerInstall(): array
+    {
+        if (!file_exists($this->composerPendingFile)) {
+            return [
+                'success' => false,
+                'error' => true,
+                'message' => 'Keine ausstehende Composer-Installation gefunden.'
+            ];
+        }
+        
+        $appRoot = dirname(dirname(__DIR__));
+        
+        // Run composer install
+        $result = $this->runComposerInstall($appRoot);
+        
+        // Remove pending status file if successful
+        if ($result['success']) {
+            if (file_exists($this->composerPendingFile) && !unlink($this->composerPendingFile)) {
+                error_log('Warning: Could not remove composer pending file after successful install: ' . $this->composerPendingFile);
+            }
+        }
+        
+        return $result;
     }
 
     /**
