@@ -13,13 +13,16 @@ use Exception;
 class SystemUpdater
 {
     private string $versionFile;
+    private string $composerPendingFile;
     private string $githubRepo = 'EmergencyForge/intraRP';
     private string $githubApiUrl;
     private array $currentVersion;
 
     public function __construct()
     {
-        $this->versionFile = __DIR__ . '/../../system/updates/version.json';
+        $appRoot = dirname(dirname(__DIR__));
+        $this->versionFile = $appRoot . '/system/updates/version.json';
+        $this->composerPendingFile = $appRoot . '/system/updates/composer_pending.json';
         $this->githubApiUrl = "https://api.github.com/repos/{$this->githubRepo}";
         $this->loadCurrentVersion();
     }
@@ -333,13 +336,12 @@ class SystemUpdater
 
             // Step 6: Mark that composer needs to run
             // Don't run composer immediately to avoid dependency issues with the current page load
-            $composerStatusFile = $appRoot . '/system/updates/composer_pending.json';
             $composerStatus = [
                 'pending' => true,
                 'created_at' => date('Y-m-d H:i:s'),
                 'version' => $newVersion
             ];
-            @file_put_contents($composerStatusFile, json_encode($composerStatus, JSON_PRETTY_PRINT));
+            @file_put_contents($this->composerPendingFile, json_encode($composerStatus, JSON_PRETTY_PRINT));
             
             // Step 7: Clear cache
             $cacheFile = sys_get_temp_dir() . '/intrarp_update_cache.json';
@@ -498,17 +500,28 @@ class SystemUpdater
         try {
             // Use composer's --working-dir option for safer execution
             $command = sprintf(
-                '%s install --working-dir=%s --no-dev --optimize-autoloader --no-interaction 2>&1',
+                'timeout 600 %s install --working-dir=%s --no-dev --optimize-autoloader --no-interaction 2>&1',
                 escapeshellarg($composerPath),
                 escapeshellarg($appRoot)
             );
             
-            // Execute composer command
+            // Execute composer command with timeout
             $output = [];
             $returnCode = 0;
             exec($command, $output, $returnCode);
             
             $outputString = implode("\n", $output);
+            
+            // Check if timeout occurred (exit code 124)
+            if ($returnCode === 124) {
+                return [
+                    'executed' => true,
+                    'success' => false,
+                    'message' => 'Composer-Installation hat zu lange gedauert (Timeout nach 10 Minuten).',
+                    'output' => $outputString,
+                    'return_code' => $returnCode
+                ];
+            }
             
             if ($returnCode === 0) {
                 return [
@@ -542,21 +555,32 @@ class SystemUpdater
      */
     private function findComposerExecutable(): ?string
     {
-        // Try common paths
-        $possiblePaths = [
+        // Try absolute paths first using is_executable for security
+        $absolutePaths = [
             '/usr/local/bin/composer',
-            '/usr/bin/composer',
-            'composer', // Will use PATH
-            'composer.phar'
+            '/usr/bin/composer'
         ];
         
-        foreach ($possiblePaths as $path) {
-            // Check if executable exists using which
-            $testCommand = sprintf('which %s 2>/dev/null', escapeshellarg($path));
-            $result = @shell_exec($testCommand);
-            
-            if ($result && trim($result)) {
-                return trim($result);
+        foreach ($absolutePaths as $path) {
+            if (file_exists($path) && is_executable($path)) {
+                return $path;
+            }
+        }
+        
+        // For composer in PATH, use which command with strict validation
+        $pathNames = ['composer', 'composer.phar'];
+        
+        foreach ($pathNames as $name) {
+            // Validate that the name doesn't contain shell metacharacters
+            if (preg_match('/^[a-zA-Z0-9._-]+$/', $name)) {
+                $result = @shell_exec('which ' . escapeshellarg($name) . ' 2>/dev/null');
+                if ($result && trim($result)) {
+                    $execPath = trim($result);
+                    // Verify the result is an executable file
+                    if (file_exists($execPath) && is_executable($execPath)) {
+                        return $execPath;
+                    }
+                }
             }
         }
         
@@ -570,17 +594,14 @@ class SystemUpdater
      */
     public function getComposerStatus(): array
     {
-        $appRoot = dirname(dirname(__DIR__));
-        $composerStatusFile = $appRoot . '/system/updates/composer_pending.json';
-        
-        if (!file_exists($composerStatusFile)) {
+        if (!file_exists($this->composerPendingFile)) {
             return [
                 'pending' => false,
                 'message' => 'Keine ausstehende Composer-Installation.'
             ];
         }
         
-        $status = json_decode(file_get_contents($composerStatusFile), true);
+        $status = json_decode(file_get_contents($this->composerPendingFile), true);
         return array_merge(['pending' => true], $status ?? []);
     }
     
@@ -591,10 +612,7 @@ class SystemUpdater
      */
     public function executePendingComposerInstall(): array
     {
-        $appRoot = dirname(dirname(__DIR__));
-        $composerStatusFile = $appRoot . '/system/updates/composer_pending.json';
-        
-        if (!file_exists($composerStatusFile)) {
+        if (!file_exists($this->composerPendingFile)) {
             return [
                 'success' => false,
                 'error' => true,
@@ -602,12 +620,14 @@ class SystemUpdater
             ];
         }
         
+        $appRoot = dirname(dirname(__DIR__));
+        
         // Run composer install
         $result = $this->runComposerInstall($appRoot);
         
         // Remove pending status file if successful
         if ($result['success']) {
-            @unlink($composerStatusFile);
+            @unlink($this->composerPendingFile);
         }
         
         return $result;

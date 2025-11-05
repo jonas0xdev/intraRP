@@ -180,7 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             <input type="hidden" name="force_refresh" value="1">
                                             <input type="hidden" name="include_prerelease" id="force-refresh-prerelease" value="0">
                                             <button type="submit" class="btn btn-outline-primary btn-sm w-100">
-                                                <i class="fa-solid fa-refresh"></i> Neu laden
+                                                <i class="fa-solid fa-sync"></i> Neu laden
                                             </button>
                                         </form>
                                         <form method="post" class="flex-fill">
@@ -477,7 +477,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                     <p class="mb-3">Das Update ist vollständig abgeschlossen. Bitte laden Sie die Seite neu, um die Änderungen zu übernehmen.</p>
                     <button type="button" class="btn btn-primary w-100" onclick="location.reload()">
-                        <i class="fa-solid fa-refresh me-2"></i>Seite neu laden
+                        <i class="fa-solid fa-sync me-2"></i>Seite neu laden
                     </button>
                 </div>
                 
@@ -493,7 +493,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <code>composer install --no-dev --optimize-autoloader</code>
                     </p>
                     <button type="button" class="btn btn-secondary w-100 mb-2" onclick="retryComposerInstall()">
-                        <i class="fa-solid fa-refresh me-2"></i>Erneut versuchen
+                        <i class="fa-solid fa-redo me-2"></i>Erneut versuchen
                     </button>
                     <button type="button" class="btn btn-outline-secondary w-100" onclick="dismissComposerModal()">
                         <i class="fa-solid fa-times me-2"></i>Schließen (Update manuell abschließen)
