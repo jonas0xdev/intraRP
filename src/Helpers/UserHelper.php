@@ -120,6 +120,6 @@ class UserHelper
     public function isNewSystem(): bool
     {
         $stmt = $this->pdo->query("SELECT COUNT(*) FROM intra_mitarbeiter");
-        return $stmt->fetchColumn() == 0;
+        return $stmt->fetchColumn() === 0;
     }
 }
