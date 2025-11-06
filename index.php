@@ -12,10 +12,6 @@ if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
 
 use App\Helpers\Flash;
 
-if (!isset($_SESSION['cirs_user']) || empty($_SESSION['cirs_user'])) {
-    header("Location: " . BASE_PATH . "profil.php");
-}
-
 ?>
 
 <!DOCTYPE html>

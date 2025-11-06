@@ -139,7 +139,6 @@ try {
 
     if ($user) {
         $_SESSION['userid'] = $user['id'];
-        $_SESSION['cirs_user'] = $user['fullname'];
         $_SESSION['cirs_username'] = $user['username'];
         $_SESSION['aktenid'] = $user['aktenid'];
         $_SESSION['role'] = $user['role'];
@@ -230,7 +229,6 @@ try {
         }
 
         $_SESSION['userid'] = $user['id'];
-        $_SESSION['cirs_user'] = $user['fullname'];
         $_SESSION['cirs_username'] = $user['username'];
         $_SESSION['aktenid'] = $user['aktenid'];
         $_SESSION['role'] = $user['role'];

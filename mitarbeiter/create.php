@@ -13,8 +13,11 @@ if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
 
 use App\Auth\Permissions;
 use App\Helpers\Flash;
+use App\Helpers\UserHelper;
 use App\Utils\AuditLogger;
 use App\Personnel\PersonalLogManager;
+
+$userHelper = new UserHelper($pdo);
 
 if (!Permissions::check(['admin', 'personnel.edit'])) {
     Flash::set('error', 'no-permissions');
@@ -134,7 +137,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $savedId = $pdo->lastInsertId();
 
-        $edituser = $_SESSION['cirs_user'] ?? 'Unknown';
+        $edituser = $userHelper->getCurrentUserFullnameForAction();
         // Use PersonalLogManager for profile creation
         $logManager = new PersonalLogManager($pdo);
         $logManager->logProfileCreation($savedId, $edituser);

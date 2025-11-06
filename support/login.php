@@ -29,7 +29,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['support_expires_at'] = $auth_result['expires_at'];
 
             $_SESSION['userid'] = 999999;
-            $_SESSION['cirs_user'] = 'Support-Zugang';
             $_SESSION['cirs_username'] = 'support';
             $_SESSION['username'] = 'Support';
             $_SESSION['aktenid'] = null;

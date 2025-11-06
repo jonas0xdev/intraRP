@@ -12,8 +12,11 @@ if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
 
 use App\Auth\Permissions;
 use App\Helpers\Flash;
+use App\Helpers\UserHelper;
 use App\Utils\AuditLogger;
 use App\Notifications\NotificationManager;
+
+$userHelper = new UserHelper($pdo);
 
 if (!Permissions::check(['admin', 'application.edit'])) {
     Flash::set('error', 'no-permissions');
@@ -60,7 +63,7 @@ $felder_daten = $stmt->fetchAll(PDO::FETCH_ASSOC);
 if (isset($_POST['save'])) {
     $cirs_status = (int)$_POST['cirs_status'];
     $cirs_text = trim($_POST['cirs_text']);
-    $cirs_manager = $_SESSION['cirs_user'] ?? "Fehler Fehler";
+    $cirs_manager = $userHelper->getCurrentUserFullnameForAction();
     $jetzt = date("Y-m-d H:i:s");
 
     $auditLogger = new AuditLogger($pdo);
@@ -239,7 +242,7 @@ $createDate = new DateTime($antrag['time_added'] ?? 'now');
                                                 <span class="text-muted"><i>Noch nicht zugewiesen</i></span>
                                             <?php endif; ?>
                                         </div>
-                                        <small class="text-muted">Wird auf "<?= htmlspecialchars($_SESSION['cirs_user'] ?? "Fehler Fehler") ?>" gesetzt beim Speichern</small>
+                                        <small class="text-muted">Wird auf "<?= htmlspecialchars($userHelper->getCurrentUserFullnameForAction()) ?>" gesetzt beim Speichern</small>
                                     </div>
 
                                     <div class="mb-3">

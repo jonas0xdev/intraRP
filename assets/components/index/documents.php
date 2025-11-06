@@ -28,13 +28,14 @@
             pd.aussteller_name,
             pd.pdf_path,
             u.discord_id AS user_id, 
-            u.fullname, 
+            COALESCE(m.fullname, u.fullname) as fullname,
             u.aktenid,
             t.name as template_name,
             t.category as template_category,
-            COALESCE(pd.aussteller_name, u.fullname, 'Unbekannt') as ersteller_name
+            COALESCE(pd.aussteller_name, m.fullname, u.fullname, 'Unbekannt') as ersteller_name
         FROM intra_mitarbeiter_dokumente pd 
         LEFT JOIN intra_users u ON pd.ausstellerid = u.discord_id 
+        LEFT JOIN intra_mitarbeiter m ON u.discord_id = m.discordtag
         LEFT JOIN intra_dokument_templates t ON pd.template_id = t.id
         WHERE pd.profileid = :profileid 
         ORDER BY pd.ausstellungsdatum DESC

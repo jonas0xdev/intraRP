@@ -10,11 +10,6 @@ if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
     exit();
 }
 
-if (!isset($_SESSION['cirs_user']) || empty($_SESSION['cirs_user'])) {
-    header("Location: " . BASE_PATH . "profil.php");
-    exit;
-}
-
 use App\Helpers\Flash;
 
 $mitarbeiter = null;

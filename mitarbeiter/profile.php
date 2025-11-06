@@ -9,8 +9,11 @@ if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
 
 use App\Auth\Permissions;
 use App\Helpers\Flash;
+use App\Helpers\UserHelper;
 use App\Notifications\NotificationManager;
 use App\Personnel\PersonalLogManager;
+
+$userHelper = new UserHelper($pdo);
 
 if (!Permissions::check(['admin', 'personnel.view'])) {
     Flash::set('error', 'no-permissions');
@@ -44,7 +47,7 @@ if ($_SESSION['discordtag'] != null) {
 }
 
 $openedID = $_GET['id'];
-$edituser = $_SESSION['cirs_user'];
+$edituser = $userHelper->getCurrentUserFullnameForAction();
 
 // Initialize PersonalLogManager
 $logManager = new PersonalLogManager($pdo);
@@ -432,7 +435,7 @@ if (isset($_POST['new'])) {
                     <?php
                     require __DIR__ . '/../assets/config/database.php';
                     if (isset($row['discordtag'])) {
-                        $stmt = $pdo->prepare("SELECT id, username, fullname, aktenid FROM intra_users WHERE discord_id = :discordtag");
+                        $stmt = $pdo->prepare("SELECT u.id, u.username, COALESCE(m.fullname, u.fullname) as fullname, u.aktenid FROM intra_users u LEFT JOIN intra_mitarbeiter m ON u.discord_id = m.discordtag WHERE u.discord_id = :discordtag");
                         $stmt->execute([':discordtag' => $row['discordtag']]);
                         $num = $stmt->rowCount();
                         $panelakte = $stmt->fetch(PDO::FETCH_ASSOC);

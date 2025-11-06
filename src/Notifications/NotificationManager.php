@@ -66,6 +66,7 @@ class NotificationManager
 
     /**
      * Get user ID by full name
+     * Searches in Mitarbeiter profile first, then falls back to intra_users
      * 
      * @param string $fullname Full name of user
      * @return int|null User ID or null if not found
@@ -73,6 +74,21 @@ class NotificationManager
     public function getUserIdByFullname(string $fullname): ?int
     {
         try {
+            // First try to find by Mitarbeiter fullname
+            $stmt = $this->pdo->prepare("
+                SELECT u.id 
+                FROM intra_mitarbeiter m 
+                JOIN intra_users u ON m.discordtag = u.discord_id 
+                WHERE m.fullname = ?
+            ");
+            $stmt->execute([$fullname]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($result) {
+                return (int)$result['id'];
+            }
+            
+            // Fallback to intra_users fullname
             $stmt = $this->pdo->prepare("SELECT id FROM intra_users WHERE fullname = ?");
             $stmt->execute([$fullname]);
             $result = $stmt->fetch(PDO::FETCH_ASSOC);

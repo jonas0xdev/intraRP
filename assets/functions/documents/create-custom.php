@@ -13,6 +13,7 @@ use App\Documents\DocumentRenderer;
 use App\Documents\DocumentPDFGenerator;
 use App\Documents\DocumentIdGenerator;
 use App\Auth\Permissions;
+use App\Helpers\UserHelper;
 use App\Notifications\NotificationManager;
 use App\Personnel\PersonalLogManager;
 use App\Utils\AuditLogger;
@@ -27,6 +28,8 @@ if (!Permissions::check(['admin', 'personnel.documents.manage'])) {
     ob_end_flush();
     exit;
 }
+
+$userHelper = new UserHelper($pdo);
 
 try {
     $input = json_decode(file_get_contents('php://input'), true);
@@ -89,7 +92,7 @@ try {
     $logContent = "Dokument erstellt: <a href='{$pdfLink}' target='_blank'>" .
         htmlspecialchars($template['name']) .
         " (ID: {$documentId})</a>";
-    $panelUser = $_SESSION['cirs_user'] ?? 'System';
+    $panelUser = $userHelper->getCurrentUserFullnameForAction();
     
     $logManager->addEntry(
         $input['profileid'],

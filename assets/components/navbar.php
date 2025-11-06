@@ -220,7 +220,6 @@ use App\Notifications\NotificationManager;
                         <?= $_SESSION['cirs_username'] ?> <span class="badge text-bg-<?= $_SESSION['role_color'] ?>"><?= $_SESSION['role_name'] ?></span>
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="<?= BASE_PATH ?>profil.php">Profil bearbeiten</a></li>
                         <li><a class="dropdown-item" href="<?= BASE_PATH ?>logout.php">Abmelden</a></li>
                     </ul>
                 </li>

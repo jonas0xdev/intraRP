@@ -43,7 +43,7 @@ $month_names = array(
 $formatted_date = $date->format('d. ') . $month_names[$month_number - 1] . $date->format(' Y');
 $ausstelldatum = date("d.m.Y", strtotime($row['ausstellungsdatum']));
 
-$stmt2 = $pdo->prepare("SELECT id, fullname, discord_id FROM intra_users WHERE discord_id = :id");
+$stmt2 = $pdo->prepare("SELECT u.id, COALESCE(m.fullname, u.fullname) as fullname, u.discord_id FROM intra_users u LEFT JOIN intra_mitarbeiter m ON u.discord_id = m.discordtag WHERE u.discord_id = :id");
 $stmt2->execute(['id' => $row['ausstellerid']]);
 $adata = $stmt2->fetch(PDO::FETCH_ASSOC);
 
