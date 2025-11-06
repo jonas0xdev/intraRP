@@ -32,6 +32,7 @@ $rdQualis = $rdQualisStmt->fetchAll(PDO::FETCH_ASSOC);
     <?php
     include __DIR__ . '/../../assets/components/_base/admin/head.php';
     ?>
+    <script src="<?= BASE_PATH ?>assets/_ext/sortablejs/Sortable.min.js"></script>
     <style>
         .field-item {
             border: 1px solid #dee2e6;
