@@ -72,9 +72,9 @@ class UserHelper
 
     /**
      * Get user's fullname for actions/operations
-     * Returns 'System Admin' if no profile is linked, allowing the user to continue working
+     * Returns 'Admin #ID' if no profile is linked, allowing the user to continue working
      * 
-     * @return string The fullname or 'System Admin' if not found
+     * @return string The fullname or 'Admin #ID' if not found
      */
     public function getCurrentUserFullnameForAction(): string
     {
@@ -84,11 +84,18 @@ class UserHelper
         }
 
         if (!isset($_SESSION['discordtag'])) {
-            return 'System Admin';
+            $userId = $_SESSION['userid'] ?? 'Unknown';
+            return 'Admin #' . $userId;
         }
 
         $fullname = $this->getFullnameByDiscordId($_SESSION['discordtag']);
-        return $fullname ?? 'System Admin';
+        
+        if ($fullname === null) {
+            $userId = $_SESSION['userid'] ?? 'Unknown';
+            return 'Admin #' . $userId;
+        }
+        
+        return $fullname;
     }
 
     /**
