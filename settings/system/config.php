@@ -355,7 +355,9 @@ async function regenerateApiKey(event) {
     button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Wird generiert...';
     
     // Send request to regenerate API key
-    fetch(<?= json_encode(BASE_PATH) ?> + 'settings/system/regenerate-api-key.php', {
+    const basePath = <?= json_encode(BASE_PATH) ?>;
+    const url = basePath + (basePath.endsWith('/') ? '' : '/') + 'settings/system/regenerate-api-key.php';
+    fetch(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
