@@ -342,7 +342,12 @@ class DocumentRenderer
     private function getIssuerData(int $discordId): array
     {
         $stmt = $this->pdo->prepare("
-            SELECT u.*, m.dienstgrad, m.zusatz, m.geschlecht
+            SELECT 
+                u.*, 
+                COALESCE(m.fullname, u.fullname) as fullname,
+                m.dienstgrad, 
+                m.zusatz, 
+                m.geschlecht
             FROM intra_users u
             LEFT JOIN intra_mitarbeiter m ON u.discord_id = m.discordtag
             WHERE u.discord_id = :id
@@ -372,8 +377,12 @@ class DocumentRenderer
             }
 
             // Extrahiere Nachnamen
-            $splitname = explode(" ", $data['fullname']);
-            $data['lastname'] = end($splitname);
+            if (!empty($data['fullname'])) {
+                $splitname = explode(" ", $data['fullname']);
+                $data['lastname'] = end($splitname);
+            } else {
+                $data['lastname'] = '';
+            }
         }
 
         return $data ?? [];
