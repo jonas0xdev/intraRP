@@ -41,13 +41,9 @@ if (!isset($_SESSION['cirs_user']) || empty($_SESSION['cirs_user'])) {
                     <?php
                     Flash::render();
                     ?>
-                    <div class="alert alert-primary" role="alert">
-                        <h3>Hallo, <?= $_SESSION['cirs_user'] ?>!</h3>
-                        <span id="quote-of-the-day"></span>
-                        <br>
-                    </div>
                 </div>
             </div>
+           <?php include __DIR__ . '/assets/components/index/stats.php' ?>
             <div class="row mt-4">
                 <div class="col intra__tile">
                     <h4 class="mt-2 mb-3">Eigene Dokumente</h4>
@@ -75,21 +71,6 @@ if (!isset($_SESSION['cirs_user']) || empty($_SESSION['cirs_user'])) {
             </div>
         </div>
     </div>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const quotes = [
-                "Willkommen im Intranet der <?php echo RP_ORGTYPE . " " . SERVER_CITY ?>.",
-                "Fun Fact: Die ersten Rettungswagen waren Leichenwagen. Manchmal kamen Bestatter an und mussten feststellen, dass die Person noch gar nicht gestorben war.",
-                "Das Schweizer Taschenmesser der <?php echo SERVER_CITY ?>er <?php echo RP_ORGTYPE ?>.",
-                "Die <?php echo RP_ORGTYPE . " " . SERVER_CITY ?> - Immer für Sie da.",
-                "<?php echo SYSTEM_NAME ?> powered by hypax."
-            ];
-
-            const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-
-            document.getElementById("quote-of-the-day").textContent = randomQuote;
-        });
-    </script>
     <?php include __DIR__ . "/assets/components/footer.php"; ?>
 </body>
 

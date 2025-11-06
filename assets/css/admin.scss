@@ -1,3 +1,7 @@
+:root {
+  --stat-bg-color: var(--body-bg-lighter);
+}
+
 .pagination .page-link {
   --bs-pagination-color: var(--white);
   --bs-link-color: var(--bs-pagination-color);
@@ -5,7 +9,7 @@
   --bs-pagination-active-bg: var(--main-color);
   --bs-pagination-active-border-color: var(--main-color);
   --bs-pagination-focus-color: var(--bs-pagination-hover-color);
-  --bs-pagination-hover-bg: var(--body-bg)
+  --bs-pagination-hover-bg: var(--body-bg);
   --bs-pagination-focus-bg: var(--bs-pagination-hover-bg);
 }
 
@@ -167,5 +171,53 @@ select.form-select {
     &:focus {
       outline: none;
     }
+  }
+}
+
+.intra__stats-card {
+  background-color: var(--stat-bg-color) !important;
+  box-shadow: var(--bs-box-shadow) !important;
+  border-radius: 0 !important;
+  border: 0 !important;
+  position: relative;
+  overflow: hidden;
+
+  .card-title {
+    font-size: .8rem;
+    text-transform: uppercase;
+    letter-spacing: .05rem;
+    color: rgba(255,255,255,0.85) !important;
+    margin: 0 !important;
+  }
+
+  .card-text {
+    font-size: 2.75rem;
+    font-weight: bold;
+    color: var(--white);
+    margin: 0 !important;
+  }
+
+  i {
+    position: absolute;
+    right: -1.5rem;
+    bottom: -1rem;
+    font-size: 6rem;
+    color: rgba(255, 255, 255, 0.25);
+  }
+
+  &.intra__stats-users {
+    --stat-bg-color: #D10000;
+  }
+
+  &.intra__stats-workers {
+    --stat-bg-color: #B80000;
+  }
+
+  &.intra__stats-enotf {
+    --stat-bg-color: #8F0000;
+  }
+
+  &.intra__stats-documents {
+    --stat-bg-color: #660000;
   }
 }
