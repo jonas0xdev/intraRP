@@ -43,7 +43,8 @@ try {
     
     $success = $stmt->execute([$newApiKey, $_SESSION['userid']]);
     
-    if ($success) {
+    // Check if any rows were affected
+    if ($success && $stmt->rowCount() > 0) {
         // Log the action in audit log
         $auditLogger = new AuditLogger($pdo);
         $auditLogger->log(
@@ -63,7 +64,7 @@ try {
         http_response_code(500);
         echo json_encode([
             'success' => false,
-            'message' => 'Fehler beim Aktualisieren des API-Schlüssels'
+            'message' => 'API_KEY wurde nicht in der Datenbank gefunden oder konnte nicht aktualisiert werden'
         ]);
     }
 } catch (Exception $e) {

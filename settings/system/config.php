@@ -333,8 +333,18 @@ function updateMetaImagePreview(value) {
     document.getElementById('meta_image_preview').src = value;
 }
 
-function regenerateApiKey() {
-    if (!confirm('Möchten Sie wirklich einen neuen API-Schlüssel generieren?\n\nWARNUNG: Dies macht alle bestehenden Integrationen ungültig, die den aktuellen API-Schlüssel verwenden!')) {
+async function regenerateApiKey(event) {
+    const confirmed = await showConfirm(
+        'Möchten Sie wirklich einen neuen API-Schlüssel generieren?\n\nWARNUNG: Dies macht alle bestehenden Integrationen ungültig, die den aktuellen API-Schlüssel verwenden!',
+        {
+            title: 'API-Schlüssel neu generieren',
+            confirmText: 'Ja, neu generieren',
+            cancelText: 'Abbrechen',
+            danger: true
+        }
+    );
+    
+    if (!confirmed) {
         return;
     }
     
@@ -345,7 +355,7 @@ function regenerateApiKey() {
     button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Wird generiert...';
     
     // Send request to regenerate API key
-    fetch('<?= BASE_PATH ?>settings/system/regenerate-api-key.php', {
+    fetch(<?= json_encode(BASE_PATH) ?> + 'settings/system/regenerate-api-key.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -356,13 +366,22 @@ function regenerateApiKey() {
         if (data.success) {
             // Update the input field with new API key
             document.getElementById('API_KEY').value = data.api_key;
-            alert('API-Schlüssel wurde erfolgreich neu generiert!');
+            showAlert('API-Schlüssel wurde erfolgreich neu generiert!', {
+                title: 'Erfolg',
+                type: 'success'
+            });
         } else {
-            alert('Fehler beim Generieren des API-Schlüssels: ' + (data.message || 'Unbekannter Fehler'));
+            showAlert('Fehler beim Generieren des API-Schlüssels: ' + (data.message || 'Unbekannter Fehler'), {
+                title: 'Fehler',
+                type: 'error'
+            });
         }
     })
     .catch(error => {
-        alert('Fehler beim Generieren des API-Schlüssels: ' + error);
+        showAlert('Fehler beim Generieren des API-Schlüssels: ' + error, {
+            title: 'Fehler',
+            type: 'error'
+        });
     })
     .finally(() => {
         button.disabled = false;
