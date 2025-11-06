@@ -1,6 +1,6 @@
 <?php
 try {
-    // Generate a random API key for new installations
+    // Generate a random API key for new installations (32 bytes = 64 hexadecimal characters)
     $apiKey = bin2hex(random_bytes(32));
     
     // Insert default configuration values from config.php

@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 try {
-    // Generate new API key
+    // Generate new API key (32 bytes = 64 hexadecimal characters)
     $newApiKey = bin2hex(random_bytes(32));
     
     // Update API key in database

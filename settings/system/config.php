@@ -189,7 +189,7 @@ $configByCategory = $configManager->getConfigByCategory();
                                                     <button 
                                                         type="button" 
                                                         class="btn btn-warning" 
-                                                        onclick="regenerateApiKey()"
+                                                        onclick="regenerateApiKey(event)"
                                                         title="API-Schlüssel neu generieren"
                                                     >
                                                         <i class="fa-solid fa-rotate"></i> Neu generieren
