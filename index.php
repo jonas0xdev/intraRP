@@ -11,8 +11,14 @@ if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
 }
 
 use App\Helpers\Flash;
+use App\Helpers\UserHelper;
 
-if (!isset($_SESSION['cirs_user']) || empty($_SESSION['cirs_user'])) {
+$userHelper = new UserHelper($pdo);
+$currentFullname = $userHelper->getCurrentUserFullname();
+$isNewSystem = $userHelper->isNewSystem();
+
+// Only redirect to profile if no fullname AND not a new system
+if ((empty($currentFullname) || $currentFullname === 'Unknown') && !$isNewSystem) {
     header("Location: " . BASE_PATH . "profil.php");
 }
 

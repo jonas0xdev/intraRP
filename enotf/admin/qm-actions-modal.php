@@ -11,8 +11,11 @@ if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
 
 use App\Auth\Permissions;
 use App\Helpers\Flash;
+use App\Helpers\UserHelper;
 use App\Utils\AuditLogger;
 use App\Notifications\NotificationManager;
+
+$userHelper = new UserHelper($pdo);
 
 if (!Permissions::check(['admin', 'edivi.view'])) {
     http_response_code(403);
@@ -150,7 +153,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="row mt-2 mb-1">
                 <div class="col-3 fw-bold">Gesichtet von</div>
                 <div class="col">
-                    <input style="border-radius: 0 !important" type="text" name="bearbeiter" id="bearbeiter" class="w-100 form-control edivi__admin" value="<?= $_SESSION['cirs_user'] ?>" readonly>
+                    <input style="border-radius: 0 !important" type="text" name="bearbeiter" id="bearbeiter" class="w-100 form-control edivi__admin" value="<?= htmlspecialchars($userHelper->getCurrentUserFullnameForAction()) ?>" readonly>
                 </div>
             </div>
             <div class="row mt-3">

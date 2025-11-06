@@ -11,9 +11,11 @@ if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
 }
 
 use App\Helpers\Flash;
+use App\Helpers\UserHelper;
 use App\Utils\AuditLogger;
 
 $userid = $_SESSION['userid'];
+$userHelper = new UserHelper($pdo);
 
 $stmt = $pdo->prepare("SELECT * FROM intra_users WHERE id = :id");
 $stmt->bindParam(':id', $userid, PDO::PARAM_INT);
@@ -29,8 +31,6 @@ if (isset($_POST['new']) && $_POST['new'] == 1) {
         $stmt->bindValue(':fullname', $fullname, PDO::PARAM_STR);
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
-
-        $_SESSION['cirs_user'] = $fullname;
 
         Flash::set('own', 'data-changed');
         $auditLogger = new AuditLogger($pdo);
@@ -67,8 +67,25 @@ if (isset($_POST['new']) && $_POST['new'] == 1) {
                     <hr class="text-light my-3">
                     <h1 class="mb-5">Eigene Daten bearbeiten</h1>
                     <?php
-
-                    if (!isset($_SESSION['cirs_user']) || empty($_SESSION['cirs_user'])) {
+                    $currentFullname = $userHelper->getCurrentUserFullname();
+                    $hasLinkedProfile = $userHelper->hasLinkedProfile();
+                    $isNewSystem = $userHelper->isNewSystem();
+                    
+                    if (!$hasLinkedProfile && $isNewSystem) {
+                        echo '<div class="alert alert-info alert-dismissible fade show" role="alert">';
+                        echo '<h4 class="alert-heading"><i class="fa-solid fa-info-circle"></i> Information</h4>';
+                        echo 'Dies ist ein neues System ohne verknüpfte Mitarbeiterprofile. Du kannst trotzdem mit dem System arbeiten - dein Name wird automatisch aus deinem verknüpften Mitarbeiterprofil übernommen, sobald eines erstellt wurde.';
+                        echo '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Schließen"></button>';
+                        echo '</div>';
+                    } elseif (!$hasLinkedProfile) {
+                        echo '<div class="alert alert-warning alert-dismissible fade show" role="alert">';
+                        echo '<h4 class="alert-heading"><i class="fa-solid fa-exclamation-triangle"></i> Warnung</h4>';
+                        echo 'Dein Discord-Account ist noch nicht mit einem Mitarbeiterprofil verknüpft. Bitte wende dich an einen Administrator, um dein Profil zu verknüpfen.';
+                        echo '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Schließen"></button>';
+                        echo '</div>';
+                    }
+                    
+                    if (empty($currentFullname) || $currentFullname === 'Unknown') {
                         echo '<div class="alert alert-warning alert-dismissible fade show" role="alert">';
                         echo '<h4 class="alert-heading">Achtung!</h4>';
                         echo 'Du hast noch keinen Namen hinterlegt. <u style="font-weight:bold">Bitte hinterlege deinen Namen jetzt!</u><br>Bei fehlendem Namen kann es zu technischen Problemen kommen.';

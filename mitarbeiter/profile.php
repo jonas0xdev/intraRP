@@ -9,8 +9,11 @@ if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
 
 use App\Auth\Permissions;
 use App\Helpers\Flash;
+use App\Helpers\UserHelper;
 use App\Notifications\NotificationManager;
 use App\Personnel\PersonalLogManager;
+
+$userHelper = new UserHelper($pdo);
 
 if (!Permissions::check(['admin', 'personnel.view'])) {
     Flash::set('error', 'no-permissions');
@@ -44,7 +47,7 @@ if ($_SESSION['discordtag'] != null) {
 }
 
 $openedID = $_GET['id'];
-$edituser = $_SESSION['cirs_user'];
+$edituser = $userHelper->getCurrentUserFullnameForAction();
 
 // Initialize PersonalLogManager
 $logManager = new PersonalLogManager($pdo);

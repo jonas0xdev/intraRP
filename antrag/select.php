@@ -10,12 +10,17 @@ if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
     exit();
 }
 
-if (!isset($_SESSION['cirs_user']) || empty($_SESSION['cirs_user'])) {
+use App\Helpers\Flash;
+use App\Helpers\UserHelper;
+
+$userHelper = new UserHelper($pdo);
+$currentFullname = $userHelper->getCurrentUserFullname();
+$isNewSystem = $userHelper->isNewSystem();
+
+if ((empty($currentFullname) || $currentFullname === 'Unknown') && !$isNewSystem) {
     header("Location: " . BASE_PATH . "profil.php");
     exit;
 }
-
-use App\Helpers\Flash;
 
 $stmt = $pdo->prepare("
     SELECT 
