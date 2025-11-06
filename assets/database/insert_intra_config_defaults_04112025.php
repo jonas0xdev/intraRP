@@ -1,9 +1,12 @@
 <?php
 try {
+    // Generate a random API key for new installations
+    $apiKey = bin2hex(random_bytes(32));
+    
     // Insert default configuration values from config.php
     $configs = [
         // BASIS DATEN
-        ['key' => 'API_KEY', 'value' => 'CHANGE_ME', 'type' => 'string', 'category' => 'basis', 'description' => 'API-Schlüssel für externe Schnittstellen', 'editable' => 0, 'order' => 1],
+        ['key' => 'API_KEY', 'value' => $apiKey, 'type' => 'string', 'category' => 'basis', 'description' => 'API-Schlüssel für externe Schnittstellen', 'editable' => 0, 'order' => 1],
         ['key' => 'SYSTEM_NAME', 'value' => 'intraRP', 'type' => 'string', 'category' => 'basis', 'description' => 'Eigenname des Intranets', 'editable' => 1, 'order' => 2],
         ['key' => 'SYSTEM_COLOR', 'value' => '#d10000', 'type' => 'color', 'category' => 'basis', 'description' => 'Hauptfarbe des Systems', 'editable' => 1, 'order' => 3],
         ['key' => 'SYSTEM_URL', 'value' => 'CHANGE_ME', 'type' => 'url', 'category' => 'basis', 'description' => 'Domain des Systems', 'editable' => 1, 'order' => 4],
@@ -40,16 +43,42 @@ try {
             display_order = VALUES(display_order)
     ");
 
+    // Special handling for API_KEY to never overwrite existing value
+    $apiKeyStmt = $pdo->prepare("
+        INSERT INTO intra_config (config_key, config_value, config_type, category, description, is_editable, display_order)
+        VALUES (:key, :value, :type, :category, :description, :editable, :order)
+        ON DUPLICATE KEY UPDATE
+            config_type = VALUES(config_type),
+            category = VALUES(category),
+            description = VALUES(description),
+            is_editable = VALUES(is_editable),
+            display_order = VALUES(display_order),
+            config_value = config_value
+    ");
+
     foreach ($configs as $config) {
-        $stmt->execute([
-            'key' => $config['key'],
-            'value' => $config['value'],
-            'type' => $config['type'],
-            'category' => $config['category'],
-            'description' => $config['description'],
-            'editable' => $config['editable'],
-            'order' => $config['order']
-        ]);
+        if ($config['key'] === 'API_KEY') {
+            // Use special statement that doesn't overwrite API_KEY value
+            $apiKeyStmt->execute([
+                'key' => $config['key'],
+                'value' => $config['value'],
+                'type' => $config['type'],
+                'category' => $config['category'],
+                'description' => $config['description'],
+                'editable' => $config['editable'],
+                'order' => $config['order']
+            ]);
+        } else {
+            $stmt->execute([
+                'key' => $config['key'],
+                'value' => $config['value'],
+                'type' => $config['type'],
+                'category' => $config['category'],
+                'description' => $config['description'],
+                'editable' => $config['editable'],
+                'order' => $config['order']
+            ]);
+        }
     }
 } catch (PDOException $e) {
     $message = $e->getMessage();

@@ -172,13 +172,32 @@ $configByCategory = $configManager->getConfigByCategory();
                                 </div>
                                 <div class="card-body">
                                     <?php foreach ($configs as $config): ?>
-                                        <?php if ($config['is_editable']): ?>
-                                            <div class="mb-4">
-                                                <label for="<?= htmlspecialchars($config['config_key']) ?>" class="form-label">
-                                                    <?= htmlspecialchars($config['description']) ?>
-                                                </label>
+                                        <div class="mb-4">
+                                            <label for="<?= htmlspecialchars($config['config_key']) ?>" class="form-label">
+                                                <?= htmlspecialchars($config['description']) ?>
+                                            </label>
+                                            
+                                            <?php if ($config['config_key'] === 'API_KEY'): ?>
+                                                <div class="input-group">
+                                                    <input 
+                                                        type="text" 
+                                                        class="form-control" 
+                                                        id="<?= htmlspecialchars($config['config_key']) ?>" 
+                                                        value="<?= htmlspecialchars($config['config_value']) ?>"
+                                                        readonly
+                                                    >
+                                                    <button 
+                                                        type="button" 
+                                                        class="btn btn-warning" 
+                                                        onclick="regenerateApiKey()"
+                                                        title="API-Schlüssel neu generieren"
+                                                    >
+                                                        <i class="fa-solid fa-rotate"></i> Neu generieren
+                                                    </button>
+                                                </div>
+                                                <div class="form-text">Dieser API-Schlüssel wird für externe Schnittstellen verwendet. Ein neuer Schlüssel macht alte Integrationen ungültig.</div>
                                                 
-                                                <?php if ($config['config_type'] === 'boolean'): ?>
+                                            <?php elseif ($config['is_editable'] && $config['config_type'] === 'boolean'): ?>
                                                     <div class="form-check form-switch">
                                                         <input 
                                                             class="form-check-input" 
@@ -190,7 +209,7 @@ $configByCategory = $configManager->getConfigByCategory();
                                                         >
                                                     </div>
                                                     
-                                                <?php elseif ($config['config_type'] === 'color'): ?>
+                                            <?php elseif ($config['is_editable'] && $config['config_type'] === 'color'): ?>
                                                     <div class="color-input-wrapper">
                                                         <input 
                                                             type="color" 
@@ -212,7 +231,7 @@ $configByCategory = $configManager->getConfigByCategory();
                                                     </div>
                                                     <div class="form-text">Wählen Sie eine Farbe aus oder geben Sie einen Hex-Farbcode ein.</div>
                                                     
-                                                <?php elseif ($config['config_type'] === 'url' && $config['config_key'] === 'SYSTEM_LOGO'): ?>
+                                            <?php elseif ($config['is_editable'] && $config['config_type'] === 'url' && $config['config_key'] === 'SYSTEM_LOGO'): ?>
                                                     <input 
                                                         type="text" 
                                                         class="form-control mb-2" 
@@ -233,7 +252,7 @@ $configByCategory = $configManager->getConfigByCategory();
                                                         >
                                                     </div>
                                                     
-                                                <?php elseif ($config['config_type'] === 'url' && $config['config_key'] === 'META_IMAGE_URL'): ?>
+                                            <?php elseif ($config['is_editable'] && $config['config_type'] === 'url' && $config['config_key'] === 'META_IMAGE_URL'): ?>
                                                     <input 
                                                         type="text" 
                                                         class="form-control mb-2" 
@@ -254,7 +273,7 @@ $configByCategory = $configManager->getConfigByCategory();
                                                         >
                                                     </div>
                                                     
-                                                <?php elseif ($config['config_key'] === 'REGISTRATION_MODE'): ?>
+                                            <?php elseif ($config['is_editable'] && $config['config_key'] === 'REGISTRATION_MODE'): ?>
                                                     <select 
                                                         class="form-select" 
                                                         id="<?= htmlspecialchars($config['config_key']) ?>" 
@@ -266,17 +285,16 @@ $configByCategory = $configManager->getConfigByCategory();
                                                     </select>
                                                     <div class="form-text"><?= htmlspecialchars($config['description']) ?></div>
                                                     
-                                                <?php else: ?>
-                                                    <input 
-                                                        type="text" 
-                                                        class="form-control" 
-                                                        id="<?= htmlspecialchars($config['config_key']) ?>" 
-                                                        name="<?= htmlspecialchars($config['config_key']) ?>"
-                                                        value="<?= htmlspecialchars($config['config_value']) ?>"
-                                                    >
-                                                <?php endif; ?>
-                                            </div>
-                                        <?php endif; ?>
+                                            <?php elseif ($config['is_editable']): ?>
+                                                <input 
+                                                    type="text" 
+                                                    class="form-control" 
+                                                    id="<?= htmlspecialchars($config['config_key']) ?>" 
+                                                    name="<?= htmlspecialchars($config['config_key']) ?>"
+                                                    value="<?= htmlspecialchars($config['config_value']) ?>"
+                                                >
+                                            <?php endif; ?>
+                                        </div>
                                     <?php endforeach; ?>
                                 </div>
                             </div>
@@ -313,6 +331,43 @@ function updateLogoPreview(value) {
 
 function updateMetaImagePreview(value) {
     document.getElementById('meta_image_preview').src = value;
+}
+
+function regenerateApiKey() {
+    if (!confirm('Möchten Sie wirklich einen neuen API-Schlüssel generieren?\n\nWARNUNG: Dies macht alle bestehenden Integrationen ungültig, die den aktuellen API-Schlüssel verwenden!')) {
+        return;
+    }
+    
+    // Show loading indicator
+    const button = event.target.closest('button');
+    const originalContent = button.innerHTML;
+    button.disabled = true;
+    button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Wird generiert...';
+    
+    // Send request to regenerate API key
+    fetch('<?= BASE_PATH ?>settings/system/regenerate-api-key.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update the input field with new API key
+            document.getElementById('API_KEY').value = data.api_key;
+            alert('API-Schlüssel wurde erfolgreich neu generiert!');
+        } else {
+            alert('Fehler beim Generieren des API-Schlüssels: ' + (data.message || 'Unbekannter Fehler'));
+        }
+    })
+    .catch(error => {
+        alert('Fehler beim Generieren des API-Schlüssels: ' + error);
+    })
+    .finally(() => {
+        button.disabled = false;
+        button.innerHTML = originalContent;
+    });
 }
 </script>
 </body>
