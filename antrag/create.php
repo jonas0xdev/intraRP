@@ -11,16 +11,6 @@ if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
 }
 
 use App\Helpers\Flash;
-use App\Helpers\UserHelper;
-
-$userHelper = new UserHelper($pdo);
-$currentFullname = $userHelper->getCurrentUserFullname();
-$isNewSystem = $userHelper->isNewSystem();
-
-if ((empty($currentFullname) || $currentFullname === 'Unknown') && !$isNewSystem) {
-    header("Location: " . BASE_PATH . "profil.php");
-    exit;
-}
 
 $mitarbeiter = null;
 if (isset($_SESSION['discordtag']) && !empty($_SESSION['discordtag'])) {
