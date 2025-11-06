@@ -53,7 +53,7 @@ use App\Notifications\NotificationManager;
                         <i class="fa-solid fa-house-medical-flag" style="margin-right:3px"></i> eNOTF
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="<?= BASE_PATH ?>enotf/" target="_blank">Neues Protokoll</a></li>
+                        <li><a class="dropdown-item" href="<?= BASE_PATH ?>enotf/" target="_blank">eNOTF öffnen</a></li>
                         <?php if (Permissions::check(['admin', 'edivi.view'])) { ?>
                             <li>
                                 <hr class="dropdown-divider">
