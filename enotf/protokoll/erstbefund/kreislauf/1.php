@@ -124,7 +124,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             <input type="radio" class="btn-check" id="c_kreislauf-2" name="c_kreislauf" value="2" <?php echo ($daten['c_kreislauf'] == 2 ? 'checked' : '') ?> autocomplete="off">
                             <label for="c_kreislauf-2">instabil</label>
 
-                            <input type="radio" class="btn-check" id="c_kreislauf-99" name="awfrei_1" value="99" <?php echo ($daten['c_kreislauf'] == 99 ? 'checked' : '') ?> autocomplete="off">
+                            <input type="radio" class="btn-check" id="c_kreislauf-99" name="c_kreislauf" value="99" <?php echo ($daten['c_kreislauf'] == 99 ? 'checked' : '') ?> autocomplete="off">
                             <label for="c_kreislauf-99">Nicht beurteilbar</label>
                         </div>
                     </div>
