@@ -143,6 +143,27 @@ function tableExists(PDO $pdo, string $tableName): bool
     }
 }
 
+function columnExists(PDO $pdo, string $tableName, string $columnName): bool
+{
+    try {
+        $stmt = $pdo->prepare("SHOW COLUMNS FROM `{$tableName}` LIKE ?");
+        $stmt->execute([$columnName]);
+        return $stmt->rowCount() > 0;
+    } catch (PDOException $e) {
+        return false;
+    }
+}
+
+function extractColumnName(string $migrationContent): ?string
+{
+    // Extract column name from ALTER TABLE ADD COLUMN statements
+    // Examples: ADD COLUMN `c_zugang` LONGTEXT NULL -> c_zugang
+    if (preg_match('/ADD\s+COLUMN\s+`?([a-zA-Z0-9_]+)`?/i', $migrationContent, $matches)) {
+        return $matches[1];
+    }
+    return null;
+}
+
 function isTransactionActive(PDO $pdo): bool
 {
     return $pdo->inTransaction();
@@ -315,6 +336,24 @@ foreach ($migrationFiles as $migration) {
             $tableName = extractTableName($file);
             if ($tableName && !tableExists($pdo, $tableName)) {
                 throw new Exception("Table '$tableName' was not created successfully");
+            }
+        }
+        
+        // For ALTER migrations, verify the table exists and column was added if applicable
+        if ($type === 'alter') {
+            $tableName = extractTableName($file);
+            if ($tableName) {
+                // Check if table exists before altering
+                if (!tableExists($pdo, $tableName)) {
+                    throw new Exception("Cannot alter table '$tableName' - table does not exist");
+                }
+                
+                // Check if this is an ADD COLUMN migration
+                $migrationContent = file_get_contents($fullPath);
+                $columnName = extractColumnName($migrationContent);
+                if ($columnName && !columnExists($pdo, $tableName, $columnName)) {
+                    throw new Exception("Column '$columnName' was not added to table '$tableName' successfully");
+                }
             }
         }
 
