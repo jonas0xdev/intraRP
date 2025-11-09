@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS `intra_users_roles` (
   `priority` int(11) NOT NULL DEFAULT 0,
   `name` varchar(255) NOT NULL,
   `color` varchar(255) DEFAULT NULL,
-  `permissions` longtext DEFAULT '[]',
+  `permissions` longtext DEFAULT NULL,
   `default` tinyint(1) NOT NULL DEFAULT 0,
   `admin` tinyint(1) NOT NULL DEFAULT 0,
   `created_at` timestamp NULL DEFAULT current_timestamp(),

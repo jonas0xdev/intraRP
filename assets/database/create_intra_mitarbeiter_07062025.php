@@ -16,7 +16,7 @@ try {
         `qualifw2` int(11) NOT NULL DEFAULT 0,
         `qualird` int(11) NOT NULL DEFAULT 0,
         `zusatz` varchar(255) DEFAULT NULL,
-        `fachdienste` longtext NOT NULL DEFAULT '[]',
+        `fachdienste` longtext DEFAULT NULL,
         `createdate` datetime NOT NULL DEFAULT current_timestamp(),
         PRIMARY KEY (`id`),
         UNIQUE KEY `dienstnr` (`dienstnr`),
