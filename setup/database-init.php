@@ -344,6 +344,32 @@ echo "Project Root: $projectRoot\n";
 echo "Neue Migrationen ausgeführt: $executed\n";
 echo "Bereits ausgeführt (übersprungen): $alreadyRun\n";
 echo "Nicht gefunden: $skipped\n";
-echo "Gesamt: " . count($migrationFiles) . " Migrationen\n\n";
+echo "Gesamt: " . count($migrationFiles) . " Migrationen\n";
+
+// Verify critical tables exist
+$criticalTables = [
+    'intra_users',
+    'intra_users_roles',
+    'intra_migrations',
+    'intra_audit_log'
+];
+
+$missingTables = [];
+foreach ($criticalTables as $table) {
+    if (!tableExists($pdo, $table)) {
+        $missingTables[] = $table;
+    }
+}
+
+if (!empty($missingTables)) {
+    echo "\n⚠️  WARNUNG: Folgende kritische Tabellen fehlen:\n";
+    foreach ($missingTables as $table) {
+        echo "   - $table\n";
+    }
+    echo "\nBitte führen Sie 'composer db:migrate' erneut aus oder überprüfen Sie die Datenbankberechtigungen.\n";
+    exit(1);
+}
+
+echo "\n✅ Alle kritischen Tabellen wurden erfolgreich erstellt.\n\n";
 
 exit(0);
