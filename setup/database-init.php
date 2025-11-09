@@ -121,6 +121,28 @@ function markMigrationAsRun(PDO $pdo, string $migrationName)
     $stmt->execute([$migrationName]);
 }
 
+function extractTableName(string $fileName): ?string
+{
+    // Extract table name from migration file name
+    // Examples: create_intra_users_07062025.php -> intra_users
+    //           alter_intra_edivi_03092025.php -> intra_edivi
+    if (preg_match('/^(create|alter)_(.+?)_\d{8}\.php$/', $fileName, $matches)) {
+        return $matches[2];
+    }
+    return null;
+}
+
+function tableExists(PDO $pdo, string $tableName): bool
+{
+    try {
+        $stmt = $pdo->prepare("SHOW TABLES LIKE ?");
+        $stmt->execute([$tableName]);
+        return $stmt->rowCount() > 0;
+    } catch (PDOException $e) {
+        return false;
+    }
+}
+
 function isTransactionActive(PDO $pdo): bool
 {
     return $pdo->inTransaction();
@@ -249,34 +271,67 @@ foreach ($migrationFiles as $migration) {
         continue;
     }
 
-    $transactionStarted = false;
     try {
-        if (!isTransactionActive($pdo)) {
-            $pdo->beginTransaction();
-            $transactionStarted = true;
-        }
-
         echo "▶️  Führe aus [$type]: $file\n";
+        
+        // Capture output from the migration file
+        ob_start();
         include $fullPath;
+        $migrationOutput = ob_get_clean();
+        
+        // Check if there was any error output from the migration
+        // Look for common SQL error patterns
+        if (!empty($migrationOutput)) {
+            $isError = false;
+            $errorPatterns = [
+                'SQLSTATE',
+                'Table .* doesn\'t exist',
+                'Unknown column',
+                'Duplicate column',
+                'Syntax error',
+                'Access denied',
+                'Can\'t create table',
+                'Can\'t DROP',
+                'foreign key constraint fails'
+            ];
+            
+            foreach ($errorPatterns as $pattern) {
+                if (preg_match('/' . $pattern . '/i', $migrationOutput)) {
+                    $isError = true;
+                    break;
+                }
+            }
+            
+            if ($isError) {
+                throw new Exception("Migration produced error output: " . $migrationOutput);
+            } else {
+                // Non-error output, just display it
+                echo $migrationOutput;
+            }
+        }
+        
+        // For CREATE migrations, verify the table was actually created
+        if ($type === 'create') {
+            $tableName = extractTableName($file);
+            if ($tableName && !tableExists($pdo, $tableName)) {
+                throw new Exception("Table '$tableName' was not created successfully");
+            }
+        }
 
         markMigrationAsRun($pdo, $file);
-
-        if ($transactionStarted && isTransactionActive($pdo)) {
-            $pdo->commit();
-        }
-
         $executed++;
         echo "✅ Erfolgreich: $file\n\n";
     } catch (Exception $e) {
-        if ($transactionStarted && isTransactionActive($pdo)) {
-            $pdo->rollBack();
-        }
-
         echo "❌ Fehlgeschlagen: $file\n";
         echo "   Fehler: " . $e->getMessage() . "\n\n";
 
         if ($type === 'create' || $type === 'alter') {
             echo "⚠️  Kritischer Fehler bei $type-Migration. Abbruch.\n";
+            echo "   Bitte überprüfen Sie:\n";
+            echo "   1. Datenbankberechtigungen (CREATE, ALTER, INDEX Rechte)\n";
+            echo "   2. MySQL/MariaDB Version und Kompatibilität\n";
+            echo "   3. Verfügbarer Speicherplatz\n";
+            echo "   4. MySQL-Fehlerlog für detaillierte Fehlermeldungen\n\n";
             exit(1);
         }
 
