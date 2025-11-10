@@ -334,8 +334,19 @@ foreach ($migrationFiles as $migration) {
         // For CREATE migrations, verify the table was actually created
         if ($type === 'create') {
             $tableName = extractTableName($file);
-            if ($tableName && !tableExists($pdo, $tableName)) {
-                throw new Exception("Table '$tableName' was not created successfully");
+            if ($tableName) {
+                $exists = tableExists($pdo, $tableName);
+                if (!$exists) {
+                    // Additional debugging: check what tables exist
+                    try {
+                        $stmt = $pdo->query("SHOW TABLES");
+                        $tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
+                        $tableList = empty($tables) ? 'keine' : implode(', ', $tables);
+                        throw new Exception("Table '$tableName' was not created successfully. Existing tables: $tableList");
+                    } catch (PDOException $e) {
+                        throw new Exception("Table '$tableName' was not created successfully. Could not list tables: " . $e->getMessage());
+                    }
+                }
             }
         }
         
