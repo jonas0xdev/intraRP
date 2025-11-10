@@ -135,7 +135,12 @@ function extractTableName(string $fileName): ?string
 function tableExists(PDO $pdo, string $tableName): bool
 {
     try {
-        $stmt = $pdo->prepare("SHOW TABLES LIKE ?");
+        $stmt = $pdo->prepare("
+            SELECT TABLE_NAME 
+            FROM INFORMATION_SCHEMA.TABLES 
+            WHERE TABLE_SCHEMA = DATABASE() 
+            AND TABLE_NAME = ?
+        ");
         $stmt->execute([$tableName]);
         return $stmt->rowCount() > 0;
     } catch (PDOException $e) {
@@ -146,8 +151,14 @@ function tableExists(PDO $pdo, string $tableName): bool
 function columnExists(PDO $pdo, string $tableName, string $columnName): bool
 {
     try {
-        $stmt = $pdo->prepare("SHOW COLUMNS FROM `{$tableName}` LIKE ?");
-        $stmt->execute([$columnName]);
+        $stmt = $pdo->prepare("
+            SELECT COLUMN_NAME 
+            FROM INFORMATION_SCHEMA.COLUMNS 
+            WHERE TABLE_SCHEMA = DATABASE() 
+            AND TABLE_NAME = ? 
+            AND COLUMN_NAME = ?
+        ");
+        $stmt->execute([$tableName, $columnName]);
         return $stmt->rowCount() > 0;
     } catch (PDOException $e) {
         return false;
