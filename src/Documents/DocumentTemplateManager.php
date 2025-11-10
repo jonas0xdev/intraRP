@@ -94,10 +94,10 @@ class DocumentTemplateManager
         // Dekodiere JSON-Felder
         foreach ($template['fields'] as &$field) {
             if ($field['field_options']) {
-                $field['field_options'] = json_decode($field['field_options'], true);
+                $field['field_options'] = json_decode($field['field_options'] ?? '[]', true);
             }
             if ($field['validation_rules']) {
-                $field['validation_rules'] = json_decode($field['validation_rules'], true);
+                $field['validation_rules'] = json_decode($field['validation_rules'] ?? '[]', true);
             }
         }
 

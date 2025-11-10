@@ -36,13 +36,13 @@ class Permissions
                 $roleStmt->execute(['roleId' => $user['role']]);
                 $role = $roleStmt->fetch(PDO::FETCH_ASSOC);
 
-                if ($role && isset($role['permissions'])) {
+                if ($role) {
                     $_SESSION['role_id'] = $user['role'];
                     $_SESSION['role_name'] = $role['name'];
                     $_SESSION['role_color'] = $role['color'];
                     $_SESSION['role_priority'] = $role['priority'];
 
-                    $permissions = json_decode($role['permissions'], true);
+                    $permissions = json_decode($role['permissions'] ?? '[]', true);
                     return is_array($permissions) ? $permissions : [];
                 }
             }
