@@ -91,6 +91,32 @@ $options = [
 try {
     $pdo = new PDO($dsn, $db_user, $db_pass, $options);
     echo "✓ Datenbankverbindung erfolgreich\n";
+    
+    // Check SQL mode for debugging environment-specific issues
+    try {
+        $stmt = $pdo->query("SELECT @@sql_mode");
+        $sqlMode = $stmt->fetchColumn();
+        echo "ℹ️  SQL Mode: " . ($sqlMode ?: '(empty)') . "\n";
+        
+        // Check for problematic modes
+        $modes = array_map('trim', explode(',', $sqlMode));
+        $recommendedModes = ['STRICT_TRANS_TABLES', 'NO_ZERO_IN_DATE', 'NO_ZERO_DATE', 'ERROR_FOR_DIVISION_BY_ZERO', 'NO_ENGINE_SUBSTITUTION'];
+        $problematicModes = ['TRADITIONAL', 'STRICT_ALL_TABLES'];
+        
+        foreach ($problematicModes as $mode) {
+            if (in_array($mode, $modes)) {
+                echo "⚠️  SQL Mode '$mode' ist aktiv (kann zu strengeren Validierungen führen)\n";
+            }
+        }
+        
+        // Check MySQL/MariaDB version
+        $stmt = $pdo->query("SELECT VERSION()");
+        $version = $stmt->fetchColumn();
+        echo "ℹ️  Datenbankversion: $version\n";
+    } catch (PDOException $e) {
+        // Non-critical, continue anyway
+        echo "⚠️  Konnte SQL Mode nicht abfragen: " . $e->getMessage() . "\n";
+    }
 } catch (PDOException $e) {
     echo "❌ Datenbankverbindung fehlgeschlagen: " . $e->getMessage() . "\n";
     exit(1);
