@@ -91,6 +91,32 @@ $options = [
 try {
     $pdo = new PDO($dsn, $db_user, $db_pass, $options);
     echo "✓ Datenbankverbindung erfolgreich\n";
+    
+    // Check SQL mode for debugging environment-specific issues
+    try {
+        $stmt = $pdo->query("SELECT @@sql_mode");
+        $sqlMode = $stmt->fetchColumn();
+        echo "ℹ️  SQL Mode: " . ($sqlMode ?: '(empty)') . "\n";
+        
+        // Check for problematic modes
+        $modes = array_map('trim', explode(',', $sqlMode));
+        $recommendedModes = ['STRICT_TRANS_TABLES', 'NO_ZERO_IN_DATE', 'NO_ZERO_DATE', 'ERROR_FOR_DIVISION_BY_ZERO', 'NO_ENGINE_SUBSTITUTION'];
+        $problematicModes = ['TRADITIONAL', 'STRICT_ALL_TABLES'];
+        
+        foreach ($problematicModes as $mode) {
+            if (in_array($mode, $modes)) {
+                echo "⚠️  SQL Mode '$mode' ist aktiv (kann zu strengeren Validierungen führen)\n";
+            }
+        }
+        
+        // Check MySQL/MariaDB version
+        $stmt = $pdo->query("SELECT VERSION()");
+        $version = $stmt->fetchColumn();
+        echo "ℹ️  Datenbankversion: $version\n";
+    } catch (PDOException $e) {
+        // Non-critical, continue anyway
+        echo "⚠️  Konnte SQL Mode nicht abfragen: " . $e->getMessage() . "\n";
+    }
 } catch (PDOException $e) {
     echo "❌ Datenbankverbindung fehlgeschlagen: " . $e->getMessage() . "\n";
     exit(1);
@@ -119,6 +145,60 @@ function markMigrationAsRun(PDO $pdo, string $migrationName)
 {
     $stmt = $pdo->prepare("INSERT IGNORE INTO intra_migrations (migration) VALUES (?)");
     $stmt->execute([$migrationName]);
+}
+
+function extractTableName(string $fileName): ?string
+{
+    // Extract table name from migration file name
+    // Examples: create_intra_users_07062025.php -> intra_users
+    //           alter_intra_edivi_03092025.php -> intra_edivi
+    if (preg_match('/^(create|alter)_(.+?)_\d{8}\.php$/', $fileName, $matches)) {
+        return $matches[2];
+    }
+    return null;
+}
+
+function tableExists(PDO $pdo, string $tableName): bool
+{
+    try {
+        $stmt = $pdo->prepare("
+            SELECT TABLE_NAME 
+            FROM INFORMATION_SCHEMA.TABLES 
+            WHERE TABLE_SCHEMA = DATABASE() 
+            AND TABLE_NAME = ?
+        ");
+        $stmt->execute([$tableName]);
+        return $stmt->rowCount() > 0;
+    } catch (PDOException $e) {
+        return false;
+    }
+}
+
+function columnExists(PDO $pdo, string $tableName, string $columnName): bool
+{
+    try {
+        $stmt = $pdo->prepare("
+            SELECT COLUMN_NAME 
+            FROM INFORMATION_SCHEMA.COLUMNS 
+            WHERE TABLE_SCHEMA = DATABASE() 
+            AND TABLE_NAME = ? 
+            AND COLUMN_NAME = ?
+        ");
+        $stmt->execute([$tableName, $columnName]);
+        return $stmt->rowCount() > 0;
+    } catch (PDOException $e) {
+        return false;
+    }
+}
+
+function extractColumnName(string $migrationContent): ?string
+{
+    // Extract column name from ALTER TABLE ADD COLUMN statements
+    // Examples: ADD COLUMN `c_zugang` LONGTEXT NULL -> c_zugang
+    if (preg_match('/ADD\s+COLUMN\s+`?([a-zA-Z0-9_]+)`?/i', $migrationContent, $matches)) {
+        return $matches[1];
+    }
+    return null;
 }
 
 function isTransactionActive(PDO $pdo): bool
@@ -249,34 +329,96 @@ foreach ($migrationFiles as $migration) {
         continue;
     }
 
-    $transactionStarted = false;
     try {
-        if (!isTransactionActive($pdo)) {
-            $pdo->beginTransaction();
-            $transactionStarted = true;
-        }
-
         echo "▶️  Führe aus [$type]: $file\n";
+        
+        // Capture output from the migration file
+        ob_start();
         include $fullPath;
+        $migrationOutput = ob_get_clean();
+        
+        // Check if there was any error output from the migration
+        // Look for common SQL error patterns
+        if (!empty($migrationOutput)) {
+            $isError = false;
+            $errorPatterns = [
+                'SQLSTATE',
+                'Table .* doesn\'t exist',
+                'Unknown column',
+                'Duplicate column',
+                'Syntax error',
+                'Access denied',
+                'Can\'t create table',
+                'Can\'t DROP',
+                'foreign key constraint fails'
+            ];
+            
+            foreach ($errorPatterns as $pattern) {
+                if (preg_match('/' . $pattern . '/i', $migrationOutput)) {
+                    $isError = true;
+                    break;
+                }
+            }
+            
+            if ($isError) {
+                throw new Exception("Migration produced error output: " . $migrationOutput);
+            } else {
+                // Non-error output, just display it
+                echo $migrationOutput;
+            }
+        }
+        
+        // For CREATE migrations, verify the table was actually created
+        if ($type === 'create') {
+            $tableName = extractTableName($file);
+            if ($tableName) {
+                $exists = tableExists($pdo, $tableName);
+                if (!$exists) {
+                    // Additional debugging: check what tables exist
+                    try {
+                        $stmt = $pdo->query("SHOW TABLES");
+                        $tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
+                        $tableList = empty($tables) ? 'keine' : implode(', ', $tables);
+                        throw new Exception("Table '$tableName' was not created successfully. Existing tables: $tableList");
+                    } catch (PDOException $e) {
+                        throw new Exception("Table '$tableName' was not created successfully. Could not list tables: " . $e->getMessage());
+                    }
+                }
+            }
+        }
+        
+        // For ALTER migrations, verify the table exists and column was added if applicable
+        if ($type === 'alter') {
+            $tableName = extractTableName($file);
+            if ($tableName) {
+                // Check if table exists before altering
+                if (!tableExists($pdo, $tableName)) {
+                    throw new Exception("Cannot alter table '$tableName' - table does not exist");
+                }
+                
+                // Check if this is an ADD COLUMN migration
+                $migrationContent = file_get_contents($fullPath);
+                $columnName = extractColumnName($migrationContent);
+                if ($columnName && !columnExists($pdo, $tableName, $columnName)) {
+                    throw new Exception("Column '$columnName' was not added to table '$tableName' successfully");
+                }
+            }
+        }
 
         markMigrationAsRun($pdo, $file);
-
-        if ($transactionStarted && isTransactionActive($pdo)) {
-            $pdo->commit();
-        }
-
         $executed++;
         echo "✅ Erfolgreich: $file\n\n";
     } catch (Exception $e) {
-        if ($transactionStarted && isTransactionActive($pdo)) {
-            $pdo->rollBack();
-        }
-
         echo "❌ Fehlgeschlagen: $file\n";
         echo "   Fehler: " . $e->getMessage() . "\n\n";
 
         if ($type === 'create' || $type === 'alter') {
             echo "⚠️  Kritischer Fehler bei $type-Migration. Abbruch.\n";
+            echo "   Bitte überprüfen Sie:\n";
+            echo "   1. Datenbankberechtigungen (CREATE, ALTER, INDEX Rechte)\n";
+            echo "   2. MySQL/MariaDB Version und Kompatibilität\n";
+            echo "   3. Verfügbarer Speicherplatz\n";
+            echo "   4. MySQL-Fehlerlog für detaillierte Fehlermeldungen\n\n";
             exit(1);
         }
 
@@ -289,6 +431,32 @@ echo "Project Root: $projectRoot\n";
 echo "Neue Migrationen ausgeführt: $executed\n";
 echo "Bereits ausgeführt (übersprungen): $alreadyRun\n";
 echo "Nicht gefunden: $skipped\n";
-echo "Gesamt: " . count($migrationFiles) . " Migrationen\n\n";
+echo "Gesamt: " . count($migrationFiles) . " Migrationen\n";
+
+// Verify critical tables exist
+$criticalTables = [
+    'intra_users',
+    'intra_users_roles',
+    'intra_migrations',
+    'intra_audit_log'
+];
+
+$missingTables = [];
+foreach ($criticalTables as $table) {
+    if (!tableExists($pdo, $table)) {
+        $missingTables[] = $table;
+    }
+}
+
+if (!empty($missingTables)) {
+    echo "\n⚠️  WARNUNG: Folgende kritische Tabellen fehlen:\n";
+    foreach ($missingTables as $table) {
+        echo "   - $table\n";
+    }
+    echo "\nBitte führen Sie 'composer db:migrate' erneut aus oder überprüfen Sie die Datenbankberechtigungen.\n";
+    exit(1);
+}
+
+echo "\n✅ Alle kritischen Tabellen wurden erfolgreich erstellt.\n\n";
 
 exit(0);

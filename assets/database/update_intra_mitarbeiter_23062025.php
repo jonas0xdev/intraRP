@@ -1,7 +1,7 @@
 <?php
 try {
     $sql = <<<SQL
-        ALTER TABLE IF EXISTS `intra_mitarbeiter` 
+        ALTER TABLE `intra_mitarbeiter` 
         MODIFY COLUMN `charakterid` VARCHAR(255) NULL DEFAULT NULL;
     SQL;
 

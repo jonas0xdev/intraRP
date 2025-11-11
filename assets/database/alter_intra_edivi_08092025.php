@@ -1,7 +1,7 @@
 <?php
 try {
     $sql = <<<SQL
-    ALTER TABLE IF EXISTS `intra_edivi`
+    ALTER TABLE `intra_edivi`
     ADD COLUMN `c_zugang` LONGTEXT NULL
     AFTER `c_ekg`;
 SQL;

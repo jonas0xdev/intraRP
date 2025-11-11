@@ -53,7 +53,7 @@ class DocumentRenderer
      */
     private function renderCustomDocument(array $doc): string
     {
-        $customData = json_decode($doc['custom_data'], true);
+        $customData = json_decode($doc['custom_data'] ?? '{}', true);
         $issuer = $this->getIssuerData($doc['ausstellerid']);
 
         // Lade Template-Felder und Config
@@ -274,7 +274,7 @@ class DocumentRenderer
                 return $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             case 'select':
-                return $fieldOptions ? json_decode($fieldOptions, true) : [];
+                return $fieldOptions ? json_decode($fieldOptions ?? '[]', true) : [];
 
             default:
                 return [];
