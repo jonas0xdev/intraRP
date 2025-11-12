@@ -314,7 +314,8 @@ class SystemUpdater
             }
 
             // Step 4: Apply update (copy files)
-            $excludeDirs = ['vendor', 'storage', 'system/updates'];
+            // Exclude vendor, storage, system/updates, and assets/img to preserve customizations
+            $excludeDirs = ['vendor', 'storage', 'system/updates', 'assets/img'];
             $excludeFiles = ['.env', '.git', '.gitignore'];
 
             try {

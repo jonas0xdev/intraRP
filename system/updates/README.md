@@ -126,6 +126,32 @@ Die Datei `.github/workflows/update-version.yml` automatisiert die Version-Aktua
 3. Erstellt/aktualisiert `system/updates/version.json`
 4. Committet die Änderungen zurück zum Repository
 
+## Geschützte Dateien und Verzeichnisse
+
+Das Update-System schützt automatisch bestimmte Dateien und Verzeichnisse vor Überschreibung:
+
+### Geschützte Verzeichnisse
+- **`vendor/`**: Composer-Abhängigkeiten (werden separat über `composer install` aktualisiert)
+- **`storage/`**: Benutzerdaten, Uploads und Logs
+- **`system/updates/`**: Update-Backups und Versionsinformationen
+- **`assets/img/`**: Angepasste Bilder wie Logos, Wappen, Wallpapers und Dienstgrad-Abzeichen
+
+### Geschützte Dateien
+- **`.env`**: Umgebungskonfiguration mit sensiblen Daten
+- **`.git`**: Git-Repository-Informationen
+- **`.gitignore`**: Git-Ignore-Konfiguration
+
+### Anpassbare Bilder
+
+Die folgenden Bildverzeichnisse bleiben bei Updates erhalten:
+- `assets/img/defaultLogo.png/webp` - System-Logo
+- `assets/img/wappen_small.png` - Wappen
+- `assets/img/wallpaper.png/webp` - Hintergrundbild
+- `assets/img/schriftzug_*.png` - Organisationsschriftzüge
+- `assets/img/dienstgrade/` - Dienstgrad-Abzeichen
+
+**Tipp**: Das System-Logo kann über die System-Konfiguration (`/settings/system/config.php`) angepasst werden, ohne Dateien direkt zu ersetzen.
+
 ## Sicherheit
 
 ### Sicherheitsmaßnahmen
@@ -137,6 +163,7 @@ Die Datei `.github/workflows/update-version.yml` automatisiert die Version-Aktua
 5. **Audit-Logging**: Alle Update-Checks werden protokolliert
 6. **XSS-Schutz**: Alle Benutzereingaben werden escaped
 7. **CSRF-Schutz**: POST-Requests erforderlich für Aktionen
+8. **Schutz angepasster Inhalte**: Benutzerdefinierte Bilder und Konfigurationen bleiben erhalten
 
 ### Best Practices
 
