@@ -130,20 +130,25 @@ Die Datei `.github/workflows/update-version.yml` automatisiert die Version-Aktua
 
 Das Update-System schützt automatisch bestimmte Dateien und Verzeichnisse vor Überschreibung:
 
-### Geschützte Verzeichnisse
+### Vollständig ausgeschlossene Verzeichnisse
+Diese Verzeichnisse werden beim Update komplett übersprungen:
 - **`vendor/`**: Composer-Abhängigkeiten (werden separat über `composer install` aktualisiert)
 - **`storage/`**: Benutzerdaten, Uploads und Logs
 - **`system/updates/`**: Update-Backups und Versionsinformationen
-- **`assets/img/`**: Angepasste Bilder wie Logos, Wappen, Wallpapers und Dienstgrad-Abzeichen
 
 ### Geschützte Dateien
 - **`.env`**: Umgebungskonfiguration mit sensiblen Daten
 - **`.git`**: Git-Repository-Informationen
 - **`.gitignore`**: Git-Ignore-Konfiguration
 
-### Anpassbare Bilder
+### Intelligenter Bildschutz (`assets/img/`)
 
-Die folgenden Bildverzeichnisse bleiben bei Updates erhalten:
+Das Update-System verwendet einen intelligenten Ansatz für Bilder:
+- **Existierende Bilder bleiben erhalten**: Angepasste Logos, Wappen, Wallpapers und Dienstgrad-Abzeichen werden nicht überschrieben
+- **Neue Bilder werden hinzugefügt**: Wenn ein Update neue Bilddateien enthält (z.B. neue Dienstgrad-Abzeichen), werden diese automatisch hinzugefügt
+- **Keine Datenverluste**: Ihre Anpassungen bleiben sicher, während Sie von neuen Features profitieren
+
+#### Beispiele für geschützte Bilder:
 - `assets/img/defaultLogo.png/webp` - System-Logo
 - `assets/img/wappen_small.png` - Wappen
 - `assets/img/wallpaper.png/webp` - Hintergrundbild
