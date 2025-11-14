@@ -53,7 +53,7 @@ if (!Permissions::check(['admin', 'users.view'])) {
                             <tbody>
                                 <?php
                                 require __DIR__ . '/../assets/config/database.php';
-                                $stmt = $pdo->prepare("SELECT * FROM intra_users");
+                                $stmt = $pdo->prepare("SELECT u.id, u.username, u.created_at, u.role, u.full_admin, u.discord_id, COALESCE(m.fullname, 'Kein Profil verbunden') as fullname FROM intra_users u LEFT JOIN intra_mitarbeiter m ON u.discord_id = m.discordtag");
                                 $stmt->execute();
                                 $result = $stmt->fetchAll();
 
@@ -73,7 +73,7 @@ if (!Permissions::check(['admin', 'users.view'])) {
                                     $date = (new DateTime($row['created_at']))->format('d.m.Y | H:i');
                                     echo "<tr>";
                                     echo "<td >" . $row['id'] . "</td>";
-                                    echo "<td>" . $row['fullname'] .  " (<strong>" . $row['username'] . "</strong>)</td>";
+                                    echo "<td>" . htmlspecialchars($row['fullname']) .  " (<strong>" . htmlspecialchars($row['username']) . "</strong>)</td>";
                                     echo "<td><span class='badge text-bg-" . $role_color . "'>" . $role_name . "</span></td>";
                                     echo "<td><span style='display:none'>" . $row['created_at'] . "</span>" . $date . "</td>";
                                     if (Permissions::check(['admin', 'users.edit'])) {
