@@ -314,11 +314,14 @@ class SystemUpdater
             }
 
             // Step 4: Apply update (copy files)
+            // Exclude vendor, storage, and system/updates directories
             $excludeDirs = ['vendor', 'storage', 'system/updates'];
             $excludeFiles = ['.env', '.git', '.gitignore'];
+            // For these directories, only copy new files (don't overwrite existing customizations)
+            $preserveDirs = ['assets/img'];
 
             try {
-                $this->copyUpdateFiles($sourceDir, $appRoot, $excludeDirs, $excludeFiles);
+                $this->copyUpdateFiles($sourceDir, $appRoot, $excludeDirs, $excludeFiles, $preserveDirs);
             } catch (Exception $e) {
                 throw new Exception('Fehler beim Kopieren der Update-Dateien: ' . $e->getMessage() . ' - Backup verfügbar in: ' . $backupDir);
             }
@@ -414,8 +417,14 @@ class SystemUpdater
 
     /**
      * Copy update files while excluding certain directories and files
+     * 
+     * @param string $source Source directory
+     * @param string $dest Destination directory
+     * @param array $excludeDirs Directories to completely skip
+     * @param array $excludeFiles Files to completely skip
+     * @param array $preserveDirs Directories where existing files should be preserved (only copy new files)
      */
-    private function copyUpdateFiles(string $source, string $dest, array $excludeDirs, array $excludeFiles): void
+    private function copyUpdateFiles(string $source, string $dest, array $excludeDirs, array $excludeFiles, array $preserveDirs = []): void
     {
         $iterator = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($source, \RecursiveDirectoryIterator::SKIP_DOTS),
@@ -448,6 +457,15 @@ class SystemUpdater
 
             $destPath = $dest . '/' . $subPath;
             
+            // Check if path is in a preserve directory
+            $inPreserveDir = false;
+            foreach ($preserveDirs as $preserveDir) {
+                if (strpos($subPath, $preserveDir) === 0) {
+                    $inPreserveDir = true;
+                    break;
+                }
+            }
+            
             if ($item->isDir()) {
                 if (!is_dir($destPath)) {
                     mkdir($destPath, 0755, true);
@@ -457,7 +475,16 @@ class SystemUpdater
                 if (!is_dir($destDir)) {
                     mkdir($destDir, 0755, true);
                 }
-                copy($item, $destPath);
+                
+                // If in preserve directory, only copy if file doesn't exist
+                if ($inPreserveDir) {
+                    if (!file_exists($destPath)) {
+                        copy($item, $destPath);
+                    }
+                } else {
+                    // Normal behavior: overwrite existing files
+                    copy($item, $destPath);
+                }
             }
         }
     }
