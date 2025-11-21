@@ -206,6 +206,18 @@ function isTransactionActive(PDO $pdo): bool
     return $pdo->inTransaction();
 }
 
+function throwTableCreationError(PDO $pdo, string $missingTableInfo)
+{
+    try {
+        $stmt = $pdo->query("SHOW TABLES");
+        $tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        $tableList = empty($tables) ? 'keine' : implode(', ', $tables);
+        throw new Exception("$missingTableInfo. Existing tables: $tableList");
+    } catch (PDOException $e) {
+        throw new Exception("$missingTableInfo. Could not list tables: " . $e->getMessage());
+    }
+}
+
 ensureMigrationsTable($pdo);
 
 $migrationPath = $projectRoot . '/assets/database';
@@ -372,6 +384,10 @@ foreach ($migrationFiles as $migration) {
         if ($type === 'create') {
             // Check if migration specifies multiple tables to verify
             if (isset($migration['tables']) && is_array($migration['tables'])) {
+                if (empty($migration['tables'])) {
+                    throw new Exception("Migration has 'tables' parameter but it is empty");
+                }
+                
                 $missingTables = [];
                 foreach ($migration['tables'] as $tableName) {
                     if (!tableExists($pdo, $tableName)) {
@@ -380,17 +396,8 @@ foreach ($migrationFiles as $migration) {
                 }
                 
                 if (!empty($missingTables)) {
-                    // Additional debugging: check what tables exist
-                    try {
-                        $stmt = $pdo->query("SHOW TABLES");
-                        $tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
-                        $tableList = empty($tables) ? 'keine' : implode(', ', $tables);
-                        $missingList = implode(', ', $missingTables);
-                        throw new Exception("Tables were not created successfully: $missingList. Existing tables: $tableList");
-                    } catch (PDOException $e) {
-                        $missingList = implode(', ', $missingTables);
-                        throw new Exception("Tables were not created successfully: $missingList. Could not list tables: " . $e->getMessage());
-                    }
+                    $missingList = implode(', ', $missingTables);
+                    throwTableCreationError($pdo, "Tables were not created successfully: $missingList");
                 }
             } else {
                 // Single table migration - extract table name from filename
@@ -398,15 +405,7 @@ foreach ($migrationFiles as $migration) {
                 if ($tableName) {
                     $exists = tableExists($pdo, $tableName);
                     if (!$exists) {
-                        // Additional debugging: check what tables exist
-                        try {
-                            $stmt = $pdo->query("SHOW TABLES");
-                            $tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
-                            $tableList = empty($tables) ? 'keine' : implode(', ', $tables);
-                            throw new Exception("Table '$tableName' was not created successfully. Existing tables: $tableList");
-                        } catch (PDOException $e) {
-                            throw new Exception("Table '$tableName' was not created successfully. Could not list tables: " . $e->getMessage());
-                        }
+                        throwTableCreationError($pdo, "Table '$tableName' was not created successfully");
                     }
                 }
             }
