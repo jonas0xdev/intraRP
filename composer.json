@@ -20,6 +20,7 @@
   },
   "scripts": {
     "db:migrate": "@php setup/database-init.php",
+    "db:validate": "@php setup/validate-migrations.php",
     "post-install-cmd": [
       "@db:migrate"
     ]
