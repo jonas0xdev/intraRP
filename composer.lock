@@ -57,16 +57,16 @@
         },
         {
             "name": "datatables.net/datatables.net",
-            "version": "2.3.4",
+            "version": "2.3.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/DataTables/Dist-DataTables.git",
-                "reference": "87ae886679e2d4529032364c9f26f0042711cd0e"
+                "reference": "d20915f4c90f0adfc8ca15ad7d7eeac66092bcf3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/DataTables/Dist-DataTables/zipball/87ae886679e2d4529032364c9f26f0042711cd0e",
-                "reference": "87ae886679e2d4529032364c9f26f0042711cd0e",
+                "url": "https://api.github.com/repos/DataTables/Dist-DataTables/zipball/d20915f4c90f0adfc8ca15ad7d7eeac66092bcf3",
+                "reference": "d20915f4c90f0adfc8ca15ad7d7eeac66092bcf3",
                 "shasum": ""
             },
             "require": {
@@ -94,20 +94,20 @@
                 "forum": "https://datatables.net/forums",
                 "source": "https://github.com/DataTables/Dist-DataTables"
             },
-            "time": "2025-09-09T10:50:51+00:00"
+            "time": "2025-11-14T16:15:20+00:00"
         },
         {
             "name": "datatables.net/datatables.net-bs5",
-            "version": "2.3.4",
+            "version": "2.3.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/DataTables/Dist-DataTables-Bootstrap5.git",
-                "reference": "b62a7995d443d6b9116cc7c29c01ae44105b6420"
+                "reference": "89b79812ed1f34c9fec44dafcc6a1975529a5147"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/DataTables/Dist-DataTables-Bootstrap5/zipball/b62a7995d443d6b9116cc7c29c01ae44105b6420",
-                "reference": "b62a7995d443d6b9116cc7c29c01ae44105b6420",
+                "url": "https://api.github.com/repos/DataTables/Dist-DataTables-Bootstrap5/zipball/89b79812ed1f34c9fec44dafcc6a1975529a5147",
+                "reference": "89b79812ed1f34c9fec44dafcc6a1975529a5147",
                 "shasum": ""
             },
             "require": {
@@ -139,7 +139,7 @@
                 "issues": "https://github.com/DataTables/Dist-DataTables-Bootstrap5/issues",
                 "source": "https://github.com/DataTables/Dist-DataTables-Bootstrap5"
             },
-            "time": "2025-09-09T10:52:36+00:00"
+            "time": "2025-11-14T16:16:46+00:00"
         },
         {
             "name": "dompdf/dompdf",
