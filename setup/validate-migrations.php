@@ -33,7 +33,8 @@ function extractTableName(string $fileName): ?string
 {
     // Extract table name from migration file name
     // Handles CREATE and ALTER types only (critical operations)
-    if (preg_match('/^(create|alter)_(.+?)_\d{8}\.php$/', $fileName, $matches)) {
+    // Date format: DDMMYYYY (8 digits)
+    if (preg_match('/^(create|alter)_(.+?)_\d{2}\d{2}\d{4}\.php$/', $fileName, $matches)) {
         return $matches[2];
     }
     return null;
@@ -55,6 +56,16 @@ function extractTablesFromSQL(string $content): array
     
     return array_unique($tables);
 }
+
+/**
+ * Special files that don't follow the standard table naming convention
+ * These files perform multiple operations or special tasks
+ */
+const SPECIAL_FILES = [
+    'add_foreign_keys_07062025.php',
+    'migrate_existing_documents_30092025.php',
+    'remove_lang_config_04112025.php'
+];
 
 function getConfiguredMultiTableFiles(string $projectRoot): array
 {
@@ -100,13 +111,7 @@ try {
         $fileName = basename($file);
         
         // Skip special files that don't follow naming convention
-        $specialFiles = [
-            'add_foreign_keys_07062025.php',
-            'migrate_existing_documents_30092025.php',
-            'remove_lang_config_04112025.php'
-        ];
-        
-        if (in_array($fileName, $specialFiles)) {
+        if (in_array($fileName, SPECIAL_FILES)) {
             continue;
         }
         

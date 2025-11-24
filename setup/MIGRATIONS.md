@@ -9,12 +9,12 @@ Migration files must follow strict naming conventions to ensure proper validatio
 ### Standard Naming Pattern
 
 ```
-<action>_<table_name>_<ddmmyyyy>.php
+<action>_<table_name>_<DDMMYYYY>.php
 ```
 
 - **action**: The type of operation (create, alter, insert, update, etc.)
 - **table_name**: The exact name of the database table being modified
-- **ddmmyyyy**: Date stamp (day, month, year)
+- **DDMMYYYY**: Date stamp with zero-padding (day, month, year) - e.g., `07062025` for June 7, 2025
 
 ### Examples
 
