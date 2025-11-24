@@ -33,8 +33,8 @@ function extractTableName(string $fileName): ?string
 {
     // Extract table name from migration file name
     // Handles CREATE and ALTER types only (critical operations)
-    // Date format: DDMMYYYY (8 digits)
-    if (preg_match('/^(create|alter)_(.+?)_\d{2}\d{2}\d{4}\.php$/', $fileName, $matches)) {
+    // Date format: DDMMYYYY (8 digits, e.g., 07062025 for June 7, 2025)
+    if (preg_match('/^(create|alter)_(.+?)_\d{8}\.php$/', $fileName, $matches)) {
         return $matches[2];
     }
     return null;
@@ -70,6 +70,7 @@ const SPECIAL_FILES = [
 function getConfiguredMultiTableFiles(string $projectRoot): array
 {
     // Parse database-init.php to find files with 'tables' parameter
+    // This identifies multi-table migrations that are already properly configured
     $initFile = $projectRoot . '/setup/database-init.php';
     if (!file_exists($initFile)) {
         return [];
@@ -78,7 +79,10 @@ function getConfiguredMultiTableFiles(string $projectRoot): array
     $content = file_get_contents($initFile);
     $multiTableFiles = [];
     
-    // Match entries with 'tables' parameter
+    // Match entries with 'tables' parameter in the migrationFiles array
+    // Pattern: ['file' => 'filename.php', ..., 'tables' => [...]
+    // Note: This is a simple pattern matcher. If the array format changes significantly,
+    // this may need to be updated or replaced with more robust parsing.
     if (preg_match_all("/\['file'\s*=>\s*'([^']+)'[^\]]*'tables'\s*=>\s*\[/", $content, $matches)) {
         $multiTableFiles = $matches[1];
     }
