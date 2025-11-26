@@ -51,7 +51,7 @@
 }
 
 body {
-  --bs-body-font-family: "Maven Pro", system-ui, -apple-system, "Segoe UI",
+  --bs-body-font-family: "Rubik", system-ui, -apple-system, "Segoe UI",
     Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !important;
 }
@@ -249,8 +249,7 @@ body#dashboard::before {
   height: 100%;
   background: url("https://dev.intrarp.de/assets/img/wallpaper.webp") no-repeat center center fixed;
   background-size: cover;
-  filter: blur(3px);
-  /* Adjust the value (5px) to control the amount of blur */
+  filter: blur(3px); /* Adjust the value (5px) to control the amount of blur */
   z-index: -1;
 }
 
@@ -402,3 +401,5 @@ body {
     background-position: 0 50%;
   }
 }
+
+/*# sourceMappingURL=style.css.map */

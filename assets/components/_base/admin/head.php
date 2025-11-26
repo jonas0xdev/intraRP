@@ -9,7 +9,7 @@ $SITE_TITLE = isset($SITE_TITLE) ? $SITE_TITLE : 'Administration';
 <!-- Stylesheets -->
 <link rel="stylesheet" href="<?= BASE_PATH ?>assets/css/style.min.css" />
 <link rel="stylesheet" href="<?= BASE_PATH ?>assets/css/admin.min.css" />
-<link rel="stylesheet" href="<?= BASE_PATH ?>assets/fonts/mavenpro/css/all.min.css" />
+<link rel="stylesheet" href="<?= BASE_PATH ?>assets/fonts/rubik/css/all.min.css" />
 <link rel="stylesheet" href="<?= BASE_PATH ?>vendor/twbs/bootstrap/dist/css/bootstrap.min.css">
 <script src="<?= BASE_PATH ?>vendor/components/jquery/jquery.min.js"></script>
 <script src="<?= BASE_PATH ?>vendor/twbs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
