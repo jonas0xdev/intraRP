@@ -115,6 +115,57 @@ $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
             color: #ffffff;
             border-bottom: none;
         }
+        /* Search autocomplete styling */
+        .search-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background-color: #2d2d2d;
+            border: 1px solid #444;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+        .search-suggestions.active {
+            display: block;
+        }
+        .search-suggestion-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #444;
+            color: #e0e0e0;
+            text-decoration: none;
+            display: block;
+        }
+        .search-suggestion-item:last-child {
+            border-bottom: none;
+        }
+        .search-suggestion-item:hover {
+            background-color: rgba(255,255,255,0.1);
+            color: #ffffff;
+        }
+        .search-suggestion-title {
+            font-weight: bold;
+            color: #ffffff;
+        }
+        .search-suggestion-subtitle {
+            font-size: 0.85rem;
+            color: #aaaaaa;
+        }
+        .search-suggestion-meta {
+            display: flex;
+            gap: 8px;
+            margin-top: 4px;
+        }
+        .search-suggestion-badge {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
     </style>
 </head>
 
@@ -164,8 +215,12 @@ $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             </div>
                             <div class="col-md-5">
                                 <label for="search" class="form-label">Suche</label>
-                                <input type="text" name="search" id="search" class="form-control" 
-                                       placeholder="Titel, Beschreibung..." value="<?= htmlspecialchars($searchQuery) ?>">
+                                <div class="position-relative">
+                                    <input type="text" name="search" id="search" class="form-control" 
+                                           placeholder="Titel, Beschreibung..." value="<?= htmlspecialchars($searchQuery) ?>"
+                                           autocomplete="off">
+                                    <div id="search-suggestions" class="search-suggestions"></div>
+                                </div>
                             </div>
                             <?php if ($isLoggedIn && Permissions::check(['admin', 'kb.archive'])): ?>
                                 <div class="col-md-2">
@@ -232,12 +287,12 @@ $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                                 <small class="text-muted">
                                                     <?php if ($entry['updated_at']): ?>
                                                         Aktualisiert: <?= date('d.m.Y H:i', strtotime($entry['updated_at'])) ?>
-                                                        <?php if ($entry['updater_name']): ?>
+                                                        <?php if ($entry['updater_name'] && empty($entry['hide_editor'])): ?>
                                                             von <?= htmlspecialchars($entry['updater_name']) ?>
                                                         <?php endif; ?>
                                                     <?php else: ?>
                                                         Erstellt: <?= date('d.m.Y H:i', strtotime($entry['created_at'])) ?>
-                                                        <?php if ($entry['creator_name']): ?>
+                                                        <?php if ($entry['creator_name'] && empty($entry['hide_editor'])): ?>
                                                             von <?= htmlspecialchars($entry['creator_name']) ?>
                                                         <?php endif; ?>
                                                     <?php endif; ?>
@@ -255,6 +310,78 @@ $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
 
     <?php include __DIR__ . "/../assets/components/footer.php"; ?>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('search');
+        const suggestionsContainer = document.getElementById('search-suggestions');
+        let debounceTimer;
+        
+        searchInput.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            const query = this.value.trim();
+            
+            if (query.length < 2) {
+                suggestionsContainer.classList.remove('active');
+                suggestionsContainer.innerHTML = '';
+                return;
+            }
+            
+            // Debounce the search
+            debounceTimer = setTimeout(function() {
+                fetch('<?= BASE_PATH ?>wissensdb/search-api.php?q=' + encodeURIComponent(query))
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.results && data.results.length > 0) {
+                            let html = '';
+                            data.results.forEach(function(item) {
+                                html += '<a href="<?= BASE_PATH ?>wissensdb/view.php?id=' + item.id + '" class="search-suggestion-item">';
+                                html += '<div class="search-suggestion-title">' + escapeHtml(item.title) + '</div>';
+                                if (item.subtitle) {
+                                    html += '<div class="search-suggestion-subtitle">' + escapeHtml(item.subtitle) + '</div>';
+                                }
+                                html += '<div class="search-suggestion-meta">';
+                                html += '<span class="search-suggestion-badge" style="background-color: ' + item.type_color + '; color: #fff;">' + item.type_label + '</span>';
+                                if (item.competency_label) {
+                                    html += '<span class="search-suggestion-badge" style="background-color: ' + item.competency_color + '; color: #fff;">' + item.competency_label + '</span>';
+                                }
+                                html += '</div>';
+                                html += '</a>';
+                            });
+                            suggestionsContainer.innerHTML = html;
+                            suggestionsContainer.classList.add('active');
+                        } else {
+                            suggestionsContainer.classList.remove('active');
+                            suggestionsContainer.innerHTML = '';
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('Search error:', error);
+                    });
+            }, 300);
+        });
+        
+        // Hide suggestions when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !suggestionsContainer.contains(e.target)) {
+                suggestionsContainer.classList.remove('active');
+            }
+        });
+        
+        // Show suggestions again when focusing on input
+        searchInput.addEventListener('focus', function() {
+            if (suggestionsContainer.innerHTML.trim() !== '') {
+                suggestionsContainer.classList.add('active');
+            }
+        });
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    });
+    </script>
 </body>
 
 </html>

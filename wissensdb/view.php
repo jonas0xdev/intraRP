@@ -500,16 +500,28 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
                         <div class="edit-info">
                             <i class="fa-solid fa-clock"></i>
                             Erstellt am <?= date('d.m.Y H:i', strtotime($entry['created_at'])) ?>
-                            <?php if ($entry['creator_name']): ?>
+                            <?php if ($entry['creator_name'] && empty($entry['hide_editor'])): ?>
                                 von <?= htmlspecialchars($entry['creator_name']) ?>
                             <?php endif; ?>
                             <?php if ($entry['updated_at']): ?>
                                 <br>
                                 <i class="fa-solid fa-edit"></i>
                                 Zuletzt bearbeitet am <?= date('d.m.Y H:i', strtotime($entry['updated_at'])) ?>
-                                <?php if ($entry['updater_name']): ?>
+                                <?php if ($entry['updater_name'] && empty($entry['hide_editor'])): ?>
                                     von <?= htmlspecialchars($entry['updater_name']) ?>
                                 <?php endif; ?>
+                            <?php endif; ?>
+                            
+                            <?php if ($isLoggedIn && Permissions::check(['admin'])): ?>
+                                <!-- Admin toggle for hiding editor names -->
+                                <form method="POST" action="<?= BASE_PATH ?>wissensdb/toggle-editor.php" class="d-inline ms-3">
+                                    <input type="hidden" name="id" value="<?= $entry['id'] ?>">
+                                    <button type="submit" class="btn btn-sm <?= !empty($entry['hide_editor']) ? 'btn-warning' : 'btn-outline-secondary' ?>" 
+                                            title="<?= !empty($entry['hide_editor']) ? 'Bearbeiter anzeigen' : 'Bearbeiter ausblenden' ?>">
+                                        <i class="fa-solid fa-<?= !empty($entry['hide_editor']) ? 'eye' : 'eye-slash' ?>"></i>
+                                        <?= !empty($entry['hide_editor']) ? 'Bearbeiter anzeigen' : 'Bearbeiter ausblenden' ?>
+                                    </button>
+                                </form>
                             <?php endif; ?>
                         </div>
                         </div><!-- /.kb-content-wrapper -->
