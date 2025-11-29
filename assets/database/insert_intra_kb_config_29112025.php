@@ -7,7 +7,7 @@ try {
     INSERT INTO `intra_config` 
         (`config_key`, `config_value`, `config_type`, `category`, `description`, `is_editable`, `display_order`)
     VALUES 
-        ('KB_PUBLIC_ACCESS', 'false', 'boolean', 'funktionen', 'Wenn aktiviert, ist die Wissensdatenbank ohne Login einsehbar.', 1, 60)
+        ('KB_PUBLIC_ACCESS', 'false', 'boolean', 'funktionen', 'Soll die Wissensdatenbank ohne Login einsehbar sein?', 1, 60)
     ON DUPLICATE KEY UPDATE
         `config_key` = `config_key`;
     SQL;
