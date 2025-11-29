@@ -201,92 +201,95 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
             margin-top: 20px;
             border-top: 1px solid #444;
         }
-        /* Floating Action Buttons */
-        .floating-actions {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
+        /* Inline Action Buttons */
+        .action-buttons {
             display: flex;
-            flex-direction: column;
-            gap: 10px;
-            z-index: 1000;
+            gap: 8px;
+            flex-wrap: wrap;
         }
-        .floating-btn {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
+        .action-btn {
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
             border: none;
             cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
+            transition: all 0.2s ease;
             text-decoration: none;
         }
-        .floating-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+        .action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
-        .floating-btn .tooltip-text {
-            position: absolute;
-            right: 60px;
-            background-color: #2d2d2d;
-            color: #fff;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            white-space: nowrap;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-            pointer-events: none;
-        }
-        .floating-btn:hover .tooltip-text {
-            opacity: 1;
-            visibility: visible;
-        }
-        .floating-btn-edit {
+        .action-btn-edit {
             background-color: #0d6efd;
             color: #fff;
         }
-        .floating-btn-edit:hover {
+        .action-btn-edit:hover {
             background-color: #0b5ed7;
             color: #fff;
         }
-        .floating-btn-pin {
+        .action-btn-pin {
             background-color: #0dcaf0;
             color: #000;
         }
-        .floating-btn-pin:hover {
+        .action-btn-pin:hover {
             background-color: #31d2f2;
             color: #000;
         }
-        .floating-btn-unpin {
+        .action-btn-unpin {
             background-color: #6c757d;
             color: #fff;
         }
-        .floating-btn-unpin:hover {
+        .action-btn-unpin:hover {
             background-color: #5c636a;
             color: #fff;
         }
-        .floating-btn-archive {
+        .action-btn-archive {
             background-color: #ffc107;
             color: #000;
         }
-        .floating-btn-archive:hover {
+        .action-btn-archive:hover {
             background-color: #ffca2c;
             color: #000;
         }
-        .floating-btn-restore {
+        .action-btn-restore {
             background-color: #198754;
             color: #fff;
         }
-        .floating-btn-restore:hover {
+        .action-btn-restore:hover {
             background-color: #157347;
             color: #fff;
+        }
+        /* Edit info row with actions */
+        .edit-info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 15px 0;
+            margin-top: 20px;
+            border-top: 1px solid #444;
+        }
+        .edit-info-text {
+            font-size: 0.85rem;
+            color: #aaaaaa;
+        }
+        /* Back link styling */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #e0e0e0;
+            text-decoration: none;
+            padding: 8px 0;
+            transition: color 0.2s;
+        }
+        .back-link:hover {
+            color: #0d6efd;
         }
         /* Header section styling */
         .kb-header {
@@ -357,22 +360,13 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
                 <div class="col mb-5">
                     <hr class="text-light my-3">
                     
-                    <!-- Breadcrumb -->
-                    <nav aria-label="breadcrumb" class="mb-4">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="<?= BASE_PATH ?>"><i class="fa-solid fa-home"></i></a></li>
-                            <li class="breadcrumb-item"><a href="<?= BASE_PATH ?>wissensdb/index.php">Wissensdatenbank</a></li>
-                            <li class="breadcrumb-item">
-                                <a href="<?= BASE_PATH ?>wissensdb/index.php?type=<?= $entry['type'] ?>">
-                                    <?= KBHelper::getTypeLabel($entry['type']) ?>
-                                </a>
-                            </li>
-                            <li class="breadcrumb-item active" aria-current="page"><?= htmlspecialchars($entry['title']) ?></li>
-                        </ol>
-                    </nav>
+                    <!-- Back Link -->
+                    <a href="<?= BASE_PATH ?>wissensdb/index.php" class="back-link mb-3">
+                        <i class="fa-solid fa-arrow-left"></i> Zurück zur Übersicht
+                    </a>
 
                     <?php if (!empty($entry['is_pinned'])): ?>
-                        <div class="alert alert-info">
+                        <div class="alert alert-info mt-3">
                             <i class="fa-solid fa-thumbtack"></i> Dieser Eintrag ist angepinnt und wird oben in der Liste angezeigt.
                         </div>
                     <?php endif; ?>
@@ -550,20 +544,60 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
                             </div>
                         <?php endif; ?>
 
-                        <!-- Edit Info -->
-                        <div class="edit-info">
-                            <i class="fa-solid fa-clock"></i>
-                            Erstellt am <?= date('d.m.Y H:i', strtotime($entry['created_at'])) ?>
-                            <?php if ($entry['creator_name'] && empty($entry['hide_editor'])): ?>
-                                von <?= htmlspecialchars($entry['creator_name']) ?>
-                            <?php endif; ?>
-                            <?php if ($entry['updated_at']): ?>
-                                <br>
-                                <i class="fa-solid fa-edit"></i>
-                                Zuletzt bearbeitet am <?= date('d.m.Y H:i', strtotime($entry['updated_at'])) ?>
-                                <?php if ($entry['updater_name'] && empty($entry['hide_editor'])): ?>
-                                    von <?= htmlspecialchars($entry['updater_name']) ?>
+                        <!-- Edit Info with Action Buttons -->
+                        <div class="edit-info-row">
+                            <div class="edit-info-text">
+                                <i class="fa-solid fa-clock"></i>
+                                Erstellt am <?= date('d.m.Y H:i', strtotime($entry['created_at'])) ?>
+                                <?php if ($entry['creator_name'] && empty($entry['hide_editor'])): ?>
+                                    von <?= htmlspecialchars($entry['creator_name']) ?>
                                 <?php endif; ?>
+                                <?php if ($entry['updated_at']): ?>
+                                    <br>
+                                    <i class="fa-solid fa-edit"></i>
+                                    Zuletzt bearbeitet am <?= date('d.m.Y H:i', strtotime($entry['updated_at'])) ?>
+                                    <?php if ($entry['updater_name'] && empty($entry['hide_editor'])): ?>
+                                        von <?= htmlspecialchars($entry['updater_name']) ?>
+                                    <?php endif; ?>
+                                <?php endif; ?>
+                            </div>
+                            
+                            <?php if ($isLoggedIn): ?>
+                                <div class="action-buttons">
+                                    <?php if (Permissions::check(['admin', 'kb.edit'])): ?>
+                                        <a href="<?= BASE_PATH ?>wissensdb/edit.php?id=<?= $entry['id'] ?>" class="action-btn action-btn-edit">
+                                            <i class="fa-solid fa-edit"></i> Bearbeiten
+                                        </a>
+                                        
+                                        <form method="POST" action="<?= BASE_PATH ?>wissensdb/pin.php" style="margin: 0; display: inline;">
+                                            <input type="hidden" name="id" value="<?= $entry['id'] ?>">
+                                            <input type="hidden" name="action" value="<?= !empty($entry['is_pinned']) ? 'unpin' : 'pin' ?>">
+                                            <button type="submit" class="action-btn <?= !empty($entry['is_pinned']) ? 'action-btn-unpin' : 'action-btn-pin' ?>">
+                                                <i class="fa-solid fa-thumbtack"></i> <?= !empty($entry['is_pinned']) ? 'Lösen' : 'Anpinnen' ?>
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
+                                    
+                                    <?php if (Permissions::check(['admin', 'kb.archive'])): ?>
+                                        <?php if ($entry['is_archived']): ?>
+                                            <form method="POST" action="<?= BASE_PATH ?>wissensdb/archive.php" style="margin: 0; display: inline;">
+                                                <input type="hidden" name="id" value="<?= $entry['id'] ?>">
+                                                <input type="hidden" name="action" value="restore">
+                                                <button type="submit" class="action-btn action-btn-restore">
+                                                    <i class="fa-solid fa-rotate-left"></i> Wiederherstellen
+                                                </button>
+                                            </form>
+                                        <?php else: ?>
+                                            <form method="POST" action="<?= BASE_PATH ?>wissensdb/archive.php" style="margin: 0; display: inline;">
+                                                <input type="hidden" name="id" value="<?= $entry['id'] ?>">
+                                                <input type="hidden" name="action" value="archive">
+                                                <button type="submit" class="action-btn action-btn-archive">
+                                                    <i class="fa-solid fa-archive"></i> Archivieren
+                                                </button>
+                                            </form>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
+                                </div>
                             <?php endif; ?>
                         </div>
                         </div><!-- /.kb-content-wrapper -->
@@ -572,49 +606,6 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
             </div>
         </div>
     </div>
-
-    <!-- Floating Action Buttons -->
-    <?php if ($isLoggedIn): ?>
-        <div class="floating-actions">
-            <?php if (Permissions::check(['admin', 'kb.archive'])): ?>
-                <?php if ($entry['is_archived']): ?>
-                    <form method="POST" action="<?= BASE_PATH ?>wissensdb/archive.php" style="margin: 0;">
-                        <input type="hidden" name="id" value="<?= $entry['id'] ?>">
-                        <input type="hidden" name="action" value="restore">
-                        <button type="submit" class="floating-btn floating-btn-restore">
-                            <i class="fa-solid fa-rotate-left"></i>
-                            <span class="tooltip-text">Wiederherstellen</span>
-                        </button>
-                    </form>
-                <?php else: ?>
-                    <form method="POST" action="<?= BASE_PATH ?>wissensdb/archive.php" style="margin: 0;">
-                        <input type="hidden" name="id" value="<?= $entry['id'] ?>">
-                        <input type="hidden" name="action" value="archive">
-                        <button type="submit" class="floating-btn floating-btn-archive">
-                            <i class="fa-solid fa-archive"></i>
-                            <span class="tooltip-text">Archivieren</span>
-                        </button>
-                    </form>
-                <?php endif; ?>
-            <?php endif; ?>
-            
-            <?php if (Permissions::check(['admin', 'kb.edit'])): ?>
-                <form method="POST" action="<?= BASE_PATH ?>wissensdb/pin.php" style="margin: 0;">
-                    <input type="hidden" name="id" value="<?= $entry['id'] ?>">
-                    <input type="hidden" name="action" value="<?= !empty($entry['is_pinned']) ? 'unpin' : 'pin' ?>">
-                    <button type="submit" class="floating-btn <?= !empty($entry['is_pinned']) ? 'floating-btn-unpin' : 'floating-btn-pin' ?>">
-                        <i class="fa-solid fa-thumbtack"></i>
-                        <span class="tooltip-text"><?= !empty($entry['is_pinned']) ? 'Lösen' : 'Anpinnen' ?></span>
-                    </button>
-                </form>
-                
-                <a href="<?= BASE_PATH ?>wissensdb/edit.php?id=<?= $entry['id'] ?>" class="floating-btn floating-btn-edit">
-                    <i class="fa-solid fa-edit"></i>
-                    <span class="tooltip-text">Bearbeiten</span>
-                </a>
-            <?php endif; ?>
-        </div>
-    <?php endif; ?>
 
     <?php include __DIR__ . "/../assets/components/footer.php"; ?>
 </body>

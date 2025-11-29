@@ -290,16 +290,21 @@ $formData = $entry ?? [
         .ck.ck-editor__editable h3 {
             color: #e0e0e0 !important;
         }
-        /* CKEditor dropdown styling */
+        /* CKEditor dropdown styling - fully dark theme */
         .ck.ck-dropdown__panel {
-            background-color: #2d2d2d !important;
-            border-color: #555 !important;
+            background-color: #1e1e1e !important;
+            border: 1px solid #555 !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
+        }
+        .ck.ck-dropdown__panel .ck-list {
+            background-color: #1e1e1e !important;
         }
         .ck.ck-list__item .ck-button {
             color: #e0e0e0 !important;
+            background-color: transparent !important;
         }
         .ck.ck-list__item .ck-button:hover {
-            background-color: #444 !important;
+            background-color: #333 !important;
         }
         .ck.ck-list__item .ck-button.ck-on {
             background-color: #0d6efd !important;
@@ -315,16 +320,41 @@ $formData = $entry ?? [
             background-color: #0d6efd !important;
             color: #fff !important;
         }
+        /* Fix dropdown panel borders */
+        .ck.ck-dropdown .ck-dropdown__panel {
+            border-top: 1px solid #555 !important;
+        }
+        .ck.ck-dropdown .ck-dropdown__panel.ck-dropdown__panel_se,
+        .ck.ck-dropdown .ck-dropdown__panel.ck-dropdown__panel_sw {
+            border-radius: 0 0 6px 6px !important;
+        }
         /* CKEditor rounded border */
         .ck.ck-editor {
             border-radius: 6px;
             overflow: hidden;
+            border: 1px solid #555 !important;
         }
         .ck.ck-toolbar {
             border-radius: 6px 6px 0 0 !important;
+            border: none !important;
         }
         .ck.ck-editor__main > .ck-editor__editable {
             border-radius: 0 0 6px 6px !important;
+            border: none !important;
+            border-top: 1px solid #555 !important;
+        }
+        /* Back link styling */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #e0e0e0;
+            text-decoration: none;
+            padding: 8px 0;
+            transition: color 0.2s;
+        }
+        .back-link:hover {
+            color: #0d6efd;
         }
         /* Smaller CKEditor for inline fields */
         .ck-editor-small .ck-editor__editable {
@@ -342,12 +372,10 @@ $formData = $entry ?? [
                 <div class="col mb-5">
                     <hr class="text-light my-3">
                     
-                    <nav aria-label="breadcrumb" class="mb-3">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="<?= BASE_PATH ?>wissensdb/index.php">Wissensdatenbank</a></li>
-                            <li class="breadcrumb-item active"><?= $isEdit ? 'Bearbeiten' : 'Neuer Eintrag' ?></li>
-                        </ol>
-                    </nav>
+                    <!-- Back Link -->
+                    <a href="<?= BASE_PATH ?>wissensdb/index.php" class="back-link mb-3">
+                        <i class="fa-solid fa-arrow-left"></i> Zurück zur Übersicht
+                    </a>
 
                     <h1 class="mb-4"><?= $isEdit ? 'Eintrag bearbeiten' : 'Neuer Eintrag' ?></h1>
 

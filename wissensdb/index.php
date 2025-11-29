@@ -126,7 +126,7 @@ $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
             transition: opacity 0.2s ease;
             z-index: 10;
         }
-        .kb-card:hover .kb-card-actions {
+        .col-card-wrapper:hover .kb-card-actions {
             opacity: 1;
         }
         .kb-quick-btn {
