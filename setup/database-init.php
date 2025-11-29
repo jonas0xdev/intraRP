@@ -316,6 +316,10 @@ $migrationFiles = [
     ['file' => 'insert_intra_config_defaults_04112025.php', 'type' => 'insert'],
     ['file' => 'alter_intra_notifications_04112025.php', 'type' => 'alter'],
     ['file' => 'remove_lang_config_04112025.php', 'type' => 'alter'],
+
+    // 29.11.2025
+    ['file' => 'create_intra_kb_entries_29112025.php', 'type' => 'create'],
+    ['file' => 'insert_intra_kb_config_29112025.php', 'type' => 'insert'],
 ];
 
 $executed = 0;

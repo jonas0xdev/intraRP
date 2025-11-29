@@ -118,6 +118,11 @@ if (!Permissions::check(['admin', 'users.view'])) {
                                     'edivi.view' => 'eNOTF Protokolle ansehen',
                                     'edivi.edit' => 'eNOTF Protokolle bearbeiten'
                                 ],
+                                'Wissensdatenbank' => [
+                                    'kb.view' => 'Wissensdatenbank ansehen',
+                                    'kb.edit' => 'Wissensdatenbank bearbeiten',
+                                    'kb.archive' => 'Einträge archivieren'
+                                ],
                                 'Benutzer' => [
                                     'users.view' => 'Benutzer ansehen',
                                     'users.edit' => 'Benutzer bearbeiten',

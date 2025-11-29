@@ -63,6 +63,11 @@ use App\Notifications\NotificationManager;
                         <?php } ?>
                     </ul>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-page="wissensdb" href="<?= BASE_PATH ?>wissensdb/index.php">
+                        <i class="fa-solid fa-book-medical" style="margin-right:3px"></i> Wissensdatenbank
+                    </a>
+                </li>
                 <?php if (Permissions::check(['admin', 'personnel.view', 'vehicles.view', 'edivi.view', 'dashboard.manage'])) { ?>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" data-page="settings" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
