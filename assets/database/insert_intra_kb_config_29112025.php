@@ -5,9 +5,9 @@
 try {
     $sql = <<<SQL
     INSERT INTO `intra_config` 
-        (`config_key`, `config_value`, `config_type`, `category`, `display_name`, `description`, `is_editable`, `display_order`)
+        (`config_key`, `config_value`, `config_type`, `category`, `description`, `is_editable`, `display_order`)
     VALUES 
-        ('KB_PUBLIC_ACCESS', 'false', 'boolean', 'funktionen', 'Wissensdatenbank öffentlich', 'Wenn aktiviert, ist die Wissensdatenbank ohne Login einsehbar.', 1, 60)
+        ('KB_PUBLIC_ACCESS', 'false', 'boolean', 'funktionen', 'Wissensdatenbank öffentlich: Wenn aktiviert, ist die Wissensdatenbank ohne Login einsehbar.', 1, 60)
     ON DUPLICATE KEY UPDATE
         `config_key` = `config_key`;
     SQL;
