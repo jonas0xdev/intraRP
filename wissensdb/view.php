@@ -201,67 +201,52 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
             margin-top: 20px;
             border-top: 1px solid #444;
         }
-        /* Inline Action Buttons */
+        /* Inline Action Buttons - gray with hover tooltip */
         .action-buttons {
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
         }
         .action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            border-radius: 4px;
+            justify-content: center;
             font-size: 0.85rem;
             border: none;
             cursor: pointer;
             transition: all 0.2s ease;
             text-decoration: none;
+            background-color: #555;
+            color: #fff;
+            position: relative;
         }
         .action-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        }
-        .action-btn-edit {
-            background-color: #0d6efd;
+            background-color: #666;
             color: #fff;
         }
-        .action-btn-edit:hover {
-            background-color: #0b5ed7;
+        .action-btn .tooltip-text {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #000;
             color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+            pointer-events: none;
+            margin-bottom: 5px;
         }
-        .action-btn-pin {
-            background-color: #0dcaf0;
-            color: #000;
-        }
-        .action-btn-pin:hover {
-            background-color: #31d2f2;
-            color: #000;
-        }
-        .action-btn-unpin {
-            background-color: #6c757d;
-            color: #fff;
-        }
-        .action-btn-unpin:hover {
-            background-color: #5c636a;
-            color: #fff;
-        }
-        .action-btn-archive {
-            background-color: #ffc107;
-            color: #000;
-        }
-        .action-btn-archive:hover {
-            background-color: #ffca2c;
-            color: #000;
-        }
-        .action-btn-restore {
-            background-color: #198754;
-            color: #fff;
-        }
-        .action-btn-restore:hover {
-            background-color: #157347;
-            color: #fff;
+        .action-btn:hover .tooltip-text {
+            opacity: 1;
+            visibility: visible;
         }
         /* Edit info row with actions */
         .edit-info-row {
@@ -565,15 +550,17 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
                             <?php if ($isLoggedIn): ?>
                                 <div class="action-buttons">
                                     <?php if (Permissions::check(['admin', 'kb.edit'])): ?>
-                                        <a href="<?= BASE_PATH ?>wissensdb/edit.php?id=<?= $entry['id'] ?>" class="action-btn action-btn-edit">
-                                            <i class="fa-solid fa-edit"></i> Bearbeiten
+                                        <a href="<?= BASE_PATH ?>wissensdb/edit.php?id=<?= $entry['id'] ?>" class="action-btn">
+                                            <i class="fa-solid fa-pen"></i>
+                                            <span class="tooltip-text">Bearbeiten</span>
                                         </a>
                                         
                                         <form method="POST" action="<?= BASE_PATH ?>wissensdb/pin.php" style="margin: 0; display: inline;">
                                             <input type="hidden" name="id" value="<?= $entry['id'] ?>">
                                             <input type="hidden" name="action" value="<?= !empty($entry['is_pinned']) ? 'unpin' : 'pin' ?>">
-                                            <button type="submit" class="action-btn <?= !empty($entry['is_pinned']) ? 'action-btn-unpin' : 'action-btn-pin' ?>">
-                                                <i class="fa-solid fa-thumbtack"></i> <?= !empty($entry['is_pinned']) ? 'Lösen' : 'Anpinnen' ?>
+                                            <button type="submit" class="action-btn">
+                                                <i class="fa-solid fa-thumbtack"></i>
+                                                <span class="tooltip-text"><?= !empty($entry['is_pinned']) ? 'Lösen' : 'Anpinnen' ?></span>
                                             </button>
                                         </form>
                                     <?php endif; ?>
@@ -583,16 +570,18 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
                                             <form method="POST" action="<?= BASE_PATH ?>wissensdb/archive.php" style="margin: 0; display: inline;">
                                                 <input type="hidden" name="id" value="<?= $entry['id'] ?>">
                                                 <input type="hidden" name="action" value="restore">
-                                                <button type="submit" class="action-btn action-btn-restore">
-                                                    <i class="fa-solid fa-rotate-left"></i> Wiederherstellen
+                                                <button type="submit" class="action-btn">
+                                                    <i class="fa-solid fa-rotate-left"></i>
+                                                    <span class="tooltip-text">Wiederherstellen</span>
                                                 </button>
                                             </form>
                                         <?php else: ?>
                                             <form method="POST" action="<?= BASE_PATH ?>wissensdb/archive.php" style="margin: 0; display: inline;">
                                                 <input type="hidden" name="id" value="<?= $entry['id'] ?>">
                                                 <input type="hidden" name="action" value="archive">
-                                                <button type="submit" class="action-btn action-btn-archive">
-                                                    <i class="fa-solid fa-archive"></i> Archivieren
+                                                <button type="submit" class="action-btn">
+                                                    <i class="fa-solid fa-box-archive"></i>
+                                                    <span class="tooltip-text">Archivieren</span>
                                                 </button>
                                             </form>
                                         <?php endif; ?>

@@ -115,50 +115,63 @@ $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
             color: #ffffff;
             border-bottom: none;
         }
-        /* Quick action buttons on cards */
-        .kb-card-actions {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            display: flex;
-            gap: 5px;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-            z-index: 10;
-        }
-        .col-card-wrapper:hover .kb-card-actions {
-            opacity: 1;
-        }
+        /* Quick action buttons styling - gray background with hover tooltip */
         .kb-quick-btn {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             border: none;
             cursor: pointer;
             text-decoration: none;
-            transition: transform 0.2s ease;
+            transition: all 0.2s ease;
+            background-color: #555;
+            color: #fff;
+            position: relative;
         }
         .kb-quick-btn:hover {
-            transform: scale(1.15);
-        }
-        .kb-quick-btn-edit {
-            background-color: #0d6efd;
+            background-color: #666;
             color: #fff;
         }
-        .kb-quick-btn-pin {
-            background-color: #0dcaf0;
-            color: #000;
-        }
-        .kb-quick-btn-unpin {
-            background-color: #6c757d;
+        .kb-quick-btn .tooltip-text {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #000;
             color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+            pointer-events: none;
+            margin-bottom: 5px;
+        }
+        .kb-quick-btn:hover .tooltip-text {
+            opacity: 1;
+            visibility: visible;
         }
         .col-card-wrapper {
             position: relative;
+        }
+        /* Card footer with actions */
+        .kb-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background-color: rgba(255,255,255,0.03);
+            border-top: 1px solid #444;
+        }
+        .kb-card-footer-actions {
+            display: flex;
+            gap: 5px;
         }
         /* Search autocomplete styling */
         .search-suggestions {
@@ -299,25 +312,6 @@ $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             ?>
                                 <div class="col">
                                     <div class="col-card-wrapper">
-                                        <?php if ($isLoggedIn && Permissions::check(['admin', 'kb.edit'])): ?>
-                                            <!-- Quick Action Buttons -->
-                                            <div class="kb-card-actions">
-                                                <form method="POST" action="<?= BASE_PATH ?>wissensdb/pin.php" style="margin: 0;" onclick="event.stopPropagation();">
-                                                    <input type="hidden" name="id" value="<?= $entry['id'] ?>">
-                                                    <input type="hidden" name="action" value="<?= !empty($entry['is_pinned']) ? 'unpin' : 'pin' ?>">
-                                                    <button type="submit" class="kb-quick-btn <?= !empty($entry['is_pinned']) ? 'kb-quick-btn-unpin' : 'kb-quick-btn-pin' ?>" 
-                                                            title="<?= !empty($entry['is_pinned']) ? 'Lösen' : 'Anpinnen' ?>">
-                                                        <i class="fa-solid fa-thumbtack"></i>
-                                                    </button>
-                                                </form>
-                                                <a href="<?= BASE_PATH ?>wissensdb/edit.php?id=<?= $entry['id'] ?>" 
-                                                   class="kb-quick-btn kb-quick-btn-edit" title="Bearbeiten"
-                                                   onclick="event.stopPropagation();">
-                                                    <i class="fa-solid fa-edit"></i>
-                                                </a>
-                                            </div>
-                                        <?php endif; ?>
-                                        
                                         <a href="<?= BASE_PATH ?>wissensdb/view.php?id=<?= $entry['id'] ?>" class="text-decoration-none">
                                             <div class="card h-100 kb-card <?= $entry['is_archived'] ? 'kb-archived' : '' ?>">
                                             <?php if ($competency): ?>
@@ -348,7 +342,7 @@ $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                                     <p class="card-text small"><strong>Wirkstoffgruppe:</strong> <?= htmlspecialchars($entry['med_wirkstoffgruppe']) ?></p>
                                                 <?php endif; ?>
                                             </div>
-                                            <div class="card-footer bg-transparent">
+                                            <div class="kb-card-footer">
                                                 <small class="text-muted">
                                                     <?php if ($entry['updated_at']): ?>
                                                         Aktualisiert: <?= date('d.m.Y H:i', strtotime($entry['updated_at'])) ?>
@@ -362,6 +356,22 @@ $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                                         <?php endif; ?>
                                                     <?php endif; ?>
                                                 </small>
+                                                <?php if ($isLoggedIn && Permissions::check(['admin', 'kb.edit'])): ?>
+                                                    <div class="kb-card-footer-actions" onclick="event.preventDefault(); event.stopPropagation();">
+                                                        <form method="POST" action="<?= BASE_PATH ?>wissensdb/pin.php" style="margin: 0; display: inline;">
+                                                            <input type="hidden" name="id" value="<?= $entry['id'] ?>">
+                                                            <input type="hidden" name="action" value="<?= !empty($entry['is_pinned']) ? 'unpin' : 'pin' ?>">
+                                                            <button type="submit" class="kb-quick-btn">
+                                                                <i class="fa-solid fa-thumbtack"></i>
+                                                                <span class="tooltip-text"><?= !empty($entry['is_pinned']) ? 'Lösen' : 'Anpinnen' ?></span>
+                                                            </button>
+                                                        </form>
+                                                        <a href="<?= BASE_PATH ?>wissensdb/edit.php?id=<?= $entry['id'] ?>" class="kb-quick-btn">
+                                                            <i class="fa-solid fa-pen"></i>
+                                                            <span class="tooltip-text">Bearbeiten</span>
+                                                        </a>
+                                                    </div>
+                                                <?php endif; ?>
                                             </div>
                                         </div>
                                     </a>
