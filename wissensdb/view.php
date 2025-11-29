@@ -386,7 +386,7 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
                                             <?php if (!empty($entry['med_wirkmechanismus'])): ?>
                                                 <tr>
                                                     <th>Wirkmechanismus:</th>
-                                                    <td><?= nl2br(htmlspecialchars($entry['med_wirkmechanismus'])) ?></td>
+                                                    <td><?= KBHelper::sanitizeContent($entry['med_wirkmechanismus']) ?></td>
                                                 </tr>
                                             <?php endif; ?>
                                         </tbody>
@@ -395,35 +395,35 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
                                     <?php if (!empty($entry['med_indikationen'])): ?>
                                         <div class="kb-section kb-section-yellow">
                                             <div class="kb-section-header">Indikationen:</div>
-                                            <div class="kb-section-content"><?= nl2br(htmlspecialchars($entry['med_indikationen'])) ?></div>
+                                            <div class="kb-section-content"><?= KBHelper::sanitizeContent($entry['med_indikationen']) ?></div>
                                         </div>
                                     <?php endif; ?>
 
                                     <?php if (!empty($entry['med_kontraindikationen'])): ?>
                                         <div class="kb-section kb-section-yellow">
                                             <div class="kb-section-header">Kontraindikationen:</div>
-                                            <div class="kb-section-content"><?= nl2br(htmlspecialchars($entry['med_kontraindikationen'])) ?></div>
+                                            <div class="kb-section-content"><?= KBHelper::sanitizeContent($entry['med_kontraindikationen']) ?></div>
                                         </div>
                                     <?php endif; ?>
 
                                     <?php if (!empty($entry['med_uaw'])): ?>
                                         <div class="kb-section kb-section-gray">
                                             <div class="kb-section-header">Unerwünschte Arzneimittelwirkungen (UAW):</div>
-                                            <div class="kb-section-content"><?= nl2br(htmlspecialchars($entry['med_uaw'])) ?></div>
+                                            <div class="kb-section-content"><?= KBHelper::sanitizeContent($entry['med_uaw']) ?></div>
                                         </div>
                                     <?php endif; ?>
 
                                     <?php if (!empty($entry['med_dosierung'])): ?>
                                         <div class="kb-section kb-section-blue">
                                             <div class="kb-section-header">Dosierung:</div>
-                                            <div class="kb-section-content"><?= nl2br(htmlspecialchars($entry['med_dosierung'])) ?></div>
+                                            <div class="kb-section-content"><?= KBHelper::sanitizeContent($entry['med_dosierung']) ?></div>
                                         </div>
                                     <?php endif; ?>
 
                                     <?php if (!empty($entry['med_besonderheiten'])): ?>
                                         <div class="kb-section kb-section-red">
                                             <div class="kb-section-header">Besonderheiten / CAVE:</div>
-                                            <div class="kb-section-content"><?= nl2br(htmlspecialchars($entry['med_besonderheiten'])) ?></div>
+                                            <div class="kb-section-content"><?= KBHelper::sanitizeContent($entry['med_besonderheiten']) ?></div>
                                         </div>
                                     <?php endif; ?>
                                 </div>
@@ -437,7 +437,7 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
                                         <div class="kb-entry-row">
                                             <div class="kb-icon"><i class="fa-solid fa-lightbulb"></i></div>
                                             <div class="kb-label">Wirkprinzip</div>
-                                            <div class="kb-content"><?= nl2br(htmlspecialchars($entry['mass_wirkprinzip'])) ?></div>
+                                            <div class="kb-content"><?= KBHelper::sanitizeContent($entry['mass_wirkprinzip']) ?></div>
                                         </div>
                                     <?php endif; ?>
                                     
@@ -445,7 +445,7 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
                                         <div class="kb-entry-row">
                                             <div class="kb-icon"><i class="fa-solid fa-check"></i></div>
                                             <div class="kb-label">Indikationen</div>
-                                            <div class="kb-content"><?= nl2br(htmlspecialchars($entry['mass_indikationen'])) ?></div>
+                                            <div class="kb-content"><?= KBHelper::sanitizeContent($entry['mass_indikationen']) ?></div>
                                         </div>
                                     <?php endif; ?>
                                     
@@ -453,7 +453,7 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
                                         <div class="kb-entry-row">
                                             <div class="kb-icon"><i class="fa-solid fa-xmark"></i></div>
                                             <div class="kb-label">Kontraindikationen</div>
-                                            <div class="kb-content"><?= nl2br(htmlspecialchars($entry['mass_kontraindikationen'])) ?></div>
+                                            <div class="kb-content"><?= KBHelper::sanitizeContent($entry['mass_kontraindikationen']) ?></div>
                                         </div>
                                     <?php endif; ?>
                                     
@@ -461,7 +461,7 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
                                         <div class="kb-entry-row">
                                             <div class="kb-icon"><i class="fa-regular fa-face-frown"></i></div>
                                             <div class="kb-label">Risiken</div>
-                                            <div class="kb-content"><?= nl2br(htmlspecialchars($entry['mass_risiken'])) ?></div>
+                                            <div class="kb-content"><?= KBHelper::sanitizeContent($entry['mass_risiken']) ?></div>
                                         </div>
                                     <?php endif; ?>
                                     
@@ -469,7 +469,7 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
                                         <div class="kb-entry-row">
                                             <div class="kb-icon"><i class="fa-solid fa-arrows-left-right"></i></div>
                                             <div class="kb-label">Alternativen</div>
-                                            <div class="kb-content"><?= nl2br(htmlspecialchars($entry['mass_alternativen'])) ?></div>
+                                            <div class="kb-content"><?= KBHelper::sanitizeContent($entry['mass_alternativen']) ?></div>
                                         </div>
                                     <?php endif; ?>
                                     
@@ -477,7 +477,7 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
                                         <div class="kb-entry-row">
                                             <div class="kb-icon"><i class="fa-solid fa-screwdriver-wrench"></i></div>
                                             <div class="kb-label">Durchführung</div>
-                                            <div class="kb-content"><?= nl2br(htmlspecialchars($entry['mass_durchfuehrung'])) ?></div>
+                                            <div class="kb-content"><?= KBHelper::sanitizeContent($entry['mass_durchfuehrung']) ?></div>
                                         </div>
                                     <?php endif; ?>
                                 </div>

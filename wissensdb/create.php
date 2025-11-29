@@ -244,8 +244,48 @@ $formData = $entry ?? [
         .competency-option input {
             margin-right: 10px;
         }
+        /* CKEditor dark theme styling */
         .ck-editor__editable {
-            min-height: 200px;
+            min-height: 120px;
+            background-color: #2d2d2d !important;
+            color: #e0e0e0 !important;
+            border-color: #444 !important;
+        }
+        .ck-editor__editable:focus {
+            border-color: #666 !important;
+        }
+        .ck.ck-editor__main > .ck-editor__editable {
+            background-color: #2d2d2d !important;
+            color: #e0e0e0 !important;
+        }
+        .ck.ck-toolbar {
+            background-color: #1e1e1e !important;
+            border-color: #444 !important;
+        }
+        .ck.ck-toolbar .ck-toolbar__items .ck-button {
+            color: #e0e0e0 !important;
+        }
+        .ck.ck-toolbar .ck-toolbar__items .ck-button:hover {
+            background-color: #444 !important;
+        }
+        .ck.ck-editor__editable p,
+        .ck.ck-editor__editable li,
+        .ck.ck-editor__editable h1,
+        .ck.ck-editor__editable h2,
+        .ck.ck-editor__editable h3 {
+            color: #e0e0e0 !important;
+        }
+        .ck.ck-list__item .ck-button.ck-on {
+            background-color: #444 !important;
+            color: #fff !important;
+        }
+        .ck.ck-dropdown__panel {
+            background-color: #2d2d2d !important;
+            border-color: #444 !important;
+        }
+        /* Smaller CKEditor for inline fields */
+        .ck-editor-small .ck-editor__editable {
+            min-height: 80px;
         }
     </style>
 </head>
@@ -482,46 +522,122 @@ $formData = $entry ?? [
             TableToolbar
         } from 'ckeditor5';
 
+        // Store editor instances
+        const editorInstances = {};
+
+        // CKEditor configuration for rich text fields
+        const fullEditorConfig = {
+            licenseKey: 'GPL',
+            plugins: [
+                Essentials, Bold, Italic, Underline, Strikethrough,
+                Heading, Link, List, Paragraph, BlockQuote, Table, TableToolbar
+            ],
+            toolbar: {
+                items: [
+                    'heading', '|',
+                    'bold', 'italic', 'underline', 'strikethrough', '|',
+                    'link', 'bulletedList', 'numberedList', '|',
+                    'blockQuote', 'insertTable', '|',
+                    'undo', 'redo'
+                ]
+            },
+            table: {
+                contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells']
+            },
+            language: 'de'
+        };
+
+        // Simpler config for medication/measure fields
+        const simpleEditorConfig = {
+            licenseKey: 'GPL',
+            plugins: [
+                Essentials, Bold, Italic, Underline, Link, List, Paragraph
+            ],
+            toolbar: {
+                items: [
+                    'bold', 'italic', 'underline', '|',
+                    'link', 'bulletedList', 'numberedList', '|',
+                    'undo', 'redo'
+                ]
+            },
+            language: 'de'
+        };
+
+        // Initialize CKEditor on main content field
         ClassicEditor
-            .create(document.querySelector('#content'), {
-                licenseKey: 'GPL',
-                plugins: [
-                    Essentials, Bold, Italic, Underline, Strikethrough,
-                    Heading, Link, List, Paragraph, BlockQuote, Table, TableToolbar
-                ],
-                toolbar: {
-                    items: [
-                        'heading', '|',
-                        'bold', 'italic', 'underline', 'strikethrough', '|',
-                        'link', 'bulletedList', 'numberedList', '|',
-                        'blockQuote', 'insertTable', '|',
-                        'undo', 'redo'
-                    ]
-                },
-                table: {
-                    contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells']
-                },
-                language: 'de'
+            .create(document.querySelector('#content'), fullEditorConfig)
+            .then(editor => {
+                editorInstances['content'] = editor;
             })
             .catch(error => {
-                console.error(error);
+                console.error('Error initializing content editor:', error);
             });
+
+        // Medication field IDs
+        const medicationFields = [
+            'med_wirkmechanismus',
+            'med_indikationen',
+            'med_kontraindikationen',
+            'med_uaw',
+            'med_dosierung',
+            'med_besonderheiten'
+        ];
+
+        // Measure field IDs
+        const measureFieldIds = [
+            'mass_wirkprinzip',
+            'mass_indikationen',
+            'mass_kontraindikationen',
+            'mass_risiken',
+            'mass_alternativen',
+            'mass_durchfuehrung'
+        ];
+
+        // Initialize CKEditor on all medication fields
+        medicationFields.forEach(fieldId => {
+            const element = document.querySelector('#' + fieldId);
+            if (element) {
+                ClassicEditor
+                    .create(element, simpleEditorConfig)
+                    .then(editor => {
+                        editorInstances[fieldId] = editor;
+                    })
+                    .catch(error => {
+                        console.error('Error initializing ' + fieldId + ' editor:', error);
+                    });
+            }
+        });
+
+        // Initialize CKEditor on all measure fields
+        measureFieldIds.forEach(fieldId => {
+            const element = document.querySelector('#' + fieldId);
+            if (element) {
+                ClassicEditor
+                    .create(element, simpleEditorConfig)
+                    .then(editor => {
+                        editorInstances[fieldId] = editor;
+                    })
+                    .catch(error => {
+                        console.error('Error initializing ' + fieldId + ' editor:', error);
+                    });
+            }
+        });
 
         // Toggle type-specific fields
         const typeSelect = document.getElementById('type');
-        const medicationFields = document.getElementById('medication-fields');
-        const measureFields = document.getElementById('measure-fields');
+        const medicationFieldsDiv = document.getElementById('medication-fields');
+        const measureFieldsDiv = document.getElementById('measure-fields');
 
         function updateTypeFields() {
             const type = typeSelect.value;
             
-            medicationFields.classList.remove('active');
-            measureFields.classList.remove('active');
+            medicationFieldsDiv.classList.remove('active');
+            measureFieldsDiv.classList.remove('active');
             
             if (type === 'medication') {
-                medicationFields.classList.add('active');
+                medicationFieldsDiv.classList.add('active');
             } else if (type === 'measure') {
-                measureFields.classList.add('active');
+                measureFieldsDiv.classList.add('active');
             }
         }
 
