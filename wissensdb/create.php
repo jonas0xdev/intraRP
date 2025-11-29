@@ -437,7 +437,7 @@ $formData = $entry ?? [
                             <h4 class="mb-3">Zusätzlicher Inhalt</h4>
                             <p class="text-muted small">Optionaler Freitext für weitere Informationen (mit Formatierung)</p>
                             
-                            <textarea name="content" id="content"><?= htmlspecialchars($formData['content']) ?></textarea>
+                            <textarea name="content" id="content" class="form-control" rows="2"><?= htmlspecialchars($formData['content']) ?></textarea>
                         </div>
 
                         <!-- Submit Buttons -->
