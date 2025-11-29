@@ -322,21 +322,18 @@ $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <div class="col">
                                     <div class="col-card-wrapper">
                                         <div class="card h-100 kb-card <?= $entry['is_archived'] ? 'kb-archived' : '' ?>" 
-                                             onclick="window.location.href='<?= BASE_PATH ?>wissensdb/view.php?id=<?= $entry['id'] ?>'">
-                                            <?php if ($competency): ?>
-                                                <div class="card-header p-2" style="background-color: <?= $competency['bg'] ?>; border-bottom: 3px solid <?= $competency['color'] === '#ffffff' ? $competency['bg'] : $competency['color'] ?>;">
-                                                    <span class="competency-badge" style="background-color: <?= $competency['bg'] ?>; color: <?= $competency['text'] ?? $competency['color'] ?>;">
-                                                        <?= $competency['label'] ?>
-                                                    </span>
-                                                </div>
-                                            <?php endif; ?>
+                                             onclick="window.location.href='<?= BASE_PATH ?>wissensdb/view.php?id=<?= $entry['id'] ?>'"
+                                             <?php if ($competency): ?>style="border-top: 3px solid <?= $competency['bg'] ?>;"<?php endif; ?>>
                                             <div class="card-body">
                                                 <div class="d-flex justify-content-between align-items-start mb-2">
                                                     <div>
                                                         <?php if (!empty($entry['is_pinned'])): ?>
-                                                            <span class="badge bg-primary me-1" title="Angepinnt"><i class="fa-solid fa-thumbtack"></i></span>
+                                                            <span class="badge me-1" style="background-color: <?= SYSTEM_COLOR ?>; color: #ffffff;" title="Angepinnt"><i class="fa-solid fa-thumbtack"></i></span>
                                                         <?php endif; ?>
-                                                        <span class="badge kb-type-badge" style="background-color: <?= KBHelper::getTypeColor($entry['type']) ?>; color: #ffffff;"><?= KBHelper::getTypeLabel($entry['type']) ?></span>
+                                                        <span class="badge kb-type-badge bg-dark"><?= KBHelper::getTypeLabel($entry['type']) ?></span>
+                                                        <?php if ($competency): ?>
+                                                            <span class="badge kb-type-badge ms-1" style="background-color: <?= $competency['bg'] ?>; color: <?= $competency['text'] ?? '#ffffff' ?>;"><?= $competency['label'] ?></span>
+                                                        <?php endif; ?>
                                                     </div>
                                                     <?php if ($entry['is_archived']): ?>
                                                         <span class="badge bg-warning text-dark">Archiviert</span>

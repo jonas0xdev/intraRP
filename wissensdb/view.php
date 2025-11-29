@@ -351,8 +351,8 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
                     </a>
 
                     <?php if (!empty($entry['is_pinned'])): ?>
-                        <div class="alert alert-info mt-3">
-                            <i class="fa-solid fa-thumbtack"></i> Dieser Eintrag ist angepinnt und wird oben in der Liste angezeigt.
+                        <div class="alert mt-3" style="background-color: <?= SYSTEM_COLOR ?>20; border-color: <?= SYSTEM_COLOR ?>; color: #e0e0e0;">
+                            <i class="fa-solid fa-thumbtack" style="color: <?= SYSTEM_COLOR ?>;"></i> Dieser Eintrag ist angepinnt und wird oben in der Liste angezeigt.
                         </div>
                     <?php endif; ?>
 
@@ -368,7 +368,7 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
                         <?php if ($competency): ?>
                             <div class="kb-header position-relative" style="background-color: <?= $competency['bg'] ?>;">
                                 <!-- Category badge positioned in top right -->
-                                <span class="kb-category-badge" style="background-color: <?= KBHelper::getTypeColor($entry['type']) ?>; color: #ffffff;">
+                                <span class="kb-category-badge bg-dark" style="color: #ffffff;">
                                     <?= KBHelper::getTypeLabel($entry['type']) ?>
                                 </span>
                                 <div class="d-flex justify-content-between align-items-center">
@@ -387,7 +387,7 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
                             </div>
                         <?php else: ?>
                             <div class="kb-header-content mb-4 position-relative">
-                                <span class="kb-category-badge" style="background-color: <?= KBHelper::getTypeColor($entry['type']) ?>; color: #ffffff; top: 0; right: 0;">
+                                <span class="kb-category-badge bg-dark" style="color: #ffffff; top: 0; right: 0;">
                                     <?= KBHelper::getTypeLabel($entry['type']) ?>
                                 </span>
                                 <h2><?= htmlspecialchars($entry['title']) ?></h2>
