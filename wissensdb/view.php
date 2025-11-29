@@ -26,14 +26,16 @@ if (!$id) {
     exit();
 }
 
-// Fetch entry
+// Fetch entry with names from linked Discord profiles
 $stmt = $pdo->prepare("
     SELECT kb.*, 
-           creator.fullname as creator_name,
-           updater.fullname as updater_name
+           COALESCE(creator_m.fullname, creator.fullname) as creator_name,
+           COALESCE(updater_m.fullname, updater.fullname) as updater_name
     FROM intra_kb_entries kb
     LEFT JOIN intra_users creator ON kb.created_by = creator.id
+    LEFT JOIN intra_mitarbeiter creator_m ON creator.discord_id = creator_m.discordtag
     LEFT JOIN intra_users updater ON kb.updated_by = updater.id
+    LEFT JOIN intra_mitarbeiter updater_m ON updater.discord_id = updater_m.discordtag
     WHERE kb.id = :id
 ");
 $stmt->execute(['id' => $id]);
