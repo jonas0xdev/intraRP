@@ -484,6 +484,7 @@ $formData = $entry ?? [
 
         ClassicEditor
             .create(document.querySelector('#content'), {
+                licenseKey: 'GPL',
                 plugins: [
                     Essentials, Bold, Italic, Underline, Strikethrough,
                     Heading, Link, List, Paragraph, BlockQuote, Table, TableToolbar

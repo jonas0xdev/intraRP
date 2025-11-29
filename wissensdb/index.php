@@ -79,6 +79,7 @@ $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
         .kb-card {
             transition: transform 0.2s, box-shadow 0.2s;
             cursor: pointer;
+            background-color: #ffffff;
         }
         .kb-card:hover {
             transform: translateY(-2px);
@@ -90,9 +91,10 @@ $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
         .kb-archived {
             opacity: 0.6;
         }
-        /* Ensure card content is readable */
+        /* Ensure card content is readable with white background */
         .kb-card .card-body {
             color: #212529;
+            background-color: #ffffff;
         }
         .kb-card .card-title {
             color: #212529;
@@ -102,6 +104,20 @@ $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
         .kb-card .card-footer {
             color: #6c757d;
+            background-color: #f8f9fa;
+        }
+        .kb-card .card-header {
+            color: #ffffff;
+        }
+        /* Filter section styling */
+        .filter-section {
+            background-color: #2d2d2d;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .filter-section .form-label {
+            color: #ffffff;
         }
     </style>
 </head>

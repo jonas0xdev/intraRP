@@ -73,12 +73,31 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
             font-weight: bold;
             font-size: 1.2rem;
         }
+        /* Category badge - positioned separately to avoid color collision */
+        .kb-category-badge {
+            position: absolute;
+            top: -10px;
+            right: 15px;
+            padding: 5px 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            border-radius: 4px;
+            z-index: 10;
+        }
+        /* Main content wrapper with white background for readability */
+        .kb-content-wrapper {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 20px;
+            color: #212529;
+        }
         /* Unified entry row styling */
         .kb-entry-table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
             color: #212529;
+            background-color: #ffffff;
         }
         .kb-entry-table th,
         .kb-entry-table td {
@@ -86,6 +105,7 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
             border: 1px solid #dee2e6;
             vertical-align: top;
             color: #212529;
+            background-color: #ffffff;
         }
         .kb-entry-table th {
             width: 180px;
@@ -97,6 +117,7 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
             border: 1px solid #dee2e6;
             border-bottom: none;
             color: #212529;
+            background-color: #ffffff;
         }
         .kb-entry-row:last-child {
             border-bottom: 1px solid #dee2e6;
@@ -109,6 +130,7 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
             font-size: 1.3rem;
             background-color: #f8f9fa;
             border-right: 1px solid #dee2e6;
+            color: #212529;
         }
         .kb-entry-row .kb-label {
             width: 160px;
@@ -118,10 +140,13 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
             border-right: 1px solid #dee2e6;
             display: flex;
             align-items: center;
+            color: #212529;
         }
         .kb-entry-row .kb-content {
             flex: 1;
             padding: 12px 15px;
+            background-color: #ffffff;
+            color: #212529;
         }
         /* Section styling for special sections */
         .kb-section {
@@ -140,7 +165,7 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
             color: #000000;
         }
         .kb-section-red {
-            background-color: #fff;
+            background-color: #ffffff;
             border: 2px solid #c00000;
             color: #000000;
         }
@@ -163,17 +188,53 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
         }
         .edit-info {
             font-size: 0.85rem;
-            opacity: 0.8;
+            color: #6c757d;
+            background-color: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-top: 20px;
         }
-        /* Ensure all content areas have readable text */
-        .intra__tile {
+        /* Ensure the tile has proper background */
+        .kb-tile {
+            background-color: #ffffff;
+            border-radius: 8px;
             color: #212529;
         }
-        .intra__tile h2, .intra__tile h3, .intra__tile h4, .intra__tile h5 {
+        .kb-tile h2, .kb-tile h3, .kb-tile h4, .kb-tile h5, .kb-tile p {
             color: #212529;
         }
         .content-area {
             color: #212529;
+            background-color: #ffffff;
+            padding: 15px;
+            border-radius: 4px;
+        }
+        /* Header section styling */
+        .kb-header {
+            position: relative;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .kb-header-content {
+            background-color: #ffffff;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .kb-header h2 {
+            margin: 0;
+            color: #212529;
+        }
+        .kb-header .subtitle {
+            color: #6c757d;
+            margin: 5px 0 0 0;
+        }
+        .kb-freigabe-badge {
+            padding: 8px 15px;
+            font-weight: bold;
+            font-size: 1rem;
+            border-radius: 4px;
+            display: inline-block;
         }
     </style>
 </head>
@@ -259,39 +320,41 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
                     <?php endif; ?>
 
                     <!-- Entry Content -->
-                    <div class="intra__tile p-4">
+                    <div class="kb-tile p-4">
                         <!-- Header with Title and Competency -->
                         <?php if ($competency): ?>
-                            <div class="competency-header" style="background-color: <?= $competency['bg'] ?>; color: <?= $competency['text'] ?>;">
+                            <div class="kb-header position-relative" style="background-color: <?= $competency['bg'] ?>;">
+                                <!-- Category badge positioned in top right -->
+                                <span class="kb-category-badge" style="background-color: <?= KBHelper::getTypeColor($entry['type']) ?>; color: #ffffff;">
+                                    <?= KBHelper::getTypeLabel($entry['type']) ?>
+                                </span>
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <span class="badge mb-2" style="background-color: <?= KBHelper::getTypeColor($entry['type']) ?>; color: #ffffff;">
-                                            <?= KBHelper::getTypeLabel($entry['type']) ?>
-                                        </span>
-                                        <h2 class="mb-1"><?= htmlspecialchars($entry['title']) ?></h2>
+                                    <div class="kb-header-content flex-grow-1 me-3">
+                                        <h2><?= htmlspecialchars($entry['title']) ?></h2>
                                         <?php if (!empty($entry['subtitle'])): ?>
-                                            <p class="mb-0 opacity-75"><?= htmlspecialchars($entry['subtitle']) ?></p>
+                                            <p class="subtitle"><?= htmlspecialchars($entry['subtitle']) ?></p>
                                         <?php endif; ?>
                                     </div>
                                     <div class="text-end">
-                                        <div class="competency-label p-2 rounded" style="background-color: <?= $competency['color'] ?>; color: <?= KBHelper::competencyNeedsDarkText($entry['competency_level']) ? '#000' : '#fff' ?>;">
+                                        <div class="kb-freigabe-badge" style="background-color: <?= $competency['color'] ?>; color: <?= KBHelper::competencyNeedsDarkText($entry['competency_level']) ? '#000' : '#fff' ?>;">
                                             Freigabe: <?= $competency['label'] ?>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         <?php else: ?>
-                            <div class="mb-4">
-                                <span class="badge mb-2" style="background-color: <?= KBHelper::getTypeColor($entry['type']) ?>; color: #ffffff;">
+                            <div class="kb-header-content mb-4 position-relative">
+                                <span class="kb-category-badge" style="background-color: <?= KBHelper::getTypeColor($entry['type']) ?>; color: #ffffff; top: 0; right: 0;">
                                     <?= KBHelper::getTypeLabel($entry['type']) ?>
                                 </span>
-                                <h2 class="mb-1"><?= htmlspecialchars($entry['title']) ?></h2>
+                                <h2><?= htmlspecialchars($entry['title']) ?></h2>
                                 <?php if (!empty($entry['subtitle'])): ?>
-                                    <p class="text-muted"><?= htmlspecialchars($entry['subtitle']) ?></p>
+                                    <p class="subtitle"><?= htmlspecialchars($entry['subtitle']) ?></p>
                                 <?php endif; ?>
                             </div>
                         <?php endif; ?>
 
+                        <div class="kb-content-wrapper">
                         <?php if ($entry['type'] === 'medication'): ?>
                             <!-- Medication Layout -->
                             <div class="row">
@@ -425,8 +488,7 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
                         <?php endif; ?>
 
                         <!-- Edit Info -->
-                        <hr class="my-4">
-                        <div class="edit-info text-muted">
+                        <div class="edit-info">
                             <i class="fa-solid fa-clock"></i>
                             Erstellt am <?= date('d.m.Y H:i', strtotime($entry['created_at'])) ?>
                             <?php if ($entry['creator_name']): ?>
@@ -441,7 +503,8 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
                                 <?php endif; ?>
                             <?php endif; ?>
                         </div>
-                    </div>
+                        </div><!-- /.kb-content-wrapper -->
+                    </div><!-- /.kb-tile -->
                 </div>
             </div>
         </div>
