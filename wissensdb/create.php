@@ -310,8 +310,8 @@ $formData = $entry ?? [
                                         <option value="" <?= empty($formData['competency_level']) ? 'selected' : '' ?>>Keine Angabe</option>
                                         <option value="basis" <?= $formData['competency_level'] === 'basis' ? 'selected' : '' ?>>Basis - Basismaßnahmen</option>
                                         <option value="rettsan" <?= $formData['competency_level'] === 'rettsan' ? 'selected' : '' ?>>RettSan - Rettungssanitäter</option>
-                                        <option value="notsan_2c" <?= $formData['competency_level'] === 'notsan_2c' ? 'selected' : '' ?>>NotSan 2c - § 4 Abs. 2c NotSanG</option>
-                                        <option value="notsan_2a" <?= $formData['competency_level'] === 'notsan_2a' ? 'selected' : '' ?>>NotSan 2a - § 2a NotSanG</option>
+                                        <option value="notsan_2c" <?= $formData['competency_level'] === 'notsan_2c' ? 'selected' : '' ?>>NFS 2c - § 4 Abs. 2c NotSanG</option>
+                                        <option value="notsan_2a" <?= $formData['competency_level'] === 'notsan_2a' ? 'selected' : '' ?>>NFS 2a - § 2a NotSanG</option>
                                         <option value="notarzt" <?= $formData['competency_level'] === 'notarzt' ? 'selected' : '' ?>>Notarzt</option>
                                     </select>
                                 </div>

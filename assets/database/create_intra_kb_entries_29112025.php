@@ -36,6 +36,7 @@ try {
         `mass_durchfuehrung` TEXT NULL,
         
         -- Metadata
+        `is_pinned` TINYINT(1) NOT NULL DEFAULT 0,
         `is_archived` TINYINT(1) NOT NULL DEFAULT 0,
         `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         `created_by` INT NULL,
@@ -43,6 +44,7 @@ try {
         `updated_by` INT NULL,
         
         INDEX idx_type (type),
+        INDEX idx_pinned (is_pinned),
         INDEX idx_archived (is_archived),
         INDEX idx_competency (competency_level),
         INDEX idx_created (created_at),

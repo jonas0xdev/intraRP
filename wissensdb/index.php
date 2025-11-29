@@ -44,11 +44,15 @@ if ($typeFilter !== 'all') {
 }
 
 if (!empty($searchQuery)) {
-    $sql .= " AND (kb.title LIKE :search OR kb.subtitle LIKE :search OR kb.content LIKE :search)";
-    $params['search'] = '%' . $searchQuery . '%';
+    $sql .= " AND (kb.title LIKE :search1 OR kb.subtitle LIKE :search2 OR kb.content LIKE :search3)";
+    $searchParam = '%' . $searchQuery . '%';
+    $params['search1'] = $searchParam;
+    $params['search2'] = $searchParam;
+    $params['search3'] = $searchParam;
 }
 
-$sql .= " ORDER BY kb.updated_at DESC, kb.created_at DESC";
+// Order by pinned first, then by update/creation date
+$sql .= " ORDER BY kb.is_pinned DESC, kb.updated_at DESC, kb.created_at DESC";
 
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
@@ -82,10 +86,22 @@ $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
         .kb-type-badge {
             font-size: 0.7rem;
-            opacity: 0.8;
         }
         .kb-archived {
             opacity: 0.6;
+        }
+        /* Ensure card content is readable */
+        .kb-card .card-body {
+            color: #212529;
+        }
+        .kb-card .card-title {
+            color: #212529;
+        }
+        .kb-card .card-text {
+            color: #495057;
+        }
+        .kb-card .card-footer {
+            color: #6c757d;
         }
     </style>
 </head>
@@ -181,7 +197,12 @@ $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                             <?php endif; ?>
                                             <div class="card-body">
                                                 <div class="d-flex justify-content-between align-items-start mb-2">
-                                                    <span class="badge bg-secondary kb-type-badge"><?= KBHelper::getTypeLabel($entry['type']) ?></span>
+                                                    <div>
+                                                        <?php if (!empty($entry['is_pinned'])): ?>
+                                                            <span class="badge bg-primary me-1" title="Angepinnt"><i class="fa-solid fa-thumbtack"></i></span>
+                                                        <?php endif; ?>
+                                                        <span class="badge kb-type-badge" style="background-color: <?= KBHelper::getTypeColor($entry['type']) ?>; color: #ffffff;"><?= KBHelper::getTypeLabel($entry['type']) ?></span>
+                                                    </div>
                                                     <?php if ($entry['is_archived']): ?>
                                                         <span class="badge bg-warning text-dark">Archiviert</span>
                                                     <?php endif; ?>

@@ -73,54 +73,107 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
             font-weight: bold;
             font-size: 1.2rem;
         }
-        .kb-section {
+        /* Unified entry row styling */
+        .kb-entry-table {
+            width: 100%;
+            border-collapse: collapse;
             margin-bottom: 20px;
-            padding: 15px;
-            border-radius: 8px;
+            color: #212529;
+        }
+        .kb-entry-table th,
+        .kb-entry-table td {
+            padding: 12px 15px;
+            border: 1px solid #dee2e6;
+            vertical-align: top;
+            color: #212529;
+        }
+        .kb-entry-table th {
+            width: 180px;
+            font-weight: bold;
+            background-color: #f8f9fa;
+        }
+        .kb-entry-row {
+            display: flex;
+            border: 1px solid #dee2e6;
+            border-bottom: none;
+            color: #212529;
+        }
+        .kb-entry-row:last-child {
+            border-bottom: 1px solid #dee2e6;
+        }
+        .kb-entry-row .kb-icon {
+            width: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            background-color: #f8f9fa;
+            border-right: 1px solid #dee2e6;
+        }
+        .kb-entry-row .kb-label {
+            width: 160px;
+            padding: 12px 15px;
+            font-weight: bold;
+            background-color: #f8f9fa;
+            border-right: 1px solid #dee2e6;
+            display: flex;
+            align-items: center;
+        }
+        .kb-entry-row .kb-content {
+            flex: 1;
+            padding: 12px 15px;
+        }
+        /* Section styling for special sections */
+        .kb-section {
+            margin-bottom: 15px;
+            border-radius: 0;
+            color: #000000;
         }
         .kb-section-yellow {
-            background-color: #fff3cd;
-            border-left: 4px solid #f7b500;
+            background-color: #ffff00;
+            border: 1px solid #dee2e6;
+            color: #000000;
         }
         .kb-section-blue {
             background-color: #cce5ff;
-            border-left: 4px solid #004085;
+            border: 1px solid #dee2e6;
+            color: #000000;
         }
         .kb-section-red {
-            background-color: #f8d7da;
-            border: 2px solid #dc0000;
+            background-color: #fff;
+            border: 2px solid #c00000;
+            color: #000000;
         }
         .kb-section-gray {
             background-color: #f8f9fa;
-            border-left: 4px solid #6c757d;
+            border: 1px solid #dee2e6;
+            color: #000000;
         }
-        .kb-section h5 {
-            margin-bottom: 10px;
+        .kb-section h5,
+        .kb-section-header {
+            margin: 0;
+            padding: 8px 15px;
             font-weight: bold;
+            color: #000000;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .kb-section-content {
+            padding: 12px 15px;
+            color: #000000;
         }
         .edit-info {
             font-size: 0.85rem;
             opacity: 0.8;
         }
-        .measure-row {
-            display: flex;
-            border-bottom: 1px solid #dee2e6;
-            padding: 10px 0;
+        /* Ensure all content areas have readable text */
+        .intra__tile {
+            color: #212529;
         }
-        .measure-row:last-child {
-            border-bottom: none;
+        .intra__tile h2, .intra__tile h3, .intra__tile h4, .intra__tile h5 {
+            color: #212529;
         }
-        .measure-icon {
-            width: 50px;
-            text-align: center;
-            font-size: 1.5rem;
-        }
-        .measure-label {
-            width: 180px;
-            font-weight: bold;
-        }
-        .measure-content {
-            flex: 1;
+        .content-area {
+            color: #212529;
         }
     </style>
 </head>
@@ -158,6 +211,14 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
                         <?php if ($isLoggedIn): ?>
                             <div>
                                 <?php if (Permissions::check(['admin', 'kb.edit'])): ?>
+                                    <!-- Pin/Unpin Button -->
+                                    <form method="POST" action="<?= BASE_PATH ?>wissensdb/pin.php" class="d-inline">
+                                        <input type="hidden" name="id" value="<?= $entry['id'] ?>">
+                                        <input type="hidden" name="action" value="<?= !empty($entry['is_pinned']) ? 'unpin' : 'pin' ?>">
+                                        <button type="submit" class="btn btn-<?= !empty($entry['is_pinned']) ? 'info' : 'outline-info' ?> btn-sm" title="<?= !empty($entry['is_pinned']) ? 'Lösen' : 'Anpinnen' ?>">
+                                            <i class="fa-solid fa-thumbtack"></i> <?= !empty($entry['is_pinned']) ? 'Lösen' : 'Anpinnen' ?>
+                                        </button>
+                                    </form>
                                     <a href="<?= BASE_PATH ?>wissensdb/edit.php?id=<?= $entry['id'] ?>" class="btn btn-primary btn-sm">
                                         <i class="fa-solid fa-edit"></i> Bearbeiten
                                     </a>
@@ -185,6 +246,12 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
                         <?php endif; ?>
                     </div>
 
+                    <?php if (!empty($entry['is_pinned'])): ?>
+                        <div class="alert alert-info">
+                            <i class="fa-solid fa-thumbtack"></i> Dieser Eintrag ist angepinnt und wird oben in der Liste angezeigt.
+                        </div>
+                    <?php endif; ?>
+
                     <?php if ($entry['is_archived']): ?>
                         <div class="alert alert-warning">
                             <i class="fa-solid fa-archive"></i> Dieser Eintrag ist archiviert.
@@ -198,7 +265,7 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
                             <div class="competency-header" style="background-color: <?= $competency['bg'] ?>; color: <?= $competency['text'] ?>;">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
-                                        <span class="badge mb-2" style="background-color: <?= KBHelper::getTypeColor($entry['type']) ?>">
+                                        <span class="badge mb-2" style="background-color: <?= KBHelper::getTypeColor($entry['type']) ?>; color: #ffffff;">
                                             <?= KBHelper::getTypeLabel($entry['type']) ?>
                                         </span>
                                         <h2 class="mb-1"><?= htmlspecialchars($entry['title']) ?></h2>
@@ -215,7 +282,7 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
                             </div>
                         <?php else: ?>
                             <div class="mb-4">
-                                <span class="badge mb-2" style="background-color: <?= KBHelper::getTypeColor($entry['type']) ?>">
+                                <span class="badge mb-2" style="background-color: <?= KBHelper::getTypeColor($entry['type']) ?>; color: #ffffff;">
                                     <?= KBHelper::getTypeLabel($entry['type']) ?>
                                 </span>
                                 <h2 class="mb-1"><?= htmlspecialchars($entry['title']) ?></h2>
@@ -230,11 +297,11 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
                             <div class="row">
                                 <div class="col-12">
                                     <!-- Basic Info Table -->
-                                    <table class="table table-bordered mb-4">
+                                    <table class="kb-entry-table mb-4">
                                         <tbody>
                                             <?php if (!empty($entry['med_wirkstoff'])): ?>
                                                 <tr>
-                                                    <th style="width: 180px;">Wirkstoff:</th>
+                                                    <th>Wirkstoff:</th>
                                                     <td><?= htmlspecialchars($entry['med_wirkstoff']) ?></td>
                                                 </tr>
                                             <?php endif; ?>
@@ -255,94 +322,92 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
 
                                     <?php if (!empty($entry['med_indikationen'])): ?>
                                         <div class="kb-section kb-section-yellow">
-                                            <h5>Indikationen:</h5>
-                                            <div><?= nl2br(htmlspecialchars($entry['med_indikationen'])) ?></div>
+                                            <div class="kb-section-header">Indikationen:</div>
+                                            <div class="kb-section-content"><?= nl2br(htmlspecialchars($entry['med_indikationen'])) ?></div>
                                         </div>
                                     <?php endif; ?>
 
                                     <?php if (!empty($entry['med_kontraindikationen'])): ?>
                                         <div class="kb-section kb-section-yellow">
-                                            <h5>Kontraindikationen:</h5>
-                                            <div><?= nl2br(htmlspecialchars($entry['med_kontraindikationen'])) ?></div>
+                                            <div class="kb-section-header">Kontraindikationen:</div>
+                                            <div class="kb-section-content"><?= nl2br(htmlspecialchars($entry['med_kontraindikationen'])) ?></div>
                                         </div>
                                     <?php endif; ?>
 
                                     <?php if (!empty($entry['med_uaw'])): ?>
                                         <div class="kb-section kb-section-gray">
-                                            <h5>Unerwünschte Arzneimittelwirkungen (UAW):</h5>
-                                            <div><?= nl2br(htmlspecialchars($entry['med_uaw'])) ?></div>
+                                            <div class="kb-section-header">Unerwünschte Arzneimittelwirkungen (UAW):</div>
+                                            <div class="kb-section-content"><?= nl2br(htmlspecialchars($entry['med_uaw'])) ?></div>
                                         </div>
                                     <?php endif; ?>
 
                                     <?php if (!empty($entry['med_dosierung'])): ?>
                                         <div class="kb-section kb-section-blue">
-                                            <h5>Dosierung:</h5>
-                                            <div><?= nl2br(htmlspecialchars($entry['med_dosierung'])) ?></div>
+                                            <div class="kb-section-header">Dosierung:</div>
+                                            <div class="kb-section-content"><?= nl2br(htmlspecialchars($entry['med_dosierung'])) ?></div>
                                         </div>
                                     <?php endif; ?>
 
                                     <?php if (!empty($entry['med_besonderheiten'])): ?>
                                         <div class="kb-section kb-section-red">
-                                            <h5>Besonderheiten / CAVE:</h5>
-                                            <div><?= nl2br(htmlspecialchars($entry['med_besonderheiten'])) ?></div>
+                                            <div class="kb-section-header">Besonderheiten / CAVE:</div>
+                                            <div class="kb-section-content"><?= nl2br(htmlspecialchars($entry['med_besonderheiten'])) ?></div>
                                         </div>
                                     <?php endif; ?>
                                 </div>
                             </div>
 
                         <?php elseif ($entry['type'] === 'measure'): ?>
-                            <!-- Measure Layout -->
+                            <!-- Measure Layout - Same style as Medication -->
                             <div class="row">
                                 <div class="col-12">
-                                    <div class="border rounded">
-                                        <?php if (!empty($entry['mass_wirkprinzip'])): ?>
-                                            <div class="measure-row">
-                                                <div class="measure-icon"><i class="fa-solid fa-lightbulb text-warning"></i></div>
-                                                <div class="measure-label">Wirkprinzip</div>
-                                                <div class="measure-content"><?= nl2br(htmlspecialchars($entry['mass_wirkprinzip'])) ?></div>
-                                            </div>
-                                        <?php endif; ?>
-                                        
-                                        <?php if (!empty($entry['mass_indikationen'])): ?>
-                                            <div class="measure-row">
-                                                <div class="measure-icon"><i class="fa-solid fa-check text-success"></i></div>
-                                                <div class="measure-label">Indikationen</div>
-                                                <div class="measure-content"><?= nl2br(htmlspecialchars($entry['mass_indikationen'])) ?></div>
-                                            </div>
-                                        <?php endif; ?>
-                                        
-                                        <?php if (!empty($entry['mass_kontraindikationen'])): ?>
-                                            <div class="measure-row">
-                                                <div class="measure-icon"><i class="fa-solid fa-xmark text-danger"></i></div>
-                                                <div class="measure-label">Kontraindikationen</div>
-                                                <div class="measure-content"><?= nl2br(htmlspecialchars($entry['mass_kontraindikationen'])) ?></div>
-                                            </div>
-                                        <?php endif; ?>
-                                        
-                                        <?php if (!empty($entry['mass_risiken'])): ?>
-                                            <div class="measure-row">
-                                                <div class="measure-icon"><i class="fa-solid fa-face-frown text-secondary"></i></div>
-                                                <div class="measure-label">Risiken</div>
-                                                <div class="measure-content"><?= nl2br(htmlspecialchars($entry['mass_risiken'])) ?></div>
-                                            </div>
-                                        <?php endif; ?>
-                                        
-                                        <?php if (!empty($entry['mass_alternativen'])): ?>
-                                            <div class="measure-row">
-                                                <div class="measure-icon"><i class="fa-solid fa-arrows-left-right text-info"></i></div>
-                                                <div class="measure-label">Alternativen</div>
-                                                <div class="measure-content"><?= nl2br(htmlspecialchars($entry['mass_alternativen'])) ?></div>
-                                            </div>
-                                        <?php endif; ?>
-                                        
-                                        <?php if (!empty($entry['mass_durchfuehrung'])): ?>
-                                            <div class="measure-row">
-                                                <div class="measure-icon"><i class="fa-solid fa-screwdriver-wrench text-primary"></i></div>
-                                                <div class="measure-label">Durchführung</div>
-                                                <div class="measure-content"><?= nl2br(htmlspecialchars($entry['mass_durchfuehrung'])) ?></div>
-                                            </div>
-                                        <?php endif; ?>
-                                    </div>
+                                    <?php if (!empty($entry['mass_wirkprinzip'])): ?>
+                                        <div class="kb-entry-row">
+                                            <div class="kb-icon"><i class="fa-solid fa-lightbulb"></i></div>
+                                            <div class="kb-label">Wirkprinzip</div>
+                                            <div class="kb-content"><?= nl2br(htmlspecialchars($entry['mass_wirkprinzip'])) ?></div>
+                                        </div>
+                                    <?php endif; ?>
+                                    
+                                    <?php if (!empty($entry['mass_indikationen'])): ?>
+                                        <div class="kb-entry-row">
+                                            <div class="kb-icon"><i class="fa-solid fa-check"></i></div>
+                                            <div class="kb-label">Indikationen</div>
+                                            <div class="kb-content"><?= nl2br(htmlspecialchars($entry['mass_indikationen'])) ?></div>
+                                        </div>
+                                    <?php endif; ?>
+                                    
+                                    <?php if (!empty($entry['mass_kontraindikationen'])): ?>
+                                        <div class="kb-entry-row">
+                                            <div class="kb-icon"><i class="fa-solid fa-xmark"></i></div>
+                                            <div class="kb-label">Kontraindikationen</div>
+                                            <div class="kb-content"><?= nl2br(htmlspecialchars($entry['mass_kontraindikationen'])) ?></div>
+                                        </div>
+                                    <?php endif; ?>
+                                    
+                                    <?php if (!empty($entry['mass_risiken'])): ?>
+                                        <div class="kb-entry-row">
+                                            <div class="kb-icon"><i class="fa-regular fa-face-frown"></i></div>
+                                            <div class="kb-label">Risiken</div>
+                                            <div class="kb-content"><?= nl2br(htmlspecialchars($entry['mass_risiken'])) ?></div>
+                                        </div>
+                                    <?php endif; ?>
+                                    
+                                    <?php if (!empty($entry['mass_alternativen'])): ?>
+                                        <div class="kb-entry-row">
+                                            <div class="kb-icon"><i class="fa-solid fa-arrows-left-right"></i></div>
+                                            <div class="kb-label">Alternativen</div>
+                                            <div class="kb-content"><?= nl2br(htmlspecialchars($entry['mass_alternativen'])) ?></div>
+                                        </div>
+                                    <?php endif; ?>
+                                    
+                                    <?php if (!empty($entry['mass_durchfuehrung'])): ?>
+                                        <div class="kb-entry-row">
+                                            <div class="kb-icon"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+                                            <div class="kb-label">Durchführung</div>
+                                            <div class="kb-content"><?= nl2br(htmlspecialchars($entry['mass_durchfuehrung'])) ?></div>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         <?php endif; ?>

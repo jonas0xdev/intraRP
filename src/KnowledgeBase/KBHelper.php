@@ -22,36 +22,36 @@ class KBHelper
         $competencies = [
             'basis' => [
                 'label' => 'Basis',
-                'color' => '#808080',
-                'bg' => '#f0f0f0',
-                'text' => '#333333',
+                'color' => '#767171',
+                'bg' => '#767171',
+                'text' => '#ffffff',
                 'desc' => 'Basismaßnahmen; durch jedes Rettungsdienstpersonal ausführbar'
             ],
             'rettsan' => [
                 'label' => 'RettSan',
-                'color' => '#dc0000',
-                'bg' => '#ffcccc',
-                'text' => '#dc0000',
+                'color' => '#00b0f0',
+                'bg' => '#00b0f0',
+                'text' => '#ffffff',
                 'desc' => 'Durchführung durch RettSan bei Hinzuziehung/Nachsicht eines Arztes'
             ],
             'notsan_2c' => [
-                'label' => 'NotSan 2c',
-                'color' => '#f7b500',
-                'bg' => '#fff3cd',
-                'text' => '#000000',
+                'label' => 'NFS 2c',
+                'color' => '#00b050',
+                'bg' => '#00b050',
+                'text' => '#ffffff',
                 'desc' => 'Eigenständige Durchführung durch NotSan im Rahmen § 4 Abs. 2c NotSanG'
             ],
             'notsan_2a' => [
-                'label' => 'NotSan 2a',
-                'color' => '#00a651',
-                'bg' => '#d4edda',
-                'text' => '#ffffff',
+                'label' => 'NFS 2a',
+                'color' => '#ffc000',
+                'bg' => '#ffc000',
+                'text' => '#000000',
                 'desc' => 'Eigenverantwortliche Durchführung durch NotSan im Rahmen § 2a NotSanG'
             ],
             'notarzt' => [
                 'label' => 'Notarzt',
-                'color' => '#dc0000',
-                'bg' => '#f8d7da',
+                'color' => '#c00000',
+                'bg' => '#c00000',
                 'text' => '#ffffff',
                 'desc' => 'Durchführung nur durch Notärzte vorgesehen'
             ]
@@ -100,7 +100,8 @@ class KBHelper
      */
     public static function competencyNeedsDarkText(?string $level): bool
     {
-        return $level === 'notsan_2c';
+        // Only NFS 2a (yellow/orange) needs dark text
+        return $level === 'notsan_2a';
     }
 
     /**
