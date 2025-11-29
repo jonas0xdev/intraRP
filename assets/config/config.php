@@ -45,4 +45,8 @@ try {
     if (!defined('ENOTF_REQUIRE_USER_AUTH')) define('ENOTF_REQUIRE_USER_AUTH', false);
     if (!defined('REGISTRATION_MODE')) define('REGISTRATION_MODE', 'open');
     if (!defined('BASE_PATH')) define('BASE_PATH', '/');
+    if (!defined('KB_PUBLIC_ACCESS')) define('KB_PUBLIC_ACCESS', false);
 }
+
+// Ensure KB_PUBLIC_ACCESS has a default even after successful config load
+if (!defined('KB_PUBLIC_ACCESS')) define('KB_PUBLIC_ACCESS', false);
