@@ -321,8 +321,8 @@ $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             ?>
                                 <div class="col">
                                     <div class="col-card-wrapper">
-                                        <a href="<?= BASE_PATH ?>wissensdb/view.php?id=<?= $entry['id'] ?>" class="text-decoration-none">
-                                            <div class="card h-100 kb-card <?= $entry['is_archived'] ? 'kb-archived' : '' ?>">
+                                        <div class="card h-100 kb-card <?= $entry['is_archived'] ? 'kb-archived' : '' ?>" 
+                                             onclick="window.location.href='<?= BASE_PATH ?>wissensdb/view.php?id=<?= $entry['id'] ?>'">
                                             <?php if ($competency): ?>
                                                 <div class="card-header p-2" style="background-color: <?= $competency['bg'] ?>; border-bottom: 3px solid <?= $competency['color'] === '#ffffff' ? $competency['bg'] : $competency['color'] ?>;">
                                                     <span class="competency-badge" style="background-color: <?= $competency['bg'] ?>; color: <?= $competency['text'] ?? $competency['color'] ?>;">
@@ -366,8 +366,8 @@ $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                                     <?php endif; ?>
                                                 </small>
                                                 <?php if ($isLoggedIn && Permissions::check(['admin', 'kb.edit'])): ?>
-                                                    <div class="kb-card-footer-actions" onclick="event.preventDefault(); event.stopPropagation();">
-                                                        <form method="POST" action="<?= BASE_PATH ?>wissensdb/pin.php" style="margin: 0; display: inline;">
+                                                    <div class="kb-card-footer-actions">
+                                                        <form method="POST" action="<?= BASE_PATH ?>wissensdb/pin.php" style="margin: 0; display: inline;" onclick="event.stopPropagation();">
                                                             <input type="hidden" name="id" value="<?= $entry['id'] ?>">
                                                             <input type="hidden" name="action" value="<?= !empty($entry['is_pinned']) ? 'unpin' : 'pin' ?>">
                                                             <button type="submit" class="kb-quick-btn">
@@ -375,7 +375,7 @@ $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                                                 <span class="tooltip-text"><?= !empty($entry['is_pinned']) ? 'Lösen' : 'Anpinnen' ?></span>
                                                             </button>
                                                         </form>
-                                                        <a href="<?= BASE_PATH ?>wissensdb/edit.php?id=<?= $entry['id'] ?>" class="kb-quick-btn">
+                                                        <a href="<?= BASE_PATH ?>wissensdb/edit.php?id=<?= $entry['id'] ?>" class="kb-quick-btn" onclick="event.stopPropagation();">
                                                             <i class="fa-solid fa-pen"></i>
                                                             <span class="tooltip-text">Bearbeiten</span>
                                                         </a>
@@ -383,7 +383,6 @@ $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                                 <?php endif; ?>
                                             </div>
                                         </div>
-                                    </a>
                                     </div><!-- /.col-card-wrapper -->
                                 </div>
                             <?php endforeach; ?>
