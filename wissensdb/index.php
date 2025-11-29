@@ -6,6 +6,7 @@ require __DIR__ . '/../assets/config/database.php';
 
 use App\Auth\Permissions;
 use App\Helpers\Flash;
+use App\KnowledgeBase\KBHelper;
 
 // Check if public access is enabled or user is logged in
 $publicAccess = defined('KB_PUBLIC_ACCESS') && KB_PUBLIC_ACCESS === true;
@@ -52,28 +53,6 @@ $sql .= " ORDER BY kb.updated_at DESC, kb.created_at DESC";
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Helper function for competency level colors and labels
-function getCompetencyInfo($level) {
-    $competencies = [
-        'basis' => ['label' => 'Basis', 'color' => '#808080', 'bg' => '#f0f0f0'],
-        'rettsan' => ['label' => 'RettSan', 'color' => '#dc0000', 'bg' => '#ffcccc'],
-        'notsan_2c' => ['label' => 'NotSan 2c', 'color' => '#ffffff', 'bg' => '#f7b500', 'text' => '#000000'],
-        'notsan_2a' => ['label' => 'NotSan 2a', 'color' => '#ffffff', 'bg' => '#00a651'],
-        'notarzt' => ['label' => 'Notarzt', 'color' => '#ffffff', 'bg' => '#dc0000']
-    ];
-    return $competencies[$level] ?? null;
-}
-
-// Helper for type labels
-function getTypeLabel($type) {
-    $types = [
-        'general' => 'Allgemein',
-        'medication' => 'Medikament',
-        'measure' => 'Maßnahme'
-    ];
-    return $types[$type] ?? $type;
-}
 ?>
 
 <!DOCTYPE html>
@@ -188,7 +167,7 @@ function getTypeLabel($type) {
                     <?php else: ?>
                         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
                             <?php foreach ($entries as $entry): 
-                                $competency = getCompetencyInfo($entry['competency_level']);
+                                $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
                             ?>
                                 <div class="col">
                                     <a href="<?= BASE_PATH ?>wissensdb/view.php?id=<?= $entry['id'] ?>" class="text-decoration-none">
@@ -202,7 +181,7 @@ function getTypeLabel($type) {
                                             <?php endif; ?>
                                             <div class="card-body">
                                                 <div class="d-flex justify-content-between align-items-start mb-2">
-                                                    <span class="badge bg-secondary kb-type-badge"><?= getTypeLabel($entry['type']) ?></span>
+                                                    <span class="badge bg-secondary kb-type-badge"><?= KBHelper::getTypeLabel($entry['type']) ?></span>
                                                     <?php if ($entry['is_archived']): ?>
                                                         <span class="badge bg-warning text-dark">Archiviert</span>
                                                     <?php endif; ?>

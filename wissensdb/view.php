@@ -6,6 +6,7 @@ require __DIR__ . '/../assets/config/database.php';
 
 use App\Auth\Permissions;
 use App\Helpers\Flash;
+use App\KnowledgeBase\KBHelper;
 
 // Check if public access is enabled or user is logged in
 $publicAccess = defined('KB_PUBLIC_ACCESS') && KB_PUBLIC_ACCESS === true;
@@ -51,28 +52,7 @@ if ($entry['is_archived'] && (!$isLoggedIn || !Permissions::check(['admin', 'kb.
     exit();
 }
 
-// Helper function for competency level colors and labels
-function getCompetencyInfo($level) {
-    $competencies = [
-        'basis' => ['label' => 'Basis', 'color' => '#808080', 'bg' => '#f0f0f0', 'text' => '#333333', 'desc' => 'Basismaßnahmen; durch jedes Rettungsdienstpersonal ausführbar'],
-        'rettsan' => ['label' => 'RettSan', 'color' => '#dc0000', 'bg' => '#ffcccc', 'text' => '#dc0000', 'desc' => 'Durchführung durch RettSan bei Hinzuziehung/Nachsicht eines Arztes'],
-        'notsan_2c' => ['label' => 'NotSan 2c', 'color' => '#f7b500', 'bg' => '#fff3cd', 'text' => '#000000', 'desc' => 'Eigenständige Durchführung durch NotSan im Rahmen § 4 Abs. 2c NotSanG'],
-        'notsan_2a' => ['label' => 'NotSan 2a', 'color' => '#00a651', 'bg' => '#d4edda', 'text' => '#ffffff', 'desc' => 'Eigenverantwortliche Durchführung durch NotSan im Rahmen § 2a NotSanG'],
-        'notarzt' => ['label' => 'Notarzt', 'color' => '#dc0000', 'bg' => '#f8d7da', 'text' => '#ffffff', 'desc' => 'Durchführung nur durch Notärzte vorgesehen']
-    ];
-    return $competencies[$level] ?? null;
-}
-
-function getTypeLabel($type) {
-    $types = [
-        'general' => 'Allgemein',
-        'medication' => 'Medikament',
-        'measure' => 'Maßnahme'
-    ];
-    return $types[$type] ?? $type;
-}
-
-$competency = getCompetencyInfo($entry['competency_level']);
+$competency = KBHelper::getCompetencyInfo($entry['competency_level']);
 ?>
 
 <!DOCTYPE html>
@@ -219,7 +199,7 @@ $competency = getCompetencyInfo($entry['competency_level']);
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
                                         <span class="badge mb-2" style="background-color: <?= $entry['type'] === 'medication' ? '#17a2b8' : ($entry['type'] === 'measure' ? '#28a745' : '#6c757d') ?>">
-                                            <?= getTypeLabel($entry['type']) ?>
+                                            <?= KBHelper::getTypeLabel($entry['type']) ?>
                                         </span>
                                         <h2 class="mb-1"><?= htmlspecialchars($entry['title']) ?></h2>
                                         <?php if (!empty($entry['subtitle'])): ?>
@@ -236,7 +216,7 @@ $competency = getCompetencyInfo($entry['competency_level']);
                         <?php else: ?>
                             <div class="mb-4">
                                 <span class="badge mb-2" style="background-color: <?= $entry['type'] === 'medication' ? '#17a2b8' : ($entry['type'] === 'measure' ? '#28a745' : '#6c757d') ?>">
-                                    <?= getTypeLabel($entry['type']) ?>
+                                    <?= KBHelper::getTypeLabel($entry['type']) ?>
                                 </span>
                                 <h2 class="mb-1"><?= htmlspecialchars($entry['title']) ?></h2>
                                 <?php if (!empty($entry['subtitle'])): ?>
@@ -374,7 +354,7 @@ $competency = getCompetencyInfo($entry['competency_level']);
                                     <h5>Weitere Informationen:</h5>
                                 <?php endif; ?>
                                 <div class="content-area">
-                                    <?= $entry['content'] ?>
+                                    <?= KBHelper::sanitizeContent($entry['content']) ?>
                                 </div>
                             </div>
                         <?php endif; ?>

@@ -25,10 +25,16 @@ if (!Permissions::check(['admin', 'kb.edit'])) {
 $editId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 $isEdit = false;
 $entry = null;
+$updaterName = null;
 
 if ($editId) {
     $isEdit = true;
-    $stmt = $pdo->prepare("SELECT * FROM intra_kb_entries WHERE id = :id");
+    $stmt = $pdo->prepare("
+        SELECT kb.*, u.fullname as updater_name
+        FROM intra_kb_entries kb
+        LEFT JOIN intra_users u ON kb.updated_by = u.id
+        WHERE kb.id = :id
+    ");
     $stmt->execute(['id' => $editId]);
     $entry = $stmt->fetch(PDO::FETCH_ASSOC);
     
@@ -37,6 +43,8 @@ if ($editId) {
         header("Location: " . BASE_PATH . "wissensdb/index.php");
         exit();
     }
+    
+    $updaterName = $entry['updater_name'] ?? null;
 }
 
 // Handle form submission
@@ -276,12 +284,8 @@ $formData = $entry ?? [
                         <div class="alert alert-info">
                             <i class="fa-solid fa-info-circle"></i>
                             Zuletzt bearbeitet am <?= date('d.m.Y H:i', strtotime($entry['updated_at'])) ?>
-                            <?php 
-                            $stmt = $pdo->prepare("SELECT fullname FROM intra_users WHERE id = :id");
-                            $stmt->execute(['id' => $entry['updated_by']]);
-                            $updater = $stmt->fetch(PDO::FETCH_ASSOC);
-                            if ($updater): ?>
-                                von <?= htmlspecialchars($updater['fullname']) ?>
+                            <?php if ($updaterName): ?>
+                                von <?= htmlspecialchars($updaterName) ?>
                             <?php endif; ?>
                         </div>
                     <?php endif; ?>
