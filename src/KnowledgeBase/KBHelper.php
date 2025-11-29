@@ -77,6 +77,33 @@ class KBHelper
     }
 
     /**
+     * Get type badge color
+     * 
+     * @param string $type The entry type
+     * @return string CSS color value
+     */
+    public static function getTypeColor(string $type): string
+    {
+        $colors = [
+            'general' => '#6c757d',     // secondary gray
+            'medication' => '#17a2b8',  // info teal
+            'measure' => '#28a745'      // success green
+        ];
+        return $colors[$type] ?? '#6c757d';
+    }
+
+    /**
+     * Check if competency label color needs dark text
+     * 
+     * @param string|null $level The competency level key
+     * @return bool True if dark text should be used
+     */
+    public static function competencyNeedsDarkText(?string $level): bool
+    {
+        return $level === 'notsan_2c';
+    }
+
+    /**
      * Sanitize HTML content for safe output
      * Allows only safe HTML tags used by CKEditor
      * 

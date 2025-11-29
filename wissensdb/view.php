@@ -198,7 +198,7 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
                             <div class="competency-header" style="background-color: <?= $competency['bg'] ?>; color: <?= $competency['text'] ?>;">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
-                                        <span class="badge mb-2" style="background-color: <?= $entry['type'] === 'medication' ? '#17a2b8' : ($entry['type'] === 'measure' ? '#28a745' : '#6c757d') ?>">
+                                        <span class="badge mb-2" style="background-color: <?= KBHelper::getTypeColor($entry['type']) ?>">
                                             <?= KBHelper::getTypeLabel($entry['type']) ?>
                                         </span>
                                         <h2 class="mb-1"><?= htmlspecialchars($entry['title']) ?></h2>
@@ -207,7 +207,7 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
                                         <?php endif; ?>
                                     </div>
                                     <div class="text-end">
-                                        <div class="competency-label p-2 rounded" style="background-color: <?= $competency['color'] ?>; color: <?= $competency['color'] === '#f7b500' ? '#000' : '#fff' ?>;">
+                                        <div class="competency-label p-2 rounded" style="background-color: <?= $competency['color'] ?>; color: <?= KBHelper::competencyNeedsDarkText($entry['competency_level']) ? '#000' : '#fff' ?>;">
                                             Freigabe: <?= $competency['label'] ?>
                                         </div>
                                     </div>
@@ -215,7 +215,7 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
                             </div>
                         <?php else: ?>
                             <div class="mb-4">
-                                <span class="badge mb-2" style="background-color: <?= $entry['type'] === 'medication' ? '#17a2b8' : ($entry['type'] === 'measure' ? '#28a745' : '#6c757d') ?>">
+                                <span class="badge mb-2" style="background-color: <?= KBHelper::getTypeColor($entry['type']) ?>">
                                     <?= KBHelper::getTypeLabel($entry['type']) ?>
                                 </span>
                                 <h2 class="mb-1"><?= htmlspecialchars($entry['title']) ?></h2>
