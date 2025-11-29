@@ -430,54 +430,53 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
                             </div>
 
                         <?php elseif ($entry['type'] === 'measure'): ?>
-                            <!-- Measure Layout - Same style as Medication -->
+                            <!-- Measure Layout - Same table style as Medication -->
                             <div class="row">
                                 <div class="col-12">
-                                    <?php if (!empty($entry['mass_wirkprinzip'])): ?>
-                                        <div class="kb-entry-row">
-                                            <div class="kb-icon"><i class="fa-solid fa-lightbulb"></i></div>
-                                            <div class="kb-label">Wirkprinzip</div>
-                                            <div class="kb-content"><?= KBHelper::sanitizeContent($entry['mass_wirkprinzip']) ?></div>
-                                        </div>
-                                    <?php endif; ?>
-                                    
+                                    <!-- Basic Info Table -->
+                                    <table class="kb-entry-table mb-4">
+                                        <tbody>
+                                            <?php if (!empty($entry['mass_wirkprinzip'])): ?>
+                                                <tr>
+                                                    <th>Wirkprinzip:</th>
+                                                    <td><?= KBHelper::sanitizeContent($entry['mass_wirkprinzip']) ?></td>
+                                                </tr>
+                                            <?php endif; ?>
+                                        </tbody>
+                                    </table>
+
                                     <?php if (!empty($entry['mass_indikationen'])): ?>
-                                        <div class="kb-entry-row">
-                                            <div class="kb-icon"><i class="fa-solid fa-check"></i></div>
-                                            <div class="kb-label">Indikationen</div>
-                                            <div class="kb-content"><?= KBHelper::sanitizeContent($entry['mass_indikationen']) ?></div>
+                                        <div class="kb-section kb-section-yellow">
+                                            <div class="kb-section-header">Indikationen:</div>
+                                            <div class="kb-section-content"><?= KBHelper::sanitizeContent($entry['mass_indikationen']) ?></div>
                                         </div>
                                     <?php endif; ?>
-                                    
+
                                     <?php if (!empty($entry['mass_kontraindikationen'])): ?>
-                                        <div class="kb-entry-row">
-                                            <div class="kb-icon"><i class="fa-solid fa-xmark"></i></div>
-                                            <div class="kb-label">Kontraindikationen</div>
-                                            <div class="kb-content"><?= KBHelper::sanitizeContent($entry['mass_kontraindikationen']) ?></div>
+                                        <div class="kb-section kb-section-yellow">
+                                            <div class="kb-section-header">Kontraindikationen:</div>
+                                            <div class="kb-section-content"><?= KBHelper::sanitizeContent($entry['mass_kontraindikationen']) ?></div>
                                         </div>
                                     <?php endif; ?>
-                                    
+
                                     <?php if (!empty($entry['mass_risiken'])): ?>
-                                        <div class="kb-entry-row">
-                                            <div class="kb-icon"><i class="fa-regular fa-face-frown"></i></div>
-                                            <div class="kb-label">Risiken</div>
-                                            <div class="kb-content"><?= KBHelper::sanitizeContent($entry['mass_risiken']) ?></div>
+                                        <div class="kb-section kb-section-gray">
+                                            <div class="kb-section-header">Risiken:</div>
+                                            <div class="kb-section-content"><?= KBHelper::sanitizeContent($entry['mass_risiken']) ?></div>
                                         </div>
                                     <?php endif; ?>
-                                    
+
                                     <?php if (!empty($entry['mass_alternativen'])): ?>
-                                        <div class="kb-entry-row">
-                                            <div class="kb-icon"><i class="fa-solid fa-arrows-left-right"></i></div>
-                                            <div class="kb-label">Alternativen</div>
-                                            <div class="kb-content"><?= KBHelper::sanitizeContent($entry['mass_alternativen']) ?></div>
+                                        <div class="kb-section kb-section-blue">
+                                            <div class="kb-section-header">Alternativen:</div>
+                                            <div class="kb-section-content"><?= KBHelper::sanitizeContent($entry['mass_alternativen']) ?></div>
                                         </div>
                                     <?php endif; ?>
-                                    
+
                                     <?php if (!empty($entry['mass_durchfuehrung'])): ?>
-                                        <div class="kb-entry-row">
-                                            <div class="kb-icon"><i class="fa-solid fa-screwdriver-wrench"></i></div>
-                                            <div class="kb-label">Durchführung</div>
-                                            <div class="kb-content"><?= KBHelper::sanitizeContent($entry['mass_durchfuehrung']) ?></div>
+                                        <div class="kb-section kb-section-red">
+                                            <div class="kb-section-header">Durchführung:</div>
+                                            <div class="kb-section-content"><?= KBHelper::sanitizeContent($entry['mass_durchfuehrung']) ?></div>
                                         </div>
                                     <?php endif; ?>
                                 </div>
@@ -510,18 +509,6 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
                                 <?php if ($entry['updater_name'] && empty($entry['hide_editor'])): ?>
                                     von <?= htmlspecialchars($entry['updater_name']) ?>
                                 <?php endif; ?>
-                            <?php endif; ?>
-                            
-                            <?php if ($isLoggedIn && Permissions::check(['admin'])): ?>
-                                <!-- Admin toggle for hiding editor names -->
-                                <form method="POST" action="<?= BASE_PATH ?>wissensdb/toggle-editor.php" class="d-inline ms-3">
-                                    <input type="hidden" name="id" value="<?= $entry['id'] ?>">
-                                    <button type="submit" class="btn btn-sm <?= !empty($entry['hide_editor']) ? 'btn-warning' : 'btn-outline-secondary' ?>" 
-                                            title="<?= !empty($entry['hide_editor']) ? 'Bearbeiter anzeigen' : 'Bearbeiter ausblenden' ?>">
-                                        <i class="fa-solid fa-<?= !empty($entry['hide_editor']) ? 'eye' : 'eye-slash' ?>"></i>
-                                        <?= !empty($entry['hide_editor']) ? 'Bearbeiter anzeigen' : 'Bearbeiter ausblenden' ?>
-                                    </button>
-                                </form>
                             <?php endif; ?>
                         </div>
                         </div><!-- /.kb-content-wrapper -->

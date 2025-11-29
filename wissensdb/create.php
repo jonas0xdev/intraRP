@@ -84,6 +84,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if (empty($errors)) {
         try {
+            // Get is_pinned and hide_editor values for editing
+            $is_pinned = isset($_POST['is_pinned']) ? 1 : 0;
+            $hide_editor = isset($_POST['hide_editor']) ? 1 : 0;
+            
             if ($isEdit) {
                 // Update existing entry
                 $sql = "UPDATE intra_kb_entries SET 
@@ -106,6 +110,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         mass_risiken = :mass_risiken,
                         mass_alternativen = :mass_alternativen,
                         mass_durchfuehrung = :mass_durchfuehrung,
+                        is_pinned = :is_pinned,
+                        hide_editor = :hide_editor,
                         updated_by = :user_id,
                         updated_at = NOW()
                         WHERE id = :id";
@@ -131,6 +137,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'mass_risiken' => $mass_risiken,
                     'mass_alternativen' => $mass_alternativen,
                     'mass_durchfuehrung' => $mass_durchfuehrung,
+                    'is_pinned' => $is_pinned,
+                    'hide_editor' => $hide_editor,
                     'user_id' => $_SESSION['userid'],
                     'id' => $editId
                 ]);
@@ -249,10 +257,11 @@ $formData = $entry ?? [
             min-height: 120px;
             background-color: #2d2d2d !important;
             color: #e0e0e0 !important;
-            border-color: #444 !important;
+            border-color: #555 !important;
         }
         .ck-editor__editable:focus {
-            border-color: #666 !important;
+            border-color: #0d6efd !important;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
         }
         .ck.ck-editor__main > .ck-editor__editable {
             background-color: #2d2d2d !important;
@@ -260,13 +269,19 @@ $formData = $entry ?? [
         }
         .ck.ck-toolbar {
             background-color: #1e1e1e !important;
-            border-color: #444 !important;
+            border-color: #555 !important;
         }
         .ck.ck-toolbar .ck-toolbar__items .ck-button {
             color: #e0e0e0 !important;
         }
         .ck.ck-toolbar .ck-toolbar__items .ck-button:hover {
             background-color: #444 !important;
+        }
+        /* CKEditor active button state */
+        .ck.ck-toolbar .ck-toolbar__items .ck-button.ck-on,
+        .ck.ck-button.ck-on {
+            background-color: #0d6efd !important;
+            color: #ffffff !important;
         }
         .ck.ck-editor__editable p,
         .ck.ck-editor__editable li,
@@ -275,13 +290,41 @@ $formData = $entry ?? [
         .ck.ck-editor__editable h3 {
             color: #e0e0e0 !important;
         }
-        .ck.ck-list__item .ck-button.ck-on {
-            background-color: #444 !important;
-            color: #fff !important;
-        }
+        /* CKEditor dropdown styling */
         .ck.ck-dropdown__panel {
             background-color: #2d2d2d !important;
-            border-color: #444 !important;
+            border-color: #555 !important;
+        }
+        .ck.ck-list__item .ck-button {
+            color: #e0e0e0 !important;
+        }
+        .ck.ck-list__item .ck-button:hover {
+            background-color: #444 !important;
+        }
+        .ck.ck-list__item .ck-button.ck-on {
+            background-color: #0d6efd !important;
+            color: #fff !important;
+        }
+        .ck.ck-dropdown__button {
+            color: #e0e0e0 !important;
+        }
+        .ck.ck-dropdown__button:hover {
+            background-color: #444 !important;
+        }
+        .ck.ck-dropdown__button.ck-on {
+            background-color: #0d6efd !important;
+            color: #fff !important;
+        }
+        /* CKEditor rounded border */
+        .ck.ck-editor {
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .ck.ck-toolbar {
+            border-radius: 6px 6px 0 0 !important;
+        }
+        .ck.ck-editor__main > .ck-editor__editable {
+            border-radius: 0 0 6px 6px !important;
         }
         /* Smaller CKEditor for inline fields */
         .ck-editor-small .ck-editor__editable {
@@ -479,6 +522,41 @@ $formData = $entry ?? [
                             
                             <textarea name="content" id="content" class="form-control" rows="2"><?= htmlspecialchars($formData['content']) ?></textarea>
                         </div>
+
+                        <?php if ($isEdit): ?>
+                        <!-- Admin Options (only when editing) -->
+                        <div class="intra__tile p-4 mb-4">
+                            <h4 class="mb-3"><i class="fa-solid fa-cog"></i> Optionen</h4>
+                            
+                            <div class="row">
+                                <?php if (Permissions::check(['admin', 'kb.edit'])): ?>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch" name="is_pinned" id="is_pinned" value="1"
+                                               <?= !empty($entry['is_pinned']) ? 'checked' : '' ?>>
+                                        <label class="form-check-label" for="is_pinned">
+                                            <i class="fa-solid fa-thumbtack"></i> Eintrag anpinnen
+                                            <small class="text-muted d-block">Angepinnte Einträge werden oben in der Liste angezeigt</small>
+                                        </label>
+                                    </div>
+                                </div>
+                                <?php endif; ?>
+                                
+                                <?php if (Permissions::check(['admin'])): ?>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch" name="hide_editor" id="hide_editor" value="1"
+                                               <?= !empty($entry['hide_editor']) ? 'checked' : '' ?>>
+                                        <label class="form-check-label" for="hide_editor">
+                                            <i class="fa-solid fa-eye-slash"></i> Bearbeiter ausblenden
+                                            <small class="text-muted d-block">Name des Erstellers/Bearbeiters wird nicht angezeigt</small>
+                                        </label>
+                                    </div>
+                                </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <?php endif; ?>
 
                         <!-- Submit Buttons -->
                         <div class="d-flex justify-content-between">
