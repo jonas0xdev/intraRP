@@ -3,8 +3,7 @@ require __DIR__ . '/../vendor/autoload.php';
 require __DIR__ . '/../assets/config/config.php';
 require __DIR__ . '/../assets/config/database.php';
 
-use League\OAuth2\Client\Provider\GenericProvider;
-use App\Helpers\ProtocolDetection;
+use App\Helpers\DiscordOAuth;
 use App\Notifications\NotificationManager;
 
 ini_set('display_errors', 1);
@@ -23,14 +22,7 @@ if (time() - $_SESSION['oauth2state_time'] > 300) {
     exit('Authorization expired. Please <a href="' . BASE_PATH . 'auth/discord.php">try again</a>.');
 }
 
-$provider = new GenericProvider([
-    'clientId'                => $_ENV['DISCORD_CLIENT_ID'],
-    'clientSecret'            => $_ENV['DISCORD_CLIENT_SECRET'],
-    'redirectUri'             => ProtocolDetection::buildRedirectUri('auth/callback.php'),
-    'urlAuthorize'            => 'https://discord.com/api/oauth2/authorize',
-    'urlAccessToken'          => 'https://discord.com/api/oauth2/token',
-    'urlResourceOwnerDetails' => 'https://discord.com/api/users/@me',
-]);
+$provider = DiscordOAuth::createProvider('auth/callback.php');
 
 if (empty($_GET['state']) || ($_GET['state'] !== $_SESSION['oauth2state'])) {
     unset($_SESSION['oauth2state']);
