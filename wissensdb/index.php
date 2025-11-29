@@ -168,10 +168,19 @@ $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
             padding: 10px 15px;
             background-color: rgba(255,255,255,0.03);
             border-top: 1px solid #444;
+            gap: 10px;
+        }
+        .kb-card-footer-text {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         .kb-card-footer-actions {
             display: flex;
             gap: 5px;
+            flex-shrink: 0;
         }
         /* Search autocomplete styling */
         .search-suggestions {
@@ -343,7 +352,7 @@ $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                                 <?php endif; ?>
                                             </div>
                                             <div class="kb-card-footer">
-                                                <small class="text-muted">
+                                                <small class="text-muted kb-card-footer-text">
                                                     <?php if ($entry['updated_at']): ?>
                                                         Aktualisiert: <?= date('d.m.Y H:i', strtotime($entry['updated_at'])) ?>
                                                         <?php if ($entry['updater_name'] && empty($entry['hide_editor'])): ?>
