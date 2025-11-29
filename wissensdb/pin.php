@@ -54,5 +54,16 @@ try {
     Flash::error('Datenbankfehler: ' . $e->getMessage());
 }
 
-header("Location: " . BASE_PATH . "wissensdb/view.php?id=" . $id);
+$referer = $_SERVER['HTTP_REFERER'] ?? '';
+
+$referer = preg_replace('/[\r\n]+/', '', $referer);
+
+if ($referer && strpos($referer, BASE_PATH) !== false) {
+    $redirect = $referer;
+} else {
+    // Fallback: Hauptliste
+    $redirect = BASE_PATH . 'wissensdb/index.php';
+}
+
+header('Location: ' . $redirect);
 exit();
