@@ -86,43 +86,45 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
             border-radius: 4px;
             z-index: 10;
         }
-        /* Main content wrapper with white background for readability */
+        /* Main content wrapper - transparent to keep dark design */
         .kb-content-wrapper {
-            background-color: #ffffff;
-            border-radius: 8px;
-            padding: 20px;
-            color: #212529;
+            padding: 20px 0;
         }
-        /* Unified entry row styling */
+        /* Table styling with dark theme */
         .kb-entry-table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
-            color: #212529;
-            background-color: #ffffff;
+            color: #e0e0e0;
+            background-color: transparent;
         }
         .kb-entry-table th,
         .kb-entry-table td {
             padding: 12px 15px;
-            border: 1px solid #dee2e6;
+            border: 1px solid #444;
             vertical-align: top;
-            color: #212529;
-            background-color: #ffffff;
+            color: #e0e0e0;
+            background-color: transparent;
         }
         .kb-entry-table th {
             width: 180px;
             font-weight: bold;
-            background-color: #f8f9fa;
+            background-color: rgba(255,255,255,0.1);
+            color: #ffffff;
         }
+        .kb-entry-table td {
+            background-color: rgba(255,255,255,0.05);
+        }
+        /* Entry row styling with dark theme */
         .kb-entry-row {
             display: flex;
-            border: 1px solid #dee2e6;
+            border: 1px solid #444;
             border-bottom: none;
-            color: #212529;
-            background-color: #ffffff;
+            color: #e0e0e0;
+            background-color: transparent;
         }
         .kb-entry-row:last-child {
-            border-bottom: 1px solid #dee2e6;
+            border-bottom: 1px solid #444;
         }
         .kb-entry-row .kb-icon {
             width: 50px;
@@ -130,86 +132,74 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
             align-items: center;
             justify-content: center;
             font-size: 1.3rem;
-            background-color: #f8f9fa;
-            border-right: 1px solid #dee2e6;
-            color: #212529;
+            background-color: rgba(255,255,255,0.1);
+            border-right: 1px solid #444;
+            color: #e0e0e0;
         }
         .kb-entry-row .kb-label {
             width: 160px;
             padding: 12px 15px;
             font-weight: bold;
-            background-color: #f8f9fa;
-            border-right: 1px solid #dee2e6;
+            background-color: rgba(255,255,255,0.1);
+            border-right: 1px solid #444;
             display: flex;
             align-items: center;
-            color: #212529;
+            color: #ffffff;
         }
         .kb-entry-row .kb-content {
             flex: 1;
             padding: 12px 15px;
-            background-color: #ffffff;
-            color: #212529;
+            background-color: rgba(255,255,255,0.05);
+            color: #e0e0e0;
         }
-        /* Section styling for special sections */
+        /* Section styling - these have colored backgrounds so need dark text */
         .kb-section {
             margin-bottom: 15px;
-            border-radius: 0;
-            color: #000000;
+            border-radius: 4px;
         }
         .kb-section-yellow {
             background-color: #ffff00;
-            border: 1px solid #dee2e6;
+            border: 1px solid #cccc00;
             color: #000000;
         }
         .kb-section-blue {
             background-color: #cce5ff;
-            border: 1px solid #dee2e6;
+            border: 1px solid #99ccff;
             color: #000000;
         }
         .kb-section-red {
-            background-color: #ffffff;
+            background-color: rgba(192, 0, 0, 0.1);
             border: 2px solid #c00000;
-            color: #000000;
+            color: #ffffff;
+        }
+        .kb-section-red .kb-section-header,
+        .kb-section-red .kb-section-content {
+            color: #ffffff;
         }
         .kb-section-gray {
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
-            color: #000000;
+            background-color: rgba(255,255,255,0.1);
+            border: 1px solid #444;
+            color: #e0e0e0;
         }
-        .kb-section h5,
+        .kb-section-gray .kb-section-header,
+        .kb-section-gray .kb-section-content {
+            color: #e0e0e0;
+        }
         .kb-section-header {
             margin: 0;
             padding: 8px 15px;
             font-weight: bold;
-            color: #000000;
-            border-bottom: 1px solid #dee2e6;
+            border-bottom: 1px solid rgba(0,0,0,0.2);
         }
         .kb-section-content {
             padding: 12px 15px;
-            color: #000000;
         }
         .edit-info {
             font-size: 0.85rem;
-            color: #6c757d;
-            background-color: #f8f9fa;
-            padding: 10px 15px;
-            border-radius: 4px;
+            color: #aaaaaa;
+            padding: 10px 0;
             margin-top: 20px;
-        }
-        /* Ensure the tile has proper background */
-        .kb-tile {
-            background-color: #ffffff;
-            border-radius: 8px;
-            color: #212529;
-        }
-        .kb-tile h2, .kb-tile h3, .kb-tile h4, .kb-tile h5, .kb-tile p {
-            color: #212529;
-        }
-        .content-area {
-            color: #212529;
-            background-color: #ffffff;
-            padding: 15px;
-            border-radius: 4px;
+            border-top: 1px solid #444;
         }
         /* Header section styling */
         .kb-header {
@@ -219,16 +209,16 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
             margin-bottom: 20px;
         }
         .kb-header-content {
-            background-color: #ffffff;
             padding: 15px;
             border-radius: 8px;
+            background-color: rgba(0,0,0,0.3);
         }
         .kb-header h2 {
             margin: 0;
-            color: #212529;
+            color: #ffffff;
         }
         .kb-header .subtitle {
-            color: #6c757d;
+            color: #aaaaaa;
             margin: 5px 0 0 0;
         }
         .kb-freigabe-badge {
@@ -237,6 +227,23 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
             font-size: 1rem;
             border-radius: 4px;
             display: inline-block;
+        }
+        /* Content area for CKEditor content */
+        .content-area {
+            color: #e0e0e0;
+            padding: 15px;
+            background-color: rgba(255,255,255,0.05);
+            border-radius: 4px;
+        }
+        .content-area h1, .content-area h2, .content-area h3, 
+        .content-area h4, .content-area h5, .content-area h6 {
+            color: #ffffff;
+        }
+        .content-area p, .content-area li, .content-area td, .content-area th {
+            color: #e0e0e0;
+        }
+        .content-area a {
+            color: #6ea8fe;
         }
     </style>
 </head>
@@ -322,7 +329,7 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
                     <?php endif; ?>
 
                     <!-- Entry Content -->
-                    <div class="kb-tile p-4">
+                    <div class="intra__tile p-4">
                         <!-- Header with Title and Competency -->
                         <?php if ($competency): ?>
                             <div class="kb-header position-relative" style="background-color: <?= $competency['bg'] ?>;">
@@ -506,7 +513,7 @@ $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
                             <?php endif; ?>
                         </div>
                         </div><!-- /.kb-content-wrapper -->
-                    </div><!-- /.kb-tile -->
+                    </div><!-- /.intra__tile -->
                 </div>
             </div>
         </div>

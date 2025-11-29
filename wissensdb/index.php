@@ -81,11 +81,13 @@ $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
         .kb-card {
             transition: transform 0.2s, box-shadow 0.2s;
             cursor: pointer;
-            background-color: #ffffff;
+            background-color: rgba(255,255,255,0.05);
+            border: 1px solid #444;
         }
         .kb-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            background-color: rgba(255,255,255,0.08);
         }
         .kb-type-badge {
             font-size: 0.7rem;
@@ -93,33 +95,25 @@ $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
         .kb-archived {
             opacity: 0.6;
         }
-        /* Ensure card content is readable with white background */
+        /* Card styling for dark theme */
         .kb-card .card-body {
-            color: #212529;
-            background-color: #ffffff;
+            color: #e0e0e0;
+            background-color: transparent;
         }
         .kb-card .card-title {
-            color: #212529;
+            color: #ffffff;
         }
         .kb-card .card-text {
-            color: #495057;
+            color: #aaaaaa;
         }
         .kb-card .card-footer {
-            color: #6c757d;
-            background-color: #f8f9fa;
+            color: #888888;
+            background-color: rgba(255,255,255,0.03);
+            border-top: 1px solid #444;
         }
         .kb-card .card-header {
             color: #ffffff;
-        }
-        /* Filter section styling */
-        .filter-section {
-            background-color: #2d2d2d;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-        .filter-section .form-label {
-            color: #ffffff;
+            border-bottom: none;
         }
     </style>
 </head>
