@@ -21,7 +21,9 @@ if (!$publicAccess && !$isLoggedIn) {
 // Get filter parameters
 $typeFilter = $_GET['type'] ?? 'all';
 $searchQuery = $_GET['search'] ?? '';
-$showArchived = isset($_GET['archived']) && $_GET['archived'] === '1';
+// Only allow viewing archived entries if user has kb.archive permission
+$showArchived = isset($_GET['archived']) && $_GET['archived'] === '1' 
+                && $isLoggedIn && Permissions::check(['admin', 'kb.archive']);
 
 // Build query with names from linked Discord profiles
 $sql = "SELECT kb.*, 
