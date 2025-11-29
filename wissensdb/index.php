@@ -115,6 +115,51 @@ $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
             color: #ffffff;
             border-bottom: none;
         }
+        /* Quick action buttons on cards */
+        .kb-card-actions {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            display: flex;
+            gap: 5px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            z-index: 10;
+        }
+        .kb-card:hover .kb-card-actions {
+            opacity: 1;
+        }
+        .kb-quick-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.2s ease;
+        }
+        .kb-quick-btn:hover {
+            transform: scale(1.15);
+        }
+        .kb-quick-btn-edit {
+            background-color: #0d6efd;
+            color: #fff;
+        }
+        .kb-quick-btn-pin {
+            background-color: #0dcaf0;
+            color: #000;
+        }
+        .kb-quick-btn-unpin {
+            background-color: #6c757d;
+            color: #fff;
+        }
+        .col-card-wrapper {
+            position: relative;
+        }
         /* Search autocomplete styling */
         .search-suggestions {
             position: absolute;
@@ -253,8 +298,28 @@ $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 $competency = KBHelper::getCompetencyInfo($entry['competency_level']);
                             ?>
                                 <div class="col">
-                                    <a href="<?= BASE_PATH ?>wissensdb/view.php?id=<?= $entry['id'] ?>" class="text-decoration-none">
-                                        <div class="card h-100 kb-card <?= $entry['is_archived'] ? 'kb-archived' : '' ?>">
+                                    <div class="col-card-wrapper">
+                                        <?php if ($isLoggedIn && Permissions::check(['admin', 'kb.edit'])): ?>
+                                            <!-- Quick Action Buttons -->
+                                            <div class="kb-card-actions">
+                                                <form method="POST" action="<?= BASE_PATH ?>wissensdb/pin.php" style="margin: 0;" onclick="event.stopPropagation();">
+                                                    <input type="hidden" name="id" value="<?= $entry['id'] ?>">
+                                                    <input type="hidden" name="action" value="<?= !empty($entry['is_pinned']) ? 'unpin' : 'pin' ?>">
+                                                    <button type="submit" class="kb-quick-btn <?= !empty($entry['is_pinned']) ? 'kb-quick-btn-unpin' : 'kb-quick-btn-pin' ?>" 
+                                                            title="<?= !empty($entry['is_pinned']) ? 'Lösen' : 'Anpinnen' ?>">
+                                                        <i class="fa-solid fa-thumbtack"></i>
+                                                    </button>
+                                                </form>
+                                                <a href="<?= BASE_PATH ?>wissensdb/edit.php?id=<?= $entry['id'] ?>" 
+                                                   class="kb-quick-btn kb-quick-btn-edit" title="Bearbeiten"
+                                                   onclick="event.stopPropagation();">
+                                                    <i class="fa-solid fa-edit"></i>
+                                                </a>
+                                            </div>
+                                        <?php endif; ?>
+                                        
+                                        <a href="<?= BASE_PATH ?>wissensdb/view.php?id=<?= $entry['id'] ?>" class="text-decoration-none">
+                                            <div class="card h-100 kb-card <?= $entry['is_archived'] ? 'kb-archived' : '' ?>">
                                             <?php if ($competency): ?>
                                                 <div class="card-header p-2" style="background-color: <?= $competency['bg'] ?>; border-bottom: 3px solid <?= $competency['color'] === '#ffffff' ? $competency['bg'] : $competency['color'] ?>;">
                                                     <span class="competency-badge" style="background-color: <?= $competency['bg'] ?>; color: <?= $competency['text'] ?? $competency['color'] ?>;">
@@ -300,6 +365,7 @@ $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                             </div>
                                         </div>
                                     </a>
+                                    </div><!-- /.col-card-wrapper -->
                                 </div>
                             <?php endforeach; ?>
                         </div>
