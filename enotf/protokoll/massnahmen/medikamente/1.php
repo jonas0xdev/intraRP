@@ -120,8 +120,10 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             </div>
                             <div class="row mt-3">
                                 <div class="col">
-                                    <input class="form-control medikament-field-ignore" type="text" placeholder="Dosierung" name="medis-concentration" id="medis-concentration" list="dosierung-datalist" style="background-color: #333333; color: white; --bs-secondary-color: #a2a2a2" data-ignore-autosave="true">
-                                    <datalist id="dosierung-datalist"></datalist>
+                                    <div class="position-relative" id="dosierung-autocomplete-wrapper">
+                                        <input class="form-control medikament-field-ignore" type="text" placeholder="Dosierung" name="medis-concentration" id="medis-concentration" autocomplete="off" style="background-color: #333333; color: white; --bs-secondary-color: #a2a2a2" data-ignore-autosave="true">
+                                        <div id="dosierung-dropdown" class="dosierung-dropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; background-color: #444; border: 1px solid #555; border-radius: 4px; max-height: 200px; overflow-y: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.3);"></div>
+                                    </div>
                                 </div>
                                 <div class="col">
                                     <select class="form-select medikament-field-ignore" name="medis-unit" id="medis-unit" required autocomplete="off" style="background-color: #333333; color: white;" data-ignore-autosave="true">
@@ -259,51 +261,105 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                 });
             }
 
-            // Update datalist when medication is selected
+            // Update dropdown when medication is selected
             const medisSelect = document.getElementById('medis-select');
             if (medisSelect) {
                 medisSelect.addEventListener('change', function() {
-                    updateDosierungDatalist(this);
+                    updateDosierungDropdown(this);
                 });
             }
 
-            // Auto-set unit when predefined dosage is selected from datalist
+            // Setup custom dropdown for dosage
             const dosierungInput = document.getElementById('medis-concentration');
-            if (dosierungInput) {
+            const dosierungDropdown = document.getElementById('dosierung-dropdown');
+            
+            if (dosierungInput && dosierungDropdown) {
+                // Show dropdown on focus
+                dosierungInput.addEventListener('focus', function() {
+                    if (dosierungDropdown.children.length > 0) {
+                        dosierungDropdown.style.display = 'block';
+                    }
+                });
+
+                // Filter dropdown on input
                 dosierungInput.addEventListener('input', function() {
+                    const value = this.value.toLowerCase();
+                    const items = dosierungDropdown.querySelectorAll('.dosierung-item');
+                    let hasVisible = false;
+                    
+                    items.forEach(item => {
+                        if (item.textContent.toLowerCase().includes(value)) {
+                            item.style.display = 'block';
+                            hasVisible = true;
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                    
+                    dosierungDropdown.style.display = hasVisible ? 'block' : 'none';
+                    
+                    // Also try to parse and set unit
                     parseDosierungAndSetUnit(this.value);
+                });
+
+                // Hide dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!e.target.closest('#dosierung-autocomplete-wrapper')) {
+                        dosierungDropdown.style.display = 'none';
+                    }
                 });
             }
         });
 
-        function updateDosierungDatalist(selectElement) {
+        function updateDosierungDropdown(selectElement) {
             const selectedOption = selectElement.options[selectElement.selectedIndex];
             const dosierungen = selectedOption.dataset.dosierungen || '';
-            const datalist = document.getElementById('dosierung-datalist');
+            const dropdown = document.getElementById('dosierung-dropdown');
             
             // Clear existing options
-            datalist.innerHTML = '';
+            dropdown.innerHTML = '';
             
             if (dosierungen) {
-                // Split by comma and create options
+                // Split by comma and create styled options
                 const dosierungValues = dosierungen.split(',').map(d => d.trim()).filter(d => d);
                 dosierungValues.forEach(value => {
-                    const option = document.createElement('option');
-                    option.value = value;
-                    datalist.appendChild(option);
+                    const item = document.createElement('div');
+                    item.className = 'dosierung-item';
+                    item.textContent = value;
+                    item.style.cssText = 'padding: 8px 12px; cursor: pointer; color: white; border-bottom: 1px solid #555;';
+                    
+                    item.addEventListener('mouseenter', function() {
+                        this.style.backgroundColor = '#555';
+                    });
+                    item.addEventListener('mouseleave', function() {
+                        this.style.backgroundColor = 'transparent';
+                    });
+                    item.addEventListener('click', function() {
+                        document.getElementById('medis-concentration').value = value;
+                        dropdown.style.display = 'none';
+                        // Parse and set unit
+                        parseDosierungAndSetUnit(value);
+                    });
+                    
+                    dropdown.appendChild(item);
                 });
+                
+                // Remove border from last item
+                if (dropdown.lastChild) {
+                    dropdown.lastChild.style.borderBottom = 'none';
+                }
             }
         }
 
         function parseDosierungAndSetUnit(value) {
-            // Map of unit suffixes to select values
+            // Map of unit suffixes to select values (supports both mcg and µg)
             const unitMap = {
                 'mcg': 'mcg',
                 'µg': 'mcg',
                 'mg': 'mg',
                 'g': 'g',
                 'ml': 'ml',
-                'IE': 'IE'
+                'ie': 'IE'
             };
 
             // Try to match a predefined dosage pattern (number + unit)
@@ -311,7 +367,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
             if (match) {
                 const numericValue = match[1];
                 const unit = match[2].toLowerCase();
-                const unitSelectValue = unitMap[unit] || unitMap[unit.replace('µ', 'mc')];
+                const unitSelectValue = unitMap[unit];
                 
                 if (unitSelectValue) {
                     // Set the numeric value in the input field
