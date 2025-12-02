@@ -125,6 +125,12 @@ class Flash
                 'not-found' => ['type' => 'danger', 'title' => 'Fehler!', 'text' => 'Das Ziel wurde nicht gefunden.'],
                 'invalid-id' => ['type' => 'danger', 'title' => 'Fehler!', 'text' => 'Ungültige Ziel-ID.'],
             ],
+            'medikament' => [
+                'deleted' => ['type' => 'success', 'title' => 'Erfolg!', 'text' => 'Das Medikament wurde erfolgreich gelöscht.'],
+                'created' => ['type' => 'success', 'title' => 'Erfolg!', 'text' => 'Das Medikament wurde erfolgreich erstellt.'],
+                'not-found' => ['type' => 'danger', 'title' => 'Fehler!', 'text' => 'Das Medikament wurde nicht gefunden.'],
+                'invalid-id' => ['type' => 'danger', 'title' => 'Fehler!', 'text' => 'Ungültige Medikament-ID.'],
+            ],
             'edivi' => [
                 'deleted' => ['type' => 'success', 'title' => 'Erfolg!', 'text' => 'Das Protokoll wurde erfolgreich gelöscht.'],
                 'not-found' => ['type' => 'danger', 'title' => 'Fehler!', 'text' => 'Das Protokoll wurde nicht gefunden.'],

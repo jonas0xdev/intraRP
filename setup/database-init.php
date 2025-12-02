@@ -322,6 +322,10 @@ $migrationFiles = [
     ['file' => 'insert_intra_kb_config_29112025.php', 'type' => 'insert'],
     ['file' => 'alter_intra_kb_entries_29112025_pinned.php', 'type' => 'alter'],
     ['file' => 'alter_intra_kb_entries_29112025_hide_editor.php', 'type' => 'alter'],
+
+    // 02.12.2025
+    ['file' => 'create_intra_edivi_medikamente_02122025.php', 'type' => 'create'],
+    ['file' => 'insert_intra_edivi_medikamente_02122025.php', 'type' => 'insert'],
 ];
 
 $executed = 0;
