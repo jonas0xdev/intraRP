@@ -42,15 +42,41 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
     $SITE_TITLE = "eNOTF";
     include __DIR__ . '/../assets/components/enotf/_head.php';
     ?>
+    <style>
+        .name-autocomplete-wrapper {
+            position: relative;
+        }
+        .name-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background-color: #444;
+            border: 1px solid #555;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .name-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            color: white;
+            border-bottom: 1px solid #555;
+        }
+        .name-item:last-child {
+            border-bottom: none;
+        }
+        .name-item:hover {
+            background-color: #555;
+        }
+    </style>
 </head>
 
 <body data-bs-theme="dark" style="overflow-x:hidden" id="edivi__login" data-pin-enabled="<?= $pinEnabled ?>">
     <form name="form" method="post" action="">
-        <datalist id="nameSuggestions">
-            <?php foreach ($fullnames as $name): ?>
-                <option value="<?= htmlspecialchars($name) ?>"></option>
-            <?php endforeach; ?>
-        </datalist>
         <input type="hidden" name="new" value="1" />
         <div class="container-fluid" id="edivi__container">
             <div class="row h-100">
@@ -64,7 +90,10 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                         <div class="col">
                             <div class="row mb-2">
                                 <div class="col">
-                                    <input type="text" class="form-control my-2" name="fahrername" id="fahrername" placeholder="" list="nameSuggestions" required />
+                                    <div class="name-autocomplete-wrapper">
+                                        <input type="text" class="form-control my-2" name="fahrername" id="fahrername" placeholder="" autocomplete="off" required />
+                                        <div class="name-dropdown" id="fahrername-dropdown"></div>
+                                    </div>
                                     <label for="fahrername">Fahrer-Name</label>
                                 </div>
                                 <div class="col-3">
@@ -82,8 +111,10 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             </div>
                             <div class="row mb-2">
                                 <div class="col">
-                                    <input type="text" class="form-control my-2" name="beifahrername" id="beifahrername" placeholder="" list="nameSuggestions" />
-
+                                    <div class="name-autocomplete-wrapper">
+                                        <input type="text" class="form-control my-2" name="beifahrername" id="beifahrername" placeholder="" autocomplete="off" />
+                                        <div class="name-dropdown" id="beifahrername-dropdown"></div>
+                                    </div>
                                     <label for="beifahrername">Beifahrer-Name</label>
                                 </div>
                                 <div class="col-3">
@@ -134,6 +165,67 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
             </div>
     </form>
     <script>
+        // Name suggestions data from PHP
+        const nameSuggestions = <?= json_encode($fullnames, JSON_UNESCAPED_UNICODE) ?>;
+
+        // Setup custom dropdown for name inputs
+        function setupNameAutocomplete(inputId, dropdownId) {
+            const input = document.getElementById(inputId);
+            const dropdown = document.getElementById(dropdownId);
+
+            if (!input || !dropdown) return;
+
+            // Populate dropdown with all names initially
+            function populateDropdown(filterValue = '') {
+                dropdown.innerHTML = '';
+                const filteredNames = nameSuggestions.filter(name => 
+                    name.toLowerCase().includes(filterValue.toLowerCase())
+                );
+
+                filteredNames.forEach(name => {
+                    const item = document.createElement('div');
+                    item.className = 'name-item';
+                    item.textContent = name;
+                    item.addEventListener('click', function() {
+                        input.value = name;
+                        dropdown.style.display = 'none';
+                    });
+                    dropdown.appendChild(item);
+                });
+
+                return filteredNames.length > 0;
+            }
+
+            // Show dropdown on focus
+            input.addEventListener('focus', function() {
+                if (populateDropdown(this.value)) {
+                    dropdown.style.display = 'block';
+                }
+            });
+
+            // Filter dropdown on input
+            input.addEventListener('input', function() {
+                if (populateDropdown(this.value)) {
+                    dropdown.style.display = 'block';
+                } else {
+                    dropdown.style.display = 'none';
+                }
+            });
+
+            // Hide dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.name-autocomplete-wrapper') || 
+                    (e.target.closest('.name-autocomplete-wrapper') && 
+                     e.target.closest('.name-autocomplete-wrapper').querySelector('input') !== input)) {
+                    dropdown.style.display = 'none';
+                }
+            });
+        }
+
+        // Initialize autocomplete for both name fields
+        setupNameAutocomplete('fahrername', 'fahrername-dropdown');
+        setupNameAutocomplete('beifahrername', 'beifahrername-dropdown');
+
         document.getElementById('crew__delete').addEventListener('click', function() {
             document.getElementById('fahrername').value = '';
             document.getElementById('fahrerquali').value = '';
