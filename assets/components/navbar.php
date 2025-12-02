@@ -60,6 +60,7 @@ use App\Notifications\NotificationManager;
                             </li>
                             <li><a class="dropdown-item" href="<?= BASE_PATH ?>enotf/admin/list.php">Prüfliste</a></li>
                             <li><a class="dropdown-item" href="<?= BASE_PATH ?>enotf/admin/zielverwaltung/index.php">Transportziele</a></li>
+                            <li><a class="dropdown-item" href="<?= BASE_PATH ?>enotf/admin/medikamentenverwaltung/index.php">Medikamente</a></li>
                         <?php } ?>
                     </ul>
                 </li>
