@@ -79,8 +79,8 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                         </div>
                         <div class="col">
                             <?php
-                            // Load medications from database
-                            $medStmt = $pdo->prepare("SELECT wirkstoff, herstellername, dosierungen FROM intra_edivi_medikamente WHERE active = 1 ORDER BY priority ASC, wirkstoff ASC");
+                            // Load medications from database, sorted alphabetically by wirkstoff
+                            $medStmt = $pdo->prepare("SELECT wirkstoff, herstellername, dosierungen FROM intra_edivi_medikamente WHERE active = 1 ORDER BY wirkstoff ASC");
                             $medStmt->execute();
                             $medikamente = $medStmt->fetchAll(PDO::FETCH_ASSOC);
                             ?>
@@ -266,6 +266,14 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                     updateDosierungDatalist(this);
                 });
             }
+
+            // Auto-set unit when predefined dosage is selected from datalist
+            const dosierungInput = document.getElementById('medis-concentration');
+            if (dosierungInput) {
+                dosierungInput.addEventListener('input', function() {
+                    parseDosierungAndSetUnit(this.value);
+                });
+            }
         });
 
         function updateDosierungDatalist(selectElement) {
@@ -284,6 +292,33 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                     option.value = value;
                     datalist.appendChild(option);
                 });
+            }
+        }
+
+        function parseDosierungAndSetUnit(value) {
+            // Map of unit suffixes to select values
+            const unitMap = {
+                'mcg': 'mcg',
+                'µg': 'mcg',
+                'mg': 'mg',
+                'g': 'g',
+                'ml': 'ml',
+                'IE': 'IE'
+            };
+
+            // Try to match a predefined dosage pattern (number + unit)
+            const match = value.match(/^([0-9]+(?:[.,][0-9]+)?)\s*(mcg|µg|mg|g|ml|IE)$/i);
+            if (match) {
+                const numericValue = match[1];
+                const unit = match[2].toLowerCase();
+                const unitSelectValue = unitMap[unit] || unitMap[unit.replace('µ', 'mc')];
+                
+                if (unitSelectValue) {
+                    // Set the numeric value in the input field
+                    document.getElementById('medis-concentration').value = numericValue;
+                    // Auto-select the unit
+                    document.getElementById('medis-unit').value = unitSelectValue;
+                }
             }
         }
 

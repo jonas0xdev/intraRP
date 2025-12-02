@@ -1,6 +1,7 @@
 <?php
 try {
     // Default medications from the existing hardcoded list
+    // Dosierungen contain value + unit (e.g., "100 mg") - unit is auto-selected when dosage is chosen
     $defaultMedikamente = [
         ['wirkstoff' => 'Acetylsalicylsäure', 'herstellername' => 'ASS', 'dosierungen' => '100 mg,250 mg,500 mg', 'priority' => 1],
         ['wirkstoff' => 'Adenosin', 'herstellername' => NULL, 'dosierungen' => '6 mg,12 mg', 'priority' => 2],

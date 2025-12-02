@@ -63,7 +63,7 @@ if (!Permissions::check(['admin', 'edivi.view'])) {
                             <tbody>
                                 <?php
                                 require __DIR__ . '/../../../assets/config/database.php';
-                                $stmt = $pdo->prepare("SELECT * FROM intra_edivi_medikamente ORDER BY priority ASC");
+                                $stmt = $pdo->prepare("SELECT * FROM intra_edivi_medikamente ORDER BY wirkstoff ASC");
                                 $stmt->execute();
                                 $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 foreach ($result as $row) {
@@ -223,7 +223,7 @@ if (!Permissions::check(['admin', 'edivi.view'])) {
                 lengthMenu: [10, 25, 50],
                 pageLength: 25,
                 order: [
-                    [0, 'asc']
+                    [1, 'asc']
                 ],
                 columnDefs: [{
                     orderable: false,
