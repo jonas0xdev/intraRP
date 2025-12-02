@@ -83,19 +83,6 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             $medStmt = $pdo->prepare("SELECT wirkstoff, herstellername, dosierungen FROM intra_edivi_medikamente WHERE active = 1 ORDER BY priority ASC, wirkstoff ASC");
                             $medStmt->execute();
                             $medikamente = $medStmt->fetchAll(PDO::FETCH_ASSOC);
-                            
-                            // Create a JavaScript object with medication data for datalist
-                            $medikamenteData = [];
-                            foreach ($medikamente as $med) {
-                                $displayName = $med['wirkstoff'];
-                                if (!empty($med['herstellername'])) {
-                                    $displayName = $med['herstellername'] . ' (' . $med['wirkstoff'] . ')';
-                                }
-                                $medikamenteData[$med['wirkstoff']] = [
-                                    'display' => $displayName,
-                                    'dosierungen' => $med['dosierungen'] ?? ''
-                                ];
-                            }
                             ?>
                             <div class="row">
                                 <div class="col">
@@ -103,7 +90,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                         <option value="" disabled hidden selected>Wirkstoff</option>
                                         <?php foreach ($medikamente as $med): ?>
                                             <?php 
-                                            $displayName = $med['wirkstoff'];
+                                            $displayName = htmlspecialchars($med['wirkstoff']);
                                             if (!empty($med['herstellername'])) {
                                                 $displayName = htmlspecialchars($med['herstellername']) . ' (' . htmlspecialchars($med['wirkstoff']) . ')';
                                             }

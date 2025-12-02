@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':active' => $active
         ]);
 
-        Flash::success('Das Medikament wurde erfolgreich erstellt.');
+        Flash::set('medikament', 'created');
         $auditLogger = new AuditLogger($pdo);
         $auditLogger->log($_SESSION['userid'], 'Medikament erstellt', 'Wirkstoff: ' . $wirkstoff, 'Medikamente', 1);
         header("Location: " . BASE_PATH . "enotf/admin/medikamentenverwaltung/index.php");
@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } catch (PDOException $e) {
         error_log("PDO Insert Error: " . $e->getMessage());
         if ($e->getCode() == 23000) {
-            Flash::error('Ein Medikament mit diesem Wirkstoff existiert bereits.');
+            Flash::danger('Ein Medikament mit diesem Wirkstoff existiert bereits.');
         } else {
             Flash::set('error', 'exception');
         }

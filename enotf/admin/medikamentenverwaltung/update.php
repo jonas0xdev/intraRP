@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } catch (PDOException $e) {
         error_log("PDO Error: " . $e->getMessage());
         if ($e->getCode() == 23000) {
-            Flash::error('Ein Medikament mit diesem Wirkstoff existiert bereits.');
+            Flash::danger('Ein Medikament mit diesem Wirkstoff existiert bereits.');
         } else {
             Flash::set('error', 'exception');
         }

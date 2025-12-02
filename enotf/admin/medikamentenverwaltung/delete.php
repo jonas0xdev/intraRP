@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $checkStmt = $pdo->prepare("SELECT id FROM intra_edivi_medikamente WHERE id = :id");
         $checkStmt->execute([':id' => $id]);
         if (!$checkStmt->fetch()) {
-            Flash::error('Das Medikament wurde nicht gefunden.');
+            Flash::set('medikament', 'not-found');
             header("Location: " . BASE_PATH . "enotf/admin/medikamentenverwaltung/index.php");
             exit;
         }
@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $pdo->prepare("DELETE FROM intra_edivi_medikamente WHERE id = :id");
         $stmt->execute([':id' => $id]);
 
-        Flash::success('Das Medikament wurde erfolgreich gelöscht.');
+        Flash::set('medikament', 'deleted');
         $auditLogger = new AuditLogger($pdo);
         $auditLogger->log($_SESSION['userid'], 'Medikament gelöscht [ID: ' . $id . ']', NULL, 'Medikamente', 1);
         header("Location: " . BASE_PATH . "enotf/admin/medikamentenverwaltung/index.php");
