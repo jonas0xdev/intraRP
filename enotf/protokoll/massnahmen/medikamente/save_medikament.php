@@ -49,64 +49,17 @@ try {
             }
         }
 
-        $allowedWirkstoffe = [
-            'Acetylsalicylsäure',
-            'Adenosin',
-            'Alteplase',
-            'Amiodaron',
-            'Atropinsulfat',
-            'Butylscopolamin',
-            'Calciumgluconat',
-            'Ceftriaxon',
-            'Dimenhydrinat',
-            'Dimetinden',
-            'Epinephrin',
-            'Esketamin',
-            'Fentanyl',
-            'Flumazenil',
-            'Furosemid',
-            'Gelatinepolysuccinat',
-            'Glukose',
-            'Heparin',
-            'Humanblut',
-            'Hydroxycobolamin',
-            'Ipratropiumbromid',
-            'Lidocain',
-            'Lorazepam',
-            'Metamizol',
-            'Metoprolol',
-            'Midazolam',
-            'Morphin',
-            'Naloxon',
-            'Natriumhydrogencarbonat',
-            'Natriumthiosulfat',
-            'Nitroglycerin',
-            'Norepinephrin',
-            'Ondansetron',
-            'Paracetamol',
-            'Piritramid',
-            'Prednisolon',
-            'Propofol',
-            'Reproterol',
-            'Rocuronium',
-            'Salbutamol',
-            'Succinylcholin',
-            'Sufentanil',
-            'Theodrenalin-Cafedrin',
-            'Thiopental',
-            'Tranexamsäure',
-            'Urapidil',
-            'Vollelektrolytlösung'
-        ];
-
-        $allowedApplikationen = ['i.v.', 'i.o.', 'i.m.', 's.c.', 's.l.', 'p.o.'];
-        $allowedEinheiten = ['mcg', 'mg', 'g', 'ml', 'IE'];
-
-        if (!in_array($medikamentData['wirkstoff'], $allowedWirkstoffe)) {
+        // Validate wirkstoff against database
+        $wirkstoffStmt = $pdo->prepare("SELECT wirkstoff FROM intra_edivi_medikamente WHERE wirkstoff = :wirkstoff AND active = 1");
+        $wirkstoffStmt->execute([':wirkstoff' => $medikamentData['wirkstoff']]);
+        if (!$wirkstoffStmt->fetch()) {
             http_response_code(400);
             echo "Ungültiger Wirkstoff: " . $medikamentData['wirkstoff'];
             exit();
         }
+
+        $allowedApplikationen = ['i.v.', 'i.o.', 'i.m.', 's.c.', 's.l.', 'p.o.'];
+        $allowedEinheiten = ['mcg', 'mg', 'g', 'ml', 'IE'];
 
         if (!in_array($medikamentData['applikation'], $allowedApplikationen)) {
             http_response_code(400);

@@ -78,57 +78,25 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             </div>
                         </div>
                         <div class="col">
+                            <?php
+                            // Load medications from database, sorted alphabetically by wirkstoff
+                            $medStmt = $pdo->prepare("SELECT wirkstoff, herstellername, dosierungen FROM intra_edivi_medikamente WHERE active = 1 ORDER BY wirkstoff ASC");
+                            $medStmt->execute();
+                            $medikamente = $medStmt->fetchAll(PDO::FETCH_ASSOC);
+                            ?>
                             <div class="row">
                                 <div class="col">
                                     <select class="form-select medikament-field-ignore" name="medis-select" id="medis-select" required autocomplete="off" style="background-color: #333333; color: white;" data-ignore-autosave="true">
                                         <option value="" disabled hidden selected>Wirkstoff</option>
-                                        <option value="Acetylsalicylsäure">Acetylsalicylsäure</option>
-                                        <option value="Adenosin">Adenosin</option>
-                                        <option value="Alteplase">Alteplase</option>
-                                        <option value="Amiodaron">Amiodaron</option>
-                                        <option value="Atropinsulfat">Atropinsulfat</option>
-                                        <option value="Butylscopolamin">Butylscopolamin</option>
-                                        <option value="Calciumgluconat">Calciumgluconat</option>
-                                        <option value="Ceftriaxon">Ceftriaxon</option>
-                                        <option value="Dimenhydrinat">Dimenhydrinat</option>
-                                        <option value="Dimetinden">Dimetinden</option>
-                                        <option value="Epinephrin">Epinephrin</option>
-                                        <option value="Esketamin">Esketamin</option>
-                                        <option value="Fentanyl">Fentanyl</option>
-                                        <option value="Flumazenil">Flumazenil</option>
-                                        <option value="Furosemid">Furosemid</option>
-                                        <option value="Gelatinepolysuccinat">Gelatinepolysuccinat</option>
-                                        <option value="Glukose">Glukose</option>
-                                        <option value="Heparin">Heparin</option>
-                                        <option value="Humanblut">Humanblut</option>
-                                        <option value="Hydroxycobolamin">Hydroxycobolamin</option>
-                                        <option value="Ipratropiumbromid">Ipratropiumbromid</option>
-                                        <option value="Lidocain">Lidocain</option>
-                                        <option value="Lorazepam">Lorazepam</option>
-                                        <option value="Metamizol">Metamizol</option>
-                                        <option value="Metoprolol">Metoprolol</option>
-                                        <option value="Midazolam">Midazolam</option>
-                                        <option value="Morphin">Morphin</option>
-                                        <option value="Naloxon">Naloxon</option>
-                                        <option value="Natriumhydrogencarbonat">Natriumhydrogencarbonat</option>
-                                        <option value="Natriumthiosulfat">Natriumthiosulfat</option>
-                                        <option value="Nitroglycerin">Nitroglycerin</option>
-                                        <option value="Norepinephrin">Norepinephrin</option>
-                                        <option value="Ondansetron">Ondansetron</option>
-                                        <option value="Paracetamol">Paracetamol</option>
-                                        <option value="Piritramid">Piritramid</option>
-                                        <option value="Prednisolon">Prednisolon</option>
-                                        <option value="Propofol">Propofol</option>
-                                        <option value="Reproterol">Reproterol</option>
-                                        <option value="Rocuronium">Rocuronium</option>
-                                        <option value="Salbutamol">Salbutamol</option>
-                                        <option value="Succinylcholin">Succinylcholin</option>
-                                        <option value="Sufentanil">Sufentanil</option>
-                                        <option value="Theodrenalin-Cafedrin">Theodrenalin-Cafedrin</option>
-                                        <option value="Thiopental">Thiopental</option>
-                                        <option value="Tranexamsäure">Tranexamsäure</option>
-                                        <option value="Urapidil">Urapidil</option>
-                                        <option value="Vollelektrolytlösung">Vollelektrolytlösung</option>
+                                        <?php foreach ($medikamente as $med): ?>
+                                            <?php 
+                                            $displayName = htmlspecialchars($med['wirkstoff']);
+                                            if (!empty($med['herstellername'])) {
+                                                $displayName = htmlspecialchars($med['herstellername']) . ' (' . htmlspecialchars($med['wirkstoff']) . ')';
+                                            }
+                                            ?>
+                                            <option value="<?= htmlspecialchars($med['wirkstoff']) ?>" data-dosierungen="<?= htmlspecialchars($med['dosierungen'] ?? '') ?>"><?= $displayName ?></option>
+                                        <?php endforeach; ?>
                                     </select>
                                 </div>
                             </div>
@@ -152,7 +120,10 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             </div>
                             <div class="row mt-3">
                                 <div class="col">
-                                    <input class="form-control medikament-field-ignore" type="text" placeholder="Dosierung" name="medis-concentration" id="medis-concentration" style="background-color: #333333; color: white; --bs-secondary-color: #a2a2a2" data-ignore-autosave="true">
+                                    <div class="position-relative" id="dosierung-autocomplete-wrapper">
+                                        <input class="form-control medikament-field-ignore" type="text" placeholder="Dosierung" name="medis-concentration" id="medis-concentration" autocomplete="off" style="background-color: #333333; color: white; --bs-secondary-color: #a2a2a2" data-ignore-autosave="true">
+                                        <div id="dosierung-dropdown" class="dosierung-dropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; background-color: #444; border: 1px solid #555; border-radius: 4px; max-height: 200px; overflow-y: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.3);"></div>
+                                    </div>
                                 </div>
                                 <div class="col">
                                     <select class="form-select medikament-field-ignore" name="medis-unit" id="medis-unit" required autocomplete="off" style="background-color: #333333; color: white;" data-ignore-autosave="true">
@@ -289,7 +260,123 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                     deleteSelectedMedikament();
                 });
             }
+
+            // Update dropdown when medication is selected
+            const medisSelect = document.getElementById('medis-select');
+            if (medisSelect) {
+                medisSelect.addEventListener('change', function() {
+                    updateDosierungDropdown(this);
+                });
+            }
+
+            // Setup custom dropdown for dosage
+            const dosierungInput = document.getElementById('medis-concentration');
+            const dosierungDropdown = document.getElementById('dosierung-dropdown');
+            
+            if (dosierungInput && dosierungDropdown) {
+                // Show dropdown on focus
+                dosierungInput.addEventListener('focus', function() {
+                    if (dosierungDropdown.children.length > 0) {
+                        dosierungDropdown.style.display = 'block';
+                    }
+                });
+
+                // Filter dropdown on input
+                dosierungInput.addEventListener('input', function() {
+                    const value = this.value.toLowerCase();
+                    const items = dosierungDropdown.querySelectorAll('.dosierung-item');
+                    let hasVisible = false;
+                    
+                    items.forEach(item => {
+                        if (item.textContent.toLowerCase().includes(value)) {
+                            item.style.display = 'block';
+                            hasVisible = true;
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                    
+                    dosierungDropdown.style.display = hasVisible ? 'block' : 'none';
+                    
+                    // Also try to parse and set unit
+                    parseDosierungAndSetUnit(this.value);
+                });
+
+                // Hide dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!e.target.closest('#dosierung-autocomplete-wrapper')) {
+                        dosierungDropdown.style.display = 'none';
+                    }
+                });
+            }
         });
+
+        function updateDosierungDropdown(selectElement) {
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            const dosierungen = selectedOption.dataset.dosierungen || '';
+            const dropdown = document.getElementById('dosierung-dropdown');
+            
+            // Clear existing options
+            dropdown.innerHTML = '';
+            
+            if (dosierungen) {
+                // Split by comma and create styled options
+                const dosierungValues = dosierungen.split(',').map(d => d.trim()).filter(d => d);
+                dosierungValues.forEach(value => {
+                    const item = document.createElement('div');
+                    item.className = 'dosierung-item';
+                    item.textContent = value;
+                    item.style.cssText = 'padding: 8px 12px; cursor: pointer; color: white; border-bottom: 1px solid #555;';
+                    
+                    item.addEventListener('mouseenter', function() {
+                        this.style.backgroundColor = '#555';
+                    });
+                    item.addEventListener('mouseleave', function() {
+                        this.style.backgroundColor = 'transparent';
+                    });
+                    item.addEventListener('click', function() {
+                        document.getElementById('medis-concentration').value = value;
+                        dropdown.style.display = 'none';
+                        // Parse and set unit
+                        parseDosierungAndSetUnit(value);
+                    });
+                    
+                    dropdown.appendChild(item);
+                });
+                
+                // Remove border from last item
+                if (dropdown.lastChild) {
+                    dropdown.lastChild.style.borderBottom = 'none';
+                }
+            }
+        }
+
+        function parseDosierungAndSetUnit(value) {
+            // Map of unit suffixes to select values (supports both mcg and µg)
+            const unitMap = {
+                'mcg': 'mcg',
+                'µg': 'mcg',
+                'mg': 'mg',
+                'g': 'g',
+                'ml': 'ml',
+                'ie': 'IE'
+            };
+
+            // Try to match a predefined dosage pattern (number + unit)
+            const match = value.match(/^([0-9]+(?:[.,][0-9]+)?)\s*(mcg|µg|mg|g|ml|IE)$/i);
+            if (match) {
+                const numericValue = match[1];
+                const unit = match[2].toLowerCase();
+                const unitSelectValue = unitMap[unit];
+                
+                if (unitSelectValue) {
+                    // Set the numeric value in the input field
+                    document.getElementById('medis-concentration').value = numericValue;
+                    // Auto-select the unit
+                    document.getElementById('medis-unit').value = unitSelectValue;
+                }
+            }
+        }
 
         function saveMedikament() {
             const wirkstoff = document.getElementById('medis-select').value;
