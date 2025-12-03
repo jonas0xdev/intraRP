@@ -235,7 +235,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                     4  => 'Krankentransport',
                                 ];
 
-                                $eart_text = $einsatzarten[$daten['eart']] ?? '';
+                                $eart_text = $einsatzarten[$daten['eart'] ?? ''] ?? '';
                                 ?>
                                 <div class="print__field-wrapper" data-field-name="Einsatz-Art">
                                     <input type="text" class="w-100 print__field" value="<?= $eart_text ?>" readonly>
