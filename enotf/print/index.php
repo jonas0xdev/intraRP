@@ -235,7 +235,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                     4  => 'Krankentransport',
                                 ];
 
-                                $eart_text = $einsatzarten[$daten['eart']] ?? '';
+                                $eart_text = $einsatzarten[$daten['eart'] ?? ''] ?? '';
                                 ?>
                                 <div class="print__field-wrapper" data-field-name="Einsatz-Art">
                                     <input type="text" class="w-100 print__field" value="<?= $eart_text ?>" readonly>
@@ -553,7 +553,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                         ?>
                         <table class="w-100 print__text-small">
                             <tr>
-                                <td>Zustand<br><span class="fw-bold"><?= $c_kreislauf_labels[$daten['c_kreislauf']] ?? '' ?></span></td>
+                                <td>Zustand<br><span class="fw-bold"><?= $c_kreislauf_labels[$daten['c_kreislauf'] ?? ''] ?? '' ?></span></td>
                                 <td>
                                     Puls
                                     <br>
@@ -945,7 +945,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
 
                         $diagnose_haupt_text = '';
                         if (isset($daten['diagnose_haupt']) && !empty($daten['diagnose_haupt'])) {
-                            $diagnose_haupt_text = $diagnose_labels[$daten['diagnose_haupt']] ?? 'Unbekannte Diagnose';
+                            $diagnose_haupt_text = $diagnose_labels[$daten['diagnose_haupt'] ?? ''] ?? 'Unbekannte Diagnose';
                         }
 
                         $diagnose_weitere_array = [];
@@ -960,8 +960,8 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                         if (!empty($diagnose_weitere_array)) {
                             $diagnose_weitere_labels = [];
                             foreach ($diagnose_weitere_array as $diagnose_id) {
-                                if (isset($diagnose_labels[$diagnose_id])) {
-                                    $diagnose_weitere_labels[] = $diagnose_labels[$diagnose_id];
+                                if (isset($diagnose_labels[$diagnose_id ?? ''])) {
+                                    $diagnose_weitere_labels[] = $diagnose_labels[$diagnose_id ?? ''];
                                 }
                             }
                             $diagnose_weitere_text = implode(', ', $diagnose_weitere_labels);
@@ -1010,7 +1010,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                         <table class="w-100 print__text-small">
                             <tr>
                                 <td colspan="4">
-                                    Bewusstsein <span class="fw-bold"><?= $d_bewusstsein_labels[$daten['d_bewusstsein']] ?? '' ?></span>
+                                    Bewusstsein <span class="fw-bold"><?= $d_bewusstsein_labels[$daten['d_bewusstsein'] ?? ''] ?? '' ?></span>
                                 </td>
                             </tr>
                             <tr>
@@ -1075,11 +1075,11 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                         <table class="w-100 print__text-small">
                             <tr>
                                 <td>rechts</td>
-                                <td>Weite<br><span class="fw-bold"><?= $d_pupillenw_1_labels[$daten['d_pupillenw_2']] ?? '' ?></span></td>
-                                <td>Lichtreaktion<br><span class="fw-bold"><?= $d_lichtreakt_1_labels[$daten['d_lichtreakt_2']] ?? '' ?></span></td>
+                                <td>Weite<br><span class="fw-bold"><?= $d_pupillenw_1_labels[$daten['d_pupillenw_2'] ?? ''] ?? '' ?></span></td>
+                                <td>Lichtreaktion<br><span class="fw-bold"><?= $d_lichtreakt_1_labels[$daten['d_lichtreakt_2'] ?? ''] ?? '' ?></span></td>
                                 <td>links</td>
-                                <td>Weite<br><span class="fw-bold"><?= $d_pupillenw_1_labels[$daten['d_pupillenw_1']] ?? '' ?></span></td>
-                                <td>Lichtreaktion<br><span class="fw-bold"><?= $d_lichtreakt_1_labels[$daten['d_lichtreakt_1']] ?? '' ?></span></td>
+                                <td>Weite<br><span class="fw-bold"><?= $d_pupillenw_1_labels[$daten['d_pupillenw_1'] ?? ''] ?? '' ?></span></td>
+                                <td>Lichtreaktion<br><span class="fw-bold"><?= $d_lichtreakt_1_labels[$daten['d_lichtreakt_1'] ?? ''] ?? '' ?></span></td>
                             </tr>
                         </table>
                     </div>
@@ -1094,7 +1094,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             99 => 'Nicht beurteilbar'
                         ];
                         ?>
-                        Extremitätenbewegung<br><span class="fw-bold"><?= $d_ex_1_labels[$daten['d_ex_1']] ?? '' ?></span>
+                        Extremitätenbewegung<br><span class="fw-bold"><?= $d_ex_1_labels[$daten['d_ex_1'] ?? ''] ?? '' ?></span>
                     </div>
                     <div class="col border-start border-dark">
                         <?php
@@ -1116,7 +1116,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                         ?>
                         <table class="w-100 print__text-small">
                             <tr>
-                                <td rowspan="2">Schmerzen<br><span class="fw-bold">NRS <?= $sz_nrs_labels[$daten['sz_nrs']] ?? '' ?></span></td>
+                                <td rowspan="2">Schmerzen<br><span class="fw-bold">NRS <?= $sz_nrs_labels[$daten['sz_nrs'] ?? ''] ?? '' ?></span></td>
                                 <td>
                                     <?php if ($daten['sz_toleranz_1'] == 1): ?>
                                         <input type="radio" name="tolerabel" checked disabled />
@@ -1310,33 +1310,33 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                         <table class="w-100 print__text-small">
                             <tr>
                                 <td>Schädel-Hirn</td>
-                                <td class="fw-bold"><?= $v_muster_k_labels[$daten['v_muster_k']] ?? '' ?></td>
-                                <td class="fw-bold"> <?= $v_muster_k1_labels[$daten['v_muster_k1']] ?? '' ?></td>
+                                <td class="fw-bold"><?= $v_muster_k_labels[$daten['v_muster_k'] ?? ''] ?? '' ?></td>
+                                <td class="fw-bold"> <?= $v_muster_k1_labels[$daten['v_muster_k1'] ?? ''] ?? '' ?></td>
                             </tr>
                             <tr>
                                 <td>Wirbelsäule</td>
-                                <td class="fw-bold"><?= $v_muster_k_labels[$daten['v_muster_w']] ?? '' ?></td>
-                                <td class="fw-bold"> <?= $v_muster_k1_labels[$daten['v_muster_w1']] ?? '' ?></td>
+                                <td class="fw-bold"><?= $v_muster_k_labels[$daten['v_muster_w'] ?? ''] ?? '' ?></td>
+                                <td class="fw-bold"> <?= $v_muster_k1_labels[$daten['v_muster_w1'] ?? ''] ?? '' ?></td>
                             </tr>
                             <tr>
                                 <td>Thorax</td>
-                                <td class="fw-bold"><?= $v_muster_k_labels[$daten['v_muster_t']] ?? '' ?></td>
-                                <td class="fw-bold"> <?= $v_muster_k1_labels[$daten['v_muster_t1']] ?? '' ?></td>
+                                <td class="fw-bold"><?= $v_muster_k_labels[$daten['v_muster_t'] ?? ''] ?? '' ?></td>
+                                <td class="fw-bold"> <?= $v_muster_k1_labels[$daten['v_muster_t1'] ?? ''] ?? '' ?></td>
                             </tr>
                             <tr>
                                 <td>Abdomen</td>
-                                <td class="fw-bold"><?= $v_muster_k_labels[$daten['v_muster_a']] ?? '' ?></td>
-                                <td class="fw-bold"> <?= $v_muster_k1_labels[$daten['v_muster_a1']] ?? '' ?></td>
+                                <td class="fw-bold"><?= $v_muster_k_labels[$daten['v_muster_a'] ?? ''] ?? '' ?></td>
+                                <td class="fw-bold"> <?= $v_muster_k1_labels[$daten['v_muster_a1'] ?? ''] ?? '' ?></td>
                             </tr>
                             <tr>
                                 <td>Obere Extremitäten</td>
-                                <td class="fw-bold"><?= $v_muster_k_labels[$daten['v_muster_al']] ?? '' ?></td>
-                                <td class="fw-bold"> <?= $v_muster_k1_labels[$daten['v_muster_al1']] ?? '' ?></td>
+                                <td class="fw-bold"><?= $v_muster_k_labels[$daten['v_muster_al'] ?? ''] ?? '' ?></td>
+                                <td class="fw-bold"> <?= $v_muster_k1_labels[$daten['v_muster_al1'] ?? ''] ?? '' ?></td>
                             </tr>
                             <tr>
                                 <td>Untere Extremitäten</td>
-                                <td class="fw-bold"><?= $v_muster_k_labels[$daten['v_muster_bl']] ?? '' ?></td>
-                                <td class="fw-bold"> <?= $v_muster_k1_labels[$daten['v_muster_bl1']] ?? '' ?></td>
+                                <td class="fw-bold"><?= $v_muster_k_labels[$daten['v_muster_bl'] ?? ''] ?? '' ?></td>
+                                <td class="fw-bold"> <?= $v_muster_k1_labels[$daten['v_muster_bl1'] ?? ''] ?? '' ?></td>
                             </tr>
                         </table>
                     </div>
@@ -1644,7 +1644,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             $displays = [];
 
                             foreach ($zugaenge as $zugang) {
-                                $artName   = $artNames[$zugang['art']] ?? $zugang['art'];
+                                $artName   = $artNames[$zugang['art'] ?? ''] ?? ($zugang['art'] ?? '');
                                 $groesse   = normalize_groesse_pretty($zugang['groesse'] ?? '');
                                 $ort       = $zugang['ort']   ?? '';
                                 $seite     = $zugang['seite'] ?? '';
@@ -1677,7 +1677,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             $displays = [];
 
                             foreach ($zugaenge as $zugang) {
-                                $artName   = $artNames[$zugang['art']] ?? $zugang['art'];
+                                $artName   = $artNames[$zugang['art'] ?? ''] ?? ($zugang['art'] ?? '');
                                 $groesse   = normalize_groesse_pretty($zugang['groesse'] ?? '');
                                 $ort       = $zugang['ort']   ?? '';
                                 $seite     = $zugang['seite'] ?? '';
@@ -1721,7 +1721,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             $displays = [];
 
                             foreach ($zugaenge as $zugang) {
-                                $artName   = $artNames[$zugang['art']] ?? $zugang['art'];
+                                $artName   = $artNames[$zugang['art'] ?? ''] ?? ($zugang['art'] ?? '');
                                 $groesse   = normalize_groesse_pretty($zugang['groesse'] ?? '');
                                 $ort       = $zugang['ort']   ?? '';
                                 $seite     = $zugang['seite'] ?? '';
@@ -1766,7 +1766,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             $displays = [];
 
                             foreach ($zugaenge as $zugang) {
-                                $artName   = $artNames[$zugang['art']] ?? $zugang['art'];
+                                $artName   = $artNames[$zugang['art'] ?? ''] ?? ($zugang['art'] ?? '');
                                 $groesse   = normalize_groesse_pretty($zugang['groesse'] ?? '');
                                 $ort       = $zugang['ort']   ?? '';
                                 $seite     = $zugang['seite'] ?? '';
@@ -1858,10 +1858,10 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                         <table class="w-100 print__text-small">
                             <tr>
                                 <td>
-                                    Intubation<br><span style="font-weight:600;font-size:11pt"><?= $awsicherung_neu_labels[$daten['awsicherung_neu']] ?? '' ?></span>
+                                    Intubation<br><span style="font-weight:600;font-size:11pt"><?= $awsicherung_neu_labels[$daten['awsicherung_neu'] ?? ''] ?? '' ?></span>
                                 </td>
                                 <td>
-                                    Beatmung<br><span style="font-weight:600;font-size:11pt"><?= $b_beatmung_labels[$daten['b_beatmung']] ?? '' ?></span>
+                                    Beatmung<br><span style="font-weight:600;font-size:11pt"><?= $b_beatmung_labels[$daten['b_beatmung'] ?? ''] ?? '' ?></span>
                                 </td>
                             </tr>
                             <tr>
@@ -1889,7 +1889,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                         <table class="w-100 print__text-small">
                             <tr>
                                 <td colspan="2">
-                                    Lagerung<br><span style="font-weight:600;font-size:11pt"><?= $lagerung_labels[$daten['lagerung']] ?? '' ?></span>
+                                    Lagerung<br><span style="font-weight:600;font-size:11pt"><?= $lagerung_labels[$daten['lagerung'] ?? ''] ?? '' ?></span>
                                 </td>
                             </tr>
                             <tr>
@@ -2095,12 +2095,12 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
 
                         $uebergabe_an_text = '';
                         if (isset($daten['uebergabe_an']) && !empty($daten['uebergabe_an'])) {
-                            $uebergabe_an_text = $uebergabe_an_labels[$daten['uebergabe_an']] ?? '&nbsp';
+                            $uebergabe_an_text = $uebergabe_an_labels[$daten['uebergabe_an'] ?? ''] ?? '&nbsp';
                         }
 
                         $uebergabe_ort_text = '';
                         if (isset($daten['uebergabe_ort']) && !empty($daten['uebergabe_ort'])) {
-                            $uebergabe_ort_text = $uebergabe_ort_labels[$daten['uebergabe_ort']] ?? '&nbsp';
+                            $uebergabe_ort_text = $uebergabe_ort_labels[$daten['uebergabe_ort'] ?? ''] ?? '&nbsp';
                         }
                         ?>
                         <h6 class="print__heading">Übergabe an</h6>

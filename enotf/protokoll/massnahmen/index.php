@@ -171,7 +171,7 @@ function displayAllZugaenge($zugangJson)
     $displays = [];
 
     foreach ($zugaenge as $zugang) {
-        $artName   = $artNames[$zugang['art']] ?? $zugang['art'];
+        $artName   = $artNames[$zugang['art'] ?? ''] ?? ($zugang['art'] ?? '');
         $groesse   = normalize_groesse_pretty($zugang['groesse'] ?? '');
         $ort       = $zugang['ort']   ?? '';
         $seite     = $zugang['seite'] ?? '';
@@ -204,7 +204,7 @@ function displayAllZugaengeText($zugangJson)
     $displays = [];
 
     foreach ($zugaenge as $zugang) {
-        $artName   = $artNames[$zugang['art']] ?? $zugang['art'];
+        $artName   = $artNames[$zugang['art'] ?? ''] ?? ($zugang['art'] ?? '');
         $groesse   = normalize_groesse_pretty($zugang['groesse'] ?? '');
         $ort       = $zugang['ort']   ?? '';
         $seite     = $zugang['seite'] ?? '';
@@ -248,7 +248,7 @@ function displayZugaengeByArt($zugangJson, $filterArt = null)
     $displays = [];
 
     foreach ($zugaenge as $zugang) {
-        $artName   = $artNames[$zugang['art']] ?? $zugang['art'];
+        $artName   = $artNames[$zugang['art'] ?? ''] ?? ($zugang['art'] ?? '');
         $groesse   = normalize_groesse_pretty($zugang['groesse'] ?? '');
         $ort       = $zugang['ort']   ?? '';
         $seite     = $zugang['seite'] ?? '';
@@ -293,7 +293,7 @@ function displayZugaengeByArtText($zugangJson, $filterArt = null)
     $displays = [];
 
     foreach ($zugaenge as $zugang) {
-        $artName   = $artNames[$zugang['art']] ?? $zugang['art'];
+        $artName   = $artNames[$zugang['art'] ?? ''] ?? ($zugang['art'] ?? '');
         $groesse   = normalize_groesse_pretty($zugang['groesse'] ?? '');
         $ort       = $zugang['ort']   ?? '';
         $seite     = $zugang['seite'] ?? '';
@@ -497,7 +497,7 @@ if (!empty($daten['rettungstechnik'])) {
                                             <div class="row my-2">
                                                 <div class="col">
                                                     <label for="atemwegssicherung" class="edivi__description">Atemwegssicherung</label>
-                                                    <input type="text" name="atemwegssicherung" id="atemwegssicherung" class="w-100 form-control edivi__input-check" value="<?= $awsicherung_neu_labels[$daten['awsicherung_neu']] ?? '' ?>" readonly>
+                                                    <input type="text" name="atemwegssicherung" id="atemwegssicherung" class="w-100 form-control edivi__input-check" value="<?= $awsicherung_neu_labels[$daten['awsicherung_neu'] ?? ''] ?? '' ?>" readonly>
                                                 </div>
                                             </div>
                                         </div>
@@ -512,7 +512,7 @@ if (!empty($daten['rettungstechnik'])) {
                                                     <div class="row my-2">
                                                         <div class="col">
                                                             <label for="beatmung" class="edivi__description">Beatmung</label>
-                                                            <input type="text" name="beatmung" id="beatmung" class="w-100 form-control edivi__input-check" value="<?= $b_beatmung_labels[$daten['b_beatmung']] ?? '' ?>" readonly>
+                                                            <input type="text" name="beatmung" id="beatmung" class="w-100 form-control edivi__input-check" value="<?= $b_beatmung_labels[$daten['b_beatmung'] ?? ''] ?? '' ?>" readonly>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -520,7 +520,7 @@ if (!empty($daten['rettungstechnik'])) {
                                                     <div class="row my-2">
                                                         <div class="col">
                                                             <label for="o2gabe" class="edivi__description">O2-Gabe</label>
-                                                            <input type="text" name="o2gabe" id="o2gabe" class="w-100 form-control" value="<?= $o2gabe_labels[$daten['o2gabe']] ?? '' ?>" readonly>
+                                                            <input type="text" name="o2gabe" id="o2gabe" class="w-100 form-control" value="<?= $o2gabe_labels[$daten['o2gabe'] ?? ''] ?? '' ?>" readonly>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -585,7 +585,7 @@ if (!empty($daten['rettungstechnik'])) {
                                                     <div class="row my-2">
                                                         <div class="col">
                                                             <label for="lagerung" class="edivi__description">Lagerung</label>
-                                                            <input type="text" name="lagerung" id="lagerung" class="w-100 form-control" value="<?= $lagerung_labels[$daten['lagerung']] ?? '' ?>" readonly>
+                                                            <input type="text" name="lagerung" id="lagerung" class="w-100 form-control" value="<?= $lagerung_labels[$daten['lagerung'] ?? ''] ?? '' ?>" readonly>
                                                         </div>
                                                     </div>
                                                 </div>

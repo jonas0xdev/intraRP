@@ -69,8 +69,8 @@ if (isset($_GET['enr'])) {
             'Temperatur' => 'temp'
         ];
 
-        if (isset($parameterMapping[$vital['parameter_name']])) {
-            $fieldName = $parameterMapping[$vital['parameter_name']];
+        if (isset($parameterMapping[$vital['parameter_name'] ?? ''])) {
+            $fieldName = $parameterMapping[$vital['parameter_name'] ?? ''];
             $groupedByTime[$zeitpunkt][$fieldName] = $vital['parameter_wert'];
         }
     }

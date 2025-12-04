@@ -202,7 +202,7 @@ $diagnose_labels = [
 
 $diagnose_haupt_text = '';
 if (isset($daten['diagnose_haupt']) && !empty($daten['diagnose_haupt'])) {
-    $diagnose_haupt_text = $diagnose_labels[$daten['diagnose_haupt']] ?? 'Unbekannte Diagnose';
+    $diagnose_haupt_text = $diagnose_labels[$daten['diagnose_haupt'] ?? ''] ?? 'Unbekannte Diagnose';
 }
 
 $diagnose_weitere_array = [];
@@ -217,8 +217,8 @@ $diagnose_weitere_text = '';
 if (!empty($diagnose_weitere_array)) {
     $diagnose_weitere_labels = [];
     foreach ($diagnose_weitere_array as $diagnose_id) {
-        if (isset($diagnose_labels[$diagnose_id])) {
-            $diagnose_weitere_labels[] = $diagnose_labels[$diagnose_id];
+        if (isset($diagnose_labels[$diagnose_id ?? ''])) {
+            $diagnose_weitere_labels[] = $diagnose_labels[$diagnose_id ?? ''];
         }
     }
     $diagnose_weitere_text = implode(', ', $diagnose_weitere_labels);

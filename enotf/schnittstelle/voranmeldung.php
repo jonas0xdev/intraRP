@@ -272,7 +272,7 @@ $diagnose_labels = [
 
 $diagnose_haupt_text = '';
 if (isset($daten['diagnose_haupt']) && !empty($daten['diagnose_haupt'])) {
-    $diagnose_haupt_text = $diagnose_labels[$daten['diagnose_haupt']] ?? 'Unbekannte Diagnose';
+    $diagnose_haupt_text = $diagnose_labels[$daten['diagnose_haupt'] ?? ''] ?? 'Unbekannte Diagnose';
 }
 
 $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'false';

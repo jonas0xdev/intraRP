@@ -95,8 +95,8 @@ $rdginfo = $stmtr->fetchAll(PDO::FETCH_UNIQUE);
                                 foreach ($result as $row) {
                                     $einstellungsdatum = (new DateTime($row['einstdatum']))->format('d.m.Y');
 
-                                    $dginfo2 = $dginfo[$row['dienstgrad']];
-                                    $rdginfo2 = $rdginfo[$row['qualird']];
+                                    $dginfo2 = $dginfo[$row['dienstgrad'] ?? ''] ?? [];
+                                    $rdginfo2 = $rdginfo[$row['qualird'] ?? ''] ?? [];
 
                                     if ($row['geschlecht'] == 0) {
                                         $dienstgrad = $dginfo2['name_m'];

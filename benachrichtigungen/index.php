@@ -181,7 +181,7 @@ $unreadCount = $notificationManager->getUnreadCount($userId);
                                     'dokument' => 'fa-folder-open',
                                         'system' => 'fa-gears'
                                 ];
-                                $icon = $iconClass[$notification['type']] ?? 'fa-bell';
+                                $icon = $iconClass[$notification['type'] ?? ''] ?? 'fa-bell';
                             ?>
                                 <div class="notification-item <?= $isUnread ? 'unread' : '' ?> p-3 border-bottom">
                                     <div class="row align-items-center">

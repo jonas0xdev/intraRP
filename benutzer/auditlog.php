@@ -68,7 +68,7 @@ $uinfo = $stmtg->fetchAll(PDO::FETCH_UNIQUE);
                                 $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 foreach ($result as $row) {
 
-                                    $uinfo2 = $uinfo[$row['user']];
+                                    $uinfo2 = $uinfo[$row['user'] ?? ''] ?? [];
 
                                     $datetime = new DateTime($row['timestamp']);
                                     $date = $datetime->format('d.m.Y  H:i:s');
