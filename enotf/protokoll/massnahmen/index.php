@@ -171,7 +171,7 @@ function displayAllZugaenge($zugangJson)
     $displays = [];
 
     foreach ($zugaenge as $zugang) {
-        $artName   = $artNames[$zugang['art']] ?? $zugang['art'];
+        $artName   = $artNames[$zugang['art'] ?? ''] ?? ($zugang['art'] ?? '');
         $groesse   = normalize_groesse_pretty($zugang['groesse'] ?? '');
         $ort       = $zugang['ort']   ?? '';
         $seite     = $zugang['seite'] ?? '';
@@ -204,7 +204,7 @@ function displayAllZugaengeText($zugangJson)
     $displays = [];
 
     foreach ($zugaenge as $zugang) {
-        $artName   = $artNames[$zugang['art']] ?? $zugang['art'];
+        $artName   = $artNames[$zugang['art'] ?? ''] ?? ($zugang['art'] ?? '');
         $groesse   = normalize_groesse_pretty($zugang['groesse'] ?? '');
         $ort       = $zugang['ort']   ?? '';
         $seite     = $zugang['seite'] ?? '';
@@ -248,7 +248,7 @@ function displayZugaengeByArt($zugangJson, $filterArt = null)
     $displays = [];
 
     foreach ($zugaenge as $zugang) {
-        $artName   = $artNames[$zugang['art']] ?? $zugang['art'];
+        $artName   = $artNames[$zugang['art'] ?? ''] ?? ($zugang['art'] ?? '');
         $groesse   = normalize_groesse_pretty($zugang['groesse'] ?? '');
         $ort       = $zugang['ort']   ?? '';
         $seite     = $zugang['seite'] ?? '';
@@ -293,7 +293,7 @@ function displayZugaengeByArtText($zugangJson, $filterArt = null)
     $displays = [];
 
     foreach ($zugaenge as $zugang) {
-        $artName   = $artNames[$zugang['art']] ?? $zugang['art'];
+        $artName   = $artNames[$zugang['art'] ?? ''] ?? ($zugang['art'] ?? '');
         $groesse   = normalize_groesse_pretty($zugang['groesse'] ?? '');
         $ort       = $zugang['ort']   ?? '';
         $seite     = $zugang['seite'] ?? '';

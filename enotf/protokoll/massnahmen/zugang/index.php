@@ -130,7 +130,7 @@ function displayAllZugaenge($zugangJson)
     $displays = [];
     foreach ($zugaenge as $zugang) {
         $artNames = ['pvk' => 'PVK', 'zvk' => 'ZVK', 'io' => 'intraossär'];
-        $artName = $artNames[$zugang['art']] ?? $zugang['art'];
+        $artName = $artNames[$zugang['art'] ?? ''] ?? ($zugang['art'] ?? '');
         $displays[] = sprintf(
             '%s %s - %s %s',
             $artName,

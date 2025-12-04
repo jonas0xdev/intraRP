@@ -1644,7 +1644,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             $displays = [];
 
                             foreach ($zugaenge as $zugang) {
-                                $artName   = $artNames[$zugang['art']] ?? $zugang['art'];
+                                $artName   = $artNames[$zugang['art'] ?? ''] ?? ($zugang['art'] ?? '');
                                 $groesse   = normalize_groesse_pretty($zugang['groesse'] ?? '');
                                 $ort       = $zugang['ort']   ?? '';
                                 $seite     = $zugang['seite'] ?? '';
@@ -1677,7 +1677,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             $displays = [];
 
                             foreach ($zugaenge as $zugang) {
-                                $artName   = $artNames[$zugang['art']] ?? $zugang['art'];
+                                $artName   = $artNames[$zugang['art'] ?? ''] ?? ($zugang['art'] ?? '');
                                 $groesse   = normalize_groesse_pretty($zugang['groesse'] ?? '');
                                 $ort       = $zugang['ort']   ?? '';
                                 $seite     = $zugang['seite'] ?? '';
@@ -1721,7 +1721,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             $displays = [];
 
                             foreach ($zugaenge as $zugang) {
-                                $artName   = $artNames[$zugang['art']] ?? $zugang['art'];
+                                $artName   = $artNames[$zugang['art'] ?? ''] ?? ($zugang['art'] ?? '');
                                 $groesse   = normalize_groesse_pretty($zugang['groesse'] ?? '');
                                 $ort       = $zugang['ort']   ?? '';
                                 $seite     = $zugang['seite'] ?? '';
@@ -1766,7 +1766,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             $displays = [];
 
                             foreach ($zugaenge as $zugang) {
-                                $artName   = $artNames[$zugang['art']] ?? $zugang['art'];
+                                $artName   = $artNames[$zugang['art'] ?? ''] ?? ($zugang['art'] ?? '');
                                 $groesse   = normalize_groesse_pretty($zugang['groesse'] ?? '');
                                 $ort       = $zugang['ort']   ?? '';
                                 $seite     = $zugang['seite'] ?? '';

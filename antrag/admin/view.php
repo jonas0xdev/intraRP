@@ -114,7 +114,7 @@ $statusMapping = [
     3 => ['class' => 'success', 'text' => 'Angenommen', 'icon' => 'las la-check-circle'],
 ];
 
-$currentStatus = $statusMapping[$antrag['cirs_status']] ?? ['class' => 'dark', 'text' => 'Unbekannt', 'icon' => 'las la-question-circle'];
+$currentStatus = $statusMapping[$antrag['cirs_status'] ?? ''] ?? ['class' => 'dark', 'text' => 'Unbekannt', 'icon' => 'las la-question-circle'];
 $createDate = new DateTime($antrag['time_added'] ?? 'now');
 ?>
 

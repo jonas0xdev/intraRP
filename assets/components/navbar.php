@@ -181,7 +181,7 @@ use App\Notifications\NotificationManager;
                                     'dokument' => 'fa-folder-open',
                                     'system' => 'fa-gears'
                                 ];
-                                $icon = $iconClass[$notification['type']] ?? 'fa-bell';
+                                $icon = $iconClass[$notification['type'] ?? ''] ?? 'fa-bell';
                             ?>
                                 <li>
                                     <div class="dropdown-item p-0" style="white-space: normal;">
