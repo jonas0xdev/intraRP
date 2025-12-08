@@ -59,7 +59,7 @@ use App\Notifications\NotificationManager;
                                 <hr class="dropdown-divider">
                             </li>
                             <li><a class="dropdown-item" href="<?= BASE_PATH ?>enotf/admin/list.php">Prüfliste</a></li>
-                            <li><a class="dropdown-item" href="<?= BASE_PATH ?>enotf/admin/zielverwaltung/index.php">Transportziele</a></li>
+                            <li><a class="dropdown-item" href="<?= BASE_PATH ?>enotf/admin/pois/index.php">POIs</a></li>
                             <li><a class="dropdown-item" href="<?= BASE_PATH ?>enotf/admin/medikamentenverwaltung/index.php">Medikamente</a></li>
                         <?php } ?>
                     </ul>
@@ -123,7 +123,7 @@ use App\Notifications\NotificationManager;
                     if (!isset($pdo)) {
                         require_once __DIR__ . '/../config/database.php';
                     }
-                    
+
                     if (isset($pdo)) {
                         $notificationManager = new NotificationManager($pdo);
                         $unreadCount = $notificationManager->getUnreadCount($_SESSION['userid']);
@@ -147,20 +147,22 @@ use App\Notifications\NotificationManager;
                         <?php endif; ?>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" style="min-width: 320px; max-width: 400px;">
-                        <li><h6 class="dropdown-header">Benachrichtigungen</h6></li>
+                        <li>
+                            <h6 class="dropdown-header">Benachrichtigungen</h6>
+                        </li>
                         <?php if (empty($recentNotifications)): ?>
                             <li><span class="dropdown-item-text text-muted small">Keine Benachrichtigungen</span></li>
                         <?php else: ?>
-                            <?php foreach ($recentNotifications as $notification): 
+                            <?php foreach ($recentNotifications as $notification):
                                 $isUnread = $notification['is_read'] == 0;
-                                
+
                                 // MySQL stores timestamps in its system timezone, we need to convert to PHP's timezone
                                 // Create DateTime in MySQL's timezone (system timezone), then convert to PHP's timezone
                                 $datetime = new DateTime($notification['created_at'], new DateTimeZone('Europe/Berlin')); // MySQL SYSTEM timezone
                                 $datetime->setTimezone(new DateTimeZone(date_default_timezone_get())); // Convert to PHP timezone (UTC)
                                 $now = new DateTime('now', new DateTimeZone(date_default_timezone_get()));
                                 $diff = $now->diff($datetime);
-                                
+
                                 // Check if the notification is in the future (clock skew)
                                 if ($diff->invert == 0) {
                                     // Notification is in the future, show as "jetzt"
@@ -174,7 +176,7 @@ use App\Notifications\NotificationManager;
                                 } else {
                                     $timeAgo = 'jetzt';
                                 }
-                                
+
                                 $iconClass = [
                                     'antrag' => 'fa-file',
                                     'protokoll' => 'fa-truck-medical',
@@ -200,10 +202,10 @@ use App\Notifications\NotificationManager;
                                             <div class="d-flex align-items-center ms-2" style="gap: 0.25rem;">
                                                 <small class="text-muted" style="font-size: 0.7rem; white-space: nowrap;"><?= $timeAgo ?></small>
                                                 <?php if ($isUnread): ?>
-                                                    <button class="btn btn-sm btn-link p-1 ms-1 mark-as-read-btn" 
-                                                            data-notification-id="<?= $notification['id'] ?>" 
-                                                            title="Als gelesen markieren"
-                                                            style="font-size: 1.1rem; line-height: 1;">
+                                                    <button class="btn btn-sm btn-link p-1 ms-1 mark-as-read-btn"
+                                                        data-notification-id="<?= $notification['id'] ?>"
+                                                        title="Als gelesen markieren"
+                                                        style="font-size: 1.1rem; line-height: 1;">
                                                         <i class="fa-solid fa-check text-muted"></i>
                                                     </button>
                                                 <?php endif; ?>
@@ -212,7 +214,9 @@ use App\Notifications\NotificationManager;
                                     </div>
                                 </li>
                             <?php endforeach; ?>
-                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
                         <?php endif; ?>
                         <li>
                             <a class="dropdown-item text-center small" href="<?= BASE_PATH ?>benachrichtigungen/index.php">
@@ -238,46 +242,48 @@ use App\Notifications\NotificationManager;
         var currentPage = $("body").data("page");
         $(".nav-link").removeClass("active");
         $(".nav-link[data-page='" + currentPage + "']").addClass("active");
-        
+
         // Handle mark as read buttons in notification dropdown
         $('.mark-as-read-btn').on('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            
+
             const notificationId = $(this).data('notification-id');
             const $button = $(this);
             const $listItem = $button.closest('li');
-            
+
             // Send AJAX request to mark as read
             fetch('<?= BASE_PATH ?>benachrichtigungen/mark-read.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ id: notificationId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Remove bold styling and hide button
-                    $listItem.find('a').removeClass('fw-bold');
-                    $button.fadeOut(200);
-                    
-                    // Update badge count
-                    const $badge = $('.nav-link[data-page="benachrichtigungen"] .badge');
-                    const currentCount = parseInt($badge.text()) || 0;
-                    const newCount = Math.max(0, currentCount - 1);
-                    
-                    if (newCount > 0) {
-                        $badge.text(newCount > 9 ? '9+' : newCount);
-                    } else {
-                        $badge.remove();
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        id: notificationId
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Remove bold styling and hide button
+                        $listItem.find('a').removeClass('fw-bold');
+                        $button.fadeOut(200);
+
+                        // Update badge count
+                        const $badge = $('.nav-link[data-page="benachrichtigungen"] .badge');
+                        const currentCount = parseInt($badge.text()) || 0;
+                        const newCount = Math.max(0, currentCount - 1);
+
+                        if (newCount > 0) {
+                            $badge.text(newCount > 9 ? '9+' : newCount);
+                        } else {
+                            $badge.remove();
+                        }
                     }
-                }
-            })
-            .catch(error => {
-                console.error('Error marking notification as read:', error);
-            });
+                })
+                .catch(error => {
+                    console.error('Error marking notification as read:', error);
+                });
         });
     });
 

@@ -91,24 +91,24 @@ $options = [
 try {
     $pdo = new PDO($dsn, $db_user, $db_pass, $options);
     echo "✓ Datenbankverbindung erfolgreich\n";
-    
+
     // Check SQL mode for debugging environment-specific issues
     try {
         $stmt = $pdo->query("SELECT @@sql_mode");
         $sqlMode = $stmt->fetchColumn();
         echo "ℹ️  SQL Mode: " . ($sqlMode ?: '(empty)') . "\n";
-        
+
         // Check for problematic modes
         $modes = array_map('trim', explode(',', $sqlMode));
         $recommendedModes = ['STRICT_TRANS_TABLES', 'NO_ZERO_IN_DATE', 'NO_ZERO_DATE', 'ERROR_FOR_DIVISION_BY_ZERO', 'NO_ENGINE_SUBSTITUTION'];
         $problematicModes = ['TRADITIONAL', 'STRICT_ALL_TABLES'];
-        
+
         foreach ($problematicModes as $mode) {
             if (in_array($mode, $modes)) {
                 echo "⚠️  SQL Mode '$mode' ist aktiv (kann zu strengeren Validierungen führen)\n";
             }
         }
-        
+
         // Check MySQL/MariaDB version
         $stmt = $pdo->query("SELECT VERSION()");
         $version = $stmt->fetchColumn();
@@ -329,6 +329,7 @@ $migrationFiles = [
 
     // 08.12.2025
     ['file' => 'alter_intra_edivi_08122025.php', 'type' => 'alter'],
+    ['file' => 'create_intra_edivi_pois_08122025.php', 'type' => 'create'],
 ];
 
 $executed = 0;
@@ -356,12 +357,12 @@ foreach ($migrationFiles as $migration) {
 
     try {
         echo "▶️  Führe aus [$type]: $file\n";
-        
+
         // Capture output from the migration file
         ob_start();
         include $fullPath;
         $migrationOutput = ob_get_clean();
-        
+
         // Check if there was any error output from the migration
         // Look for common SQL error patterns
         if (!empty($migrationOutput)) {
@@ -377,14 +378,14 @@ foreach ($migrationFiles as $migration) {
                 'Can\'t DROP',
                 'foreign key constraint fails'
             ];
-            
+
             foreach ($errorPatterns as $pattern) {
                 if (preg_match('/' . $pattern . '/i', $migrationOutput)) {
                     $isError = true;
                     break;
                 }
             }
-            
+
             if ($isError) {
                 throw new Exception("Migration produced error output: " . $migrationOutput);
             } else {
@@ -392,7 +393,7 @@ foreach ($migrationFiles as $migration) {
                 echo $migrationOutput;
             }
         }
-        
+
         // For CREATE migrations, verify the table was actually created
         if ($type === 'create') {
             // Check if migration specifies multiple tables to verify
@@ -400,14 +401,14 @@ foreach ($migrationFiles as $migration) {
                 if (empty($migration['tables'])) {
                     throw new Exception("Migration has 'tables' parameter but it is empty");
                 }
-                
+
                 $missingTables = [];
                 foreach ($migration['tables'] as $tableName) {
                     if (!tableExists($pdo, $tableName)) {
                         $missingTables[] = $tableName;
                     }
                 }
-                
+
                 if (!empty($missingTables)) {
                     $missingList = implode(', ', $missingTables);
                     throwTableCreationError($pdo, "Tables were not created successfully: $missingList");
@@ -423,7 +424,7 @@ foreach ($migrationFiles as $migration) {
                 }
             }
         }
-        
+
         // For ALTER migrations, verify the table exists and column was added if applicable
         if ($type === 'alter') {
             $tableName = extractTableName($file);
@@ -432,7 +433,7 @@ foreach ($migrationFiles as $migration) {
                 if (!tableExists($pdo, $tableName)) {
                     throw new Exception("Cannot alter table '$tableName' - table does not exist");
                 }
-                
+
                 // Check if this is an ADD COLUMN migration
                 $migrationContent = file_get_contents($fullPath);
                 $columnName = extractColumnName($migrationContent);

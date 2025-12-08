@@ -88,6 +88,9 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                     <span>Nachforderung NA</span>
                                 </a>
                             <?php endif; ?>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/3.php?enr=<?= $daten['enr'] ?>">
+                                <span>Übergabe</span>
+                            </a>
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton">
                             <input type="checkbox" class="btn-check" id="ebesonderheiten-1" name="ebesonderheiten[]" value="1" <?php echo (in_array(1, $ebesonderheiten) ? 'checked' : '') ?> autocomplete="off">

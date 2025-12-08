@@ -78,6 +78,9 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/2.php?enr=<?= $daten['enr'] ?>" data-requires="na_nachf" class="active">
                                 <span>Nachforderung NA</span>
                             </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/3.php?enr=<?= $daten['enr'] ?>">
+                                <span>Übergabe</span>
+                            </a>
                         </div>
                         <div class="col-2 d-flex flex-column edivi__interactbutton">
                             <input type="radio" class="btn-check" id="na_nachf-1" name="na_nachf" value="1" <?php echo ($daten['na_nachf'] == 1 ? 'checked' : '') ?> autocomplete="off">

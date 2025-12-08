@@ -411,24 +411,34 @@ try {
             }
 
             if ($vehicle['is_notarzt']) {
+                $currentDate = date('Y-m-d');
+                $currentTime = date('H:i');
+
                 $insertStmt = $pdo->prepare("
-                    INSERT INTO intra_edivi (enr, fzg_na, created_at) 
-                    VALUES (:enr, :fzg_na, NOW())
+                    INSERT INTO intra_edivi (enr, fzg_na, edatum, ezeit, created_at) 
+                    VALUES (:enr, :fzg_na, :edatum, :ezeit, NOW())
                 ");
                 $insertStmt->execute([
                     ':enr' => $enrToUse,
-                    ':fzg_na' => $vehicle['identifier']
+                    ':fzg_na' => $vehicle['identifier'],
+                    ':edatum' => $currentDate,
+                    ':ezeit' => $currentTime
                 ]);
 
                 logSync("Notarzt-Eintrag $enrToUse erstellt: {$vehicle['identifier']}", 'INFO');
             } else {
+                $currentDate = date('Y-m-d');
+                $currentTime = date('H:i');
+
                 $insertStmt = $pdo->prepare("
-                    INSERT INTO intra_edivi (enr, fzg_transp, created_at) 
-                    VALUES (:enr, :fzg_transp, NOW())
+                    INSERT INTO intra_edivi (enr, fzg_transp, edatum, ezeit, created_at) 
+                    VALUES (:enr, :fzg_transp, :edatum, :ezeit, NOW())
                 ");
                 $insertStmt->execute([
                     ':enr' => $enrToUse,
-                    ':fzg_transp' => $vehicle['identifier']
+                    ':fzg_transp' => $vehicle['identifier'],
+                    ':edatum' => $currentDate,
+                    ':ezeit' => $currentTime
                 ]);
 
                 logSync("Transport-Eintrag $enrToUse erstellt: {$vehicle['identifier']}", 'INFO');

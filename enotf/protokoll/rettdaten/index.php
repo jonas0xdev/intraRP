@@ -53,6 +53,59 @@ date_default_timezone_set('Europe/Berlin');
 $currentTime = date('H:i');
 $currentDate = date('d.m.Y');
 
+// Adresse aus JSON dekodieren für Anzeige im Format: Straße HNR, Ort-Ortsteil
+$transp_display = '';
+if (!empty($daten['transp_adresse'])) {
+    $parts = [];
+
+    $decoded = json_decode($daten['transp_adresse'], true);
+    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+        // Straße + HNR zusammen
+        $strasseHnr = [];
+        if (!empty($decoded['strasse'])) $strasseHnr[] = $decoded['strasse'];
+        if (!empty($decoded['hnr'])) $strasseHnr[] = $decoded['hnr'];
+        if (!empty($strasseHnr)) {
+            $parts[] = implode(' ', $strasseHnr);
+        }
+
+        // Ort-Ortsteil
+        $ortOrtsteil = [];
+        if (!empty($decoded['ort'])) $ortOrtsteil[] = $decoded['ort'];
+        if (!empty($decoded['ortsteil'])) $ortOrtsteil[] = $decoded['ortsteil'];
+        if (!empty($ortOrtsteil)) {
+            $parts[] = implode('-', $ortOrtsteil);
+        }
+    }
+
+    $transp_display = implode(', ', $parts);
+}
+
+// Ziel-Adresse aus JSON dekodieren für Anzeige
+$ziel_display = '';
+if (!empty($daten['ziel_adresse'])) {
+    $parts = [];
+
+    $decoded = json_decode($daten['ziel_adresse'], true);
+    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+        // Straße + HNR zusammen
+        $strasseHnr = [];
+        if (!empty($decoded['strasse'])) $strasseHnr[] = $decoded['strasse'];
+        if (!empty($decoded['hnr'])) $strasseHnr[] = $decoded['hnr'];
+        if (!empty($strasseHnr)) {
+            $parts[] = implode(' ', $strasseHnr);
+        }
+
+        // Ort-Ortsteil
+        $ortOrtsteil = [];
+        if (!empty($decoded['ort'])) $ortOrtsteil[] = $decoded['ort'];
+        if (!empty($decoded['ortsteil'])) $ortOrtsteil[] = $decoded['ortsteil'];
+        if (!empty($ortOrtsteil)) {
+            $parts[] = implode('-', $ortOrtsteil);
+        }
+    }
+
+    $ziel_display = implode(', ', $parts);
+}
 $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'false';
 ?>
 
@@ -76,7 +129,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
             <div class="row h-100">
                 <?php include __DIR__ . '/../../../assets/components/enotf/nav.php'; ?>
                 <div class="col" id="edivi__content">
-                    <div class=" row">
+                    <div class="row">
                         <div class="col">
                             <div class="row shadow edivi__box">
                                 <h5 class="text-light px-2 py-1">Patientendaten</h5>
@@ -123,6 +176,23 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                     </div>
                                 </div>
                             </div>
+                            <div class="row shadow edivi__box edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/rettdaten/1.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
+                                <h5 class="text-light px-2 py-1">Transport von</h5>
+                                <div class="col">
+                                    <div class="row my-2">
+                                        <div class="col">
+                                            <label for="transp_poi_name" class="edivi__description">Von Einrichtung</label>
+                                            <input type="text" name="transp_poi_name" id="transp_poi_name" class="w-100 form-control" value="<?= htmlspecialchars($daten['transp_poi'] ?? '') ?>" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="row my-2">
+                                        <div class="col">
+                                            <label for="transp_display" class="edivi__description">Von Adresse</label>
+                                            <input type="text" name="transp_display" id="transp_display" class="w-100 form-control" value="<?= htmlspecialchars($transp_display) ?>" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="col">
                             <div class="row shadow edivi__box">
@@ -144,8 +214,19 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                     </div>
                                     <div class="row my-2">
                                         <div class="col">
-                                            <label for="eort" class="edivi__description">Einsatzort</label>
-                                            <input type="text" name="eort" id="eort" class="w-100 form-control edivi__input-check" placeholder="Einsatzort" value="<?= $daten['eort'] ?>" required>
+                                            <label for="transportziel" class="edivi__description">Versorgung</label>
+                                            <select name="transportziel" id="transportziel" class="w-100 form-select edivi__input-check" required autocomplete="off">
+                                                <option disabled hidden selected>---</option>
+                                                <option value="1" <?php echo ($daten['transportziel'] == 1 ? 'selected' : '') ?>>ambulante Versorgung vor Ort</option>
+                                                <option value="2" <?php echo ($daten['transportziel'] == 2 ? 'selected' : '') ?>>Transport ohne NA (oder mit TNA)</option>
+                                                <option value="21" <?php echo ($daten['transportziel'] == 21 ? 'selected' : '') ?>>Transport mit NA (bodengebunden)</option>
+                                                <option value="22" <?php echo ($daten['transportziel'] == 22 ? 'selected' : '') ?>>Transport mit NA (RTH)</option>
+                                                <option value="3" <?php echo ($daten['transportziel'] == 3 ? 'selected' : '') ?>>Übergabe anderes Rettungsmittel</option>
+                                                <option value="4" <?php echo ($daten['transportziel'] == 4 ? 'selected' : '') ?>>Fehleinsatz - kein Patient</option>
+                                                <option value="5" <?php echo ($daten['transportziel'] == 5 ? 'selected' : '') ?>>Patient nicht transportfähig</option>
+                                                <option value="6" <?php echo ($daten['transportziel'] == 6 ? 'selected' : '') ?>>primäre Todesfeststellung (ohne CPR)</option>
+                                                <option value="99" <?php echo ($daten['transportziel'] == 99 ? 'selected' : '') ?>>Sonstige</option>
+                                            </select>
                                         </div>
                                         <div class="col">
                                             <label for="eart" class="edivi__description">Einsatzart</label>
@@ -158,6 +239,23 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                                 <option value="3" <?php echo ($daten['eart'] == 3 ? 'selected' : '') ?>>Intensivtransport</option>
                                                 <option value="4" <?php echo ($daten['eart'] == 4 ? 'selected' : '') ?>>Krankentransport</option>
                                             </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row shadow edivi__box edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/rettdaten/2.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
+                                <h5 class="text-light px-2 py-1">Transportziel</h5>
+                                <div class="col">
+                                    <div class="row my-2">
+                                        <div class="col">
+                                            <label for="ziel_poi_name" class="edivi__description">Ziel Einrichtung</label>
+                                            <input type="text" name="ziel_poi_name" id="ziel_poi_name" class="w-100 form-control" value="<?= htmlspecialchars($daten['ziel_poi'] ?? '') ?>" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="row my-2">
+                                        <div class="col">
+                                            <label for="ziel_poi_adresse" class="edivi__description">Ziel Adresse</label>
+                                            <input type="text" name="ziel_poi_adresse" id="ziel_poi_adresse" class="w-100 form-control" value="<?= htmlspecialchars($ziel_display) ?>" readonly>
                                         </div>
                                     </div>
                                 </div>
