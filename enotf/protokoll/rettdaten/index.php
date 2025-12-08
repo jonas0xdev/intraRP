@@ -265,7 +265,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                     <div class="row">
                         <div class="col">
                             <div class="row shadow edivi__box">
-                                <h5 class="text-light px-2 py-1 edivi__group-check">Zeiten</h5>
+                                <h5 class="text-light px-2 py-1">Zeiten</h5>
                                 <div class="col">
                                     <div class="row my-2">
                                         <div class="col">
