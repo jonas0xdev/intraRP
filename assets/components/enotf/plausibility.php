@@ -15,6 +15,18 @@ if (empty($daten['eort'])) {
     echo '[1] Rett. Daten: Einsatzort ist nicht gesetzt.<br>';
 }
 
+if (empty($daten['salarm'])) {
+    echo '[1] Rett. Daten: Alarmzeit ist nicht gesetzt.<br>';
+}
+
+if (!empty($daten['s4']) && empty($daten['spat'])) {
+    echo '[1] Rett. Daten: Patientenankunft ist nicht gesetzt.<br>';
+}
+
+if (empty($daten['sende'])) {
+    echo '[1] Rett. Daten: Endzeit ist nicht gesetzt.<br>';
+}
+
 if (empty($daten['awfrei_1']) && empty($daten['awfrei_2']) && empty($daten['awfrei_3'])) {
     echo '[2] Erstbefund: Atemwege ist nicht gesetzt.<br>';
 }

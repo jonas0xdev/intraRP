@@ -40,6 +40,198 @@ function logSync($message, $level = 'INFO')
     }
 }
 
+/**
+ * Verarbeitet abgeschlossene Einsätze (Dispatch Logs)
+ * Wird nur zur Validierung verwendet - keine Speicherung nötig
+ */
+function handleDispatchLogs($data, $pdo)
+{
+    try {
+        logSync('Dispatch-Log-Sync empfangen (keine Speicherung erforderlich)', 'INFO');
+
+        $missions = $data['missions'] ?? [];
+
+        if (empty($missions)) {
+            logSync('Keine Einsätze in der Anfrage', 'INFO');
+            echo json_encode(['success' => true, 'message' => 'Keine Einsätze zu verarbeiten', 'processed' => 0]);
+            return;
+        }
+
+        logSync('Es wurden ' . count($missions) . ' abgeschlossene Einsätze empfangen (werden nicht gespeichert)', 'INFO');
+
+        echo json_encode([
+            'success' => true,
+            'type' => 'dispatch_logs',
+            'processed' => count($missions),
+            'total_received' => count($missions),
+            'message' => 'Dispatch-Logs empfangen, Statusmeldungen werden über Status-Sync verarbeitet'
+        ]);
+    } catch (Exception $e) {
+        logSync('Fehler bei Dispatch-Log-Verarbeitung: ' . $e->getMessage(), 'ERROR');
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'error' => 'Dispatch-Log-Verarbeitungsfehler',
+            'message' => $e->getMessage()
+        ]);
+    }
+}
+
+/**
+ * Verarbeitet Echtzeit-Statusmeldungen und aktualisiert intra_edivi
+ */
+function handleStatusUpdates($data, $pdo)
+{
+    try {
+        logSync('Starte Status-Update-Verarbeitung', 'INFO');
+
+        $statuses = $data['statuses'] ?? [];
+
+        if (empty($statuses)) {
+            logSync('Keine Statusmeldungen in der Anfrage', 'INFO');
+            echo json_encode(['success' => true, 'message' => 'Keine Statusmeldungen zu verarbeiten', 'processed' => 0]);
+            return;
+        }
+
+        logSync('Es wurden ' . count($statuses) . ' Statusmeldungen empfangen', 'INFO');
+
+        $updated = 0;
+        $notFound = 0;
+        $successfulIds = [];
+
+        foreach ($statuses as $status) {
+            $statusValue = $status['status'];
+            $missionNumber = $status['mission_number'];
+            $sender = $status['sender'];
+            $statusId = $status['id'];
+
+            // Konvertiere Zeit-Format
+            $statusTime = DateTime::createFromFormat('d.m.Y H:i', $status['timestamp']);
+            if (!$statusTime) {
+                logSync("Ungültiges Zeitformat für Status-Update $statusId", 'WARNING');
+                continue;
+            }
+
+            logSync("Verarbeite Status '$statusValue' (Typ: " . gettype($statusValue) . ") für Einsatz $missionNumber von Fahrzeug $sender (ID: $statusId)", 'DEBUG');
+
+            // Mapping: Status -> Spaltenname
+            $statusColumn = 's' . $statusValue; // s1, s2, s3, s4, s7, s8
+
+            // Schritt 1: Finde das Fahrzeug-Kennzeichen (identifier) in intra_fahrzeuge
+            $findVehicleStmt = $pdo->prepare("
+                SELECT identifier, rd_type 
+                FROM intra_fahrzeuge 
+                WHERE name = :name 
+                LIMIT 1
+            ");
+            $findVehicleStmt->execute([':name' => $sender]);
+            $vehicleRow = $findVehicleStmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$vehicleRow) {
+                $notFound++;
+                logSync("Fahrzeug $sender nicht in intra_fahrzeuge gefunden - wird beim nächsten Mal erneut versucht (ID: $statusId)", 'WARNING');
+                continue;
+            }
+
+            $vehicleIdentifier = $vehicleRow['identifier'];
+            $rdType = intval($vehicleRow['rd_type'] ?? 0);
+
+            logSync("Fahrzeug $sender hat Kennzeichen: $vehicleIdentifier (rd_type=$rdType)", 'DEBUG');
+
+            // Schritt 2: Suche in intra_edivi nach dem Einsatz, wo dieses Kennzeichen in fzg_na oder fzg_transp steht
+            $findEnrStmt = $pdo->prepare("
+                SELECT enr 
+                FROM intra_edivi 
+                WHERE (enr = :mission OR enr LIKE :mission_pattern)
+                  AND (fzg_na = :vehicle_id1 OR fzg_transp = :vehicle_id2)
+                LIMIT 1
+            ");
+            $findEnrStmt->execute([
+                ':mission' => $missionNumber,
+                ':mission_pattern' => $missionNumber . '_%',
+                ':vehicle_id1' => $vehicleIdentifier,
+                ':vehicle_id2' => $vehicleIdentifier
+            ]);
+            $enrRow = $findEnrStmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$enrRow) {
+                $notFound++;
+                logSync("Einsatz mit Kennzeichen $vehicleIdentifier für Mission $missionNumber nicht in intra_edivi gefunden - wird beim nächsten Mal erneut versucht (ID: $statusId)", 'WARNING');
+                continue;
+            }
+
+            $enr = $enrRow['enr'];
+            $formattedTime = $statusTime->format('Y-m-d H:i:s');
+
+            logSync("Fahrzeug $sender (Kennzeichen: $vehicleIdentifier) ist Einsatz $enr zugeordnet", 'DEBUG');
+
+            // Schritt 3: Update NUR diesen spezifischen Einsatz
+            // Status C ist die Alarmierung - wird in salarm gespeichert
+            // Status 1, 2, 3, 4, 7, 8 werden in s1-s8 gespeichert
+
+            if (strtoupper(trim($statusValue)) === 'C') {
+                // Status C (Alarmierung) -> nur salarm
+                logSync("Versuche salarm zu setzen für ENR $enr mit Zeit $formattedTime", 'DEBUG');
+                $sql = "UPDATE intra_edivi SET salarm = :salarm WHERE enr = :enr";
+                $updateStmt = $pdo->prepare($sql);
+                $updateStmt->execute([
+                    ':salarm' => $formattedTime,
+                    ':enr' => $enr
+                ]);
+                $rowCount = $updateStmt->rowCount();
+                logSync("Status C (Alarmierung) für Fahrzeug $sender in Einsatz $enr: salarm = $formattedTime, rowCount = $rowCount (ID: $statusId)", 'INFO');
+            } else {
+                // Status 1-8 -> in s1-s8 Spalten
+                $allowedColumns = ['s1', 's2', 's3', 's4', 's7', 's8'];
+                if (!in_array($statusColumn, $allowedColumns)) {
+                    logSync("Ungültige Status-Spalte: $statusColumn (ID: $statusId)", 'WARNING');
+                    continue;
+                }
+
+                $sql = "UPDATE intra_edivi SET $statusColumn = :status_time WHERE enr = :enr";
+                $updateStmt = $pdo->prepare($sql);
+                $updateStmt->execute([
+                    ':status_time' => $formattedTime,
+                    ':enr' => $enr
+                ]);
+                logSync("Status $statusValue für Fahrzeug $sender in Einsatz $enr: $statusColumn = $formattedTime (ID: $statusId)", 'INFO');
+            }
+
+            $updatedThisStatus = false;
+            if ($updateStmt->rowCount() > 0) {
+                $updated++;
+                $updatedThisStatus = true;
+            } else {
+                logSync("Status $statusValue für Einsatz $enr war bereits gesetzt oder Spalte existiert nicht", 'WARNING');
+            }
+
+            // Nur zu successfulIds hinzufügen, wenn mindestens ein Update erfolgreich war
+            if ($updatedThisStatus) {
+                $successfulIds[] = $statusId;
+            }
+        }
+
+        logSync("Status-Update-Verarbeitung abgeschlossen: $updated intra_edivi-Updates, $notFound nicht gefunden von " . count($statuses) . " Statusmeldungen", 'INFO');
+
+        echo json_encode([
+            'success' => true,
+            'type' => 'status_updates',
+            'updated_edivi' => $updated,
+            'not_found' => $notFound,
+            'successful_ids' => $successfulIds,
+            'total_received' => count($statuses)
+        ]);
+    } catch (Exception $e) {
+        logSync('Fehler bei Status-Update-Verarbeitung: ' . $e->getMessage(), 'ERROR');
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'error' => 'Status-Update-Verarbeitungsfehler',
+            'message' => $e->getMessage()
+        ]);
+    }
+}
+
 try {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         http_response_code(405);
@@ -68,6 +260,24 @@ try {
         exit;
     }
 
+    // Routing basierend auf type
+    if (isset($receivedData['type'])) {
+        switch ($receivedData['type']) {
+            case 'dispatch_logs':
+                handleDispatchLogs($receivedData, $pdo);
+                exit;
+            case 'status_updates':
+                handleStatusUpdates($receivedData, $pdo);
+                exit;
+            default:
+                logSync('Unbekannter Sync-Typ: ' . $receivedData['type'], 'WARNING');
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Unbekannter Sync-Typ']);
+                exit;
+        }
+    }
+
+    // Normale Fahrzeug-Synchronisierung
     $vehicles = $receivedData['data']['vehicles'] ?? [];
 
     if (empty($vehicles)) {

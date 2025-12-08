@@ -7,6 +7,7 @@
         $('input[name="ebesonderheiten[]"]').addClass('medikament-field-ignore');
         $('input[name="rettungstechnik[]"]').addClass('medikament-field-ignore');
         $('input[type="checkbox"][data-quickfill], input[type="checkbox"][data-quickclear]').addClass('medikament-field-ignore');
+        $('input[id$="_datum"]').addClass('medikament-field-ignore');
 
         const inputElements = $(
             "form[name='form'] input:not([readonly]):not([disabled]):not(.medikament-field-ignore):not([data-ignore-autosave]), " +

@@ -22,6 +22,12 @@ if (isset($_GET['enr'])) {
 
     $daten = $stmt->fetch(PDO::FETCH_ASSOC);
 
+    // Zeiten abrufen
+    $queryZeiten = "SELECT salarm, s1, s2, s3, s4, spat, s7, s8, sende FROM intra_edivi WHERE enr = :enr";
+    $stmtZeiten = $pdo->prepare($queryZeiten);
+    $stmtZeiten->execute(['enr' => $_GET['enr']]);
+    $zeiten = $stmtZeiten->fetch(PDO::FETCH_ASSOC);
+
     if (count($daten) == 0) {
         header("Location: " . BASE_PATH . "enotf/");
         exit();
@@ -158,6 +164,69 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             </div>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="row shadow edivi__box">
+                                <h5 class="text-light px-2 py-1 edivi__group-check">Zeiten</h5>
+                                <div class="col">
+                                    <div class="row my-2">
+                                        <div class="col">
+                                            <label for="salarm" class="edivi__description">
+                                                Alarm
+                                                <i id="icon-salarm" class="fa-solid fa-circle-exclamation" style="color:#d91425; <?= !empty($zeiten['salarm']) ? 'display:none;' : '' ?>"></i>
+                                            </label>
+                                            <input type="time" name="salarm" id="salarm" class="w-100 form-control fs-3 text-center edivi__input-check" value="<?= !empty($zeiten['salarm']) ? date('H:i', strtotime($zeiten['salarm'])) : '' ?>" required>
+                                            <input type="date" name="salarm_datum" id="salarm_datum" class="w-100 form-control mt-1 text-center edivi__input-check" value="<?= !empty($zeiten['salarm']) ? date('Y-m-d', strtotime($zeiten['salarm'])) : '' ?>" required>
+                                        </div>
+                                        <div class="col">
+                                            <label for="s3" class="edivi__description">aus (3)</label>
+                                            <input type="time" name="s3" id="s3" class="w-100 form-control fs-3 text-center edivi__input-check" value="<?= !empty($zeiten['s3']) ? date('H:i', strtotime($zeiten['s3'])) : '' ?>" required>
+                                            <input type="date" name="s3_datum" id="s3_datum" class="w-100 form-control mt-1 text-center edivi__input-check" value="<?= !empty($zeiten['s3']) ? date('Y-m-d', strtotime($zeiten['s3'])) : '' ?>" required>
+                                        </div>
+                                        <div class="col">
+                                            <label for="s4" class="edivi__description">E.-an (4)</label>
+                                            <input type="time" name="s4" id="s4" class="w-100 form-control fs-3 text-center edivi__input-check" value="<?= !empty($zeiten['s4']) ? date('H:i', strtotime($zeiten['s4'])) : '' ?>" required>
+                                            <input type="date" name="s4_datum" id="s4_datum" class="w-100 form-control mt-1 text-center edivi__input-check" value="<?= !empty($zeiten['s4']) ? date('Y-m-d', strtotime($zeiten['s4'])) : '' ?>" required>
+                                        </div>
+                                        <div class="col">
+                                            <label for="spat" class="edivi__description">Pat.-an</label>
+                                            <input type="time" name="spat" id="spat" class="w-100 form-control fs-3 text-center edivi__input-check" value="<?= !empty($zeiten['spat']) ? date('H:i', strtotime($zeiten['spat'])) : '' ?>" required>
+                                            <input type="date" name="spat_datum" id="spat_datum" class="w-100 form-control mt-1 text-center edivi__input-check" value="<?= !empty($zeiten['spat']) ? date('Y-m-d', strtotime($zeiten['spat'])) : '' ?>" required>
+                                        </div>
+                                        <div class="col">
+                                            <label for="s7" class="edivi__description">E.-ab (7)</label>
+                                            <input type="time" name="s7" id="s7" class="w-100 form-control fs-3 text-center edivi__input-check" value="<?= !empty($zeiten['s7']) ? date('H:i', strtotime($zeiten['s7'])) : '' ?>" required>
+                                            <input type="date" name="s7_datum" id="s7_datum" class="w-100 form-control mt-1 text-center edivi__input-check" value="<?= !empty($zeiten['s7']) ? date('Y-m-d', strtotime($zeiten['s7'])) : '' ?>" required>
+                                        </div>
+                                        <div class="col">
+                                            <label for="s8" class="edivi__description">KH an (8)</label>
+                                            <input type="time" name="s1" id="s8" class="w-100 form-control fs-3 text-center edivi__input-check" value="<?= !empty($zeiten['s8']) ? date('H:i', strtotime($zeiten['s8'])) : '' ?>" required>
+                                            <input type="date" name="s8_datum" id="s8_datum" class="w-100 form-control mt-1 text-center edivi__input-check" value="<?= !empty($zeiten['s8']) ? date('Y-m-d', strtotime($zeiten['s8'])) : '' ?>" required>
+                                        </div>
+                                        <div class="col">
+                                            <label for="s1" class="edivi__description">frei (1)</label>
+                                            <input type="time" name="s1" id="s1" class="w-100 form-control fs-3 text-center edivi__input-check" value="<?= !empty($zeiten['s1']) ? date('H:i', strtotime($zeiten['s1'])) : '' ?>" required>
+                                            <input type="date" name="s1_datum" id="s1_datum" class="w-100 form-control mt-1 text-center edivi__input-check" value="<?= !empty($zeiten['s1']) ? date('Y-m-d', strtotime($zeiten['s1'])) : '' ?>" required>
+                                        </div>
+                                        <div class="col">
+                                            <label for="s2" class="edivi__description">Wache (2)</label>
+                                            <input type="time" name="s2" id="s2" class="w-100 form-control fs-3 text-center edivi__input-check" value="<?= !empty($zeiten['s2']) ? date('H:i', strtotime($zeiten['s2'])) : '' ?>" required>
+                                            <input type="date" name="s2_datum" id="s2_datum" class="w-100 form-control mt-1 text-center edivi__input-check" value="<?= !empty($zeiten['s2']) ? date('Y-m-d', strtotime($zeiten['s2'])) : '' ?>" required>
+                                        </div>
+                                        <div class="col">
+                                            <label for="sende" class="edivi__description">
+                                                Ende
+                                                <i id="icon-sende" class="fa-solid fa-circle-exclamation" style="color:#d91425; <?= !empty($zeiten['sende']) ? 'display:none;' : '' ?>"></i>
+                                            </label>
+                                            <input type="time" name="sende" id="sende" class="w-100 form-control fs-3 text-center edivi__input-check" value="<?= !empty($zeiten['sende']) ? date('H:i', strtotime($zeiten['sende'])) : '' ?>" required>
+                                            <input type="date" name="sende_datum" id="sende_datum" class="w-100 form-control mt-1 text-center edivi__input-check" value="<?= !empty($zeiten['sende']) ? date('Y-m-d', strtotime($zeiten['sende'])) : '' ?>" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
     </form>
@@ -217,6 +286,61 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
         document.getElementById('patgebdat').addEventListener('input', updateAge);
     </script>
     <script src="<?= BASE_PATH ?>assets/js/pin_activity.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const zeitFelder = ['salarm', 's1', 's2', 's3', 's4', 'spat', 's7', 's8', 'sende'];
+            const enr = <?= json_encode($enr) ?>;
+            const heute = new Date().toISOString().split('T')[0];
+
+            function updateIcon(feld, hatWert) {
+                const icon = document.getElementById('icon-' + feld);
+                if (icon) {
+                    icon.style.display = hatWert ? 'none' : 'inline';
+                }
+            }
+
+            zeitFelder.forEach(feld => {
+                const zeitInput = document.getElementById(feld);
+                const datumInput = document.getElementById(feld + '_datum');
+
+                if (zeitInput && datumInput) {
+                    zeitInput.addEventListener('input', function() {
+                        if (zeitInput.value && !datumInput.value) {
+                            datumInput.value = heute;
+                        }
+                    });
+
+                    [zeitInput, datumInput].forEach(input => {
+                        input.addEventListener('change', function() {
+                            if (zeitInput.value && datumInput.value) {
+                                const combined = datumInput.value + ' ' + zeitInput.value + ':00';
+
+                                $.ajax({
+                                    url: '<?= BASE_PATH ?>assets/functions/save_fields.php',
+                                    type: 'POST',
+                                    data: {
+                                        enr: enr,
+                                        field: feld,
+                                        value: combined
+                                    },
+                                    success: function(response) {
+                                        showToast("✔️ '" + feld + "' gespeichert.", 'success');
+                                        window.__dynamicDaten[feld] = combined;
+                                        updateIcon(feld, true);
+                                    },
+                                    error: function() {
+                                        showToast("❌ Fehler beim Speichern von '" + feld + "'", 'error');
+                                    }
+                                });
+                            } else {
+                                updateIcon(feld, false);
+                            }
+                        });
+                    });
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>
