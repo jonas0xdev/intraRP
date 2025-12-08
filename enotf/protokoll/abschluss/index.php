@@ -72,6 +72,31 @@ $ebesonderheitenLabels = [
     14 => 'verzögerte Patientenübergabe',
     99 => 'Sonstige'
 ];
+$uebergabeortLabels = [
+    1 => 'Schockraum',
+    2 => 'Praxis',
+    3 => 'ZNA / INA',
+    4 => 'Stroke Unit',
+    5 => 'Intensivstation',
+    6 => 'OP direkt',
+    7 => 'Hausarzt',
+    8 => 'Fachambulanz',
+    9 => 'Chest Pain Unit',
+    10 => 'Herzkatheterlabor',
+    11 => 'Allgemeinstation',
+    13 => 'Einsatzstelle',
+    99 => 'Sonstige'
+];
+$uebergabeanLabels = [
+    1 => 'Arzt',
+    2 => 'Pflegepersonal',
+    3 => 'Rettungssanitäter',
+    4 => 'Rettungsassistent',
+    5 => 'Notfallsanitäter',
+    6 => 'Polizei',
+    7 => 'Angehörige',
+    99 => 'Sonstige'
+];
 
 $ebesonderheitenDisplayTexts = [];
 if (!empty($ebesonderheiten) && is_array($ebesonderheiten)) {
@@ -117,6 +142,9 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                     <span>Nachforderung NA</span>
                                 </a>
                             <?php endif; ?>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/3.php?enr=<?= $daten['enr'] ?>">
+                                <span>Übergabe</span>
+                            </a>
                         </div>
                         <div class="col edivi__overview-container">
                             <div class="row">
@@ -238,55 +266,6 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                                     <input type="text" name="fzg_sonst" id="fzg_sonst" class="w-100 form-control" placeholder="Weitere Rettungsmittel" value="<?= $daten['fzg_sonst'] ?>">
                                                 </div>
                                             </div>
-                                            <div class="row my-2">
-                                                <div class="col">
-                                                    <label for="transportziel" class="edivi__description">Transportart oder Transportziel</label>
-                                                    <?php
-                                                    if ($daten['transportziel'] === NULL) {
-                                                    ?>
-                                                        <select name="transportziel" id="transportziel" class="w-100 form-select edivi__input-check" required>
-                                                            <option disabled hidden selected value="NULL">---</option>
-                                                            <?php
-                                                            require __DIR__ . '/../../../assets/config/database.php';
-                                                            require_once __DIR__ . '/../../../assets/functions/enotf/pin_middleware.php';
-
-                                                            $stmt = $pdo->prepare("SELECT * FROM intra_edivi_ziele WHERE active = 1 ORDER BY priority ASC");
-                                                            $stmt->execute();
-                                                            $ziele = $stmt->fetchAll();
-                                                            foreach ($ziele as $row) {
-                                                                echo '<option value="' . $row['identifier'] . '">' . $row['name'] . '</option>';
-                                                            }
-                                                            ?>
-                                                        </select>
-                                                    <?php
-                                                    } else {
-                                                    ?>
-                                                        <select name="transportziel" id="transportziel" class="w-100 mb-2 form-select edivi__input-check" autocomplete="off">
-                                                            <option disabled hidden selected value="NULL">---</option>
-                                                            <?php
-                                                            require __DIR__ . '/../../../assets/config/database.php';
-                                                            require_once __DIR__ . '/../../../assets/functions/enotf/pin_middleware.php';
-
-                                                            $stmt = $pdo->prepare("SELECT * FROM intra_edivi_ziele ORDER BY priority ASC");
-                                                            $stmt->execute();
-                                                            $fahrzeuge = $stmt->fetchAll();
-
-                                                            foreach ($fahrzeuge as $row) {
-                                                                if ($row['identifier'] == $daten['transportziel'] && $row['active'] == 1) {
-                                                                    echo '<option value="' . $row['identifier'] . '" selected>' . $row['name'] . '</option>';
-                                                                } elseif ($row['identifier'] == $daten['transportziel'] && $row['active'] == 0) {
-                                                                    echo '<option value="' . $row['identifier'] . '" selected disabled>' . $row['name'] . '</option>';
-                                                                } else {
-                                                                    echo '<option value="' . $row['identifier'] . '">' . $row['name'] . '</option>';
-                                                                }
-                                                            }
-                                                            ?>
-                                                        </select>
-                                                    <?php
-                                                    }
-                                                    ?>
-                                                </div>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -321,7 +300,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row edivi__box">
+                                    <div class="row edivi__box edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/abschluss/3.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
                                         <h5 class="text-light px-2 py-1">Übergabe</h5>
                                         <div class="col">
                                             <?php
@@ -330,39 +309,14 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                             ?>
                                             <div class="row my-2">
                                                 <div class="col">
-                                                    <label for="uebergabe_ort" class="edivi__description">Übergabe-Ort</label>
-                                                    <select name="uebergabe_ort" id="uebergabe_ort" class="w-100 form-select" autocomplete="off">
-                                                        <option disabled hidden selected>---</option>
-                                                        <option value="1" <?php echo ($daten['uebergabe_ort'] == 1 ? 'selected' : '') ?>>Schockraum</option>
-                                                        <option value="2" <?php echo ($daten['uebergabe_ort'] == 2 ? 'selected' : '') ?>>Praxis</option>
-                                                        <option value="3" <?php echo ($daten['uebergabe_ort'] == 3 ? 'selected' : '') ?>>ZNA / INA</option>
-                                                        <option value="4" <?php echo ($daten['uebergabe_ort'] == 4 ? 'selected' : '') ?>>Stroke Unit</option>
-                                                        <option value="5" <?php echo ($daten['uebergabe_ort'] == 5 ? 'selected' : '') ?>>Intensivstation</option>
-                                                        <option value="6" <?php echo ($daten['uebergabe_ort'] == 6 ? 'selected' : '') ?>>OP direkt</option>
-                                                        <option value="7" <?php echo ($daten['uebergabe_ort'] == 7 ? 'selected' : '') ?>>Hausarzt</option>
-                                                        <option value="8" <?php echo ($daten['uebergabe_ort'] == 8 ? 'selected' : '') ?>>Fachambulanz</option>
-                                                        <option value="9" <?php echo ($daten['uebergabe_ort'] == 9 ? 'selected' : '') ?>>Chest Pain Unit</option>
-                                                        <option value="10" <?php echo ($daten['uebergabe_ort'] == 10 ? 'selected' : '') ?>>HKL</option>
-                                                        <option value="11" <?php echo ($daten['uebergabe_ort'] == 11 ? 'selected' : '') ?>>Allgemeinstation</option>
-                                                        <option value="12" <?php echo ($daten['uebergabe_ort'] == 12 ? 'selected' : '') ?>>Einsatzstelle</option>
-                                                        <option value="99" <?php echo ($daten['uebergabe_ort'] == 99 ? 'selected' : '') ?>>Sonstige</option>
-                                                    </select>
+                                                    <label for="uebergabeort" class="edivi__description">Übergabe-Ort</label>
+                                                    <input type="text" name="uebergabeort" id="uebergabeort" class="w-100 form-control" value="<?= $uebergabeortLabels[$daten['uebergabe_ort'] ?? ''] ?? '' ?>" readonly>
                                                 </div>
                                             </div>
                                             <div class="row my-2">
                                                 <div class="col">
-                                                    <label for="uebergabe_an" class="edivi__description">Übergabe an</label>
-                                                    <select name="uebergabe_an" id="uebergabe_an" class="w-100 form-select" autocomplete="off">
-                                                        <option disabled hidden selected>---</option>
-                                                        <option value="1" <?php echo ($daten['uebergabe_an'] == 1 ? 'selected' : '') ?>>Arzt</option>
-                                                        <option value="2" <?php echo ($daten['uebergabe_an'] == 2 ? 'selected' : '') ?>>Pflegepersonal</option>
-                                                        <option value="3" <?php echo ($daten['uebergabe_an'] == 3 ? 'selected' : '') ?>>Rettungssanitäter</option>
-                                                        <option value="4" <?php echo ($daten['uebergabe_an'] == 4 ? 'selected' : '') ?>>Rettungsassistent</option>
-                                                        <option value="5" <?php echo ($daten['uebergabe_an'] == 5 ? 'selected' : '') ?>>Notfallsanitäter</option>
-                                                        <option value="6" <?php echo ($daten['uebergabe_an'] == 6 ? 'selected' : '') ?>>Polizei</option>
-                                                        <option value="7" <?php echo ($daten['uebergabe_an'] == 7 ? 'selected' : '') ?>>Angehörige</option>
-                                                        <option value="99" <?php echo ($daten['uebergabe_an'] == 99 ? 'selected' : '') ?>>Sonstige</option>
-                                                    </select>
+                                                    <label for="uebergabean" class="edivi__description">Übergabe an</label>
+                                                    <input type="text" name="uebergabean" id="uebergabean" class="w-100 form-control" value="<?= $uebergabeanLabels[$daten['uebergabe_an'] ?? ''] ?? '' ?>" readonly>
                                                 </div>
                                             </div>
                                         </div>

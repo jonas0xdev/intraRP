@@ -11,8 +11,8 @@ if (empty($daten['ezeit'])) {
     echo '[1] Rett. Daten: Einsatzzeit ist nicht gesetzt.<br>';
 }
 
-if (empty($daten['eort'])) {
-    echo '[1] Rett. Daten: Einsatzort ist nicht gesetzt.<br>';
+if ($daten['transportziel'] === NULL) {
+    echo '[1] Rett. Daten: Versorgung ist nicht gesetzt.<br>';
 }
 
 if (empty($daten['salarm'])) {
@@ -109,10 +109,6 @@ if (empty($daten['ebesonderheiten'])) {
 
 if ($daten['prot_by'] != 1 && $daten['na_nachf'] === NULL) {
     echo '[7] Abschluss: NA-Nachforderung ist nicht gesetzt.<br>';
-}
-
-if ($daten['transportziel'] === NULL) {
-    echo '[7] Abschluss: Transportziel ist nicht gesetzt.<br>';
 }
 
 if (empty($daten['pfname'])) {

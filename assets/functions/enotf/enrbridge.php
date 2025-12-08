@@ -95,12 +95,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         ? $_SESSION['beifahrername'] . " (" . $_SESSION['beifahrerquali'] . ")"
         : null;
 
-    $columns = ['enr', 'prot_by', $fzgField];
-    $placeholders = [':enr', ':prot_by', ':fahrzeug'];
+    // Aktuelles Datum und Zeit für edatum und ezeit
+    $currentDate = date('Y-m-d');
+    $currentTime = date('H:i');
+
+    $columns = ['enr', 'prot_by', $fzgField, 'edatum', 'ezeit'];
+    $placeholders = [':enr', ':prot_by', ':fahrzeug', ':edatum', ':ezeit'];
     $params = [
         ':enr' => $enr,
         ':prot_by' => $prot_by,
-        ':fahrzeug' => $fahrzeugId
+        ':fahrzeug' => $fahrzeugId,
+        ':edatum' => $currentDate,
+        ':ezeit' => $currentTime
     ];
 
     if ($beifahrer !== null) {

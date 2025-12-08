@@ -65,6 +65,76 @@ date_default_timezone_set('Europe/Berlin');
 $currentTime = date('H:i');
 $currentDate = date('d.m.Y');
 
+// Transport von - Adresse aus JSON dekodieren im Format: Objekt, Straße HNR, Ort-Ortsteil
+$transp_von_display = '';
+if (!empty($daten['transp_poi']) || !empty($daten['transp_adresse'])) {
+    $parts = [];
+
+    // POI/Objekt
+    if (!empty($daten['transp_poi'])) {
+        $parts[] = $daten['transp_poi'];
+    }
+
+    // Adressteile aus JSON
+    if (!empty($daten['transp_adresse'])) {
+        $decoded = json_decode($daten['transp_adresse'], true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            // Straße + HNR zusammen
+            $strasseHnr = [];
+            if (!empty($decoded['strasse'])) $strasseHnr[] = $decoded['strasse'];
+            if (!empty($decoded['hnr'])) $strasseHnr[] = $decoded['hnr'];
+            if (!empty($strasseHnr)) {
+                $parts[] = implode(' ', $strasseHnr);
+            }
+
+            // Ort-Ortsteil
+            $ortOrtsteil = [];
+            if (!empty($decoded['ort'])) $ortOrtsteil[] = $decoded['ort'];
+            if (!empty($decoded['ortsteil'])) $ortOrtsteil[] = $decoded['ortsteil'];
+            if (!empty($ortOrtsteil)) {
+                $parts[] = implode('-', $ortOrtsteil);
+            }
+        }
+    }
+
+    $transp_von_display = implode(', ', $parts);
+}
+
+// Transport nach - Adresse aus JSON dekodieren im Format: Objekt, Straße HNR, Ort-Ortsteil
+$transp_nach_display = '';
+if (!empty($daten['ziel_poi']) || !empty($daten['ziel_adresse'])) {
+    $parts = [];
+
+    // POI/Objekt
+    if (!empty($daten['ziel_poi'])) {
+        $parts[] = $daten['ziel_poi'];
+    }
+
+    // Adressteile aus JSON
+    if (!empty($daten['ziel_adresse'])) {
+        $decoded = json_decode($daten['ziel_adresse'], true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            // Straße + HNR zusammen
+            $strasseHnr = [];
+            if (!empty($decoded['strasse'])) $strasseHnr[] = $decoded['strasse'];
+            if (!empty($decoded['hnr'])) $strasseHnr[] = $decoded['hnr'];
+            if (!empty($strasseHnr)) {
+                $parts[] = implode(' ', $strasseHnr);
+            }
+
+            // Ort-Ortsteil
+            $ortOrtsteil = [];
+            if (!empty($decoded['ort'])) $ortOrtsteil[] = $decoded['ort'];
+            if (!empty($decoded['ortsteil'])) $ortOrtsteil[] = $decoded['ortsteil'];
+            if (!empty($ortOrtsteil)) {
+                $parts[] = implode('-', $ortOrtsteil);
+            }
+        }
+    }
+
+    $transp_nach_display = implode(', ', $parts);
+}
+
 $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'false';
 ?>
 
@@ -148,10 +218,10 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                         <table class="w-100">
                                             <tbody>
                                                 <tr>
-                                                    <td>von: <?= $daten['eort'] ?? '<span style="color:lightgray">Kein Ort hinterlegt</span>' ?></td>
+                                                    <td>von: <?= !empty($transp_von_display) ? htmlspecialchars($transp_von_display) : '<span style="color:lightgray">Kein Ort hinterlegt</span>' ?></td>
                                                 </tr>
                                                 <tr>
-                                                    <td>nach: <?= !empty($ziel) ? $ziel : '<span style="color:lightgray">Kein Zielort hinterlegt</span>' ?></td>
+                                                    <td>nach: <?= !empty($transp_nach_display) ? htmlspecialchars($transp_nach_display) : (!empty($ziel) ? $ziel : '<span style="color:lightgray">Kein Zielort hinterlegt</span>') ?></td>
                                                 </tr>
                                             </tbody>
                                         </table>

@@ -1090,6 +1090,14 @@ body[data-page=freigabe] {
   align-items: start;
 }
 
+input.edivi__target {
+  background-color: #333333;
+  font-size: 1.2rem;
+  padding: 0.2rem;
+  border: 1px solid #595959;
+  border-radius: 0;
+}
+
 .edivi__freigabe-buttons {
   position: absolute;
   bottom: 0;
