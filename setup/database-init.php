@@ -326,6 +326,9 @@ $migrationFiles = [
     // 02.12.2025
     ['file' => 'create_intra_edivi_medikamente_02122025.php', 'type' => 'create'],
     ['file' => 'insert_intra_edivi_medikamente_02122025.php', 'type' => 'insert'],
+
+    // 08.12.2025
+    ['file' => 'alter_intra_edivi_08122025.php', 'type' => 'alter'],
 ];
 
 $executed = 0;

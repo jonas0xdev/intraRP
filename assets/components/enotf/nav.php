@@ -1,6 +1,6 @@
 <div class="col-1 d-flex flex-column" id="edivi__nidanav">
     <a href="<?= BASE_PATH ?>enotf/protokoll/rettdaten/index.php?enr=<?= $daten['enr'] ?>" data-page="stammdaten"
-        data-requires="patsex,eort,ezeit,eort">
+        data-requires="patsex,eort,ezeit,eort, salarm, sende">
         <span>Rett. Daten</span>
     </a>
     <a href="<?= BASE_PATH ?>enotf/protokoll/erstbefund/index.php?enr=<?= $daten['enr'] ?>" data-page="erstbefund"
