@@ -11,7 +11,11 @@ try {
     ADD COLUMN `spat` VARCHAR(255) DEFAULT NULL AFTER `s4`,
     ADD COLUMN `s7` VARCHAR(255) DEFAULT NULL AFTER `spat`,
     ADD COLUMN `s8` VARCHAR(255) DEFAULT NULL AFTER `s7`,
-    ADD COLUMN `sende` VARCHAR(255) DEFAULT NULL AFTER `s8`;
+    ADD COLUMN `sende` VARCHAR(255) DEFAULT NULL AFTER `s8`,
+    ADD COLUMN `transp_poi` VARCHAR(255) DEFAULT NULL AFTER `eort`,
+    ADD COLUMN `transp_adresse` TEXT DEFAULT NULL AFTER `transp_poi`,
+    ADD COLUMN `ziel_poi` VARCHAR(255) DEFAULT NULL AFTER `transp_adresse`,
+    ADD COLUMN `ziel_adresse` TEXT DEFAULT NULL AFTER `ziel_poi`;
 SQL;
 
     $pdo->exec($sql);
