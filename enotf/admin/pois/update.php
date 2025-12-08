@@ -25,6 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $hnr = $_POST['hnr'] ?? null;
     $ort = $_POST['ort'] ?? '';
     $ortsteil = $_POST['ortsteil'] ?? null;
+    $typ = $_POST['typ'] ?? null;
     $active = isset($_POST['active']) ? 1 : 0;
 
     if (empty($name) || empty($ort) || empty($id)) {
@@ -34,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     try {
-        $stmt = $pdo->prepare("UPDATE intra_edivi_pois SET name = :name, strasse = :strasse, hnr = :hnr, ort = :ort, ortsteil = :ortsteil, active = :active WHERE id = :id");
+        $stmt = $pdo->prepare("UPDATE intra_edivi_pois SET name = :name, strasse = :strasse, hnr = :hnr, ort = :ort, ortsteil = :ortsteil, typ = :typ, active = :active WHERE id = :id");
         $stmt->execute([
             'id' => $id,
             'name' => $name,
@@ -42,6 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'hnr' => $hnr,
             'ort' => $ort,
             'ortsteil' => $ortsteil,
+            'typ' => $typ,
             'active' => $active
         ]);
 

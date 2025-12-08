@@ -11,6 +11,25 @@ $currentTime = date('H:i');
 $currentDate = date('d.m.Y');
 
 $ziel = $_GET['klinik'] ?? NULL;
+$zielName = '';
+
+// Zielname für die Anzeige ermitteln
+if ($ziel) {
+    if (strpos($ziel, 'poi_') === 0) {
+        // POI-basiertes Krankenhaus
+        $poiId = substr($ziel, 4);
+        $stmt = $pdo->prepare("SELECT name FROM intra_edivi_pois WHERE id = :id");
+        $stmt->execute(['id' => $poiId]);
+        $poiData = $stmt->fetch(PDO::FETCH_ASSOC);
+        $zielName = $poiData ? $poiData['name'] : 'Unbekanntes Krankenhaus';
+    } else {
+        // Klassisches Ziel
+        $stmt = $pdo->prepare("SELECT name FROM intra_edivi_ziele WHERE identifier = :identifier");
+        $stmt->execute(['identifier' => $ziel]);
+        $zielData = $stmt->fetch(PDO::FETCH_ASSOC);
+        $zielName = $zielData ? $zielData['name'] : 'Unbekanntes Ziel';
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -69,8 +88,10 @@ $ziel = $_GET['klinik'] ?? NULL;
                                 $row['geschlecht'] = '<i class="fa-solid fa-venus"></i>';
                             } elseif ($row['geschlecht'] == 0) {
                                 $row['geschlecht'] = '<i class="fa-solid fa-mars"></i>';
+                            } elseif ($row['geschlecht'] == 2) {
+                                $row['geschlecht'] = '<i class="fa-solid fa-mars-and-venus"></i>';
                             } else {
-                                $row['geschlecht'] =   '<i class="fa-solid fa-mars-and-venus"></i>';
+                                $row['geschlecht'] = '<i class="fa-solid fa-question" style="opacity:0.5"></i>';
                             }
 
                             if (empty($row['alter'])) {
@@ -113,7 +134,12 @@ $ziel = $_GET['klinik'] ?? NULL;
     </div>
     <footer class="text-center py-2 text-white" style="background-color: #131313;">
         <div class="row">
-            <div class="col ps-4 d-flex align-items-center" style="font-size:2rem">eNOTFArrivalboard</div>
+            <div class="col ps-4 d-flex align-items-center" style="font-size:2rem">
+                eNOTFArrivalboard
+                <?php if ($ziel && !empty($zielName)): ?>
+                    <span style="font-size:0.9rem; opacity:0.6; margin-left:1rem;"><?= htmlspecialchars($zielName) ?></span>
+                <?php endif; ?>
+            </div>
             <div class="col">
                 <img src="https://dev.intrarp.de/assets/img/defaultLogo.webp" alt="intraRP Logo" height="48px" width="auto">
             </div>

@@ -24,6 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $hnr = $_POST['hnr'] ?? null;
     $ort = $_POST['ort'] ?? '';
     $ortsteil = $_POST['ortsteil'] ?? null;
+    $typ = $_POST['typ'] ?? null;
     $active = isset($_POST['active']) ? 1 : 0;
 
     if (empty($name) || empty($ort)) {
@@ -33,13 +34,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     try {
-        $stmt = $pdo->prepare("INSERT INTO intra_edivi_pois (name, strasse, hnr, ort, ortsteil, active) VALUES (:name, :strasse, :hnr, :ort, :ortsteil, :active)");
+        $stmt = $pdo->prepare("INSERT INTO intra_edivi_pois (name, strasse, hnr, ort, ortsteil, typ, active) VALUES (:name, :strasse, :hnr, :ort, :ortsteil, :typ, :active)");
         $stmt->execute([
             'name' => $name,
             'strasse' => $strasse,
             'hnr' => $hnr,
             'ort' => $ort,
             'ortsteil' => $ortsteil,
+            'typ' => $typ,
             'active' => $active
         ]);
 

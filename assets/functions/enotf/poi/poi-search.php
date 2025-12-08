@@ -16,11 +16,11 @@ $searchTerm = $_GET['search'] ?? '';
 try {
     if (empty($searchTerm)) {
         // Alle aktiven POIs zurückgeben
-        $stmt = $pdo->prepare("SELECT id, name, strasse, hnr, ort, ortsteil FROM intra_edivi_pois WHERE active = 1 ORDER BY name ASC LIMIT 50");
+        $stmt = $pdo->prepare("SELECT id, name, strasse, hnr, ort, ortsteil, typ FROM intra_edivi_pois WHERE active = 1 ORDER BY name ASC LIMIT 50");
         $stmt->execute();
     } else {
         // Suche nach Name oder Ort
-        $stmt = $pdo->prepare("SELECT id, name, strasse, hnr, ort, ortsteil FROM intra_edivi_pois WHERE active = 1 AND (name LIKE :search OR ort LIKE :search) ORDER BY name ASC LIMIT 50");
+        $stmt = $pdo->prepare("SELECT id, name, strasse, hnr, ort, ortsteil, typ FROM intra_edivi_pois WHERE active = 1 AND (name LIKE :search OR ort LIKE :search) ORDER BY name ASC LIMIT 50");
         $stmt->execute(['search' => '%' . $searchTerm . '%']);
     }
 

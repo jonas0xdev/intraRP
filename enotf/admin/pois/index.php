@@ -58,6 +58,7 @@ if (!Permissions::check(['admin', 'vehicles.view'])) {
                                     <th scope="col">HNR</th>
                                     <th scope="col">Ort</th>
                                     <th scope="col">Ortsteil</th>
+                                    <th scope="col">Typ</th>
                                     <th scope="col">Aktiv?</th>
                                     <th scope="col"></th>
                                 </tr>
@@ -84,9 +85,10 @@ if (!Permissions::check(['admin', 'vehicles.view'])) {
                                     $strasse = htmlspecialchars($row['strasse'] ?? '-');
                                     $hnr = htmlspecialchars($row['hnr'] ?? '-');
                                     $ortsteil = htmlspecialchars($row['ortsteil'] ?? '-');
+                                    $typ = htmlspecialchars($row['typ'] ?? '-');
 
                                     $actions = (Permissions::check(['admin', 'vehicles.manage']))
-                                        ? "<a title='POI bearbeiten' href='#' class='btn btn-sm btn-primary edit-btn' data-bs-toggle='modal' data-bs-target='#editPoiModal' data-id='{$row['id']}' data-name='" . htmlspecialchars($row['name']) . "' data-strasse='" . htmlspecialchars($row['strasse'] ?? '') . "' data-hnr='" . htmlspecialchars($row['hnr'] ?? '') . "' data-ort='" . htmlspecialchars($row['ort']) . "' data-ortsteil='" . htmlspecialchars($row['ortsteil'] ?? '') . "' data-active='{$row['active']}'><i class='fa-solid fa-pen'></i></a>"
+                                        ? "<a title='POI bearbeiten' href='#' class='btn btn-sm btn-primary edit-btn' data-bs-toggle='modal' data-bs-target='#editPoiModal' data-id='{$row['id']}' data-name='" . htmlspecialchars($row['name']) . "' data-strasse='" . htmlspecialchars($row['strasse'] ?? '') . "' data-hnr='" . htmlspecialchars($row['hnr'] ?? '') . "' data-ort='" . htmlspecialchars($row['ort']) . "' data-ortsteil='" . htmlspecialchars($row['ortsteil'] ?? '') . "' data-typ='" . htmlspecialchars($row['typ'] ?? '') . "' data-active='{$row['active']}'><i class='fa-solid fa-pen'></i></a>"
                                         : "";
 
                                     echo "<tr>";
@@ -95,6 +97,7 @@ if (!Permissions::check(['admin', 'vehicles.view'])) {
                                     echo "<td " . $dimmed . ">" . $hnr . "</td>";
                                     echo "<td " . $dimmed . ">" . htmlspecialchars($row['ort']) . "</td>";
                                     echo "<td " . $dimmed . ">" . $ortsteil . "</td>";
+                                    echo "<td " . $dimmed . ">" . $typ . "</td>";
                                     echo "<td>" . $poiActive . "</td>";
                                     echo "<td>{$actions}</td>";
                                     echo "</tr>";
@@ -115,7 +118,7 @@ if (!Permissions::check(['admin', 'vehicles.view'])) {
                 <div class="modal-content">
                     <form action="<?= BASE_PATH ?>enotf/admin/pois/update.php" method="POST">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="editPoiModalLabel">POI bearbeiten</h5>
+                            <h5 class="modal-title" id="editPoiModalLabel">POI bearbeiten <small class="text-muted" id="poi-id-display"></small></h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
                         </div>
                         <div class="modal-body">
@@ -144,6 +147,21 @@ if (!Permissions::check(['admin', 'vehicles.view'])) {
                             <div class="mb-3">
                                 <label for="poi-ortsteil" class="form-label">Ortsteil</label>
                                 <input type="text" class="form-control" name="ortsteil" id="poi-ortsteil">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="poi-typ" class="form-label">Typ</label>
+                                <select class="form-select" name="typ" id="poi-typ">
+                                    <option value="">--- Kein Typ ---</option>
+                                    <option value="Polizeiwache">Polizeiwache</option>
+                                    <option value="Rettungswache">Rettungswache</option>
+                                    <option value="Feuerwache">Feuerwache</option>
+                                    <option value="Krankenhaus">Krankenhaus</option>
+                                    <option value="Klinik">Ärztliche Praxis / Klinik</option>
+                                    <option value="Behörde">Behörde</option>
+                                    <option value="Schule">Schule / Bildungseinrichtung</option>
+                                    <option value="Sonstiges">Sonstiges</option>
+                                </select>
                             </div>
 
                             <div class="form-check">
@@ -207,6 +225,21 @@ if (!Permissions::check(['admin', 'vehicles.view'])) {
                             <div class="mb-3">
                                 <label for="new-poi-ortsteil" class="form-label">Ortsteil</label>
                                 <input type="text" class="form-control" name="ortsteil" id="new-poi-ortsteil">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="new-poi-typ" class="form-label">Typ</label>
+                                <select class="form-select" name="typ" id="new-poi-typ">
+                                    <option value="">--- Kein Typ ---</option>
+                                    <option value="Polizeiwache">Polizeiwache</option>
+                                    <option value="Rettungswache">Rettungswache</option>
+                                    <option value="Feuerwache">Feuerwache</option>
+                                    <option value="Krankenhaus">Krankenhaus</option>
+                                    <option value="Klinik">Ärztliche Praxis / Klinik</option>
+                                    <option value="Behörde">Behörde</option>
+                                    <option value="Schule">Schule / Bildungseinrichtung</option>
+                                    <option value="Sonstiges">Sonstiges</option>
+                                </select>
                             </div>
 
                             <div class="form-check">
@@ -276,11 +309,13 @@ if (!Permissions::check(['admin', 'vehicles.view'])) {
                 button.addEventListener('click', function() {
                     const id = this.dataset.id;
                     document.getElementById('poi-id').value = id;
+                    document.getElementById('poi-id-display').textContent = '(ID: ' + id + ')';
                     document.getElementById('poi-name').value = this.dataset.name;
                     document.getElementById('poi-strasse').value = this.dataset.strasse || '';
                     document.getElementById('poi-hnr').value = this.dataset.hnr || '';
                     document.getElementById('poi-ort').value = this.dataset.ort;
                     document.getElementById('poi-ortsteil').value = this.dataset.ortsteil || '';
+                    document.getElementById('poi-typ').value = this.dataset.typ || '';
                     document.getElementById('poi-active').checked = this.dataset.active == 1;
 
                     document.getElementById('poi-delete-id').value = id;

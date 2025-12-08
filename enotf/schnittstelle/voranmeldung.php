@@ -103,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['new']) && $_POST['new
             'arrival' => $arrivalDateTime,
             'fahrzeug' => $_POST['fahrzeug'],
             'diagnose' => $_POST['diagnose'],
-            'geschlecht' => $daten['patsex'] ?? NULL,
+            'geschlecht' => $daten['patsex'] ?? 9,
             'alter' => $_POST['_AGE_'] ?? NULL,
             'text' => $_POST['text'] ?? NULL,
             'kreislauf' => $_POST['kreislauf'],
@@ -307,11 +307,14 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                                 <?php
                                                 require __DIR__ . '/../../assets/config/database.php';
 
-                                                $stmt = $pdo->prepare("SELECT * FROM intra_edivi_ziele WHERE transport = 1 AND active = 1 ORDER BY priority ASC");
+                                                // Nur POIs mit Typ "Krankenhaus" laden
+                                                $stmt = $pdo->prepare("SELECT id, name FROM intra_edivi_pois WHERE typ = 'Krankenhaus' AND active = 1 ORDER BY name ASC");
                                                 $stmt->execute();
-                                                $ziele = $stmt->fetchAll();
-                                                foreach ($ziele as $row) {
-                                                    echo '<option value="' . $row['identifier'] . '">' . $row['name'] . '</option>';
+                                                $krankenhaeuserPois = $stmt->fetchAll();
+
+                                                // POI-Krankenhäuser mit poi_ prefix ausgeben
+                                                foreach ($krankenhaeuserPois as $row) {
+                                                    echo '<option value="poi_' . $row['id'] . '">' . htmlspecialchars($row['name']) . '</option>';
                                                 }
                                                 ?>
                                             </select>
@@ -379,6 +382,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                                 <option value="0" <?php echo ($daten['patsex'] == 0 ? 'selected' : '') ?>>männlich</option>
                                                 <option value="1" <?php echo ($daten['patsex'] == 1 ? 'selected' : '') ?>>weiblich</option>
                                                 <option value="2" <?php echo ($daten['patsex'] == 2 ? 'selected' : '') ?>>divers</option>
+                                                <option value="9" <?php echo (!isset($daten['patsex']) || $daten['patsex'] === null || $daten['patsex'] === '' ? 'selected' : '') ?>>unbekannt</option>
                                             </select>
                                         </div>
                                         <div class="col">
