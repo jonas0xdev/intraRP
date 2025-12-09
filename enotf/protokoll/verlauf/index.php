@@ -12,9 +12,15 @@ require_once __DIR__ . '/../../../assets/functions/enotf/user_auth_middleware.ph
 require_once __DIR__ . '/../../../assets/functions/enotf/pin_middleware.php';
 
 use App\Auth\Permissions;
+use App\Helpers\BloodSugarHelper;
 
 $daten = array();
 $vitals = array();
+
+// Initialize BloodSugarHelper
+$bzHelper = new BloodSugarHelper($pdo);
+$bzUnit = $bzHelper->getCurrentUnit();
+$bzDecimalPlaces = $bzHelper->getDecimalPlaces();
 
 if (isset($_GET['enr'])) {
     // Basis-Daten laden
@@ -120,7 +126,8 @@ foreach ($vitals as $vital) {
     $chartAtemfreq[] = $vital['atemfreq'] ? floatval(str_replace(',', '.', $vital['atemfreq'])) : null;
     $chartTemp[] = $vital['temp'] ? floatval(str_replace(',', '.', $vital['temp'])) : null;
     $chartEtco2[] = $vital['etco2'] ? floatval(str_replace(',', '.', $vital['etco2'])) : null;
-    $chartBz[] = $vital['bz'] ? floatval(str_replace(',', '.', $vital['bz'])) : null;
+    // Blutzucker: Werte sind in mg/dl gespeichert, konvertiere zur Anzeige-Einheit
+    $chartBz[] = $vital['bz'] ? $bzHelper->toDisplayUnit($vital['bz']) : null;
 }
 
 // GEÄNDERT: Anzahl der verfügbaren Einzelwerte ermitteln
@@ -355,7 +362,7 @@ $totalVitals = $stmtCount->fetch(PDO::FETCH_ASSOC)['count'];
             bz: {
                 axis: 'y1',
                 color: 'rgb(83, 102, 255)',
-                label: 'Blutzucker (mg/dl)',
+                label: 'Blutzucker (<?= $bzUnit ?>)',
                 category: 'Hohe Werte'
             },
             etco2: {
@@ -413,18 +420,35 @@ $totalVitals = $stmtCount->fetch(PDO::FETCH_ASSOC)['count'];
 
         function calculateRightAxisMax() {
             const bzValues = numericData.bz.filter(v => v !== null && v !== undefined);
-            if (bzValues.length === 0) return 300;
+            const bzUnit = <?= json_encode($bzUnit) ?>;
+
+            if (bzValues.length === 0) {
+                return bzUnit === 'mmol/l' ? 16.65 : 300;
+            }
 
             const maxBZ = Math.max(...bzValues);
-            if (maxBZ > 300) {
-                console.log(`Blutzucker-Maximum: ${maxBZ} mg/dl - Skala wird auf 600 erweitert`);
-                return 600;
+            if (bzUnit === 'mmol/l') {
+                // mmol/l Bereich: Standard 16.65 (entspricht 300 mg/dl), erweitert auf 33.3 (entspricht 600 mg/dl)
+                if (maxBZ > 16.65) {
+                    console.log(`Blutzucker-Maximum: ${maxBZ} mmol/l - Skala wird auf 33.3 erweitert`);
+                    return 33.3;
+                }
+                return 16.65;
+            } else {
+                // mg/dl Bereich
+                if (maxBZ > 300) {
+                    console.log(`Blutzucker-Maximum: ${maxBZ} mg/dl - Skala wird auf 600 erweitert`);
+                    return 600;
+                }
+                return 300;
             }
-            return 300;
         }
 
         const rightAxisMax = calculateRightAxisMax();
-        const rightAxisStep = rightAxisMax === 600 ? 60 : 30;
+        const bzUnit = <?= json_encode($bzUnit) ?>;
+        const rightAxisStep = bzUnit === 'mmol/l' ?
+            (rightAxisMax === 33.3 ? 3.33 : 1.665) :
+            (rightAxisMax === 600 ? 60 : 30);
 
         const customPointStyles = {
             id: 'customPointStyles',
@@ -570,6 +594,8 @@ $totalVitals = $stmtCount->fetch(PDO::FETCH_ASSOC)['count'];
                                         return `${label}: ${value.toFixed(1)}°C`;
                                     } else if (label.includes('mg/dl')) {
                                         return `${label}: ${value.toFixed(0)} mg/dl`;
+                                    } else if (label.includes('mmol/l')) {
+                                        return `${label}: ${value.toFixed(1)} mmol/l`;
                                     } else {
                                         return `${label}: ${value.toFixed(1)}`;
                                     }
@@ -712,7 +738,10 @@ $totalVitals = $stmtCount->fetch(PDO::FETCH_ASSOC)['count'];
             <?php if (!$ist_freigegeben): ?>
                 window.location.href = 'add.php?enr=<?= $enr ?>';
             <?php else: ?>
-                showAlert('Diese Dokumentation ist bereits freigegeben und kann nicht mehr bearbeitet werden.', {type: 'warning', title: 'Nicht bearbeitbar'});
+                showAlert('Diese Dokumentation ist bereits freigegeben und kann nicht mehr bearbeitet werden.', {
+                    type: 'warning',
+                    title: 'Nicht bearbeitbar'
+                });
             <?php endif; ?>
         }
 
