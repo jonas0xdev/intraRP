@@ -28,23 +28,23 @@ $auditLogger = new AuditLogger($pdo);
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
     $updates = [];
     $changes = [];
-    
+
     // Get all configs to check types
     $allConfigs = $configManager->getAllConfig();
     $configTypes = [];
     foreach ($allConfigs as $config) {
         $configTypes[$config['config_key']] = $config['config_type'];
     }
-    
+
     // Process POST data
     foreach ($allConfigs as $config) {
         if (!$config['is_editable']) continue;
-        
+
         $key = $config['config_key'];
-        
+
         // Get the raw database value (string) instead of converted value
         $oldValue = $config['config_value'];
-        
+
         // Handle different input types
         if ($config['config_type'] === 'boolean') {
             // Checkboxes/switches send 'on' when checked, nothing when unchecked
@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
             if (!isset($_POST[$key])) continue;
             $value = $_POST[$key];
         }
-        
+
         // Only update if value changed (strict comparison for type safety)
         if ($oldValue !== $value) {
             $updates[$key] = $value;
@@ -65,10 +65,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
             ];
         }
     }
-    
+
     if (!empty($updates)) {
         $result = $configManager->updateMultiple($updates, $_SESSION['userid']);
-        
+
         if ($result['success']) {
             // Log each change in audit log
             foreach ($changes as $change) {
@@ -80,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
                     1  // Config updates are global
                 );
             }
-            
+
             Flash::set('success', 'Konfiguration erfolgreich aktualisiert.');
         } else {
             Flash::set('error', 'Fehler beim Aktualisieren der Konfiguration.');
@@ -88,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
     } else {
         Flash::set('info', 'Keine Änderungen vorgenommen.');
     }
-    
+
     header("Location: " . $_SERVER['PHP_SELF']);
     exit();
 }
@@ -109,7 +109,7 @@ $configByCategory = $configManager->getConfigByCategory();
             padding: 1rem;
             margin-top: 0.5rem;
         }
-        
+
         .logo-preview,
         .meta-image-preview {
             max-width: 200px;
@@ -118,13 +118,13 @@ $configByCategory = $configManager->getConfigByCategory();
             border-radius: 0;
             padding: 0.5rem;
         }
-        
+
         .color-input-wrapper {
             display: flex;
             align-items: center;
             gap: 10px;
         }
-        
+
         .color-input-wrapper input[type="color"] {
             width: 60px;
             height: 40px;
@@ -132,19 +132,19 @@ $configByCategory = $configManager->getConfigByCategory();
             border-radius: 0.375rem;
             cursor: pointer;
         }
-        
+
         .color-input-wrapper input[type="text"] {
             flex: 1;
         }
-        
+
         .form-label {
             font-weight: 600;
         }
-        
+
         .form-text {
             font-size: 0.875rem;
         }
-        
+
         .config-section {
             margin-bottom: 2rem;
         }
@@ -152,245 +152,243 @@ $configByCategory = $configManager->getConfigByCategory();
 </head>
 
 <body data-bs-theme="dark" data-page="settings">
-<?php include __DIR__ . "/../../assets/components/navbar.php"; ?>
-<div class="container-full position-relative" id="mainpageContainer">
-    <div class="container">
-        <div class="row">
-            <div class="col mb-5">
-                <hr class="text-light my-3">
-                <div class="d-flex justify-content-between align-items-center mb-5">
-                    <h1 class="mb-0">System-Konfiguration</h1>
-                </div>
-                <?php Flash::render(); ?>
+    <?php include __DIR__ . "/../../assets/components/navbar.php"; ?>
+    <div class="container-full position-relative" id="mainpageContainer">
+        <div class="container">
+            <div class="row">
+                <div class="col mb-5">
+                    <hr class="text-light my-3">
+                    <div class="d-flex justify-content-between align-items-center mb-5">
+                        <h1 class="mb-0">System-Konfiguration</h1>
+                    </div>
+                    <?php Flash::render(); ?>
 
-                <form method="post" id="configForm">
-                    <?php foreach ($configByCategory as $category => $configs): ?>
-                        <div class="config-section">
-                            <div class="card mb-4">
-                                <div class="card-header">
-                                    <h5 class="mb-0"><?= htmlspecialchars($configManager->getCategoryDisplayName($category)) ?></h5>
-                                </div>
-                                <div class="card-body">
-                                    <?php foreach ($configs as $config): ?>
-                                        <div class="mb-4">
-                                            <label for="<?= htmlspecialchars($config['config_key']) ?>" class="form-label">
-                                                <?= htmlspecialchars($config['description']) ?>
-                                            </label>
-                                            
-                                            <?php if ($config['config_key'] === 'API_KEY'): ?>
-                                                <div class="input-group">
-                                                    <input 
-                                                        type="text" 
-                                                        class="form-control" 
-                                                        id="<?= htmlspecialchars($config['config_key']) ?>" 
-                                                        value="<?= htmlspecialchars($config['config_value']) ?>"
-                                                        readonly
-                                                    >
-                                                    <button 
-                                                        type="button" 
-                                                        class="btn btn-warning" 
-                                                        onclick="regenerateApiKey(event)"
-                                                        title="API-Schlüssel neu generieren"
-                                                    >
-                                                        <i class="fa-solid fa-rotate"></i> Neu generieren
-                                                    </button>
-                                                </div>
-                                                <div class="form-text">Dieser API-Schlüssel wird für externe Schnittstellen verwendet. Ein neuer Schlüssel macht alte Integrationen ungültig.</div>
-                                                
-                                            <?php elseif ($config['is_editable'] && $config['config_type'] === 'boolean'): ?>
-                                                    <div class="form-check form-switch">
-                                                        <input 
-                                                            class="form-check-input" 
-                                                            type="checkbox" 
-                                                            role="switch"
-                                                            id="<?= htmlspecialchars($config['config_key']) ?>" 
-                                                            name="<?= htmlspecialchars($config['config_key']) ?>"
-                                                            <?= ($config['config_value'] === 'true' || $config['config_value'] === '1') ? 'checked' : '' ?>
-                                                        >
-                                                    </div>
-                                                    
-                                            <?php elseif ($config['is_editable'] && $config['config_type'] === 'color'): ?>
-                                                    <div class="color-input-wrapper">
-                                                        <input 
-                                                            type="color" 
-                                                            id="<?= htmlspecialchars($config['config_key']) ?>_picker" 
+                    <form method="post" id="configForm">
+                        <?php foreach ($configByCategory as $category => $configs): ?>
+                            <div class="config-section">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="mb-0"><?= htmlspecialchars($configManager->getCategoryDisplayName($category)) ?></h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <?php foreach ($configs as $config): ?>
+                                            <div class="mb-4">
+                                                <label for="<?= htmlspecialchars($config['config_key']) ?>" class="form-label">
+                                                    <?= htmlspecialchars($config['description']) ?>
+                                                </label>
+
+                                                <?php if ($config['config_key'] === 'API_KEY'): ?>
+                                                    <div class="input-group">
+                                                        <input
+                                                            type="text"
+                                                            class="form-control"
+                                                            id="<?= htmlspecialchars($config['config_key']) ?>"
                                                             value="<?= htmlspecialchars($config['config_value']) ?>"
-                                                            onchange="updateColorValue('<?= htmlspecialchars($config['config_key']) ?>', this.value)"
-                                                        >
-                                                        <input 
-                                                            type="text" 
-                                                            class="form-control" 
-                                                            id="<?= htmlspecialchars($config['config_key']) ?>" 
+                                                            readonly>
+                                                        <button
+                                                            type="button"
+                                                            class="btn btn-warning"
+                                                            onclick="regenerateApiKey(event)"
+                                                            title="API-Schlüssel neu generieren">
+                                                            <i class="fa-solid fa-rotate"></i> Neu generieren
+                                                        </button>
+                                                    </div>
+                                                    <div class="form-text">Dieser API-Schlüssel wird für externe Schnittstellen verwendet. Ein neuer Schlüssel macht alte Integrationen ungültig.</div>
+
+                                                <?php elseif ($config['is_editable'] && $config['config_type'] === 'boolean'): ?>
+                                                    <div class="form-check form-switch">
+                                                        <input
+                                                            class="form-check-input"
+                                                            type="checkbox"
+                                                            role="switch"
+                                                            id="<?= htmlspecialchars($config['config_key']) ?>"
+                                                            name="<?= htmlspecialchars($config['config_key']) ?>"
+                                                            <?= ($config['config_value'] === 'true' || $config['config_value'] === '1') ? 'checked' : '' ?>>
+                                                    </div>
+
+                                                <?php elseif ($config['is_editable'] && $config['config_type'] === 'color'): ?>
+                                                    <div class="color-input-wrapper">
+                                                        <input
+                                                            type="color"
+                                                            id="<?= htmlspecialchars($config['config_key']) ?>_picker"
+                                                            value="<?= htmlspecialchars($config['config_value']) ?>"
+                                                            onchange="updateColorValue('<?= htmlspecialchars($config['config_key']) ?>', this.value)">
+                                                        <input
+                                                            type="text"
+                                                            class="form-control"
+                                                            id="<?= htmlspecialchars($config['config_key']) ?>"
                                                             name="<?= htmlspecialchars($config['config_key']) ?>"
                                                             value="<?= htmlspecialchars($config['config_value']) ?>"
                                                             pattern="^#[0-9A-Fa-f]{6}$"
                                                             placeholder="#000000"
                                                             title="6-stelliger Hex-Farbcode (z.B. #ff0000)"
-                                                            oninput="updateColorPicker('<?= htmlspecialchars($config['config_key']) ?>', this.value)"
-                                                        >
+                                                            oninput="updateColorPicker('<?= htmlspecialchars($config['config_key']) ?>', this.value)">
                                                     </div>
                                                     <div class="form-text">Wählen Sie eine Farbe aus oder geben Sie einen Hex-Farbcode ein.</div>
-                                                    
-                                            <?php elseif ($config['is_editable'] && $config['config_type'] === 'url' && $config['config_key'] === 'SYSTEM_LOGO'): ?>
-                                                    <input 
-                                                        type="text" 
-                                                        class="form-control mb-2" 
-                                                        id="<?= htmlspecialchars($config['config_key']) ?>" 
+
+                                                <?php elseif ($config['is_editable'] && $config['config_type'] === 'url' && $config['config_key'] === 'SYSTEM_LOGO'): ?>
+                                                    <input
+                                                        type="text"
+                                                        class="form-control mb-2"
+                                                        id="<?= htmlspecialchars($config['config_key']) ?>"
                                                         name="<?= htmlspecialchars($config['config_key']) ?>"
                                                         value="<?= htmlspecialchars($config['config_value']) ?>"
-                                                        oninput="updateLogoPreview(this.value)"
-                                                    >
+                                                        oninput="updateLogoPreview(this.value)">
                                                     <div class="form-text">Relativer Pfad oder vollständige URL zum Logo.</div>
                                                     <div class="config-preview">
                                                         <strong>Vorschau:</strong><br>
-                                                        <img 
-                                                            src="<?= htmlspecialchars($config['config_value']) ?>" 
-                                                            alt="Logo Preview" 
-                                                            class="logo-preview" 
+                                                        <img
+                                                            src="<?= htmlspecialchars($config['config_value']) ?>"
+                                                            alt="Logo Preview"
+                                                            class="logo-preview"
                                                             id="logo_preview"
-                                                            onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22100%22%3E%3Crect fill=%22%23ddd%22 width=%22200%22 height=%22100%22/%3E%3Ctext fill=%22%23999%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22%3EBild nicht gefunden%3C/text%3E%3C/svg%3E'"
-                                                        >
+                                                            onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22100%22%3E%3Crect fill=%22%23ddd%22 width=%22200%22 height=%22100%22/%3E%3Ctext fill=%22%23999%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22%3EBild nicht gefunden%3C/text%3E%3C/svg%3E'">
                                                     </div>
-                                                    
-                                            <?php elseif ($config['is_editable'] && $config['config_type'] === 'url' && $config['config_key'] === 'META_IMAGE_URL'): ?>
-                                                    <input 
-                                                        type="text" 
-                                                        class="form-control mb-2" 
-                                                        id="<?= htmlspecialchars($config['config_key']) ?>" 
+
+                                                <?php elseif ($config['is_editable'] && $config['config_type'] === 'url' && $config['config_key'] === 'META_IMAGE_URL'): ?>
+                                                    <input
+                                                        type="text"
+                                                        class="form-control mb-2"
+                                                        id="<?= htmlspecialchars($config['config_key']) ?>"
                                                         name="<?= htmlspecialchars($config['config_key']) ?>"
                                                         value="<?= htmlspecialchars($config['config_value']) ?>"
-                                                        oninput="updateMetaImagePreview(this.value)"
-                                                    >
+                                                        oninput="updateMetaImagePreview(this.value)">
                                                     <div class="form-text">Vollständige URL zum Bild für Link-Vorschau.</div>
                                                     <div class="config-preview">
                                                         <strong>Vorschau:</strong><br>
-                                                        <img 
-                                                            src="<?= htmlspecialchars($config['config_value']) ?>" 
-                                                            alt="Meta Image Preview" 
-                                                            class="meta-image-preview" 
+                                                        <img
+                                                            src="<?= htmlspecialchars($config['config_value']) ?>"
+                                                            alt="Meta Image Preview"
+                                                            class="meta-image-preview"
                                                             id="meta_image_preview"
-                                                            onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22100%22%3E%3Crect fill=%22%23ddd%22 width=%22200%22 height=%22100%22/%3E%3Ctext fill=%22%23999%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22%3EBild nicht gefunden%3C/text%3E%3C/svg%3E'"
-                                                        >
+                                                            onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22100%22%3E%3Crect fill=%22%23ddd%22 width=%22200%22 height=%22100%22/%3E%3Ctext fill=%22%23999%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22%3EBild nicht gefunden%3C/text%3E%3C/svg%3E'">
                                                     </div>
-                                                    
-                                            <?php elseif ($config['is_editable'] && $config['config_key'] === 'REGISTRATION_MODE'): ?>
-                                                    <select 
-                                                        class="form-select" 
-                                                        id="<?= htmlspecialchars($config['config_key']) ?>" 
-                                                        name="<?= htmlspecialchars($config['config_key']) ?>"
-                                                    >
+
+                                                <?php elseif ($config['is_editable'] && $config['config_key'] === 'REGISTRATION_MODE'): ?>
+                                                    <select
+                                                        class="form-select"
+                                                        id="<?= htmlspecialchars($config['config_key']) ?>"
+                                                        name="<?= htmlspecialchars($config['config_key']) ?>">
                                                         <option value="open" <?= $config['config_value'] === 'open' ? 'selected' : '' ?>>Offen (für jeden möglich)</option>
                                                         <option value="code" <?= $config['config_value'] === 'code' ? 'selected' : '' ?>>Mit Code (nur mit Registrierungscode)</option>
                                                         <option value="closed" <?= $config['config_value'] === 'closed' ? 'selected' : '' ?>>Geschlossen (keine Registrierung)</option>
                                                     </select>
                                                     <div class="form-text"><?= htmlspecialchars($config['description']) ?></div>
-                                                    
-                                            <?php elseif ($config['is_editable']): ?>
-                                                <input 
-                                                    type="text" 
-                                                    class="form-control" 
-                                                    id="<?= htmlspecialchars($config['config_key']) ?>" 
-                                                    name="<?= htmlspecialchars($config['config_key']) ?>"
-                                                    value="<?= htmlspecialchars($config['config_value']) ?>"
-                                                >
-                                            <?php endif; ?>
-                                        </div>
-                                    <?php endforeach; ?>
+
+                                                <?php elseif ($config['is_editable'] && $config['config_key'] === 'ENOTF_BZ_UNIT'): ?>
+                                                    <select
+                                                        class="form-select"
+                                                        id="<?= htmlspecialchars($config['config_key']) ?>"
+                                                        name="<?= htmlspecialchars($config['config_key']) ?>">
+                                                        <option value="mg/dl" <?= $config['config_value'] === 'mg/dl' ? 'selected' : '' ?>>mg/dl (Milligramm pro Deziliter)</option>
+                                                        <option value="mmol/l" <?= $config['config_value'] === 'mmol/l' ? 'selected' : '' ?>>mmol/l (Millimol pro Liter)</option>
+                                                    </select>
+                                                    <div class="form-text">Blutzuckerwerte werden automatisch umgerechnet (1 mg/dl = 0,0555 mmol/l)</div>
+
+                                                <?php elseif ($config['is_editable']): ?>
+                                                    <input
+                                                        type="text"
+                                                        class="form-control"
+                                                        id="<?= htmlspecialchars($config['config_key']) ?>"
+                                                        name="<?= htmlspecialchars($config['config_key']) ?>"
+                                                        value="<?= htmlspecialchars($config['config_value']) ?>">
+                                                <?php endif; ?>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
                                 </div>
                             </div>
+                        <?php endforeach; ?>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-5">
+                            <button type="submit" name="save_config" class="btn btn-primary btn-lg">
+                                <i class="fa-solid fa-save"></i> Änderungen speichern
+                            </button>
                         </div>
-                    <?php endforeach; ?>
-                    
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-5">
-                        <button type="submit" name="save_config" class="btn btn-primary btn-lg">
-                            <i class="fa-solid fa-save"></i> Änderungen speichern
-                        </button>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
-<?php include __DIR__ . "/../../assets/components/footer.php"; ?>
+    <?php include __DIR__ . "/../../assets/components/footer.php"; ?>
 
-<script>
-function updateColorValue(key, value) {
-    document.getElementById(key).value = value;
-    document.getElementById(key + '_picker').value = value;
-}
-
-function updateColorPicker(key, value) {
-    if (/^#[0-9A-Fa-f]{6}$/.test(value)) {
-        document.getElementById(key + '_picker').value = value;
-    }
-}
-
-function updateLogoPreview(value) {
-    document.getElementById('logo_preview').src = value;
-}
-
-function updateMetaImagePreview(value) {
-    document.getElementById('meta_image_preview').src = value;
-}
-
-async function regenerateApiKey(event) {
-    const confirmed = await showConfirm(
-        'Möchten Sie wirklich einen neuen API-Schlüssel generieren?\n\nWARNUNG: Dies macht alle bestehenden Integrationen ungültig, die den aktuellen API-Schlüssel verwenden!',
-        {
-            title: 'API-Schlüssel neu generieren',
-            confirmText: 'Ja, neu generieren',
-            cancelText: 'Abbrechen',
-            danger: true
+    <script>
+        function updateColorValue(key, value) {
+            document.getElementById(key).value = value;
+            document.getElementById(key + '_picker').value = value;
         }
-    );
-    
-    if (!confirmed) {
-        return;
-    }
-    
-    // Show loading indicator
-    const button = event.target.closest('button');
-    const originalContent = button.innerHTML;
-    button.disabled = true;
-    button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Wird generiert...';
-    
-    // Send request to regenerate API key
-    const basePath = <?= json_encode(BASE_PATH) ?>;
-    const url = basePath + (basePath.endsWith('/') ? '' : '/') + 'settings/system/regenerate-api-key.php';
-    fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
+
+        function updateColorPicker(key, value) {
+            if (/^#[0-9A-Fa-f]{6}$/.test(value)) {
+                document.getElementById(key + '_picker').value = value;
+            }
         }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Update the input field with new API key
-            document.getElementById('API_KEY').value = data.api_key;
-            showAlert('API-Schlüssel wurde erfolgreich neu generiert!', {
-                title: 'Erfolg',
-                type: 'success'
-            });
-        } else {
-            showAlert('Fehler beim Generieren des API-Schlüssels: ' + (data.message || 'Unbekannter Fehler'), {
-                title: 'Fehler',
-                type: 'error'
-            });
+
+        function updateLogoPreview(value) {
+            document.getElementById('logo_preview').src = value;
         }
-    })
-    .catch(error => {
-        showAlert('Fehler beim Generieren des API-Schlüssels: ' + error, {
-            title: 'Fehler',
-            type: 'error'
-        });
-    })
-    .finally(() => {
-        button.disabled = false;
-        button.innerHTML = originalContent;
-    });
-}
-</script>
+
+        function updateMetaImagePreview(value) {
+            document.getElementById('meta_image_preview').src = value;
+        }
+
+        async function regenerateApiKey(event) {
+            const confirmed = await showConfirm(
+                'Möchten Sie wirklich einen neuen API-Schlüssel generieren?\n\nWARNUNG: Dies macht alle bestehenden Integrationen ungültig, die den aktuellen API-Schlüssel verwenden!', {
+                    title: 'API-Schlüssel neu generieren',
+                    confirmText: 'Ja, neu generieren',
+                    cancelText: 'Abbrechen',
+                    danger: true
+                }
+            );
+
+            if (!confirmed) {
+                return;
+            }
+
+            // Show loading indicator
+            const button = event.target.closest('button');
+            const originalContent = button.innerHTML;
+            button.disabled = true;
+            button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Wird generiert...';
+
+            // Send request to regenerate API key
+            const basePath = <?= json_encode(BASE_PATH) ?>;
+            const url = basePath + (basePath.endsWith('/') ? '' : '/') + 'settings/system/regenerate-api-key.php';
+            fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update the input field with new API key
+                        document.getElementById('API_KEY').value = data.api_key;
+                        showAlert('API-Schlüssel wurde erfolgreich neu generiert!', {
+                            title: 'Erfolg',
+                            type: 'success'
+                        });
+                    } else {
+                        showAlert('Fehler beim Generieren des API-Schlüssels: ' + (data.message || 'Unbekannter Fehler'), {
+                            title: 'Fehler',
+                            type: 'error'
+                        });
+                    }
+                })
+                .catch(error => {
+                    showAlert('Fehler beim Generieren des API-Schlüssels: ' + error, {
+                        title: 'Fehler',
+                        type: 'error'
+                    });
+                })
+                .finally(() => {
+                    button.disabled = false;
+                    button.innerHTML = originalContent;
+                });
+        }
+    </script>
 </body>
 
 </html>

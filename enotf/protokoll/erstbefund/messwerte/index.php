@@ -12,6 +12,7 @@ require_once __DIR__ . '/../../../../assets/functions/enotf/user_auth_middleware
 require_once __DIR__ . '/../../../../assets/functions/enotf/pin_middleware.php';
 
 use App\Auth\Permissions;
+use App\Helpers\BloodSugarHelper;
 
 $daten = array();
 $message = '';
@@ -44,6 +45,15 @@ if ($ist_freigegeben) {
 }
 
 $enr = $daten['enr'];
+
+// Initialize BloodSugarHelper
+$bzHelper = new BloodSugarHelper($pdo);
+$bzUnit = $bzHelper->getCurrentUnit();
+
+// Konvertiere Blutzucker für Anzeige
+if (!empty($daten['bz'])) {
+    $daten['bz'] = $bzHelper->formatValue($daten['bz'], false);
+}
 
 $prot_url = "https://" . SYSTEM_URL . "/enotf/protokoll/index.php?enr=" . $enr;
 
@@ -122,10 +132,15 @@ $currentDateTime = date('Y-m-d\TH:i');
                             </div>
 
                             <div class="row my-3">
-                                <div class="col edivi__vitalparam-box" data-before="BZ" data-after="mg/dl">
+                                <div class="col edivi__vitalparam-box" data-before="BZ" data-after="<?= htmlspecialchars($bzUnit) ?>">
                                     <input type="text" name="bz" id="bz"
                                         class="form-control edivi__vitalparam keypad-input"
-                                        min="0" max="1000" placeholder="90" value="<?= $daten['bz'] ?>" data-ignore-autosave>
+                                        min="0"
+                                        max="<?= $bzUnit === 'mmol/l' ? 55 : 1000 ?>"
+                                        step="<?= $bzUnit === 'mmol/l' ? '0.1' : '1' ?>"
+                                        placeholder="<?= $bzUnit === 'mmol/l' ? '5.0' : '90' ?>"
+                                        value="<?= $daten['bz'] ?>"
+                                        data-ignore-autosave>
                                 </div>
 
                                 <div class="col edivi__vitalparam-box" data-before="Temperatur" data-after="°C">
@@ -192,7 +207,7 @@ $currentDateTime = date('Y-m-d\TH:i');
             'herzfreq': 'Herzfrequenz (/min)',
             'rrsys': 'RR systolisch (mmHg)',
             'rrdias': 'RR diastolisch (mmHg)',
-            'bz': 'Blutzucker (mg/dl)',
+            'bz': 'Blutzucker (<?= $bzUnit ?>)',
             'temp': 'Temperatur (°C)'
         };
 
@@ -317,10 +332,19 @@ $currentDateTime = date('Y-m-d\TH:i');
                     else isSuccess = true;
                     break;
                 case 'bz':
-                    if (value < 40 || value > 250) isDanger = true;
-                    else if (value < 51 || value > 180) isWarning = true;
-                    else if (value < 81 || value > 150) isSemiWarning = true;
-                    else isSuccess = true;
+                    <?php if ($bzUnit === 'mmol/l'): ?>
+                        // mmol/l Bereiche
+                        if (value < 2.2 || value > 13.9) isDanger = true;
+                        else if ((value >= 2.2 && value < 2.8) || (value >= 10.0 && value < 13.9)) isWarning = true;
+                        else if ((value >= 2.8 && value < 4.5) || (value >= 8.3 && value < 10.0)) isSemiWarning = true;
+                        else isSuccess = true;
+                    <?php else: ?>
+                        // mg/dl Bereiche
+                        if (value < 40 || value > 250) isDanger = true;
+                        else if ((value >= 40 && value < 51) || (value >= 180 && value < 250)) isWarning = true;
+                        else if ((value >= 51 && value < 81) || (value >= 150 && value < 180)) isSemiWarning = true;
+                        else isSuccess = true;
+                    <?php endif; ?>
                     break;
                 case 'temp':
                     if (value <= 34 || value > 40) isDanger = true;
@@ -373,7 +397,10 @@ $currentDateTime = date('Y-m-d\TH:i');
 
         function keypadSetNG() {
             if (!keypadCurrentField) {
-                showAlert('Bitte wählen Sie zuerst ein Eingabefeld aus.', {type: 'warning', title: 'Eingabefeld auswählen'});
+                showAlert('Bitte wählen Sie zuerst ein Eingabefeld aus.', {
+                    type: 'warning',
+                    title: 'Eingabefeld auswählen'
+                });
                 return;
             }
             keypadUpdateFieldValue('ng');
@@ -381,7 +408,10 @@ $currentDateTime = date('Y-m-d\TH:i');
 
         function keypadAddDigit(digit) {
             if (!keypadCurrentField) {
-                showAlert('Bitte wählen Sie zuerst ein Eingabefeld aus.', {type: 'warning', title: 'Eingabefeld auswählen'});
+                showAlert('Bitte wählen Sie zuerst ein Eingabefeld aus.', {
+                    type: 'warning',
+                    title: 'Eingabefeld auswählen'
+                });
                 return;
             }
 
@@ -484,7 +514,7 @@ $currentDateTime = date('Y-m-d\TH:i');
                         isValid = numericValue >= 0 && numericValue <= 300;
                         break;
                     case 'bz':
-                        isValid = numericValue >= 0 && numericValue <= 700;
+                        isValid = numericValue >= 0 && numericValue <= <?= $bzUnit === 'mmol/l' ? 55 : 700 ?>;
                         break;
                     case 'temp':
                         isValid = numericValue >= 10 && numericValue <= 45;
@@ -598,7 +628,10 @@ $currentDateTime = date('Y-m-d\TH:i');
                 }
 
                 await Promise.all(jobs);
-                (window.showToast ? window.showToast('Vitalparameter gespeichert.', 'success') : showAlert('Vitalparameter gespeichert.', {type: 'success', title: 'Erfolgreich gespeichert'}));
+                (window.showToast ? window.showToast('Vitalparameter gespeichert.', 'success') : showAlert('Vitalparameter gespeichert.', {
+                    type: 'success',
+                    title: 'Erfolgreich gespeichert'
+                }));
             }
 
             document.getElementById('saveVitalsBtn')?.addEventListener('click', function() {
@@ -608,7 +641,10 @@ $currentDateTime = date('Y-m-d\TH:i');
 
                 saveAll().catch(err => {
                     console.error(err);
-                    (window.showToast ? window.showToast('Speichern fehlgeschlagen: ' + err.message, 'error') : showAlert('Speichern fehlgeschlagen: ' + err.message, {type: 'error', title: 'Fehler'}));
+                    (window.showToast ? window.showToast('Speichern fehlgeschlagen: ' + err.message, 'error') : showAlert('Speichern fehlgeschlagen: ' + err.message, {
+                        type: 'error',
+                        title: 'Fehler'
+                    }));
                 });
             });
         })();
@@ -867,42 +903,77 @@ $currentDateTime = date('Y-m-d\TH:i');
                         class: 'danger'
                     }
                 ],
-                'bz': [{
+                'bz': <?= $bzUnit === 'mmol/l' ? '[{
+                        min: 13.9,
+                        max: 20,
+                        class: "danger"
+                    },
+                    {
+                        min: 10.0,
+                        max: 13.9,
+                        class: "warning"
+                    },
+                    {
+                        min: 8.3,
+                        max: 10.0,
+                        class: "semiwarning"
+                    },
+                    {
+                        min: 4.5,
+                        max: 8.3,
+                        class: "success"
+                    },
+                    {
+                        min: 2.8,
+                        max: 4.5,
+                        class: "semiwarning"
+                    },
+                    {
+                        min: 2.2,
+                        max: 2.8,
+                        class: "warning"
+                    },
+                    {
+                        min: 0,
+                        max: 2.2,
+                        class: "danger"
+                    }
+                ]' : '[{
                         min: 250,
                         max: 360,
-                        class: 'danger'
+                        class: "danger"
                     },
                     {
                         min: 180,
                         max: 250,
-                        class: 'warning'
+                        class: "warning"
                     },
                     {
                         min: 150,
                         max: 180,
-                        class: 'semiwarning'
+                        class: "semiwarning"
                     },
                     {
                         min: 81,
                         max: 150,
-                        class: 'success'
+                        class: "success"
                     },
                     {
                         min: 51,
                         max: 81,
-                        class: 'semiwarning'
+                        class: "semiwarning"
                     },
                     {
                         min: 40,
                         max: 51,
-                        class: 'warning'
+                        class: "warning"
                     },
                     {
                         min: 0,
                         max: 40,
-                        class: 'danger'
+                        class: "danger"
                     }
-                ],
+                ]' ?>,
                 'temp': [{
                         min: 40,
                         max: 44,
@@ -969,10 +1040,13 @@ $currentDateTime = date('Y-m-d\TH:i');
                     max: 260
                 },
                 'bz': {
-                    label: 'Blutzucker (mg/dl)',
-                    values: [20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 340],
+                    label: 'Blutzucker (<?= $bzUnit ?>)',
+                    values: <?= $bzUnit === 'mmol/l'
+                                ? '[1.1, 2.2, 3.3, 4.4, 5.6, 6.7, 7.8, 8.9, 10.0, 11.1, 12.2, 13.3, 14.4, 15.6, 16.7, 17.8, 18.9]'
+                                : '[20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 340]'
+                            ?>,
                     min: 0,
-                    max: 360
+                    max: <?= $bzUnit === 'mmol/l' ? 20 : 360 ?>
                 },
                 'temp': {
                     label: 'Temperatur (°C)',

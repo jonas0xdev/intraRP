@@ -331,6 +331,9 @@ $migrationFiles = [
     ['file' => 'alter_intra_edivi_08122025.php', 'type' => 'alter'],
     ['file' => 'create_intra_edivi_pois_08122025.php', 'type' => 'create'],
     ['file' => 'alter_intra_edivi_pois_08122025_add_typ.php', 'type' => 'alter'],
+
+    // 09.12.2025
+    ['file' => 'insert_config_09122025_bz_unit.php', 'type' => 'insert'],
 ];
 
 $executed = 0;

@@ -12,6 +12,7 @@ require_once __DIR__ . '/../../assets/functions/enotf/pin_middleware.php';
 
 use App\Auth\Permissions;
 use App\Helpers\Redirects;
+use App\Helpers\BloodSugarHelper;
 
 $daten = array();
 
@@ -32,6 +33,10 @@ if (isset($_GET['enr'])) {
 }
 
 $enr = $daten['enr'];
+
+// Initialize BloodSugarHelper
+$bzHelper = new BloodSugarHelper($pdo);
+$bzUnit = $bzHelper->getCurrentUnit();
 
 $prot_url = "https://" . SYSTEM_URL . "/enotf/protokoll/index.php?enr=" . $enr;
 $defaultUrl = $prot_url;
@@ -776,7 +781,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                 </div>
                             </div>
                             <div class="col">
-                                <div class="print__field-wrapper" data-field-name="mg/dl" data-vp-name="BZ">
+                                <div class="print__field-wrapper" data-field-name="<?= htmlspecialchars($bzUnit) ?>" data-vp-name="BZ">
                                     <input type="text" class="w-100 print__field-vitals" value="<?= $daten['bz'] ?>" readonly>
                                 </div>
                             </div>
@@ -1399,7 +1404,9 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                     $chartData['rrdias'][] = isset($werte['RR diastolisch']) && $werte['RR diastolisch'] !== '' ? floatval(str_replace(',', '.', $werte['RR diastolisch'])) : null;
                     $chartData['atemfreq'][] = isset($werte['Atemfrequenz']) && $werte['Atemfrequenz'] !== '' ? floatval(str_replace(',', '.', $werte['Atemfrequenz'])) : null;
                     $chartData['temp'][] = isset($werte['Temperatur']) && $werte['Temperatur'] !== '' ? floatval(str_replace(',', '.', $werte['Temperatur'])) : null;
-                    $chartData['bz'][] = isset($werte['Blutzucker']) && $werte['Blutzucker'] !== '' ? floatval(str_replace(',', '.', $werte['Blutzucker'])) : null;
+                    // Blutzucker: Werte sind in mg/dl gespeichert, konvertiere zur Anzeige-Einheit
+                    $bzValue = isset($werte['Blutzucker']) && $werte['Blutzucker'] !== '' ? floatval(str_replace(',', '.', $werte['Blutzucker'])) : null;
+                    $chartData['bz'][] = $bzValue !== null ? $bzHelper->toDisplayUnit($bzValue) : null;
                     $chartData['etco2'][] = isset($werte['etCO₂']) && $werte['etCO₂'] !== '' ? floatval(str_replace(',', '.', $werte['etCO₂'])) : null;
                 }
                 ?>
@@ -2382,7 +2389,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                                 'RRdia': 'mmHg',
                                                 'AF': '/min',
                                                 'Temp': '°C',
-                                                'BZ': 'mg/dl',
+                                                'BZ': <?= json_encode($bzUnit) ?>,
                                                 'etCO₂': 'mmHg'
                                             };
 
@@ -2477,21 +2484,21 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                 type: 'linear',
                                 position: 'right',
                                 min: 0,
-                                max: 300,
+                                max: <?= $bzUnit === 'mmol/l' ? 16.65 : 300 ?>,
                                 ticks: {
                                     color: 'black',
                                     font: {
                                         size: 9,
                                         weight: 'bold'
                                     },
-                                    stepSize: 30
+                                    stepSize: <?= $bzUnit === 'mmol/l' ? 1.665 : 30 ?>
                                 },
                                 grid: {
                                     display: false
                                 },
                                 title: {
                                     display: true,
-                                    text: 'RR / HF / BZ (0-300)',
+                                    text: 'RR / HF / BZ (0-<?= $bzUnit === 'mmol/l' ? '16.65' : '300' ?>)',
                                     color: 'black',
                                     font: {
                                         size: 10,
