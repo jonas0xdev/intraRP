@@ -53,7 +53,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
     <title>[#<?= $daten['enr'] ?>] &rsaquo; eNOTF &rsaquo; <?php echo SYSTEM_NAME ?></title>
     <!-- Stylesheets -->
     <link rel="stylesheet" href="<?= BASE_PATH ?>assets/css/print.min.css" />
-    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/_ext/lineawesome/css/line-awesome.min.css" />
+    <link rel="stylesheet" href="<?= BASE_PATH ?>vendor/fortawesome/font-awesome/css/all.min.css">
     <link rel="stylesheet" href="<?= BASE_PATH ?>assets/fonts/mavenpro/css/all.min.css" />
     <!-- Bootstrap -->
     <link rel="stylesheet" href="<?= BASE_PATH ?>vendor/twbs/bootstrap/dist/css/bootstrap.min.css">
@@ -78,7 +78,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
     <meta property="og:description" content="Verwaltungsportal der <?php echo RP_ORGTYPE . " " .  SERVER_CITY ?>" />
 </head>
 
-<body data-bs-theme="dark">
+<body>
     <div id="topbar" class="container-fluid" data-pin-enabled="<?= $pinEnabled ?>">
         <div class="row">
             <div class="col">
@@ -88,13 +88,13 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
             </div>
             <div class="col text-end">
                 <button type="button" class="topbar-btn" onclick="zoomOut()" title="Verkleinern">
-                    <i class="las la-minus"></i>
+                    <i class="fa-solid fa-minus"></i>
                 </button>
                 <button type="button" class="topbar-btn" onclick="zoomIn()" title="Vergrößern">
-                    <i class="las la-plus"></i>
+                    <i class="fa-solid fa-plus"></i>
                 </button>
                 <button type="button" class="topbar-btn" onclick="window.print()" title="Drucken">
-                    <i class="las la-print"></i>
+                    <i class="fa-solid fa-print"></i>
                 </button>
             </div>
         </div>
