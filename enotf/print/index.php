@@ -88,7 +88,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
         <div class="row">
             <div class="col">
                 <a href="<?= Redirects::getRedirectUrl($defaultUrl); ?>" class="topbar-btn">
-                    <i class="fa-solid fa-undo"></i>
+                    <i class="fa-solid fa-arrow-left"></i>
                 </a>
             </div>
             <div class="col text-end">
