@@ -148,7 +148,7 @@ try {
         } catch (PDOException $e) {
             http_response_code(500);
             echo "Fehler beim Ausführen der SQL-Anweisung: " . $e->getMessage();
-            error_log("SQL execute error in save_medikament.php: " . $e->getMessage() . " - ENR: " . $enr . " - JSON length: " . strlen($medikamenteJson));
+            error_log("SQL execute error in save_medikament.php - Code: " . $e->getCode() . " - JSON length: " . strlen($medikamenteJson));
             exit();
         }
 
