@@ -12,8 +12,10 @@ require_once __DIR__ . '/../../../../assets/functions/enotf/pin_middleware.php';
 
 header('Content-Type: text/plain; charset=utf-8');
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
+// Disable display_errors for API responses to prevent warnings from breaking the response
+// Errors are still logged via error_log()
+ini_set('display_errors', 0);
+ini_set('display_startup_errors', 0);
 error_reporting(E_ALL);
 
 if (!isset($_POST['enr']) || !isset($_POST['action'])) {
@@ -38,6 +40,13 @@ try {
             http_response_code(400);
             echo "Ungültiges JSON-Format: " . json_last_error_msg();
             exit();
+        }
+
+        // Sanitize input data - trim whitespace from all fields
+        foreach ($medikamentData as $key => $value) {
+            if (is_string($value)) {
+                $medikamentData[$key] = trim($value);
+            }
         }
 
         $requiredFields = ['wirkstoff', 'zeit', 'applikation', 'dosierung', 'einheit'];
@@ -129,16 +138,27 @@ try {
         $updateStmt = $pdo->prepare($updateQuery);
 
         if (!$updateStmt) {
+            $errorInfo = $pdo->errorInfo();
             http_response_code(500);
-            echo "Fehler beim Vorbereiten der SQL-Anweisung: " . implode(" ", $pdo->errorInfo());
+            echo "Fehler beim Vorbereiten der SQL-Anweisung: " . implode(" ", $errorInfo);
+            error_log("SQL prepare error in save_medikament.php: " . implode(" ", $errorInfo));
             exit();
         }
 
-        $executeResult = $updateStmt->execute(['medis' => $medikamenteJson, 'enr' => $enr]);
+        try {
+            $executeResult = $updateStmt->execute(['medis' => $medikamenteJson, 'enr' => $enr]);
+        } catch (PDOException $e) {
+            http_response_code(500);
+            echo "Fehler beim Ausführen der SQL-Anweisung: " . $e->getMessage();
+            error_log("SQL execute error in save_medikament.php - Code: " . $e->getCode() . " - JSON length: " . strlen($medikamenteJson));
+            exit();
+        }
 
         if (!$executeResult) {
+            $errorInfo = $updateStmt->errorInfo();
             http_response_code(500);
-            echo "Fehler beim Ausführen der SQL-Anweisung: " . implode(" ", $updateStmt->errorInfo());
+            echo "Fehler beim Ausführen der SQL-Anweisung: " . implode(" ", $errorInfo);
+            error_log("SQL execute failed in save_medikament.php: " . implode(" ", $errorInfo));
             exit();
         }
 
@@ -146,7 +166,10 @@ try {
             error_log("Warning: No rows were updated for ENR: " . $enr);
         }
 
+        error_log("Medication save successful for ENR: " . $enr);
+        http_response_code(200); // Explicitly set 200 status
         echo "Medikament erfolgreich hinzugefügt";
+        exit(); // Ensure clean termination
     } elseif ($action === 'delete') {
         if (!isset($_POST['timestamp'])) {
             http_response_code(400);
@@ -202,7 +225,9 @@ try {
             exit();
         }
 
+        http_response_code(200); // Explicitly set 200 status
         echo "Medikament erfolgreich gelöscht";
+        exit(); // Ensure clean termination
     } else {
         http_response_code(400);
         echo "Ungültige Aktion: " . $action;
