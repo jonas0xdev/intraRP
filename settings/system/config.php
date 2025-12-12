@@ -180,17 +180,32 @@ $configByCategory = $configManager->getConfigByCategory();
                                                 <?php if ($config['config_key'] === 'API_KEY'): ?>
                                                     <div class="input-group">
                                                         <input
-                                                            type="text"
+                                                            type="password"
                                                             class="form-control"
                                                             id="<?= htmlspecialchars($config['config_key']) ?>"
                                                             value="<?= htmlspecialchars($config['config_value']) ?>"
                                                             readonly>
                                                         <button
                                                             type="button"
+                                                            class="btn btn-outline-secondary"
+                                                            onclick="toggleApiKeyVisibility()"
+                                                            title="API-Schlüssel anzeigen/verbergen"
+                                                            id="toggleApiKeyBtn">
+                                                            <i class="fa-solid fa-eye"></i>
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            class="btn btn-outline-primary"
+                                                            onclick="copyApiKey()"
+                                                            title="API-Schlüssel kopieren">
+                                                            <i class="fa-solid fa-copy"></i>
+                                                        </button>
+                                                        <button
+                                                            type="button"
                                                             class="btn btn-warning"
                                                             onclick="regenerateApiKey(event)"
                                                             title="API-Schlüssel neu generieren">
-                                                            <i class="fa-solid fa-rotate"></i> Neu generieren
+                                                            <i class="fa-solid fa-rotate"></i>
                                                         </button>
                                                     </div>
                                                     <div class="form-text">Dieser API-Schlüssel wird für externe Schnittstellen verwendet. Ein neuer Schlüssel macht alte Integrationen ungültig.</div>
@@ -332,6 +347,41 @@ $configByCategory = $configManager->getConfigByCategory();
             document.getElementById('meta_image_preview').src = value;
         }
 
+        function toggleApiKeyVisibility() {
+            const input = document.getElementById('API_KEY');
+            const button = document.getElementById('toggleApiKeyBtn');
+            const icon = button.querySelector('i');
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+                button.title = 'API-Schlüssel verbergen';
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+                button.title = 'API-Schlüssel anzeigen';
+            }
+        }
+
+        async function copyApiKey() {
+            const input = document.getElementById('API_KEY');
+            try {
+                await navigator.clipboard.writeText(input.value);
+                showAlert('API-Schlüssel wurde in die Zwischenablage kopiert!', {
+                    title: 'Kopiert',
+                    type: 'success',
+                    timer: 2000
+                });
+            } catch (err) {
+                showAlert('Fehler beim Kopieren: ' + err, {
+                    title: 'Fehler',
+                    type: 'error'
+                });
+            }
+        }
+
         async function regenerateApiKey(event) {
             const confirmed = await showConfirm(
                 'Möchten Sie wirklich einen neuen API-Schlüssel generieren?\n\nWARNUNG: Dies macht alle bestehenden Integrationen ungültig, die den aktuellen API-Schlüssel verwenden!', {
@@ -366,6 +416,15 @@ $configByCategory = $configManager->getConfigByCategory();
                     if (data.success) {
                         // Update the input field with new API key
                         document.getElementById('API_KEY').value = data.api_key;
+                        // Reset to password type after regeneration for security
+                        const input = document.getElementById('API_KEY');
+                        const button = document.getElementById('toggleApiKeyBtn');
+                        const icon = button.querySelector('i');
+                        input.type = 'password';
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                        button.title = 'API-Schlüssel anzeigen';
+
                         showAlert('API-Schlüssel wurde erfolgreich neu generiert!', {
                             title: 'Erfolg',
                             type: 'success'
