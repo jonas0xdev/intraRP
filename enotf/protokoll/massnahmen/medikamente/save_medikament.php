@@ -166,7 +166,10 @@ try {
             error_log("Warning: No rows were updated for ENR: " . $enr);
         }
 
+        error_log("Medication save successful for ENR: " . $enr);
+        http_response_code(200); // Explicitly set 200 status
         echo "Medikament erfolgreich hinzugefügt";
+        exit(); // Ensure clean termination
     } elseif ($action === 'delete') {
         if (!isset($_POST['timestamp'])) {
             http_response_code(400);
@@ -222,7 +225,9 @@ try {
             exit();
         }
 
+        http_response_code(200); // Explicitly set 200 status
         echo "Medikament erfolgreich gelöscht";
+        exit(); // Ensure clean termination
     } else {
         http_response_code(400);
         echo "Ungültige Aktion: " . $action;
