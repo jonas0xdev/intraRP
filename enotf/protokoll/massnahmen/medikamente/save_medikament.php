@@ -40,6 +40,13 @@ try {
             exit();
         }
 
+        // Sanitize input data - trim whitespace from all fields
+        foreach ($medikamentData as $key => $value) {
+            if (is_string($value)) {
+                $medikamentData[$key] = trim($value);
+            }
+        }
+
         $requiredFields = ['wirkstoff', 'zeit', 'applikation', 'dosierung', 'einheit'];
         foreach ($requiredFields as $field) {
             if (!isset($medikamentData[$field]) || empty($medikamentData[$field])) {
@@ -129,16 +136,27 @@ try {
         $updateStmt = $pdo->prepare($updateQuery);
 
         if (!$updateStmt) {
+            $errorInfo = $pdo->errorInfo();
             http_response_code(500);
-            echo "Fehler beim Vorbereiten der SQL-Anweisung: " . implode(" ", $pdo->errorInfo());
+            echo "Fehler beim Vorbereiten der SQL-Anweisung: " . implode(" ", $errorInfo);
+            error_log("SQL prepare error in save_medikament.php: " . implode(" ", $errorInfo));
             exit();
         }
 
-        $executeResult = $updateStmt->execute(['medis' => $medikamenteJson, 'enr' => $enr]);
+        try {
+            $executeResult = $updateStmt->execute(['medis' => $medikamenteJson, 'enr' => $enr]);
+        } catch (PDOException $e) {
+            http_response_code(500);
+            echo "Fehler beim Ausführen der SQL-Anweisung: " . $e->getMessage();
+            error_log("SQL execute error in save_medikament.php: " . $e->getMessage() . " - ENR: " . $enr . " - JSON length: " . strlen($medikamenteJson));
+            exit();
+        }
 
         if (!$executeResult) {
+            $errorInfo = $updateStmt->errorInfo();
             http_response_code(500);
-            echo "Fehler beim Ausführen der SQL-Anweisung: " . implode(" ", $updateStmt->errorInfo());
+            echo "Fehler beim Ausführen der SQL-Anweisung: " . implode(" ", $errorInfo);
+            error_log("SQL execute failed in save_medikament.php: " . implode(" ", $errorInfo));
             exit();
         }
 
