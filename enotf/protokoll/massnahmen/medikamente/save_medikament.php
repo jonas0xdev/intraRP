@@ -12,8 +12,10 @@ require_once __DIR__ . '/../../../../assets/functions/enotf/pin_middleware.php';
 
 header('Content-Type: text/plain; charset=utf-8');
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
+// Disable display_errors for API responses to prevent warnings from breaking the response
+// Errors are still logged via error_log()
+ini_set('display_errors', 0);
+ini_set('display_startup_errors', 0);
 error_reporting(E_ALL);
 
 if (!isset($_POST['enr']) || !isset($_POST['action'])) {
