@@ -63,16 +63,16 @@ class SystemUpdater
      * 
      * @param bool $includePreRelease If true, include pre-release versions in the check
      */
-    public function checkForUpdates(bool $includePreRelease = null): array
+    public function checkForUpdates(?bool $includePreRelease = null): array
     {
         try {
             // If not explicitly set, use current version's pre-release status
             if ($includePreRelease === null) {
                 $includePreRelease = $this->isPreRelease();
             }
-            
+
             $latestRelease = $this->fetchLatestRelease($includePreRelease);
-            
+
             if (!$latestRelease) {
                 return [
                     'available' => false,
@@ -117,7 +117,7 @@ class SystemUpdater
         // Always fetch from list to get both stable and pre-release versions
         return $this->fetchLatestReleaseFromList($includePreRelease);
     }
-    
+
     /**
      * Fetch latest release from releases list
      * 
@@ -127,7 +127,7 @@ class SystemUpdater
     private function fetchLatestReleaseFromList(bool $includePreRelease = false): ?array
     {
         $url = "{$this->githubApiUrl}/releases?per_page=20";
-        
+
         $context = stream_context_create([
             'http' => [
                 'method' => 'GET',
@@ -140,39 +140,39 @@ class SystemUpdater
         ]);
 
         $response = @file_get_contents($url, false, $context);
-        
+
         if ($response === false) {
             return null;
         }
 
         $releases = json_decode($response, true);
-        
+
         if (!is_array($releases) || empty($releases)) {
             return null;
         }
-        
+
         // Filter out draft releases
-        $releases = array_filter($releases, function($release) {
+        $releases = array_filter($releases, function ($release) {
             return !($release['draft'] ?? false);
         });
-        
+
         if (empty($releases)) {
             return null;
         }
-        
+
         // If including pre-releases, return the first (latest) non-draft release
         // This can be either a pre-release or stable version
         if ($includePreRelease) {
             return reset($releases);
         }
-        
+
         // Otherwise, find the latest stable (non-prerelease) release
         foreach ($releases as $release) {
             if (!($release['prerelease'] ?? false)) {
                 return $release;
             }
         }
-        
+
         // If no stable release found, return the first release
         return reset($releases);
     }
@@ -205,19 +205,19 @@ class SystemUpdater
             if (!preg_match('#^https://api\.github\.com/repos/' . preg_quote($this->githubRepo, '#') . '/zipball/#', $downloadUrl)) {
                 throw new Exception('Ungültige Download-URL. Updates können nur von GitHub heruntergeladen werden.');
             }
-            
+
             // Security: Validate version format
             if (!preg_match('/^v?\d+\.\d+(\.\d+)?(\.\d+)?(-[a-zA-Z0-9]+)?$/', $newVersion)) {
                 throw new Exception('Ungültiges Versionsformat.');
             }
-            
+
             $appRoot = dirname(dirname(__DIR__));
-            
+
             // Check write permissions
             if (!is_writable($appRoot)) {
                 throw new Exception('Keine Schreibberechtigung für das Anwendungsverzeichnis. Bitte Dateiberechtigungen prüfen.');
             }
-            
+
             // Create temporary directory for update
             $tempDir = sys_get_temp_dir() . '/intrarp_update_' . bin2hex(random_bytes(8));
             if (!mkdir($tempDir, 0755, true)) {
@@ -239,7 +239,7 @@ class SystemUpdater
             ]);
 
             $updateContent = @file_get_contents($downloadUrl, false, $context);
-            
+
             if ($updateContent === false) {
                 throw new Exception('Fehler beim Herunterladen des Updates. Bitte Internetverbindung prüfen.');
             }
@@ -276,13 +276,13 @@ class SystemUpdater
             if (!is_writable(dirname($backupDir))) {
                 throw new Exception('Keine Schreibberechtigung für Backup-Verzeichnis: ' . dirname($backupDir));
             }
-            
+
             if (!mkdir($backupDir, 0755, true)) {
                 throw new Exception('Konnte Backup-Verzeichnis nicht erstellen: ' . $backupDir);
             }
 
             $filesToBackup = ['.htaccess', 'index.php', 'composer.json', 'composer.lock'];
-            $dirsToBackup = ['src', 'assets', 'settings', 'api'];
+            $dirsToBackup = ['src', 'assets', 'api'];
 
             foreach ($filesToBackup as $file) {
                 if (file_exists($appRoot . '/' . $file)) {
@@ -301,7 +301,7 @@ class SystemUpdater
                     }
                 }
             }
-            
+
             // Backup only version.json from system directory (not the whole system/updates)
             if (!is_dir($backupDir . '/system')) {
                 mkdir($backupDir . '/system', 0755, true);
@@ -344,17 +344,17 @@ class SystemUpdater
                 'created_at' => date('Y-m-d H:i:s'),
                 'version' => $newVersion
             ];
-            
+
             $dir = dirname($this->composerPendingFile);
             if (!is_dir($dir)) {
                 mkdir($dir, 0755, true);
             }
-            
+
             if (!file_put_contents($this->composerPendingFile, json_encode($composerStatus, JSON_PRETTY_PRINT))) {
                 // Non-critical: composer will need manual installation
                 error_log('Warning: Could not write composer pending file: ' . $this->composerPendingFile);
             }
-            
+
             // Step 7: Clear cache
             $cacheFile = sys_get_temp_dir() . '/intrarp_update_cache.json';
             if (file_exists($cacheFile)) {
@@ -380,7 +380,7 @@ class SystemUpdater
                     // Ignore cleanup errors
                 }
             }
-            
+
             return [
                 'success' => false,
                 'error' => true,
@@ -398,13 +398,14 @@ class SystemUpdater
             mkdir($dest, 0755, true);
         }
 
-        $iterator = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($source, \RecursiveDirectoryIterator::SKIP_DOTS),
-            \RecursiveIteratorIterator::SELF_FIRST
-        );
+        $dirIterator = new \RecursiveDirectoryIterator($source, \RecursiveDirectoryIterator::SKIP_DOTS);
+        $iterator = new \RecursiveIteratorIterator($dirIterator, \RecursiveIteratorIterator::SELF_FIRST);
 
         foreach ($iterator as $item) {
-            $destPath = $dest . '/' . $iterator->getSubPathName();
+            $subPath = str_replace($source . DIRECTORY_SEPARATOR, '', $item->getPathname());
+            $subPath = str_replace('\\', '/', $subPath);
+            $destPath = $dest . '/' . $subPath;
+
             if ($item->isDir()) {
                 if (!is_dir($destPath)) {
                     mkdir($destPath, 0755, true);
@@ -426,14 +427,18 @@ class SystemUpdater
      */
     private function copyUpdateFiles(string $source, string $dest, array $excludeDirs, array $excludeFiles, array $preserveDirs = []): void
     {
-        $iterator = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($source, \RecursiveDirectoryIterator::SKIP_DOTS),
-            \RecursiveIteratorIterator::SELF_FIRST
-        );
+        $dirIterator = new \RecursiveDirectoryIterator($source, \RecursiveDirectoryIterator::SKIP_DOTS);
+        $iterator = new \RecursiveIteratorIterator($dirIterator, \RecursiveIteratorIterator::SELF_FIRST);
+
+        $criticalFiles = ['composer.json', 'composer.lock'];
+        $importantFiles = ['index.php', '.htaccess']; // Important but not critical - ensure they're overwritten
+        $failedCriticalFiles = [];
 
         foreach ($iterator as $item) {
-            $subPath = $iterator->getSubPathName();
-            
+            // Get relative path from source directory
+            $subPath = str_replace($source . DIRECTORY_SEPARATOR, '', $item->getPathname());
+            $subPath = str_replace('\\', '/', $subPath); // Normalize to forward slashes
+
             // Check if path contains excluded directory
             $skip = false;
             foreach ($excludeDirs as $excludeDir) {
@@ -442,7 +447,7 @@ class SystemUpdater
                     break;
                 }
             }
-            
+
             // Check if file is excluded
             foreach ($excludeFiles as $excludeFile) {
                 if ($subPath === $excludeFile || basename($subPath) === $excludeFile) {
@@ -456,7 +461,7 @@ class SystemUpdater
             }
 
             $destPath = $dest . '/' . $subPath;
-            
+
             // Check if path is in a preserve directory
             $inPreserveDir = false;
             foreach ($preserveDirs as $preserveDir) {
@@ -465,7 +470,7 @@ class SystemUpdater
                     break;
                 }
             }
-            
+
             if ($item->isDir()) {
                 if (!is_dir($destPath)) {
                     mkdir($destPath, 0755, true);
@@ -475,17 +480,58 @@ class SystemUpdater
                 if (!is_dir($destDir)) {
                     mkdir($destDir, 0755, true);
                 }
-                
+
                 // If in preserve directory, only copy if file doesn't exist
                 if ($inPreserveDir) {
                     if (!file_exists($destPath)) {
-                        copy($item, $destPath);
+                        if (!copy($item, $destPath)) {
+                            throw new Exception('Konnte Datei nicht kopieren: ' . $subPath);
+                        }
                     }
                 } else {
                     // Normal behavior: overwrite existing files
-                    copy($item, $destPath);
+                    // For critical and important files, ensure write permission and verify copy success
+                    $isCriticalFile = in_array(basename($subPath), $criticalFiles) && dirname($subPath) === '.';
+                    $isImportantFile = in_array(basename($subPath), $importantFiles) && dirname($subPath) === '.';
+
+                    if (($isCriticalFile || $isImportantFile) && file_exists($destPath)) {
+                        // Ensure file is writable before attempting to overwrite
+                        if (!is_writable($destPath)) {
+                            @chmod($destPath, 0644);
+                            // If still not writable, log warning but continue
+                            if (!is_writable($destPath)) {
+                                error_log('Warning: Could not make file writable: ' . $destPath);
+                            }
+                        }
+                    }
+
+                    if (!copy($item, $destPath)) {
+                        if ($isCriticalFile) {
+                            $failedCriticalFiles[] = $subPath;
+                        }
+                        throw new Exception('Konnte Datei nicht kopieren: ' . $subPath);
+                    }
+
+                    // Verify critical files were actually updated
+                    if ($isCriticalFile) {
+                        if (filesize($destPath) !== filesize($item)) {
+                            $failedCriticalFiles[] = $subPath . ' (Größe stimmt nicht überein)';
+                        }
+                    }
+
+                    // Log verification for important files (non-critical)
+                    if ($isImportantFile && !$isCriticalFile) {
+                        if (filesize($destPath) !== filesize($item)) {
+                            error_log('Warning: Important file may not have been updated correctly: ' . $subPath);
+                        }
+                    }
                 }
             }
+        }
+
+        // Report any critical file failures
+        if (!empty($failedCriticalFiles)) {
+            throw new Exception('Kritische Dateien konnten nicht aktualisiert werden: ' . implode(', ', $failedCriticalFiles));
         }
     }
 
@@ -524,7 +570,7 @@ class SystemUpdater
     {
         // Check if composer is available
         $composerPath = $this->findComposerExecutable();
-        
+
         if (!$composerPath) {
             return [
                 'executed' => false,
@@ -533,7 +579,7 @@ class SystemUpdater
                 'message' => 'Composer-Executable nicht gefunden.'
             ];
         }
-        
+
         try {
             // Use composer's --working-dir option for safer execution
             $command = sprintf(
@@ -541,14 +587,14 @@ class SystemUpdater
                 escapeshellarg($composerPath),
                 escapeshellarg($appRoot)
             );
-            
+
             // Execute composer command with timeout
             $output = [];
             $returnCode = 0;
             exec($command, $output, $returnCode);
-            
+
             $outputString = implode("\n", $output);
-            
+
             // Check if timeout occurred (exit code 124)
             if ($returnCode === 124) {
                 return [
@@ -559,7 +605,7 @@ class SystemUpdater
                     'return_code' => $returnCode
                 ];
             }
-            
+
             if ($returnCode === 0) {
                 return [
                     'executed' => true,
@@ -586,7 +632,7 @@ class SystemUpdater
             ];
         }
     }
-    
+
     /**
      * Find composer executable on the system
      * 
@@ -599,16 +645,16 @@ class SystemUpdater
             '/usr/local/bin/composer',
             '/usr/bin/composer'
         ];
-        
+
         foreach ($absolutePaths as $path) {
             if (file_exists($path) && is_executable($path)) {
                 return $path;
             }
         }
-        
+
         // For composer in PATH, use which command with strict validation
         $pathNames = ['composer', 'composer.phar'];
-        
+
         foreach ($pathNames as $name) {
             // Strict validation: only alphanumeric, underscore, hyphen
             // Single dot allowed only for .phar extension at the end
@@ -616,13 +662,13 @@ class SystemUpdater
                 $output = [];
                 $returnCode = 0;
                 exec('which ' . escapeshellarg($name) . ' 2>/dev/null', $output, $returnCode);
-                
+
                 if ($returnCode === 0 && !empty($output)) {
                     $execPath = trim($output[0]);
-                    
+
                     // Use realpath to resolve any symlinks and path traversal
                     $realPath = realpath($execPath);
-                    
+
                     // Verify it's a real file, executable, and in safe directories
                     if ($realPath && file_exists($realPath) && is_executable($realPath)) {
                         // Only allow paths in standard bin directories
@@ -636,10 +682,10 @@ class SystemUpdater
                 }
             }
         }
-        
+
         return null;
     }
-    
+
     /**
      * Check if composer installation is pending
      * 
@@ -653,10 +699,10 @@ class SystemUpdater
                 'message' => 'Keine ausstehende Composer-Installation.'
             ];
         }
-        
+
         $content = file_get_contents($this->composerPendingFile);
         $status = json_decode($content, true);
-        
+
         if (json_last_error() !== JSON_ERROR_NONE) {
             // Corrupted file, remove it and return not pending
             if (file_exists($this->composerPendingFile) && !unlink($this->composerPendingFile)) {
@@ -668,10 +714,10 @@ class SystemUpdater
                 'message' => 'Composer-Status-Datei war beschädigt und wurde entfernt.'
             ];
         }
-        
+
         return array_merge(['pending' => true], $status ?? []);
     }
-    
+
     /**
      * Execute pending composer installation
      * 
@@ -686,19 +732,19 @@ class SystemUpdater
                 'message' => 'Keine ausstehende Composer-Installation gefunden.'
             ];
         }
-        
+
         $appRoot = dirname(dirname(__DIR__));
-        
+
         // Run composer install
         $result = $this->runComposerInstall($appRoot);
-        
+
         // Remove pending status file if successful
         if ($result['success']) {
             if (file_exists($this->composerPendingFile) && !unlink($this->composerPendingFile)) {
                 error_log('Warning: Could not remove composer pending file after successful install: ' . $this->composerPendingFile);
             }
         }
-        
+
         return $result;
     }
 
@@ -711,7 +757,7 @@ class SystemUpdater
     {
         try {
             $json = json_encode($versionData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-            
+
             $dir = dirname($this->versionFile);
             if (!is_dir($dir)) {
                 mkdir($dir, 0755, true);
@@ -719,7 +765,7 @@ class SystemUpdater
 
             file_put_contents($this->versionFile, $json);
             $this->currentVersion = $versionData;
-            
+
             return true;
         } catch (Exception $e) {
             return false;
@@ -735,7 +781,7 @@ class SystemUpdater
     {
         try {
             $url = "{$this->githubApiUrl}/releases?per_page={$limit}";
-            
+
             $context = stream_context_create([
                 'http' => [
                     'method' => 'GET',
@@ -748,13 +794,13 @@ class SystemUpdater
             ]);
 
             $response = @file_get_contents($url, false, $context);
-            
+
             if ($response === false) {
                 return [];
             }
 
             $releases = json_decode($response, true);
-            
+
             return $releases ?? [];
         } catch (Exception $e) {
             return [];
@@ -771,12 +817,12 @@ class SystemUpdater
         if (isset($this->currentVersion['prerelease'])) {
             return (bool)$this->currentVersion['prerelease'];
         }
-        
+
         // Fall back to pattern matching in version string
         $version = $this->currentVersion['version'];
         return preg_match('/(alpha|beta|rc|dev)/i', $version) === 1;
     }
-    
+
     /**
      * Check if a specific version string is a pre-release
      * 
@@ -799,7 +845,7 @@ class SystemUpdater
 
         $updatedAt = strtotime($this->currentVersion['updated_at']);
         $now = time();
-        
+
         return (int) floor(($now - $updatedAt) / 86400);
     }
 
@@ -809,7 +855,7 @@ class SystemUpdater
     public function isUpdateRecommended(): bool
     {
         $age = $this->getVersionAge();
-        
+
         // Recommend update if version is older than 90 days
         return $age > 90;
     }
@@ -821,7 +867,7 @@ class SystemUpdater
     public function getUpdateUrgency(): string
     {
         $updateInfo = $this->checkForUpdates();
-        
+
         if (!$updateInfo['available']) {
             return 'none';
         }
@@ -866,35 +912,55 @@ class SystemUpdater
 
             // Headers
             if (preg_match('/^### (.+)$/', $line, $matches)) {
-                if ($inList) { $output .= '</ul>'; $inList = false; }
+                if ($inList) {
+                    $output .= '</ul>';
+                    $inList = false;
+                }
                 $output .= '<h6>' . htmlspecialchars($matches[1]) . '</h6>';
             } elseif (preg_match('/^## (.+)$/', $line, $matches)) {
-                if ($inList) { $output .= '</ul>'; $inList = false; }
+                if ($inList) {
+                    $output .= '</ul>';
+                    $inList = false;
+                }
                 $output .= '<h5>' . htmlspecialchars($matches[1]) . '</h5>';
             } elseif (preg_match('/^# (.+)$/', $line, $matches)) {
-                if ($inList) { $output .= '</ul>'; $inList = false; }
+                if ($inList) {
+                    $output .= '</ul>';
+                    $inList = false;
+                }
                 $output .= '<h4>' . htmlspecialchars($matches[1]) . '</h4>';
             }
             // List items
             elseif (preg_match('/^[\*\-] (.+)$/', $line, $matches)) {
-                if (!$inList) { $output .= '<ul>'; $inList = true; }
+                if (!$inList) {
+                    $output .= '<ul>';
+                    $inList = true;
+                }
                 $output .= '<li>' . htmlspecialchars($matches[1]) . '</li>';
             }
             // Bold text
             elseif (preg_match('/\*\*(.+?)\*\*/', $line)) {
-                if ($inList) { $output .= '</ul>'; $inList = false; }
+                if ($inList) {
+                    $output .= '</ul>';
+                    $inList = false;
+                }
                 $line = preg_replace('/\*\*(.+?)\*\*/', '<strong>$1</strong>', $line);
                 $output .= '<p>' . htmlspecialchars_decode($line) . '</p>';
             }
             // Regular text
             elseif (!empty($line)) {
-                if ($inList) { $output .= '</ul>'; $inList = false; }
+                if ($inList) {
+                    $output .= '</ul>';
+                    $inList = false;
+                }
                 $output .= '<p>' . htmlspecialchars($line) . '</p>';
             }
         }
 
-        if ($inList) { $output .= '</ul>'; }
-        
+        if ($inList) {
+            $output .= '</ul>';
+        }
+
         return $output;
     }
 
@@ -904,13 +970,13 @@ class SystemUpdater
     private function getCachedUpdateCheck(): ?array
     {
         $cacheFile = sys_get_temp_dir() . '/intrarp_update_cache.json';
-        
+
         if (!file_exists($cacheFile)) {
             return null;
         }
 
         $cacheData = json_decode(file_get_contents($cacheFile), true);
-        
+
         if (!$cacheData || !isset($cacheData['timestamp'])) {
             return null;
         }
@@ -924,7 +990,7 @@ class SystemUpdater
         // This ensures users see accurate update notifications after local upgrades
         $cachedVersion = $cacheData['current_version'] ?? null;
         $actualVersion = $this->currentVersion['version'] ?? null;
-        
+
         if ($cachedVersion !== null && $actualVersion !== null && $cachedVersion !== $actualVersion) {
             return null;
         }
@@ -938,7 +1004,7 @@ class SystemUpdater
     private function cacheUpdateCheck(array $data): void
     {
         $cacheFile = sys_get_temp_dir() . '/intrarp_update_cache.json';
-        
+
         $cacheData = [
             'timestamp' => time(),
             'current_version' => $this->currentVersion['version'] ?? 'unknown',
@@ -954,11 +1020,11 @@ class SystemUpdater
      * @param bool $forceRefresh If true, bypass cache and fetch fresh data
      * @param bool $includePreRelease If true, include pre-release versions in the check
      */
-    public function checkForUpdatesCached(bool $forceRefresh = false, bool $includePreRelease = null): array
+    public function checkForUpdatesCached(bool $forceRefresh = false, ?bool $includePreRelease = null): array
     {
         if (!$forceRefresh) {
             $cached = $this->getCachedUpdateCheck();
-            
+
             if ($cached !== null) {
                 $cached['cached'] = true;
                 return $cached;
@@ -971,18 +1037,18 @@ class SystemUpdater
 
         return $result;
     }
-    
+
     /**
      * Clear the update check cache
      */
     public function clearCache(): bool
     {
         $cacheFile = sys_get_temp_dir() . '/intrarp_update_cache.json';
-        
+
         if (file_exists($cacheFile)) {
             return @unlink($cacheFile);
         }
-        
+
         return true;
     }
 }
