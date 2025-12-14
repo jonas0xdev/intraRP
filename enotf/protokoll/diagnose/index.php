@@ -246,17 +246,19 @@ if (!empty($diagnose_weitere_array)) {
                 <?php include __DIR__ . '/../../../assets/components/enotf/nav.php'; ?>
                 <div class="col" id="edivi__content" style="padding-left: 0">
                     <div class="row" style="margin-left: 0">
-                        <div class="col-2 d-flex flex-column edivi__interactbutton-more">
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/diagnose/1.php?enr=<?= $daten['enr'] ?>" data-requires="diagnose_haupt">
-                                <span>Diagnose (führend)</span>
-                            </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/diagnose/2.php?enr=<?= $daten['enr'] ?>">
-                                <span>Diagnose (weitere)</span>
-                            </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/diagnose/3.php?enr=<?= $daten['enr'] ?>">
-                                <span>Diagnose Text</span>
-                            </a>
-                        </div>
+                        <?php if (!$ist_freigegeben) : ?>
+                            <div class="col-2 d-flex flex-column edivi__interactbutton-more">
+                                <a href="<?= BASE_PATH ?>enotf/protokoll/diagnose/1.php?enr=<?= $daten['enr'] ?>" data-requires="diagnose_haupt">
+                                    <span>Diagnose (führend)</span>
+                                </a>
+                                <a href="<?= BASE_PATH ?>enotf/protokoll/diagnose/2.php?enr=<?= $daten['enr'] ?>">
+                                    <span>Diagnose (weitere)</span>
+                                </a>
+                                <a href="<?= BASE_PATH ?>enotf/protokoll/diagnose/3.php?enr=<?= $daten['enr'] ?>">
+                                    <span>Diagnose Text</span>
+                                </a>
+                            </div>
+                        <?php endif; ?>
                         <div class="col edivi__overview-container">
                             <div class="row">
                                 <div class="col">

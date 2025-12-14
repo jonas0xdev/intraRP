@@ -406,24 +406,25 @@ if (!empty($daten['rettungstechnik'])) {
                 <?php include __DIR__ . '/../../../assets/components/enotf/nav.php'; ?>
                 <div class="col" id="edivi__content" style="padding-left: 0">
                     <div class="row" style="margin-left: 0">
-                        <div class="col-2 d-flex flex-column edivi__interactbutton-more">
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/atemwege/index.php?enr=<?= $daten['enr'] ?>" data-requires="awsicherung_neu">
-                                <span>Atemwege</span>
-                            </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/atmung/index.php?enr=<?= $daten['enr'] ?>" data-requires="b_beatmung">
-                                <span>Atmung</span>
-                            </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/index.php?enr=<?= $daten['enr'] ?>" data-requires="c_zugang">
-                                <span>Zugang</span>
-                            </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/medikamente/index.php?enr=<?= $daten['enr'] ?>" data-requires="medis">
-                                <span>Medikamente</span>
-                            </a>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/weitere/index.php?enr=<?= $daten['enr'] ?>">
-                                <span>Weitere</span>
-                            </a>
-                        </div>
-                        <?php
+                        <?php if (!$ist_freigegeben) : ?>
+                            <div class="col-2 d-flex flex-column edivi__interactbutton-more">
+                                <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/atemwege/index.php?enr=<?= $daten['enr'] ?>" data-requires="awsicherung_neu">
+                                    <span>Atemwege</span>
+                                </a>
+                                <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/atmung/index.php?enr=<?= $daten['enr'] ?>" data-requires="b_beatmung">
+                                    <span>Atmung</span>
+                                </a>
+                                <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/zugang/index.php?enr=<?= $daten['enr'] ?>" data-requires="c_zugang">
+                                    <span>Zugang</span>
+                                </a>
+                                <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/medikamente/index.php?enr=<?= $daten['enr'] ?>" data-requires="medis">
+                                    <span>Medikamente</span>
+                                </a>
+                                <a href="<?= BASE_PATH ?>enotf/protokoll/massnahmen/weitere/index.php?enr=<?= $daten['enr'] ?>">
+                                    <span>Weitere</span>
+                                </a>
+                            </div>
+                        <?php endif;
                         $awsicherung_neu_labels = [
                             1 => 'keine',
                             2 => 'Endotrachealtubus',

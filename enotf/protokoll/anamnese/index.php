@@ -71,11 +71,13 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                 <?php include __DIR__ . '/../../../assets/components/enotf/nav.php'; ?>
                 <div class="col" id="edivi__content" style="padding-left: 0">
                     <div class="row" style="margin-left: 0">
-                        <div class="col-2 d-flex flex-column edivi__interactbutton-more">
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/anamnese/1.php?enr=<?= $daten['enr'] ?>">
-                                <span>Anamnese</span>
-                            </a>
-                        </div>
+                        <?php if (!$ist_freigegeben) : ?>
+                            <div class="col-2 d-flex flex-column edivi__interactbutton-more">
+                                <a href="<?= BASE_PATH ?>enotf/protokoll/anamnese/1.php?enr=<?= $daten['enr'] ?>">
+                                    <span>Anamnese</span>
+                                </a>
+                            </div>
+                        <?php endif; ?>
                         <div class="col edivi__overview-container">
                             <div class="row edivi__box edivi__box-clickable" data-href="<?= BASE_PATH ?>enotf/protokoll/anamnese/1.php?enr=<?= $daten['enr'] ?>" style="cursor:pointer">
                                 <h5 class="text-light px-2 py-1">Anamnese</h5>
@@ -83,7 +85,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                     <div class="row my-2">
                                         <div class="col">
                                             <label for="anamnese" class="edivi__description" style="display: none;">Anamnese</label>
-                                            <textarea name="anamnese" id="anamnese" class="w-100 form-control" style="height: 80vh; overflow-y: auto; resize: vertical;" readonly><?= $daten['anmerkungen'] ?></textarea>
+                                            <textarea name="anamnese" id="anamnese" class="w-100 form-control" style="min-height: 80vh; overflow-y: auto; resize: vertical;" readonly><?= $daten['anmerkungen'] ?></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -123,6 +125,21 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
         </script>
     <?php endif; ?>
     <script src="<?= BASE_PATH ?>assets/js/pin_activity.js"></script>
+    <script>
+        // Auto-resize textarea based on content
+        function autoResizeTextarea() {
+            const textarea = document.getElementById('anamnese');
+            if (textarea) {
+                textarea.style.height = 'auto';
+                textarea.style.height = Math.max(textarea.scrollHeight, window.innerHeight * 0.8) + 'px';
+            }
+        }
+
+        // Run on page load
+        window.addEventListener('load', autoResizeTextarea);
+        // Run on window resize
+        window.addEventListener('resize', autoResizeTextarea);
+    </script>
 </body>
 
 </html>

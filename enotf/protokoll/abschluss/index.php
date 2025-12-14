@@ -133,19 +133,21 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                 <?php include __DIR__ . '/../../../assets/components/enotf/nav.php'; ?>
                 <div class="col" id="edivi__content" style="padding-left: 0">
                     <div class="row" style="margin-left: 0">
-                        <div class="col-2 d-flex flex-column edivi__interactbutton-more">
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/1.php?enr=<?= $daten['enr'] ?>" data-requires="ebesonderheiten">
-                                <span>Einsatzverlauf Besonderheiten</span>
-                            </a>
-                            <?php if ($daten['prot_by'] != 1) : ?>
-                                <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/2.php?enr=<?= $daten['enr'] ?>" data-requires="na_nachf">
-                                    <span>Nachforderung NA</span>
+                        <?php if (!$ist_freigegeben) : ?>
+                            <div class="col-2 d-flex flex-column edivi__interactbutton-more">
+                                <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/1.php?enr=<?= $daten['enr'] ?>" data-requires="ebesonderheiten">
+                                    <span>Einsatzverlauf Besonderheiten</span>
                                 </a>
-                            <?php endif; ?>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/3.php?enr=<?= $daten['enr'] ?>">
-                                <span>Übergabe</span>
-                            </a>
-                        </div>
+                                <?php if ($daten['prot_by'] != 1) : ?>
+                                    <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/2.php?enr=<?= $daten['enr'] ?>" data-requires="na_nachf">
+                                        <span>Nachforderung NA</span>
+                                    </a>
+                                <?php endif; ?>
+                                <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/3.php?enr=<?= $daten['enr'] ?>">
+                                    <span>Übergabe</span>
+                                </a>
+                            </div>
+                        <?php endif; ?>
                         <div class="col edivi__overview-container">
                             <div class="row">
                                 <div class="col">
