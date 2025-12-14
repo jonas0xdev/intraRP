@@ -66,7 +66,7 @@ use App\Notifications\NotificationManager;
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="<?= BASE_PATH ?>enotf/manv/index.php">MANV-Board</a></li>
+                            <li><a class="dropdown-item" href="<?= BASE_PATH ?>manv/index.php">MANV-Board</a></li>
                         <?php } ?>
                     </ul>
                 </li>
