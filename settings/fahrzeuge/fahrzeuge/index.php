@@ -95,9 +95,11 @@ if (!Permissions::check(['admin', 'vehicles.view'])) {
                                     $kennzeichen = $row['kennzeichen'] ?? '';
                                     $kennzeichenDisplay = $kennzeichen ?: '-';
 
-                                    $actions = (Permissions::check(['admin', 'vehicles.manage']))
-                                        ? "<a title='Fahrzeug bearbeiten' href='#' class='btn btn-sm btn-primary edit-btn' data-bs-toggle='modal' data-bs-target='#editFahrzeugModal' data-id='{$row['id']}' data-name='{$row['name']}' data-kennzeichen='{$row['kennzeichen']}' data-type='{$row['veh_type']}' data-priority='{$row['priority']}' data-identifier='{$row['identifier']}' data-rd_type='{$row['rd_type']}' data-active='{$row['active']}'><i class='fa-solid fa-pen'></i></a>"
-                                        : "";
+                                    $actions = "";
+                                    if (Permissions::check(['admin', 'vehicles.manage'])) {
+                                        $actions .= "<a title='Fahrzeug bearbeiten' href='#' class='btn btn-sm btn-primary edit-btn' data-bs-toggle='modal' data-bs-target='#editFahrzeugModal' data-id='{$row['id']}' data-name='{$row['name']}' data-kennzeichen='{$row['kennzeichen']}' data-type='{$row['veh_type']}' data-priority='{$row['priority']}' data-identifier='{$row['identifier']}' data-rd_type='{$row['rd_type']}' data-active='{$row['active']}'><i class='fa-solid fa-pen'></i></a> ";
+                                        $actions .= "<a title='Fahrzeug kopieren' href='#' class='btn btn-sm btn-success copy-btn' data-id='{$row['id']}' data-name='{$row['name']}' data-kennzeichen='{$row['kennzeichen']}' data-type='{$row['veh_type']}' data-priority='{$row['priority']}' data-identifier='{$row['identifier']}' data-rd_type='{$row['rd_type']}' data-active='{$row['active']}'><i class='fa-solid fa-copy'></i></a>";
+                                    }
 
                                     echo "<tr>";
                                     echo "<td " . $dimmed . ">" . $row['priority'] . "</td>";
@@ -315,10 +317,34 @@ if (!Permissions::check(['admin', 'vehicles.view'])) {
             });
 
             document.getElementById('delete-fahrzeug-btn').addEventListener('click', function() {
-                showConfirm('Möchtest du dieses Fahrzeug wirklich löschen?', {danger: true, confirmText: 'Löschen', title: 'Fahrzeug löschen'}).then(result => {
+                showConfirm('Möchtest du dieses Fahrzeug wirklich löschen?', {
+                    danger: true,
+                    confirmText: 'Löschen',
+                    title: 'Fahrzeug löschen'
+                }).then(result => {
                     if (result) {
                         document.getElementById('delete-fahrzeug-form').submit();
                     }
+                });
+            });
+
+            // Copy button functionality
+            document.querySelectorAll('.copy-btn').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    // Fill the create modal with the data from the vehicle to copy
+                    document.getElementById('new-fahrzeug-name').value = this.dataset.name;
+                    document.getElementById('new-fahrzeug-kennzeichen').value = this.dataset.kennzeichen || '';
+                    document.getElementById('new-fahrzeug-typ').value = this.dataset.type;
+                    document.getElementById('new-fahrzeug-priority').value = this.dataset.priority;
+                    document.getElementById('new-fahrzeug-identifier').value = this.dataset.identifier + '(1)';
+                    document.getElementById('new-fahrzeug-rd_type').value = this.dataset.rd_type || '0';
+                    document.getElementById('new-fahrzeug-active').checked = this.dataset.active == 1;
+
+                    // Open the create modal
+                    const createModal = new bootstrap.Modal(document.getElementById('createFahrzeugModal'));
+                    createModal.show();
                 });
             });
         });
