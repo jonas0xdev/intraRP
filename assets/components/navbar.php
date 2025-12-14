@@ -62,6 +62,12 @@ use App\Notifications\NotificationManager;
                             <li><a class="dropdown-item" href="<?= BASE_PATH ?>enotf/admin/pois/index.php">POIs</a></li>
                             <li><a class="dropdown-item" href="<?= BASE_PATH ?>enotf/admin/medikamentenverwaltung/index.php">Medikamente</a></li>
                         <?php } ?>
+                        <?php if (Permissions::check(['admin', 'manv.manage'])) { ?>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="<?= BASE_PATH ?>enotf/manv/index.php">MANV-Board</a></li>
+                        <?php } ?>
                     </ul>
                 </li>
                 <li class="nav-item">

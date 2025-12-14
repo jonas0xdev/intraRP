@@ -114,9 +114,10 @@ if (!Permissions::check(['admin', 'users.view'])) {
                                     'application.view' => 'Anträge ansehen',
                                     'application.edit' => 'Anträge bearbeiten'
                                 ],
-                                'eNOTF' => [
+                                'eNOTF / Rettungsdienst' => [
                                     'edivi.view' => 'eNOTF Protokolle ansehen',
-                                    'edivi.edit' => 'eNOTF Protokolle bearbeiten'
+                                    'edivi.edit' => 'eNOTF Protokolle bearbeiten',
+                                    'manv.manage' => 'MANV-Lagen verwalten'
                                 ],
                                 'Wissensdatenbank' => [
                                     'kb.view' => 'Wissensdatenbank ansehen',
@@ -351,7 +352,11 @@ if (!Permissions::check(['admin', 'users.view'])) {
             });
 
             document.getElementById('delete-role-btn').addEventListener('click', function() {
-                showConfirm('Möchtest du diese Rolle wirklich löschen?', {danger: true, confirmText: 'Löschen', title: 'Rolle löschen'}).then(result => {
+                showConfirm('Möchtest du diese Rolle wirklich löschen?', {
+                    danger: true,
+                    confirmText: 'Löschen',
+                    title: 'Rolle löschen'
+                }).then(result => {
                     if (result) {
                         document.getElementById('delete-role-form').submit();
                     }
