@@ -194,7 +194,7 @@ class SupportSessionMiddleware
             setInterval(updateTimeLeft, 10000);
             
             function endSupportSession() {
-                showConfirm("Möchten Sie den Support-Zugang jetzt beenden?", {confirmText: 'Beenden', title: 'Support-Zugang beenden'}).then(result => {
+                showConfirm("Möchten Sie den Support-Zugang jetzt beenden?", {confirmText: "Beenden", title: "Support-Zugang beenden"}).then(result => {
                     if (result) {
                         window.location.href = "support_logout.php";
                     }
