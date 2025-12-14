@@ -127,6 +127,35 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
     include __DIR__ . '/../../../assets/functions/enotf/field_checks.php';
     include __DIR__ . '/../../../assets/functions/enotf/clock.php';
     ?>
+
+    <!-- Freigabe Modal -->
+    <div class="modal fade" id="freigabeModal" tabindex="-1" aria-labelledby="freigabeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="freigabeModalLabel">Klinikcode-Freigabe</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center py-5">
+                    <p class="mb-4">Klinikcode für Protokoll #<?= $daten['enr'] ?></p>
+                    <div id="codeDisplay" class="display-3 fw-bold text-primary mb-4" style="letter-spacing: 0.5rem;">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Lädt...</span>
+                        </div>
+                    </div>
+                    <p class="text-muted small">Code gültig für 1 Stunde</p>
+                    <p class="text-muted small mt-3">Zugriff unter:<br>
+                        <span class="text-white"><?= 'https://' . SYSTEM_URL ?>/enotf/schnittstelle/klinikcode.php</span>
+                    </p>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
+                    <button type="button" class="btn btn-primary" id="copyCodeButton" disabled>Code kopieren</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <?php if ($ist_freigegeben) : ?>
         <script>
             var formElements = document.querySelectorAll('input, textarea');
@@ -152,6 +181,52 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
         </script>
     <?php endif; ?>
     <script>
+        $(document).ready(function() {
+            // Freigabe Button Handler
+            $('#freigabeButton').on('click', function(e) {
+                e.preventDefault();
+                const enr = $(this).data('enr');
+
+                // Modal öffnen
+                const modal = new bootstrap.Modal(document.getElementById('freigabeModal'));
+                modal.show();
+
+                // Code generieren
+                $.ajax({
+                    url: '<?= BASE_PATH ?>api/generate-klinikcode.php',
+                    method: 'POST',
+                    data: {
+                        enr: enr
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            $('#codeDisplay').text(response.code);
+                            $('#copyCodeButton').prop('disabled', false);
+                        } else {
+                            $('#codeDisplay').html('<span class="text-danger fs-6">Fehler: ' + response.message + '</span>');
+                        }
+                    },
+                    error: function() {
+                        $('#codeDisplay').html('<span class="text-danger fs-6">Fehler beim Generieren des Codes</span>');
+                    }
+                });
+            });
+
+            // Code kopieren
+            $('#copyCodeButton').on('click', function() {
+                const code = $('#codeDisplay').text();
+                navigator.clipboard.writeText(code).then(function() {
+                    const btn = $('#copyCodeButton');
+                    const originalText = btn.text();
+                    btn.text('✓ Kopiert!');
+                    setTimeout(function() {
+                        btn.text(originalText);
+                    }, 2000);
+                });
+            });
+        });
+
         var modalCloseButton = document.querySelector('#myModal4 .btn-close');
         var freigeberInput = document.getElementById('freigeber');
 

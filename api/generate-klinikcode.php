@@ -5,10 +5,10 @@ if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
 }
 
 session_start();
-require_once __DIR__ . '/../../assets/config/config.php';
-require_once __DIR__ . '/../../vendor/autoload.php';
-require __DIR__ . '/../../assets/config/database.php';
-require_once __DIR__ . '/../../assets/functions/enotf/user_auth_middleware.php';
+require_once __DIR__ . '/../assets/config/config.php';
+require_once __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/../assets/config/database.php';
+require_once __DIR__ . '/../assets/functions/enotf/user_auth_middleware.php';
 
 header('Content-Type: application/json');
 
