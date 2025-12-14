@@ -61,118 +61,121 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
 </head>
 
 <body data-bs-theme="dark" data-page="abschluss" data-pin-enabled="<?= $pinEnabled ?>">
-<?php
-include __DIR__ . '/../../../assets/components/enotf/topbar.php';
-?>
-<form name="form" method="post" action="">
-    <input type="hidden" name="new" value="1" />
-    <div class="container-fluid" id="edivi__container">
-        <div class="row h-100">
-            <?php include __DIR__ . '/../../../assets/components/enotf/nav.php'; ?>
-            <div class="col" id="edivi__content" style="padding-left: 0">
-                <div class="row" style="margin-left: 0">
-                    <div class="col-2 d-flex flex-column edivi__interactbutton-more">
-                        <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/1.php?enr=<?= $daten['enr'] ?>" data-requires="ebesonderheiten">
-                            <span>Einsatzverlauf Besonderheiten</span>
-                        </a>
-                        <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/2.php?enr=<?= $daten['enr'] ?>" data-requires="uebergabe_ort">
-                            <span>Nachforderung NA</span>
-                        </a>
-                        <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/3.php?enr=<?= $daten['enr'] ?>" class="active">
-                            <span>Übergabe</span>
-                        </a>
-                    </div>
-                    <div class="col-2 d-flex flex-column edivi__interactbutton-more">
-                        <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/3_1.php?enr=<?= $daten['enr'] ?>" class="active">
-                            <span>Ort</span>
-                        </a>
-                        <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/3_2.php?enr=<?= $daten['enr'] ?>">
-                            <span>An</span>
-                        </a>
-                    </div>
-                    <div class="col-2 d-flex flex-column edivi__interactbutton">
-                        <input type="radio" class="btn-check" id="uebergabe_ort-1" name="uebergabe_ort" value="1" <?php echo ($daten['uebergabe_ort'] == 1 ? 'checked' : '') ?> autocomplete="off">
-                        <label for="uebergabe_ort-1">Schockraum</label>
+    <?php
+    include __DIR__ . '/../../../assets/components/enotf/topbar.php';
+    ?>
+    <form name="form" method="post" action="">
+        <input type="hidden" name="new" value="1" />
+        <div class="container-fluid" id="edivi__container">
+            <div class="row h-100">
+                <?php include __DIR__ . '/../../../assets/components/enotf/nav.php'; ?>
+                <div class="col" id="edivi__content" style="padding-left: 0">
+                    <div class="row" style="margin-left: 0">
+                        <div class="col-2 d-flex flex-column edivi__interactbutton-more">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/1.php?enr=<?= $daten['enr'] ?>" data-requires="ebesonderheiten">
+                                <span>Einsatzverlauf Besonderheiten</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/2.php?enr=<?= $daten['enr'] ?>" data-requires="uebergabe_ort">
+                                <span>Nachforderung NA</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/3.php?enr=<?= $daten['enr'] ?>" class="active">
+                                <span>Übergabe</span>
+                            </a>
+                        </div>
+                        <div class="col-2 d-flex flex-column edivi__interactbutton-more">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/3_1.php?enr=<?= $daten['enr'] ?>" class="active">
+                                <span>Ort</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/3_2.php?enr=<?= $daten['enr'] ?>">
+                                <span>An</span>
+                            </a>
+                            <a href="#" id="freigabeButton" data-enr="<?= $daten['enr'] ?>">
+                                <span>Freigabe</span>
+                            </a>
+                        </div>
+                        <div class="col-2 d-flex flex-column edivi__interactbutton">
+                            <input type="radio" class="btn-check" id="uebergabe_ort-1" name="uebergabe_ort" value="1" <?php echo ($daten['uebergabe_ort'] == 1 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="uebergabe_ort-1">Schockraum</label>
 
-                        <input type="radio" class="btn-check" id="uebergabe_ort-2" name="uebergabe_ort" value="2" <?php echo ($daten['uebergabe_ort'] == 2 ? 'checked' : '') ?> autocomplete="off">
-                        <label for="uebergabe_ort-2">Praxis</label>
+                            <input type="radio" class="btn-check" id="uebergabe_ort-2" name="uebergabe_ort" value="2" <?php echo ($daten['uebergabe_ort'] == 2 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="uebergabe_ort-2">Praxis</label>
 
-                        <input type="radio" class="btn-check" id="uebergabe_ort-3" name="uebergabe_ort" value="3" <?php echo ($daten['uebergabe_ort'] == 3 ? 'checked' : '') ?> autocomplete="off">
-                        <label for="uebergabe_ort-3">ZNA / INA</label>
+                            <input type="radio" class="btn-check" id="uebergabe_ort-3" name="uebergabe_ort" value="3" <?php echo ($daten['uebergabe_ort'] == 3 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="uebergabe_ort-3">ZNA / INA</label>
 
-                        <input type="radio" class="btn-check" id="uebergabe_ort-4" name="uebergabe_ort" value="4" <?php echo ($daten['uebergabe_ort'] == 4 ? 'checked' : '') ?> autocomplete="off">
-                        <label for="uebergabe_ort-4">Stroke Unit</label>
+                            <input type="radio" class="btn-check" id="uebergabe_ort-4" name="uebergabe_ort" value="4" <?php echo ($daten['uebergabe_ort'] == 4 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="uebergabe_ort-4">Stroke Unit</label>
 
-                        <input type="radio" class="btn-check" id="uebergabe_ort-5" name="uebergabe_ort" value="5" <?php echo ($daten['uebergabe_ort'] == 5 ? 'checked' : '') ?> autocomplete="off">
-                        <label for="uebergabe_ort-5">Intensivstation</label>
+                            <input type="radio" class="btn-check" id="uebergabe_ort-5" name="uebergabe_ort" value="5" <?php echo ($daten['uebergabe_ort'] == 5 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="uebergabe_ort-5">Intensivstation</label>
 
-                        <input type="radio" class="btn-check" id="uebergabe_ort-6" name="uebergabe_ort" value="6" <?php echo ($daten['uebergabe_ort'] == 6 ? 'checked' : '') ?> autocomplete="off">
-                        <label for="uebergabe_ort-6">OP direkt</label>
+                            <input type="radio" class="btn-check" id="uebergabe_ort-6" name="uebergabe_ort" value="6" <?php echo ($daten['uebergabe_ort'] == 6 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="uebergabe_ort-6">OP direkt</label>
 
-                        <input type="radio" class="btn-check" id="uebergabe_ort-7" name="uebergabe_ort" value="7" <?php echo ($daten['uebergabe_ort'] == 7 ? 'checked' : '') ?> autocomplete="off">
-                        <label for="uebergabe_ort-7">Hausarzt</label>
+                            <input type="radio" class="btn-check" id="uebergabe_ort-7" name="uebergabe_ort" value="7" <?php echo ($daten['uebergabe_ort'] == 7 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="uebergabe_ort-7">Hausarzt</label>
 
-                        <input type="radio" class="btn-check" id="uebergabe_ort-8" name="uebergabe_ort" value="8" <?php echo ($daten['uebergabe_ort'] == 8 ? 'checked' : '') ?> autocomplete="off">
-                        <label for="uebergabe_ort-8">Fachambulanz</label>
+                            <input type="radio" class="btn-check" id="uebergabe_ort-8" name="uebergabe_ort" value="8" <?php echo ($daten['uebergabe_ort'] == 8 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="uebergabe_ort-8">Fachambulanz</label>
 
-                        <input type="radio" class="btn-check" id="uebergabe_ort-9" name="uebergabe_ort" value="9" <?php echo ($daten['uebergabe_ort'] == 9 ? 'checked' : '') ?> autocomplete="off">
-                        <label for="uebergabe_ort-9">Chest Pain Unit</label>
-                    </div>
-                    <div class="col-2 d-flex flex-column edivi__interactbutton">
-                        <input type="radio" class="btn-check" id="uebergabe_ort-10" name="uebergabe_ort" value="10" <?php echo ($daten['uebergabe_ort'] == 10 ? 'checked' : '') ?> autocomplete="off">
-                        <label for="uebergabe_ort-10">Herzkatheterlabor</label>
+                            <input type="radio" class="btn-check" id="uebergabe_ort-9" name="uebergabe_ort" value="9" <?php echo ($daten['uebergabe_ort'] == 9 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="uebergabe_ort-9">Chest Pain Unit</label>
+                        </div>
+                        <div class="col-2 d-flex flex-column edivi__interactbutton">
+                            <input type="radio" class="btn-check" id="uebergabe_ort-10" name="uebergabe_ort" value="10" <?php echo ($daten['uebergabe_ort'] == 10 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="uebergabe_ort-10">Herzkatheterlabor</label>
 
-                        <input type="radio" class="btn-check" id="uebergabe_ort-11" name="uebergabe_ort" value="11" <?php echo ($daten['uebergabe_ort'] == 11 ? 'checked' : '') ?> autocomplete="off">
-                        <label for="uebergabe_ort-11">Allgemeinstation</label>
+                            <input type="radio" class="btn-check" id="uebergabe_ort-11" name="uebergabe_ort" value="11" <?php echo ($daten['uebergabe_ort'] == 11 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="uebergabe_ort-11">Allgemeinstation</label>
 
-                        <input type="radio" class="btn-check" id="uebergabe_ort-12" name="uebergabe_ort" value="12" <?php echo ($daten['uebergabe_ort'] == 12 ? 'checked' : '') ?> autocomplete="off">
-                        <label for="uebergabe_ort-12">Einsatzstelle</label>
+                            <input type="radio" class="btn-check" id="uebergabe_ort-12" name="uebergabe_ort" value="12" <?php echo ($daten['uebergabe_ort'] == 12 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="uebergabe_ort-12">Einsatzstelle</label>
 
-                        <input type="radio" class="btn-check" id="uebergabe_ort-99" name="uebergabe_ort" value="99" <?php echo ($daten['uebergabe_ort'] == 99 ? 'checked' : '') ?> autocomplete="off">
-                        <label for="uebergabe_ort-99">Sonstige</label>
+                            <input type="radio" class="btn-check" id="uebergabe_ort-99" name="uebergabe_ort" value="99" <?php echo ($daten['uebergabe_ort'] == 99 ? 'checked' : '') ?> autocomplete="off">
+                            <label for="uebergabe_ort-99">Sonstige</label>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-</form>
-<?php
-include __DIR__ . '/../../../assets/functions/enotf/notify.php';
-include __DIR__ . '/../../../assets/functions/enotf/field_checks.php';
-include __DIR__ . '/../../../assets/functions/enotf/clock.php';
-?>
-<?php if ($ist_freigegeben) : ?>
+    </form>
+    <?php
+    include __DIR__ . '/../../../assets/functions/enotf/notify.php';
+    include __DIR__ . '/../../../assets/functions/enotf/field_checks.php';
+    include __DIR__ . '/../../../assets/functions/enotf/clock.php';
+    ?>
+    <?php if ($ist_freigegeben) : ?>
+        <script>
+            var formElements = document.querySelectorAll('input, textarea');
+            var selectElements2 = document.querySelectorAll('select');
+            var inputElements2 = document.querySelectorAll('.btn-check');
+            var inputElements3 = document.querySelectorAll('.form-check-input');
+
+            formElements.forEach(function(element) {
+                element.setAttribute('readonly', 'readonly');
+            });
+
+            selectElements2.forEach(function(element) {
+                element.setAttribute('disabled', 'disabled');
+            });
+
+            inputElements2.forEach(function(element) {
+                element.setAttribute('disabled', 'disabled');
+            });
+
+            inputElements3.forEach(function(element) {
+                element.setAttribute('disabled', 'disabled');
+            });
+        </script>
+    <?php endif; ?>
     <script>
-        var formElements = document.querySelectorAll('input, textarea');
-        var selectElements2 = document.querySelectorAll('select');
-        var inputElements2 = document.querySelectorAll('.btn-check');
-        var inputElements3 = document.querySelectorAll('.form-check-input');
+        var modalCloseButton = document.querySelector('#myModal4 .btn-close');
+        var freigeberInput = document.getElementById('freigeber');
 
-        formElements.forEach(function(element) {
-            element.setAttribute('readonly', 'readonly');
-        });
-
-        selectElements2.forEach(function(element) {
-            element.setAttribute('disabled', 'disabled');
-        });
-
-        inputElements2.forEach(function(element) {
-            element.setAttribute('disabled', 'disabled');
-        });
-
-        inputElements3.forEach(function(element) {
-            element.setAttribute('disabled', 'disabled');
+        modalCloseButton.addEventListener('click', function() {
+            freigeberInput.value = '';
         });
     </script>
-<?php endif; ?>
-<script>
-    var modalCloseButton = document.querySelector('#myModal4 .btn-close');
-    var freigeberInput = document.getElementById('freigeber');
-
-    modalCloseButton.addEventListener('click', function() {
-        freigeberInput.value = '';
-    });
-</script>
-<script src="<?= BASE_PATH ?>assets/js/pin_activity.js"></script>
+    <script src="<?= BASE_PATH ?>assets/js/pin_activity.js"></script>
 </body>
 
 </html>

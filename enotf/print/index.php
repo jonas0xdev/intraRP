@@ -87,9 +87,11 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
     <div id="topbar" class="container-fluid" data-pin-enabled="<?= $pinEnabled ?>">
         <div class="row">
             <div class="col">
-                <a href="<?= Redirects::getRedirectUrl($defaultUrl); ?>" class="topbar-btn">
-                    <i class="fa-solid fa-arrow-left"></i>
-                </a>
+                <?php if (!isset($_SESSION['klinik_access_enr'])): ?>
+                    <a href="<?= Redirects::getRedirectUrl($defaultUrl); ?>" class="topbar-btn">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </a>
+                <?php endif; ?>
             </div>
             <div class="col text-end">
                 <button type="button" class="topbar-btn" onclick="zoomOut()" title="Verkleinern">

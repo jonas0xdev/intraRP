@@ -2352,3 +2352,7 @@ body[data-page="verlauf"] {
     outline: none;
   }
 }
+
+#freigabeButton::after {
+  display: none;
+}

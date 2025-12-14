@@ -69,71 +69,150 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
 </head>
 
 <body data-bs-theme="dark" data-page="abschluss" data-pin-enabled="<?= $pinEnabled ?>">
-<?php
-include __DIR__ . '/../../../assets/components/enotf/topbar.php';
-?>
-<form name="form" method="post" action="">
-    <input type="hidden" name="new" value="1" />
-    <div class="container-fluid" id="edivi__container">
-        <div class="row h-100">
-            <?php include __DIR__ . '/../../../assets/components/enotf/nav.php'; ?>
-            <div class="col" id="edivi__content" style="padding-left: 0">
-                <div class="row" style="margin-left: 0">
-                    <div class="col-2 d-flex flex-column edivi__interactbutton-more">
-                        <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/1.php?enr=<?= $daten['enr'] ?>" data-requires="ebesonderheiten">
-                            <span>Einsatzverlauf Besonderheiten</span>
-                        </a>
-                        <?php if ($daten['prot_by'] != 1) : ?>
-                            <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/2.php?enr=<?= $daten['enr'] ?>" data-requires="na_nachf">
-                                <span>Nachforderung NA</span>
+    <?php
+    include __DIR__ . '/../../../assets/components/enotf/topbar.php';
+    ?>
+    <form name="form" method="post" action="">
+        <input type="hidden" name="new" value="1" />
+        <div class="container-fluid" id="edivi__container">
+            <div class="row h-100">
+                <?php include __DIR__ . '/../../../assets/components/enotf/nav.php'; ?>
+                <div class="col" id="edivi__content" style="padding-left: 0">
+                    <div class="row" style="margin-left: 0">
+                        <div class="col-2 d-flex flex-column edivi__interactbutton-more">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/1.php?enr=<?= $daten['enr'] ?>" data-requires="ebesonderheiten">
+                                <span>Einsatzverlauf Besonderheiten</span>
                             </a>
-                        <?php endif; ?>
-                        <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/3.php?enr=<?= $daten['enr'] ?>" class="active">
-                            <span>Übergabe</span>
-                        </a>
-                    </div>
-                    <div class="col-2 d-flex flex-column edivi__interactbutton-more">
-                        <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/3_1.php?enr=<?= $daten['enr'] ?>">
-                            <span>Ort</span>
-                        </a>
-                        <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/3_2.php?enr=<?= $daten['enr'] ?>">
-                            <span>An</span>
-                        </a>
+                            <?php if ($daten['prot_by'] != 1) : ?>
+                                <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/2.php?enr=<?= $daten['enr'] ?>" data-requires="na_nachf">
+                                    <span>Nachforderung NA</span>
+                                </a>
+                            <?php endif; ?>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/3.php?enr=<?= $daten['enr'] ?>" class="active">
+                                <span>Übergabe</span>
+                            </a>
+                        </div>
+                        <div class="col-2 d-flex flex-column edivi__interactbutton-more">
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/3_1.php?enr=<?= $daten['enr'] ?>">
+                                <span>Ort</span>
+                            </a>
+                            <a href="<?= BASE_PATH ?>enotf/protokoll/abschluss/3_2.php?enr=<?= $daten['enr'] ?>">
+                                <span>An</span>
+                            </a>
+                            <a href="#" id="freigabeButton" data-enr="<?= $daten['enr'] ?>">
+                                <span>Freigabe</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
+    </form>
+    <?php
+    include __DIR__ . '/../../../assets/functions/enotf/notify.php';
+    include __DIR__ . '/../../../assets/functions/enotf/field_checks.php';
+    include __DIR__ . '/../../../assets/functions/enotf/clock.php';
+    ?>
+
+    <!-- Freigabe Modal -->
+    <div class="modal fade" id="freigabeModal" tabindex="-1" aria-labelledby="freigabeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="freigabeModalLabel">Klinikcode-Freigabe</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center py-5">
+                    <p class="mb-4">Klinikcode für Protokoll #<?= $daten['enr'] ?></p>
+                    <div id="codeDisplay" class="display-3 fw-bold text-primary mb-4" style="letter-spacing: 0.5rem;">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Lädt...</span>
+                        </div>
+                    </div>
+                    <p class="text-muted small">Code gültig für 1 Stunde</p>
+                    <p class="text-muted small mt-3">Zugriff unter:<br>
+                        <span class="text-white"><?= 'https://' . SYSTEM_URL ?>/enotf/schnittstelle/klinikcode.php</span>
+                    </p>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
+                    <button type="button" class="btn btn-primary" id="copyCodeButton" disabled>Code kopieren</button>
+                </div>
+            </div>
         </div>
-</form>
-<?php
-include __DIR__ . '/../../../assets/functions/enotf/notify.php';
-include __DIR__ . '/../../../assets/functions/enotf/field_checks.php';
-include __DIR__ . '/../../../assets/functions/enotf/clock.php';
-?>
-<?php if ($ist_freigegeben) : ?>
+    </div>
+
+    <?php if ($ist_freigegeben) : ?>
+        <script>
+            var formElements = document.querySelectorAll('input, textarea');
+            var selectElements2 = document.querySelectorAll('select');
+            var inputElements2 = document.querySelectorAll('.btn-check');
+            var inputElements3 = document.querySelectorAll('.form-check-input');
+
+            formElements.forEach(function(element) {
+                element.setAttribute('readonly', 'readonly');
+            });
+
+            selectElements2.forEach(function(element) {
+                element.setAttribute('disabled', 'disabled');
+            });
+
+            inputElements2.forEach(function(element) {
+                element.setAttribute('disabled', 'disabled');
+            });
+
+            inputElements3.forEach(function(element) {
+                element.setAttribute('disabled', 'disabled');
+            });
+        </script>
+    <?php endif; ?>
     <script>
-        var formElements = document.querySelectorAll('input, textarea');
-        var selectElements2 = document.querySelectorAll('select');
-        var inputElements2 = document.querySelectorAll('.btn-check');
-        var inputElements3 = document.querySelectorAll('.form-check-input');
+        $(document).ready(function() {
+            // Freigabe Button Handler
+            $('#freigabeButton').on('click', function(e) {
+                e.preventDefault();
+                const enr = $(this).data('enr');
 
-        formElements.forEach(function(element) {
-            element.setAttribute('readonly', 'readonly');
-        });
+                // Modal öffnen
+                const modal = new bootstrap.Modal(document.getElementById('freigabeModal'));
+                modal.show();
 
-        selectElements2.forEach(function(element) {
-            element.setAttribute('disabled', 'disabled');
-        });
+                // Code generieren
+                $.ajax({
+                    url: '<?= BASE_PATH ?>enotf/api/generate-klinikcode.php',
+                    method: 'POST',
+                    data: {
+                        enr: enr
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            $('#codeDisplay').text(response.code);
+                            $('#copyCodeButton').prop('disabled', false);
+                        } else {
+                            $('#codeDisplay').html('<span class="text-danger fs-6">Fehler: ' + response.message + '</span>');
+                        }
+                    },
+                    error: function() {
+                        $('#codeDisplay').html('<span class="text-danger fs-6">Fehler beim Generieren des Codes</span>');
+                    }
+                });
+            });
 
-        inputElements2.forEach(function(element) {
-            element.setAttribute('disabled', 'disabled');
-        });
-
-        inputElements3.forEach(function(element) {
-            element.setAttribute('disabled', 'disabled');
+            // Code kopieren
+            $('#copyCodeButton').on('click', function() {
+                const code = $('#codeDisplay').text();
+                navigator.clipboard.writeText(code).then(function() {
+                    const btn = $('#copyCodeButton');
+                    const originalText = btn.text();
+                    btn.text('✓ Kopiert!');
+                    setTimeout(function() {
+                        btn.text(originalText);
+                    }, 2000);
+                });
+            });
         });
     </script>
-<?php endif; ?>
-<script src="<?= BASE_PATH ?>assets/js/pin_activity.js"></script>
+    <script src="<?= BASE_PATH ?>assets/js/pin_activity.js"></script>
 </body>
 
 </html>
