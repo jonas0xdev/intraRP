@@ -12,8 +12,23 @@ if (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) {
     // Permissions::check() prüft automatisch auch auf 'full_admin'
     $is_exempt_user = Permissions::check(['edivi.view']);
 
-    // Wenn Benutzer ausgenommen ist, Lockscreen-Logik überspringen
-    if (!$is_exempt_user) {
+    // Prüfe ob Klinikzugriff aktiv ist (innerhalb von 2 Stunden nach Code-Eingabe)
+    $is_klinik_access = false;
+    if (isset($_SESSION['klinik_access_enr']) && isset($_SESSION['klinik_access_time'])) {
+        $access_time = $_SESSION['klinik_access_time'];
+        $current_time = time();
+        // Klinikzugriff gilt für 2 Stunden
+        if (($current_time - $access_time) < 7200) {
+            $is_klinik_access = true;
+        } else {
+            // Zugriff abgelaufen, Session-Variablen löschen
+            unset($_SESSION['klinik_access_enr']);
+            unset($_SESSION['klinik_access_time']);
+        }
+    }
+
+    // Wenn Benutzer ausgenommen ist oder Klinikzugriff aktiv, Lockscreen-Logik überspringen
+    if (!$is_exempt_user && !$is_klinik_access) {
         $current_time = time();
         $timeout = 300; // 5 Minuten = 300 Sekunden
 

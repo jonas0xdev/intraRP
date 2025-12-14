@@ -26,6 +26,23 @@ if (isset($_GET['enr'])) {
         header("Location: " . BASE_PATH . "enotf/");
         exit();
     }
+
+    // Prüfe ob Klinikzugriff und ob auf das richtige Protokoll zugegriffen wird
+    if (isset($_SESSION['klinik_access_enr'])) {
+        if ($_SESSION['klinik_access_enr'] !== $_GET['enr']) {
+            // Zugriff auf anderes Protokoll als freigegeben - nicht erlaubt
+            header("Location: " . BASE_PATH . "enotf/schnittstelle/klinikcode.php");
+            exit();
+        }
+
+        // Prüfe ob das Protokoll noch freigegeben ist
+        if ($daten['freigegeben'] != 1) {
+            unset($_SESSION['klinik_access_enr']);
+            unset($_SESSION['klinik_access_time']);
+            header("Location: " . BASE_PATH . "enotf/schnittstelle/klinikcode.php");
+            exit();
+        }
+    }
 } else {
     header("Location: " . BASE_PATH . "enotf/");
     exit();

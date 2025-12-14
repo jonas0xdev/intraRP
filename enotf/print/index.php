@@ -59,7 +59,8 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
     <!-- Stylesheets -->
     <link rel="stylesheet" href="<?= BASE_PATH ?>assets/css/print.min.css" />
     <link rel="stylesheet" href="<?= BASE_PATH ?>vendor/fortawesome/font-awesome/css/all.min.css">
-    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/fonts/mavenpro/css/all.min.css" />
+    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/fonts/rubik/css/all.min.css" />
+    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/fonts/freehand/css/all.min.css" />
     <!-- Bootstrap -->
     <link rel="stylesheet" href="<?= BASE_PATH ?>vendor/twbs/bootstrap/dist/css/bootstrap.min.css">
     <script src="<?= BASE_PATH ?>vendor/components/jquery/jquery.min.js"></script>
@@ -87,9 +88,11 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
     <div id="topbar" class="container-fluid" data-pin-enabled="<?= $pinEnabled ?>">
         <div class="row">
             <div class="col">
-                <a href="<?= Redirects::getRedirectUrl($defaultUrl); ?>" class="topbar-btn">
-                    <i class="fa-solid fa-arrow-left"></i>
-                </a>
+                <?php if (!isset($_SESSION['klinik_access_enr'])): ?>
+                    <a href="<?= Redirects::getRedirectUrl($defaultUrl); ?>" class="topbar-btn">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </a>
+                <?php endif; ?>
             </div>
             <div class="col text-end">
                 <button type="button" class="topbar-btn" onclick="zoomOut()" title="Verkleinern">
@@ -2118,8 +2121,8 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                 </div>
                 <div class="row border border-dark border-top-0">
                     <div class="col">
-                        <h6 class="print__heading">Protokollant</h6>
-                        <span style="font-weight:600;font-size:11pt"><?= $daten['pfname'] ?? '&nbsp' ?></span>
+                        <h6 class="print__heading">Protokollant / Unterschrift</h6>
+                        <span style="font-size:11pt;font-family: 'Freehand', sans-serif"><?= $daten['pfname'] ?? '&nbsp' ?></span>
                     </div>
                 </div>
                 <div class="row border border-dark border-top-0">

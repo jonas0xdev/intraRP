@@ -340,6 +340,7 @@ $migrationFiles = [
     ['file' => 'create_intra_manv_patienten_14122025.php', 'type' => 'create'],
     ['file' => 'create_intra_manv_ressourcen_14122025.php', 'type' => 'create'],
     ['file' => 'create_intra_manv_log_14122025.php', 'type' => 'create'],
+    ['file' => 'create_intra_edivi_klinikcodes_14122025.php', 'type' => 'create'],
 ];
 
 $executed = 0;
