@@ -59,7 +59,8 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
     <!-- Stylesheets -->
     <link rel="stylesheet" href="<?= BASE_PATH ?>assets/css/print.min.css" />
     <link rel="stylesheet" href="<?= BASE_PATH ?>vendor/fortawesome/font-awesome/css/all.min.css">
-    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/fonts/mavenpro/css/all.min.css" />
+    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/fonts/rubik/css/all.min.css" />
+    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/fonts/freehand/css/all.min.css" />
     <!-- Bootstrap -->
     <link rel="stylesheet" href="<?= BASE_PATH ?>vendor/twbs/bootstrap/dist/css/bootstrap.min.css">
     <script src="<?= BASE_PATH ?>vendor/components/jquery/jquery.min.js"></script>
@@ -2120,8 +2121,8 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                 </div>
                 <div class="row border border-dark border-top-0">
                     <div class="col">
-                        <h6 class="print__heading">Protokollant</h6>
-                        <span style="font-weight:600;font-size:11pt"><?= $daten['pfname'] ?? '&nbsp' ?></span>
+                        <h6 class="print__heading">Protokollant / Unterschrift</h6>
+                        <span style="font-size:11pt;font-family: 'Freehand', sans-serif"><?= $daten['pfname'] ?? '&nbsp' ?></span>
                     </div>
                 </div>
                 <div class="row border border-dark border-top-0">
