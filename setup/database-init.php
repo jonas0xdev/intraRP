@@ -334,6 +334,12 @@ $migrationFiles = [
 
     // 09.12.2025
     ['file' => 'insert_config_09122025_bz_unit.php', 'type' => 'insert'],
+
+    // 14.12.2025
+    ['file' => 'create_intra_manv_lagen_14122025.php', 'type' => 'create'],
+    ['file' => 'create_intra_manv_patienten_14122025.php', 'type' => 'create'],
+    ['file' => 'create_intra_manv_ressourcen_14122025.php', 'type' => 'create'],
+    ['file' => 'create_intra_manv_log_14122025.php', 'type' => 'create'],
 ];
 
 $executed = 0;
