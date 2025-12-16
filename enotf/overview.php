@@ -227,7 +227,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                                 <div class="accordion-body">
                                                     <div class="row">
                                                         <div class="col-6 p-2">
-                                                            <a href="<?= BASE_PATH ?>admin" class="w-100 edivi__nidabutton" style="display:inline-block;text-align:center"><i class="fa-solid fa-toolbox"></i> Administration</a>
+                                                            <a href="<?= BASE_PATH ?>index.php" class="w-100 edivi__nidabutton" style="display:inline-block;text-align:center"><i class="fa-solid fa-toolbox"></i> Administration</a>
                                                         </div>
                                                     </div>
                                                 </div>
