@@ -72,7 +72,7 @@ $krankenhausStmt->execute();
 $krankenhaeuser = $krankenhausStmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Schnelle Sichtungskategorie-Änderung via GET
-if (isset($_GET['quick_sk']) && in_array($_GET['quick_sk'], ['SK1', 'SK2', 'SK3', 'SK4', 'tot'])) {
+if (isset($_GET['quick_sk']) && in_array($_GET['quick_sk'], ['SK1', 'SK2', 'SK3', 'SK4', 'SK5', 'SK6', 'tot'])) {
     $manvPatient->updateSichtung((int)$patientId, $_GET['quick_sk'], $_SESSION['user_id'] ?? null);
     $manvLog->log(
         (int)$patient['manv_lage_id'],
@@ -175,6 +175,8 @@ $skColors = [
     'SK2' => 'warning',
     'SK3' => 'success',
     'SK4' => 'info',
+    'SK5' => 'dark',
+    'SK6' => 'dark',
     'tot' => 'dark'
 ];
 $skColor = $skColors[$patient['sichtungskategorie']] ?? 'secondary';
@@ -332,7 +334,6 @@ $skColor = $skColors[$patient['sichtungskategorie']] ?? 'secondary';
                                         <option value="SK4" <?= $patient['sichtungskategorie'] === 'SK4' ? 'selected' : '' ?> class="text-info">SK4 - Blau</option>
                                         <option value="SK5" <?= $patient['sichtungskategorie'] === 'SK5' ? 'selected' : '' ?> style="background-color: #000; color: #fff;">SK5 - Schwarz (Tot)</option>
                                         <option value="SK6" <?= $patient['sichtungskategorie'] === 'SK6' ? 'selected' : '' ?> style="color: #9b59b6;">SK6 - Lila</option>
-                                        <option value="tot" <?= $patient['sichtungskategorie'] === 'tot' ? 'selected' : '' ?>>Tot (Legacy)</option>
                                     </select>
                                 </div>
                             </div>
