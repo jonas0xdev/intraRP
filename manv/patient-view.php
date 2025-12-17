@@ -272,6 +272,12 @@ $skColor = $skColors[$patient['sichtungskategorie']] ?? 'secondary';
                     <a href="?id=<?= $patientId ?>&quick_sk=SK4" class="btn btn-info quick-action-btn">
                         <i class="fas fa-circle me-1"></i>SK4 - Blau
                     </a>
+                    <a href="?id=<?= $patientId ?>&quick_sk=SK5" class="btn quick-action-btn" style="background-color: #000; color: #fff; border-color: #fff;">
+                        <i class="fas fa-circle me-1"></i>SK5 - Schwarz
+                    </a>
+                    <a href="?id=<?= $patientId ?>&quick_sk=SK6" class="btn quick-action-btn" style="background-color: #9b59b6; color: #fff;">
+                        <i class="fas fa-circle me-1"></i>SK6 - Lila
+                    </a>
                 </div>
             </div>
 
@@ -322,7 +328,9 @@ $skColor = $skColors[$patient['sichtungskategorie']] ?? 'secondary';
                                         <option value="SK2" <?= $patient['sichtungskategorie'] === 'SK2' ? 'selected' : '' ?> class="text-warning">SK2 - Gelb</option>
                                         <option value="SK3" <?= $patient['sichtungskategorie'] === 'SK3' ? 'selected' : '' ?> class="text-success">SK3 - Grün</option>
                                         <option value="SK4" <?= $patient['sichtungskategorie'] === 'SK4' ? 'selected' : '' ?> class="text-info">SK4 - Blau</option>
-                                        <option value="tot" <?= $patient['sichtungskategorie'] === 'tot' ? 'selected' : '' ?>>Tot</option>
+                                        <option value="SK5" <?= $patient['sichtungskategorie'] === 'SK5' ? 'selected' : '' ?> style="background-color: #000; color: #fff;">SK5 - Schwarz (Tot)</option>
+                                        <option value="SK6" <?= $patient['sichtungskategorie'] === 'SK6' ? 'selected' : '' ?> style="color: #9b59b6;">SK6 - Lila</option>
+                                        <option value="tot" <?= $patient['sichtungskategorie'] === 'tot' ? 'selected' : '' ?>>Tot (Legacy)</option>
                                     </select>
                                 </div>
                             </div>

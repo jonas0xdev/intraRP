@@ -45,6 +45,8 @@ $patientenBySK = [
     'SK2' => [],
     'SK3' => [],
     'SK4' => [],
+    'SK5' => [],
+    'SK6' => [],
     'tot' => []
 ];
 
@@ -88,8 +90,19 @@ foreach ($patienten as $patient) {
             background-color: #17a2b8 !important;
         }
 
+        .badge-sk5 {
+            background-color: #000 !important;
+            color: #fff !important;
+        }
+
+        .badge-sk6 {
+            background-color: #9b59b6 !important;
+            color: #fff !important;
+        }
+
         .badge-tot {
-            background-color: #6c757d !important;
+            background-color: #000 !important;
+            color: #fff !important;
         }
     </style>
 </head>
@@ -142,21 +155,33 @@ foreach ($patienten as $patient) {
                         <h3 class="mb-0"><?= $stats['total_patienten'] ?></h3>
                         <small class="text-muted">Gesamt</small>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-1">
                         <h3 class="mb-0 text-danger"><?= $stats['sk1'] ?></h3>
                         <small class="text-muted">SK1</small>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-1">
                         <h3 class="mb-0 text-warning"><?= $stats['sk2'] ?></h3>
                         <small class="text-muted">SK2</small>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-1">
                         <h3 class="mb-0 text-success"><?= $stats['sk3'] ?></h3>
                         <small class="text-muted">SK3</small>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-1">
                         <h3 class="mb-0 text-info"><?= $stats['sk4'] ?></h3>
                         <small class="text-muted">SK4</small>
+                    </div>
+                    <div class="col-md-1">
+                        <h3 class="mb-0" style="color: #fff;"><?= $stats['sk5'] ?? 0 ?></h3>
+                        <small class="text-muted">SK5</small>
+                    </div>
+                    <div class="col-md-1">
+                        <h3 class="mb-0" style="color: #9b59b6;"><?= $stats['sk6'] ?? 0 ?></h3>
+                        <small class="text-muted">SK6</small>
+                    </div>
+                    <div class="col-md-2">
+                        <h3 class="mb-0"><?= ($stats['tot'] ?? 0) ?></h3>
+                        <small class="text-muted">Tot (alt)</small>
                     </div>
                     <div class="col-md-2">
                         <h3 class="mb-0"><?= $stats['transportiert'] ?></h3>

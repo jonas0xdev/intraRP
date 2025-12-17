@@ -210,20 +210,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <label for="sichtungskategorie" class="form-label">Kategorie *</label>
                             <select class="form-control form-control-lg" id="sichtungskategorie" name="sichtungskategorie" required>
                                 <option value="">Bitte wählen...</option>
-                                <option value="SK1" class="text-danger">SK1 - Rot (Sofortige Behandlung)</option>
-                                <option value="SK2" class="text-warning">SK2 - Gelb (Dringende Behandlung)</option>
+                                <option value="SK1" class="text-danger">SK1 - Rot (Akute Lebensgefahr)</option>
+                                <option value="SK2" class="text-warning">SK2 - Gelb (Nicht auszuschließende schwere Folgeschäden)</option>
                                 <option value="SK3" class="text-success">SK3 - Grün (Spätere Behandlung)</option>
-                                <option value="SK4" class="text-info">SK4 - Blau (Abwartend)</option>
-                                <option value="tot">Tot</option>
+                                <option value="SK4" class="text-info">SK4 - Blau (Akute Lebensgefahr ohne zeitnahe Versorgung)</option>
+                                <option value="SK5" style="background-color: #000; color: #fff;">SK5 - Schwarz (Tot)</option>
+                                <option value="SK6" style="color: #9b59b6;">SK6 - Lila (Beteiligter ohne Verletzung)</option>
                             </select>
                         </div>
 
                         <div class="alert alert-info">
                             <small>
-                                <strong>SK1 (Rot):</strong> Akute vitale Bedrohung, sofortige Behandlung erforderlich<br>
-                                <strong>SK2 (Gelb):</strong> Schwer verletzt, dringende Behandlung innerhalb 90 Min.<br>
-                                <strong>SK3 (Grün):</strong> Leicht verletzt, spätere Behandlung möglich<br>
-                                <strong>SK4 (Blau):</strong> Ohne oder mit nur geringen Verletzungen
+                                <strong>SK1 (Rot):</strong> Akute Lebensgefahr - Sofortbehandlung und sofortiger Transport nach Stabilisierung, wenn keine Transportkapazität vorhanden dann → SK4<br>
+                                <strong>SK2 (Gelb):</strong> Nicht auszuschließende schwere Folgeschäden oder akutes, nicht lebensbedrohliches Problem - Behandlung und Transport nach individueller Dringlichkeit<br>
+                                <strong>SK3 (Grün):</strong> Spätere Behandlung bei nicht akuten Problemen ohne erwartbare Folgeschäden - Transport nach Verfügbarkeiten<br>
+                                <strong>SK4 (Blau):</strong> Akute Lebensgefahr ohne Möglichkeit der zeitnahen Versorgung (prä-)klinisch oder keine erwartbare Überlebenschance - Betreuung und ggf. Sedierung<br>
+                                <strong>SK5 (Schwarz):</strong> Verstorbene Person - Keine medizinische Maßnahme erforderlich, Leichnam sichern und dokumentieren<br>
+                                <strong>SK6 (Lila):</strong> Beteiligter / Betroffener ohne Verletzung / Erkrankung - ggf. Betreuung oder Unterbringung
                             </small>
                         </div>
                     </div>
