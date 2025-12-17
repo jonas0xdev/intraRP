@@ -175,8 +175,8 @@ $skColors = [
     'SK2' => 'warning',
     'SK3' => 'success',
     'SK4' => 'info',
-    'SK5' => 'dark',
-    'SK6' => 'dark',
+    'SK5' => 'sk5',
+    'SK6' => 'sk6',
     'tot' => 'dark'
 ];
 $skColor = $skColors[$patient['sichtungskategorie']] ?? 'secondary';
@@ -192,6 +192,16 @@ $skColor = $skColors[$patient['sichtungskategorie']] ?? 'secondary';
     <style>
         .quick-action-btn {
             margin: 0.25rem;
+        }
+
+        .bg-sk5 {
+            background-color: #000 !important;
+            color: #fff !important;
+        }
+
+        .bg-sk6 {
+            background-color: #9b59b6 !important;
+            color: #fff !important;
         }
 
         .patient-header {
