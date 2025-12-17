@@ -241,13 +241,22 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                 </div>
             </div>
     </form>
+    <?php
+    // Include Share Modals
+    if (!defined('SHARE_MODALS_INCLUDED')) {
+        define('SHARE_MODALS_INCLUDED', true);
+        include __DIR__ . '/../assets/components/enotf/share-modals.php';
+    }
+    ?>
     <script>
         var modalCloseButton = document.querySelector('#myModal4 .btn-close');
         var freigeberInput = document.getElementById('freigeber');
 
-        modalCloseButton.addEventListener('click', function() {
-            freigeberInput.value = '';
-        });
+        if (modalCloseButton && freigeberInput) {
+            modalCloseButton.addEventListener('click', function() {
+                freigeberInput.value = '';
+            });
+        }
     </script>
     <script src="<?= BASE_PATH ?>assets/js/pin_activity.js"></script>
 </body>
