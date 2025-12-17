@@ -155,11 +155,11 @@ foreach ($patienten as $patient) {
                         <h3 class="mb-0"><?= $stats['total_patienten'] ?></h3>
                         <small class="text-muted">Gesamt</small>
                     </div>
-                    <div class="col-md-1">
+                    <div class="col-md-2">
                         <h3 class="mb-0 text-danger"><?= $stats['sk1'] ?></h3>
                         <small class="text-muted">SK1</small>
                     </div>
-                    <div class="col-md-1">
+                    <div class="col-md-2">
                         <h3 class="mb-0 text-warning"><?= $stats['sk2'] ?></h3>
                         <small class="text-muted">SK2</small>
                     </div>
@@ -178,10 +178,6 @@ foreach ($patienten as $patient) {
                     <div class="col-md-1">
                         <h3 class="mb-0" style="color: #9b59b6;"><?= $stats['sk6'] ?? 0 ?></h3>
                         <small class="text-muted">SK6</small>
-                    </div>
-                    <div class="col-md-2">
-                        <h3 class="mb-0"><?= ($stats['tot'] ?? 0) ?></h3>
-                        <small class="text-muted">Tot (alt)</small>
                     </div>
                     <div class="col-md-2">
                         <h3 class="mb-0"><?= $stats['transportiert'] ?></h3>
@@ -264,7 +260,11 @@ foreach ($patienten as $patient) {
                                             <a href="<?= BASE_PATH ?>manv/patient-view.php?id=<?= $patient['id'] ?>" class="btn btn-sm btn-primary me-1">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <?php if (!$patient['transport_abfahrt'] && $patient['transportziel'] && $patient['transportziel'] !== 'Kein Transport'): ?>
+                                            <?php
+                                            // SK4, SK5, SK6 können nicht transportiert werden
+                                            $canTransport = !in_array($patient['sichtungskategorie'], ['SK4', 'SK5', 'SK6', 'tot']);
+                                            if ($canTransport && !$patient['transport_abfahrt'] && $patient['transportziel'] && $patient['transportziel'] !== 'Kein Transport'):
+                                            ?>
                                                 <button class="btn btn-sm btn-success transport-btn"
                                                     data-patient-id="<?= $patient['id'] ?>"
                                                     data-patient-nr="<?= htmlspecialchars($patient['patienten_nummer']) ?>">

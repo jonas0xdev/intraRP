@@ -340,62 +340,80 @@ $skColor = $skColors[$patient['sichtungskategorie']] ?? 'secondary';
                     <!-- Rechte Spalte -->
                     <div class="col-md-6">
                         <!-- Transport -->
-                        <div class="card mb-4">
-                            <div class="card-header">
-                                <h5 class="mb-0">Transport</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="mb-3">
-                                    <label for="transportmittel_id" class="form-label">Zugewiesenes Fahrzeug</label>
-                                    <select class="form-control" id="transportmittel_id" name="transportmittel_id">
-                                        <option value="">Noch nicht zugewiesen</option>
-                                        <?php foreach ($verfuegbareFahrzeuge as $fzg):
-                                            $selected = ($patient['transportmittel_rufname'] === $fzg['bezeichnung']) ? 'selected' : '';
-                                        ?>
-                                            <option value="<?= $fzg['id'] ?>" <?= $selected ?>
-                                                data-bezeichnung="<?= htmlspecialchars($fzg['bezeichnung']) ?>"
-                                                data-fahrzeugtyp="<?= htmlspecialchars($fzg['fahrzeugtyp'] ?? '') ?>"
-                                                data-lokalisation="<?= htmlspecialchars($fzg['lokalisation'] ?? '') ?>">
-                                                <?= htmlspecialchars($fzg['bezeichnung']) ?> - <?= htmlspecialchars($fzg['fahrzeugtyp'] ?? 'Unbekannt') ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
+                        <?php
+                        // SK4, SK5, SK6 können nicht transportiert werden
+                        $canTransport = !in_array($patient['sichtungskategorie'], ['SK4', 'SK5', 'SK6', 'tot']);
+                        ?>
+                        <?php if ($canTransport): ?>
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Transport</h5>
                                 </div>
-                                <div class="mb-3">
-                                    <label for="display_fahrzeugtyp" class="form-label">Art</label>
-                                    <input type="text" class="form-control" id="display_fahrzeugtyp" value="<?= htmlspecialchars($patient['transportmittel'] ?? '') ?>" readonly>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="display_rufname" class="form-label">Rufname / Kennung</label>
-                                    <input type="text" class="form-control" id="display_rufname" value="<?= htmlspecialchars($patient['transportmittel_rufname'] ?? '') ?>" readonly>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="display_lokalisation" class="form-label">Fahrzeug-Lokalisation</label>
-                                    <input type="text" class="form-control" id="display_lokalisation" value="<?= htmlspecialchars($patient['fahrzeug_lokalisation'] ?? '') ?>" readonly>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="transportziel" class="form-label">Transportziel</label>
-                                    <select class="form-control" id="transportziel" name="transportziel">
-                                        <option value="">Bitte wählen...</option>
-                                        <option value="Kein Transport" <?= ($patient['transportziel'] === 'Kein Transport') ? 'selected' : '' ?>>Kein Transport</option>
-                                        <?php foreach ($krankenhaeuser as $kh): ?>
-                                            <option value="<?= htmlspecialchars($kh['name']) ?>" <?= ($patient['transportziel'] === $kh['name']) ? 'selected' : '' ?>>
-                                                <?= htmlspecialchars($kh['name']) ?><?= !empty($kh['ort']) ? ' (' . htmlspecialchars($kh['ort']) . ')' : '' ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-
-                                <?php if ($patient['transport_abfahrt']): ?>
-                                    <div class="info-box">
-                                        <small class="text-muted">
-                                            <i class="fas fa-clock me-1"></i>
-                                            Abfahrt: <?= date('d.m.Y H:i', strtotime($patient['transport_abfahrt'])) ?>
-                                        </small>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="transportmittel_id" class="form-label">Zugewiesenes Fahrzeug</label>
+                                        <select class="form-control" id="transportmittel_id" name="transportmittel_id">
+                                            <option value="">Noch nicht zugewiesen</option>
+                                            <?php foreach ($verfuegbareFahrzeuge as $fzg):
+                                                $selected = ($patient['transportmittel_rufname'] === $fzg['bezeichnung']) ? 'selected' : '';
+                                            ?>
+                                                <option value="<?= $fzg['id'] ?>" <?= $selected ?>
+                                                    data-bezeichnung="<?= htmlspecialchars($fzg['bezeichnung']) ?>"
+                                                    data-fahrzeugtyp="<?= htmlspecialchars($fzg['fahrzeugtyp'] ?? '') ?>"
+                                                    data-lokalisation="<?= htmlspecialchars($fzg['lokalisation'] ?? '') ?>">
+                                                    <?= htmlspecialchars($fzg['bezeichnung']) ?> - <?= htmlspecialchars($fzg['fahrzeugtyp'] ?? 'Unbekannt') ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
                                     </div>
-                                <?php endif; ?>
+                                    <div class="mb-3">
+                                        <label for="display_fahrzeugtyp" class="form-label">Art</label>
+                                        <input type="text" class="form-control" id="display_fahrzeugtyp" value="<?= htmlspecialchars($patient['transportmittel'] ?? '') ?>" readonly>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="display_rufname" class="form-label">Rufname / Kennung</label>
+                                        <input type="text" class="form-control" id="display_rufname" value="<?= htmlspecialchars($patient['transportmittel_rufname'] ?? '') ?>" readonly>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="display_lokalisation" class="form-label">Fahrzeug-Lokalisation</label>
+                                        <input type="text" class="form-control" id="display_lokalisation" value="<?= htmlspecialchars($patient['fahrzeug_lokalisation'] ?? '') ?>" readonly>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="transportziel" class="form-label">Transportziel</label>
+                                        <select class="form-control" id="transportziel" name="transportziel">
+                                            <option value="">Bitte wählen...</option>
+                                            <option value="Kein Transport" <?= ($patient['transportziel'] === 'Kein Transport') ? 'selected' : '' ?>>Kein Transport</option>
+                                            <?php foreach ($krankenhaeuser as $kh): ?>
+                                                <option value="<?= htmlspecialchars($kh['name']) ?>" <?= ($patient['transportziel'] === $kh['name']) ? 'selected' : '' ?>>
+                                                    <?= htmlspecialchars($kh['name']) ?><?= !empty($kh['ort']) ? ' (' . htmlspecialchars($kh['ort']) . ')' : '' ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+
+                                    <?php if ($patient['transport_abfahrt']): ?>
+                                        <div class="info-box">
+                                            <small class="text-muted">
+                                                <i class="fas fa-clock me-1"></i>
+                                                Abfahrt: <?= date('d.m.Y H:i', strtotime($patient['transport_abfahrt'])) ?>
+                                            </small>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
                             </div>
-                        </div>
+                        <?php else: ?>
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Transport</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="alert alert-info mb-0">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Patienten mit Sichtungskategorie <?= htmlspecialchars($patient['sichtungskategorie']) ?> werden nicht transportiert.
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endif; ?>
 
                         <!-- Medizinische Informationen -->
                         <div class="card mb-4">
