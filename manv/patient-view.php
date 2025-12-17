@@ -38,9 +38,11 @@ if (!$patient) {
 $lage = $manvLage->getById((int)$patient['manv_lage_id']);
 
 // Lade verfügbare Fahrzeuge aus Ressourcen (nur nicht zugewiesene + aktuelles Fahrzeug)
+// JOIN mit intra_fahrzeuge um rd_type zu laden (2 = Transportmittel)
 $verfuegbareFahrzeugeStmt = $pdo->prepare("
-    SELECT r.* 
+    SELECT r.*, f.rd_type 
     FROM intra_manv_ressourcen r
+    LEFT JOIN intra_fahrzeuge f ON r.rufname = f.identifier OR r.bezeichnung = f.name
     WHERE r.manv_lage_id = ? 
     AND r.typ = 'fahrzeug'
     AND (
@@ -206,7 +208,7 @@ $skColor = $skColors[$patient['sichtungskategorie']] ?? 'secondary';
     </style>
 </head>
 
-<body data-bs-theme="dark" id="patient-view">
+<body data-bs-theme="dark" id="patient-view" data-page="edivi">
     <?php include __DIR__ . '/../assets/components/navbar.php'; ?>
     <div class="container-full position-relative" id="mainpageContainer">
         <div class="container">
@@ -272,6 +274,12 @@ $skColor = $skColors[$patient['sichtungskategorie']] ?? 'secondary';
                     <a href="?id=<?= $patientId ?>&quick_sk=SK4" class="btn btn-info quick-action-btn">
                         <i class="fas fa-circle me-1"></i>SK4 - Blau
                     </a>
+                    <a href="?id=<?= $patientId ?>&quick_sk=SK5" class="btn quick-action-btn" style="background-color: #000; color: #fff; border-color: #fff;">
+                        <i class="fas fa-circle me-1"></i>SK5 - Schwarz
+                    </a>
+                    <a href="?id=<?= $patientId ?>&quick_sk=SK6" class="btn quick-action-btn" style="background-color: #9b59b6; color: #fff;">
+                        <i class="fas fa-circle me-1"></i>SK6 - Lila
+                    </a>
                 </div>
             </div>
 
@@ -322,7 +330,9 @@ $skColor = $skColors[$patient['sichtungskategorie']] ?? 'secondary';
                                         <option value="SK2" <?= $patient['sichtungskategorie'] === 'SK2' ? 'selected' : '' ?> class="text-warning">SK2 - Gelb</option>
                                         <option value="SK3" <?= $patient['sichtungskategorie'] === 'SK3' ? 'selected' : '' ?> class="text-success">SK3 - Grün</option>
                                         <option value="SK4" <?= $patient['sichtungskategorie'] === 'SK4' ? 'selected' : '' ?> class="text-info">SK4 - Blau</option>
-                                        <option value="tot" <?= $patient['sichtungskategorie'] === 'tot' ? 'selected' : '' ?>>Tot</option>
+                                        <option value="SK5" <?= $patient['sichtungskategorie'] === 'SK5' ? 'selected' : '' ?> style="background-color: #000; color: #fff;">SK5 - Schwarz (Tot)</option>
+                                        <option value="SK6" <?= $patient['sichtungskategorie'] === 'SK6' ? 'selected' : '' ?> style="color: #9b59b6;">SK6 - Lila</option>
+                                        <option value="tot" <?= $patient['sichtungskategorie'] === 'tot' ? 'selected' : '' ?>>Tot (Legacy)</option>
                                     </select>
                                 </div>
                             </div>
@@ -331,23 +341,28 @@ $skColor = $skColors[$patient['sichtungskategorie']] ?? 'secondary';
 
                     <!-- Rechte Spalte -->
                     <div class="col-md-6">
-                        <!-- Transport -->
+                        <!-- Transport / Fahrzeugzuweisung -->
+                        <?php
+                        // SK4, SK5, SK6 und Tot können nicht transportiert werden, aber Fahrzeuge zugewiesen bekommen
+                        $canTransport = !in_array($patient['sichtungskategorie'], ['SK4', 'SK5', 'SK6', 'tot']);
+                        ?>
                         <div class="card mb-4">
                             <div class="card-header">
-                                <h5 class="mb-0">Transport</h5>
+                                <h5 class="mb-0"><?= $canTransport ? 'Transport' : 'Fahrzeugzuweisung' ?></h5>
                             </div>
                             <div class="card-body">
                                 <div class="mb-3">
                                     <label for="transportmittel_id" class="form-label">Zugewiesenes Fahrzeug</label>
                                     <select class="form-control" id="transportmittel_id" name="transportmittel_id">
-                                        <option value="">Noch nicht zugewiesen</option>
+                                        <option value="" data-rdtype="">Noch nicht zugewiesen</option>
                                         <?php foreach ($verfuegbareFahrzeuge as $fzg):
                                             $selected = ($patient['transportmittel_rufname'] === $fzg['bezeichnung']) ? 'selected' : '';
                                         ?>
                                             <option value="<?= $fzg['id'] ?>" <?= $selected ?>
                                                 data-bezeichnung="<?= htmlspecialchars($fzg['bezeichnung']) ?>"
                                                 data-fahrzeugtyp="<?= htmlspecialchars($fzg['fahrzeugtyp'] ?? '') ?>"
-                                                data-lokalisation="<?= htmlspecialchars($fzg['lokalisation'] ?? '') ?>">
+                                                data-lokalisation="<?= htmlspecialchars($fzg['lokalisation'] ?? '') ?>"
+                                                data-rdtype="<?= isset($fzg['rd_type']) ? (int)$fzg['rd_type'] : '' ?>">
                                                 <?= htmlspecialchars($fzg['bezeichnung']) ?> - <?= htmlspecialchars($fzg['fahrzeugtyp'] ?? 'Unbekannt') ?>
                                             </option>
                                         <?php endforeach; ?>
@@ -365,20 +380,22 @@ $skColor = $skColors[$patient['sichtungskategorie']] ?? 'secondary';
                                     <label for="display_lokalisation" class="form-label">Fahrzeug-Lokalisation</label>
                                     <input type="text" class="form-control" id="display_lokalisation" value="<?= htmlspecialchars($patient['fahrzeug_lokalisation'] ?? '') ?>" readonly>
                                 </div>
-                                <div class="mb-3">
-                                    <label for="transportziel" class="form-label">Transportziel</label>
-                                    <select class="form-control" id="transportziel" name="transportziel">
-                                        <option value="">Bitte wählen...</option>
-                                        <option value="Kein Transport" <?= ($patient['transportziel'] === 'Kein Transport') ? 'selected' : '' ?>>Kein Transport</option>
-                                        <?php foreach ($krankenhaeuser as $kh): ?>
-                                            <option value="<?= htmlspecialchars($kh['name']) ?>" <?= ($patient['transportziel'] === $kh['name']) ? 'selected' : '' ?>>
-                                                <?= htmlspecialchars($kh['name']) ?><?= !empty($kh['ort']) ? ' (' . htmlspecialchars($kh['ort']) . ')' : '' ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
+                                <?php if ($canTransport): ?>
+                                    <div class="mb-3">
+                                        <label for="transportziel" class="form-label">Transportziel</label>
+                                        <select class="form-control" id="transportziel" name="transportziel">
+                                            <option value="">Bitte wählen...</option>
+                                            <option value="Kein Transport" <?= ($patient['transportziel'] === 'Kein Transport') ? 'selected' : '' ?>>Kein Transport</option>
+                                            <?php foreach ($krankenhaeuser as $kh): ?>
+                                                <option value="<?= htmlspecialchars($kh['name']) ?>" <?= ($patient['transportziel'] === $kh['name']) ? 'selected' : '' ?>>
+                                                    <?= htmlspecialchars($kh['name']) ?><?= !empty($kh['ort']) ? ' (' . htmlspecialchars($kh['ort']) . ')' : '' ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                <?php endif; ?>
 
-                                <?php if ($patient['transport_abfahrt']): ?>
+                                <?php if ($canTransport && $patient['transport_abfahrt']): ?>
                                     <div class="info-box">
                                         <small class="text-muted">
                                             <i class="fas fa-clock me-1"></i>
@@ -427,17 +444,43 @@ $skColor = $skColors[$patient['sichtungskategorie']] ?? 'secondary';
     <?php include __DIR__ . '/../assets/components/footer.php'; ?>
 
     <script>
-        // Auto-update readonly fields when vehicle is selected
+        // Auto-update readonly fields and transportziel visibility when vehicle is selected
         document.getElementById('transportmittel_id').addEventListener('change', function() {
             const selectedOption = this.options[this.selectedIndex];
+            const transportzielGroup = document.getElementById('transportziel')?.closest('.mb-3');
+
             if (selectedOption.value) {
                 document.getElementById('display_rufname').value = selectedOption.dataset.bezeichnung || '';
                 document.getElementById('display_fahrzeugtyp').value = selectedOption.dataset.fahrzeugtyp || '';
                 document.getElementById('display_lokalisation').value = selectedOption.dataset.lokalisation || '';
+
+                // Zeige/verstecke Transportziel nur wenn Fahrzeug ein Rettungsdienstfahrzeug ist (rd_type >= 1)
+                const rdType = parseInt(selectedOption.dataset.rdtype);
+                if (transportzielGroup) {
+                    if (rdType >= 1) {
+                        transportzielGroup.style.display = 'block';
+                    } else {
+                        transportzielGroup.style.display = 'none';
+                        document.getElementById('transportziel').value = 'Kein Transport';
+                    }
+                }
             } else {
                 document.getElementById('display_rufname').value = '';
                 document.getElementById('display_fahrzeugtyp').value = '';
                 document.getElementById('display_lokalisation').value = '';
+
+                // Zeige Transportziel wenn kein Fahrzeug ausgewählt
+                if (transportzielGroup) {
+                    transportzielGroup.style.display = 'block';
+                }
+            }
+        });
+
+        // Initial check on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectElement = document.getElementById('transportmittel_id');
+            if (selectElement) {
+                selectElement.dispatchEvent(new Event('change'));
             }
         });
     </script>

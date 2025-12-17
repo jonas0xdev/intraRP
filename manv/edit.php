@@ -87,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ?>
 </head>
 
-<body data-bs-theme="dark" id="manv-edit">
+<body data-bs-theme="dark" id="manv-edit" data-page="edivi">
     <?php include __DIR__ . '/../assets/components/navbar.php'; ?>
     <div class="container-full position-relative" id="mainpageContainer">
         <div class="container">

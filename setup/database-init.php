@@ -341,6 +341,10 @@ $migrationFiles = [
     ['file' => 'create_intra_manv_ressourcen_14122025.php', 'type' => 'create'],
     ['file' => 'create_intra_manv_log_14122025.php', 'type' => 'create'],
     ['file' => 'create_intra_edivi_klinikcodes_14122025.php', 'type' => 'create'],
+
+    // 17.12.2025
+    ['file' => 'alter_intra_manv_patienten_17122025.php', 'type' => 'alter'],
+    ['file' => 'create_intra_edivi_share_requests_17122025.php', 'type' => 'create'],
 ];
 
 $executed = 0;

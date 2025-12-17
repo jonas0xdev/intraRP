@@ -75,7 +75,7 @@ $users = $usersStmt->fetchAll(PDO::FETCH_ASSOC);
     ?>
 </head>
 
-<body data-bs-theme="dark" id="manv-create">
+<body data-bs-theme="dark" id="manv-create" data-page="edivi">
     <?php include __DIR__ . '/../assets/components/navbar.php'; ?>
     <div class="container-full position-relative" id="mainpageContainer">
         <div class="container">

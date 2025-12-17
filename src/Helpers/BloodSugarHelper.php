@@ -67,6 +67,11 @@ class BloodSugarHelper
      */
     public function toDisplayUnit($value): float
     {
+        // Behandle 'ng' (nicht gemessen) als 0 für numerische Berechnungen
+        if (is_string($value) && strtolower(trim($value)) === 'ng') {
+            return 0;
+        }
+
         if ($this->currentUnit === 'mmol/l') {
             return self::mgToMmol($value);
         }
@@ -84,6 +89,11 @@ class BloodSugarHelper
      */
     public function toStorageUnit($value): float
     {
+        // Behandle 'ng' (nicht gemessen) als 0 für Storage
+        if (is_string($value) && strtolower(trim($value)) === 'ng') {
+            return 0;
+        }
+
         if ($this->currentUnit === 'mmol/l') {
             return self::mmolToMg($value);
         }
@@ -101,6 +111,11 @@ class BloodSugarHelper
      */
     public function formatValue($value, bool $includeUnit = true): string
     {
+        // Behandle 'ng' (nicht gemessen) als Spezialfall
+        if (is_string($value) && strtolower(trim($value)) === 'ng') {
+            return 'ng';
+        }
+
         $displayValue = $this->toDisplayUnit($value);
 
         if ($this->currentUnit === 'mmol/l') {

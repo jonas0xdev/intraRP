@@ -25,6 +25,11 @@ use App\Auth\Permissions;
                     <i class="fa-solid fa-sync"></i><br>
                     <small>Art ändern</small>
                 </a>
+
+                <button onclick="openShareProtocol(<?= $daten['id'] ?>, '<?= $enr ?>')" id="share" class="edivi__iconlink">
+                    <i class="fa-solid fa-share-nodes"></i><br>
+                    <small>Teilen</small>
+                </button>
             <?php endif; ?>
 
             <a href="<?= BASE_PATH ?>enotf/print/index.php?enr=<?= $enr ?>" id="print" class="edivi__iconlink">
@@ -59,6 +64,12 @@ use App\Auth\Permissions;
 if (!defined('QM_MODALS_INCLUDED')) {
     define('QM_MODALS_INCLUDED', true);
     include __DIR__ . '/qm-modals.php';
+}
+
+// Include Share Modals if they haven't been included yet
+if (!defined('SHARE_MODALS_INCLUDED')) {
+    define('SHARE_MODALS_INCLUDED', true);
+    include __DIR__ . '/share-modals.php';
 }
 ?>
 <?php if ($daten['freigegeben'] == 1 && $daten['hidden_user'] != 1) : ?>

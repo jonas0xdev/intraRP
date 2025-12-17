@@ -131,6 +131,8 @@ class MANVLage
             'sk2' => 0,
             'sk3' => 0,
             'sk4' => 0,
+            'sk5' => 0,
+            'sk6' => 0,
             'tot' => 0,
             'transportiert' => 0,
             'wartend' => 0
@@ -142,6 +144,8 @@ class MANVLage
                     SUM(CASE WHEN sichtungskategorie = 'SK2' THEN 1 ELSE 0 END) as sk2,
                     SUM(CASE WHEN sichtungskategorie = 'SK3' THEN 1 ELSE 0 END) as sk3,
                     SUM(CASE WHEN sichtungskategorie = 'SK4' THEN 1 ELSE 0 END) as sk4,
+                    SUM(CASE WHEN sichtungskategorie = 'SK5' THEN 1 ELSE 0 END) as sk5,
+                    SUM(CASE WHEN sichtungskategorie = 'SK6' THEN 1 ELSE 0 END) as sk6,
                     SUM(CASE WHEN sichtungskategorie = 'tot' THEN 1 ELSE 0 END) as tot,
                     SUM(CASE WHEN transport_abfahrt IS NOT NULL THEN 1 ELSE 0 END) as transportiert,
                     SUM(CASE WHEN transport_abfahrt IS NULL AND sichtungskategorie IS NOT NULL THEN 1 ELSE 0 END) as wartend
@@ -158,6 +162,8 @@ class MANVLage
             $stats['sk2'] = (int)$result['sk2'];
             $stats['sk3'] = (int)$result['sk3'];
             $stats['sk4'] = (int)$result['sk4'];
+            $stats['sk5'] = (int)$result['sk5'];
+            $stats['sk6'] = (int)$result['sk6'];
             $stats['tot'] = (int)$result['tot'];
             $stats['transportiert'] = (int)$result['transportiert'];
             $stats['wartend'] = (int)$result['wartend'];

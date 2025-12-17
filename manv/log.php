@@ -45,7 +45,7 @@ $logEntries = $manvLog->getByLage((int)$lageId, 200);
     ?>
 </head>
 
-<body data-bs-theme="dark" id="manv-log">
+<body data-bs-theme="dark" id="manv-log" data-page="edivi">
     <?php include __DIR__ . '/../assets/components/navbar.php'; ?>
     <div class="container-full position-relative" id="mainpageContainer">
         <div class="container">

@@ -52,7 +52,10 @@ $bzUnit = $bzHelper->getCurrentUnit();
 
 // Konvertiere Blutzucker für Anzeige
 if (!empty($daten['bz'])) {
-    $daten['bz'] = $bzHelper->formatValue($daten['bz'], false);
+    // Behalte 'ng' (nicht gemessen) unverändert
+    if (strtolower(trim($daten['bz'])) !== 'ng') {
+        $daten['bz'] = $bzHelper->formatValue($daten['bz'], false);
+    }
 }
 
 $prot_url = "https://" . SYSTEM_URL . "/enotf/protokoll/index.php?enr=" . $enr;
@@ -693,10 +696,20 @@ $currentDateTime = date('Y-m-d\TH:i');
                     const k = e.key;
 
                     if (/^[a-zA-Z]$/.test(k)) {
-                        const next = (String(this.value || '') + k).trim().toLowerCase();
-                        if (next !== 'n' && next !== 'ng') {
-                            e.preventDefault();
+                        const currentValue = String(this.value || '').trim().toLowerCase();
+                        const inputLower = k.toLowerCase();
+
+                        // Erlaube 'n' wenn Feld leer ist
+                        if (currentValue === '' && inputLower === 'n') {
+                            return;
                         }
+                        // Erlaube 'g' wenn aktueller Wert 'n' ist
+                        if (currentValue === 'n' && inputLower === 'g') {
+                            return;
+                        }
+
+                        // Alle anderen Buchstaben blockieren
+                        e.preventDefault();
                         return;
                     }
 
