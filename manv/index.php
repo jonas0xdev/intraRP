@@ -18,7 +18,15 @@ if (!Permissions::check(['admin', 'manv.manage'])) {
 }
 
 $manvLage = new MANVLage($pdo);
-$lagen = $manvLage->getAll('aktiv');
+
+// Status-Filter auslesen (Standard: aktiv)
+$statusFilter = $_GET['status'] ?? 'aktiv';
+$allowedStatus = ['aktiv', 'abgeschlossen', 'archiviert'];
+if (!in_array($statusFilter, $allowedStatus)) {
+    $statusFilter = 'aktiv';
+}
+
+$lagen = $manvLage->getAll($statusFilter);
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -53,14 +61,27 @@ $lagen = $manvLage->getAll('aktiv');
     </style>
 </head>
 
-<body data-bs-theme="dark" id="manv-overview">
+<body data-bs-theme="dark" id="manv-overview" data-page="edivi">
     <?php include __DIR__ . '/../assets/components/navbar.php'; ?>
     <div class="container-full position-relative" id="mainpageContainer">
         <div class="container">
             <hr class="text-light my-3">
             <div class="row mb-5">
                 <div class="col-md-8">
-                    <h1>MANV-Übersicht</h1>
+                    <?php if ($statusFilter !== 'aktiv'): ?>
+                        <a href="<?= BASE_PATH ?>manv/index.php" class="btn btn-secondary mb-3">
+                            <i class="fas fa-arrow-left me-2"></i>Zurück zu aktiven Lagen
+                        </a>
+                    <?php endif; ?>
+                    <h1>MANV-Übersicht
+                        <?php
+                        if ($statusFilter === 'abgeschlossen') {
+                            echo '<small class="text-muted ms-2">(Abgeschlossene Lagen)</small>';
+                        } elseif ($statusFilter === 'archiviert') {
+                            echo '<small class="text-muted ms-2">(Archivierte Lagen)</small>';
+                        }
+                        ?>
+                    </h1>
                     <p class="text-muted">Massenanfall von Verletzten - Lagenverwaltung</p>
                 </div>
                 <div class="col-md-4 text-end">
@@ -73,7 +94,15 @@ $lagen = $manvLage->getAll('aktiv');
             <?php if (empty($lagen)): ?>
                 <div class="alert alert-info">
                     <i class="fas fa-info-circle me-2"></i>
-                    Derzeit sind keine aktiven MANV-Lagen vorhanden.
+                    <?php
+                    if ($statusFilter === 'abgeschlossen') {
+                        echo 'Derzeit sind keine abgeschlossenen MANV-Lagen vorhanden.';
+                    } elseif ($statusFilter === 'archiviert') {
+                        echo 'Derzeit sind keine archivierten MANV-Lagen vorhanden.';
+                    } else {
+                        echo 'Derzeit sind keine aktiven MANV-Lagen vorhanden.';
+                    }
+                    ?>
                 </div>
             <?php else: ?>
                 <div class="row">
@@ -86,7 +115,18 @@ $lagen = $manvLage->getAll('aktiv');
                                     <h5 class="mb-0">
                                         <i class="fas fa-map-marker-alt me-2"></i><?= htmlspecialchars($lage['einsatznummer']) ?>
                                     </h5>
-                                    <span class="badge bg-success status-badge">Aktiv</span>
+                                    <?php
+                                    $statusClass = 'bg-success';
+                                    $statusText = 'Aktiv';
+                                    if ($lage['status'] === 'abgeschlossen') {
+                                        $statusClass = 'bg-warning';
+                                        $statusText = 'Abgeschlossen';
+                                    } elseif ($lage['status'] === 'archiviert') {
+                                        $statusClass = 'bg-secondary';
+                                        $statusText = 'Archiviert';
+                                    }
+                                    ?>
+                                    <span class="badge <?= $statusClass ?> status-badge"><?= $statusText ?></span>
                                 </div>
                                 <div class="card-body">
                                     <h6 class="card-subtitle mb-3 text-muted">
@@ -149,17 +189,17 @@ $lagen = $manvLage->getAll('aktiv');
                 </div>
             <?php endif; ?>
 
-            <div class="row mt-4">
+            <div class="row mt-4 mb-5">
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header">
                             <h5 class="mb-0">Archivierte Lagen</h5>
                         </div>
                         <div class="card-body">
-                            <a href="list.php?status=abgeschlossen" class="btn btn-secondary">
+                            <a href="<?= BASE_PATH ?>manv/index.php?status=abgeschlossen" class="btn btn-secondary">
                                 <i class="fas fa-archive me-2"></i>Abgeschlossene Lagen anzeigen
                             </a>
-                            <a href="list.php?status=archiviert" class="btn btn-secondary ms-2">
+                            <a href="<?= BASE_PATH ?>manv/index.php?status=archiviert" class="btn btn-secondary ms-2">
                                 <i class="fas fa-archive me-2"></i>Archivierte Lagen anzeigen
                             </a>
                         </div>

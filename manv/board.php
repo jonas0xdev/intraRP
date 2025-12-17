@@ -39,6 +39,26 @@ $stats = $manvLage->getStatistics((int)$lageId);
 $patienten = $manvPatient->getByLage((int)$lageId);
 $ressourcen = $manvRessource->getByLage((int)$lageId, 'fahrzeug');
 
+// Reichere Patienten-Daten mit Fahrzeug rd_type an
+foreach ($patienten as &$patient) {
+    if (!empty($patient['transportmittel_rufname'])) {
+        $fahrzeugStmt = $pdo->prepare("
+            SELECT f.rd_type 
+            FROM intra_manv_ressourcen r
+            LEFT JOIN intra_fahrzeuge f ON r.rufname = f.identifier OR r.bezeichnung = f.name
+            WHERE r.manv_lage_id = ? 
+            AND r.rufname = ?
+            LIMIT 1
+        ");
+        $fahrzeugStmt->execute([(int)$lageId, $patient['transportmittel_rufname']]);
+        $fahrzeugData = $fahrzeugStmt->fetch(PDO::FETCH_ASSOC);
+        $patient['fahrzeug_rd_type'] = $fahrzeugData['rd_type'] ?? null;
+    } else {
+        $patient['fahrzeug_rd_type'] = null;
+    }
+}
+unset($patient);
+
 // Patienten nach Sichtungskategorie gruppieren
 $patientenBySK = [
     'SK1' => [],
@@ -107,7 +127,7 @@ foreach ($patienten as $patient) {
     </style>
 </head>
 
-<body data-bs-theme="dark" id="manv-board">
+<body data-bs-theme="dark" id="manv-board" data-page="edivi">
     <?php include __DIR__ . '/../assets/components/navbar.php'; ?>
     <div class="container-full position-relative" id="mainpageContainer">
         <div class="container">
@@ -262,8 +282,10 @@ foreach ($patienten as $patient) {
                                             </a>
                                             <?php
                                             // SK4, SK5, SK6 können nicht transportiert werden
+                                            // Nur Rettungsdienstfahrzeuge (rd_type >= 1) können transportieren, keine Feuerwehr (rd_type = 0)
                                             $canTransport = !in_array($patient['sichtungskategorie'], ['SK4', 'SK5', 'SK6', 'tot']);
-                                            if ($canTransport && !$patient['transport_abfahrt'] && $patient['transportziel'] && $patient['transportziel'] !== 'Kein Transport'):
+                                            $isTransportVehicle = isset($patient['fahrzeug_rd_type']) && (int)$patient['fahrzeug_rd_type'] >= 1;
+                                            if ($canTransport && $isTransportVehicle && !$patient['transport_abfahrt'] && $patient['transportziel'] && $patient['transportziel'] !== 'Kein Transport'):
                                             ?>
                                                 <button class="btn btn-sm btn-success transport-btn"
                                                     data-patient-id="<?= $patient['id'] ?>"

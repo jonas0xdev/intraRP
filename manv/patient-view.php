@@ -38,9 +38,11 @@ if (!$patient) {
 $lage = $manvLage->getById((int)$patient['manv_lage_id']);
 
 // Lade verfügbare Fahrzeuge aus Ressourcen (nur nicht zugewiesene + aktuelles Fahrzeug)
+// JOIN mit intra_fahrzeuge um rd_type zu laden (2 = Transportmittel)
 $verfuegbareFahrzeugeStmt = $pdo->prepare("
-    SELECT r.* 
+    SELECT r.*, f.rd_type 
     FROM intra_manv_ressourcen r
+    LEFT JOIN intra_fahrzeuge f ON r.rufname = f.identifier OR r.bezeichnung = f.name
     WHERE r.manv_lage_id = ? 
     AND r.typ = 'fahrzeug'
     AND (
@@ -206,7 +208,7 @@ $skColor = $skColors[$patient['sichtungskategorie']] ?? 'secondary';
     </style>
 </head>
 
-<body data-bs-theme="dark" id="patient-view">
+<body data-bs-theme="dark" id="patient-view" data-page="edivi">
     <?php include __DIR__ . '/../assets/components/navbar.php'; ?>
     <div class="container-full position-relative" id="mainpageContainer">
         <div class="container">
@@ -339,45 +341,46 @@ $skColor = $skColors[$patient['sichtungskategorie']] ?? 'secondary';
 
                     <!-- Rechte Spalte -->
                     <div class="col-md-6">
-                        <!-- Transport -->
+                        <!-- Transport / Fahrzeugzuweisung -->
                         <?php
-                        // SK4, SK5, SK6 können nicht transportiert werden
+                        // SK4, SK5, SK6 und Tot können nicht transportiert werden, aber Fahrzeuge zugewiesen bekommen
                         $canTransport = !in_array($patient['sichtungskategorie'], ['SK4', 'SK5', 'SK6', 'tot']);
                         ?>
-                        <?php if ($canTransport): ?>
-                            <div class="card mb-4">
-                                <div class="card-header">
-                                    <h5 class="mb-0">Transport</h5>
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0"><?= $canTransport ? 'Transport' : 'Fahrzeugzuweisung' ?></h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="transportmittel_id" class="form-label">Zugewiesenes Fahrzeug</label>
+                                    <select class="form-control" id="transportmittel_id" name="transportmittel_id">
+                                        <option value="" data-rdtype="">Noch nicht zugewiesen</option>
+                                        <?php foreach ($verfuegbareFahrzeuge as $fzg):
+                                            $selected = ($patient['transportmittel_rufname'] === $fzg['bezeichnung']) ? 'selected' : '';
+                                        ?>
+                                            <option value="<?= $fzg['id'] ?>" <?= $selected ?>
+                                                data-bezeichnung="<?= htmlspecialchars($fzg['bezeichnung']) ?>"
+                                                data-fahrzeugtyp="<?= htmlspecialchars($fzg['fahrzeugtyp'] ?? '') ?>"
+                                                data-lokalisation="<?= htmlspecialchars($fzg['lokalisation'] ?? '') ?>"
+                                                data-rdtype="<?= isset($fzg['rd_type']) ? (int)$fzg['rd_type'] : '' ?>">
+                                                <?= htmlspecialchars($fzg['bezeichnung']) ?> - <?= htmlspecialchars($fzg['fahrzeugtyp'] ?? 'Unbekannt') ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
                                 </div>
-                                <div class="card-body">
-                                    <div class="mb-3">
-                                        <label for="transportmittel_id" class="form-label">Zugewiesenes Fahrzeug</label>
-                                        <select class="form-control" id="transportmittel_id" name="transportmittel_id">
-                                            <option value="">Noch nicht zugewiesen</option>
-                                            <?php foreach ($verfuegbareFahrzeuge as $fzg):
-                                                $selected = ($patient['transportmittel_rufname'] === $fzg['bezeichnung']) ? 'selected' : '';
-                                            ?>
-                                                <option value="<?= $fzg['id'] ?>" <?= $selected ?>
-                                                    data-bezeichnung="<?= htmlspecialchars($fzg['bezeichnung']) ?>"
-                                                    data-fahrzeugtyp="<?= htmlspecialchars($fzg['fahrzeugtyp'] ?? '') ?>"
-                                                    data-lokalisation="<?= htmlspecialchars($fzg['lokalisation'] ?? '') ?>">
-                                                    <?= htmlspecialchars($fzg['bezeichnung']) ?> - <?= htmlspecialchars($fzg['fahrzeugtyp'] ?? 'Unbekannt') ?>
-                                                </option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="display_fahrzeugtyp" class="form-label">Art</label>
-                                        <input type="text" class="form-control" id="display_fahrzeugtyp" value="<?= htmlspecialchars($patient['transportmittel'] ?? '') ?>" readonly>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="display_rufname" class="form-label">Rufname / Kennung</label>
-                                        <input type="text" class="form-control" id="display_rufname" value="<?= htmlspecialchars($patient['transportmittel_rufname'] ?? '') ?>" readonly>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="display_lokalisation" class="form-label">Fahrzeug-Lokalisation</label>
-                                        <input type="text" class="form-control" id="display_lokalisation" value="<?= htmlspecialchars($patient['fahrzeug_lokalisation'] ?? '') ?>" readonly>
-                                    </div>
+                                <div class="mb-3">
+                                    <label for="display_fahrzeugtyp" class="form-label">Art</label>
+                                    <input type="text" class="form-control" id="display_fahrzeugtyp" value="<?= htmlspecialchars($patient['transportmittel'] ?? '') ?>" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="display_rufname" class="form-label">Rufname / Kennung</label>
+                                    <input type="text" class="form-control" id="display_rufname" value="<?= htmlspecialchars($patient['transportmittel_rufname'] ?? '') ?>" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="display_lokalisation" class="form-label">Fahrzeug-Lokalisation</label>
+                                    <input type="text" class="form-control" id="display_lokalisation" value="<?= htmlspecialchars($patient['fahrzeug_lokalisation'] ?? '') ?>" readonly>
+                                </div>
+                                <?php if ($canTransport): ?>
                                     <div class="mb-3">
                                         <label for="transportziel" class="form-label">Transportziel</label>
                                         <select class="form-control" id="transportziel" name="transportziel">
@@ -390,30 +393,18 @@ $skColor = $skColors[$patient['sichtungskategorie']] ?? 'secondary';
                                             <?php endforeach; ?>
                                         </select>
                                     </div>
+                                <?php endif; ?>
 
-                                    <?php if ($patient['transport_abfahrt']): ?>
-                                        <div class="info-box">
-                                            <small class="text-muted">
-                                                <i class="fas fa-clock me-1"></i>
-                                                Abfahrt: <?= date('d.m.Y H:i', strtotime($patient['transport_abfahrt'])) ?>
-                                            </small>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                        <?php else: ?>
-                            <div class="card mb-4">
-                                <div class="card-header">
-                                    <h5 class="mb-0">Transport</h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="alert alert-info mb-0">
-                                        <i class="fas fa-info-circle me-2"></i>
-                                        Patienten mit Sichtungskategorie <?= htmlspecialchars($patient['sichtungskategorie']) ?> werden nicht transportiert.
+                                <?php if ($canTransport && $patient['transport_abfahrt']): ?>
+                                    <div class="info-box">
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock me-1"></i>
+                                            Abfahrt: <?= date('d.m.Y H:i', strtotime($patient['transport_abfahrt'])) ?>
+                                        </small>
                                     </div>
-                                </div>
+                                <?php endif; ?>
                             </div>
-                        <?php endif; ?>
+                        </div>
 
                         <!-- Medizinische Informationen -->
                         <div class="card mb-4">
@@ -453,17 +444,43 @@ $skColor = $skColors[$patient['sichtungskategorie']] ?? 'secondary';
     <?php include __DIR__ . '/../assets/components/footer.php'; ?>
 
     <script>
-        // Auto-update readonly fields when vehicle is selected
+        // Auto-update readonly fields and transportziel visibility when vehicle is selected
         document.getElementById('transportmittel_id').addEventListener('change', function() {
             const selectedOption = this.options[this.selectedIndex];
+            const transportzielGroup = document.getElementById('transportziel')?.closest('.mb-3');
+
             if (selectedOption.value) {
                 document.getElementById('display_rufname').value = selectedOption.dataset.bezeichnung || '';
                 document.getElementById('display_fahrzeugtyp').value = selectedOption.dataset.fahrzeugtyp || '';
                 document.getElementById('display_lokalisation').value = selectedOption.dataset.lokalisation || '';
+
+                // Zeige/verstecke Transportziel nur wenn Fahrzeug ein Rettungsdienstfahrzeug ist (rd_type >= 1)
+                const rdType = parseInt(selectedOption.dataset.rdtype);
+                if (transportzielGroup) {
+                    if (rdType >= 1) {
+                        transportzielGroup.style.display = 'block';
+                    } else {
+                        transportzielGroup.style.display = 'none';
+                        document.getElementById('transportziel').value = 'Kein Transport';
+                    }
+                }
             } else {
                 document.getElementById('display_rufname').value = '';
                 document.getElementById('display_fahrzeugtyp').value = '';
                 document.getElementById('display_lokalisation').value = '';
+
+                // Zeige Transportziel wenn kein Fahrzeug ausgewählt
+                if (transportzielGroup) {
+                    transportzielGroup.style.display = 'block';
+                }
+            }
+        });
+
+        // Initial check on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectElement = document.getElementById('transportmittel_id');
+            if (selectElement) {
+                selectElement.dispatchEvent(new Event('change'));
             }
         });
     </script>
