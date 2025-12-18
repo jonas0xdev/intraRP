@@ -23,6 +23,12 @@ if (isset($_GET['enr'])) {
 
     $daten = $stmt->fetch(PDO::FETCH_ASSOC);
 
+    // Zeiten abrufen
+    $queryZeiten = "SELECT salarm, s1, s2, s3, s4, spat, s7, s8, sende FROM intra_edivi WHERE enr = :enr";
+    $stmtZeiten = $pdo->prepare($queryZeiten);
+    $stmtZeiten->execute(['enr' => $_GET['enr']]);
+    $zeiten = $stmtZeiten->fetch(PDO::FETCH_ASSOC);
+
     if (count($daten) == 0) {
         header("Location: " . BASE_PATH . "enotf/");
         exit();
@@ -44,6 +50,72 @@ $defaultUrl = $prot_url;
 date_default_timezone_set('Europe/Berlin');
 $currentTime = date('H:i');
 $currentDate = date('d.m.Y');
+
+// Einsatzort aus JSON dekodieren für Anzeige im Format: Straße HNR, Ort-Ortsteil
+$einsatzort_display = '';
+if (!empty($daten['transp_poi'])) {
+    $einsatzort_display = $daten['transp_poi'];
+}
+if (!empty($daten['transp_adresse'])) {
+    $parts = [];
+    $decoded = json_decode($daten['transp_adresse'], true);
+    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+        // Straße + HNR zusammen
+        $strasseHnr = [];
+        if (!empty($decoded['strasse'])) $strasseHnr[] = $decoded['strasse'];
+        if (!empty($decoded['hnr'])) $strasseHnr[] = $decoded['hnr'];
+        if (!empty($strasseHnr)) {
+            $parts[] = implode(' ', $strasseHnr);
+        }
+
+        // Ort-Ortsteil
+        $ortOrtsteil = [];
+        if (!empty($decoded['ort'])) $ortOrtsteil[] = $decoded['ort'];
+        if (!empty($decoded['ortsteil'])) $ortOrtsteil[] = $decoded['ortsteil'];
+        if (!empty($ortOrtsteil)) {
+            $parts[] = implode('-', $ortOrtsteil);
+        }
+    }
+    $adresse_text = implode(', ', $parts);
+    if (!empty($einsatzort_display) && !empty($adresse_text)) {
+        $einsatzort_display .= ', ' . $adresse_text;
+    } elseif (!empty($adresse_text)) {
+        $einsatzort_display = $adresse_text;
+    }
+}
+
+// Transportziel aus JSON dekodieren für Anzeige
+$transportziel_display = '';
+if (!empty($daten['ziel_poi'])) {
+    $transportziel_display = $daten['ziel_poi'];
+}
+if (!empty($daten['ziel_adresse'])) {
+    $parts = [];
+    $decoded = json_decode($daten['ziel_adresse'], true);
+    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+        // Straße + HNR zusammen
+        $strasseHnr = [];
+        if (!empty($decoded['strasse'])) $strasseHnr[] = $decoded['strasse'];
+        if (!empty($decoded['hnr'])) $strasseHnr[] = $decoded['hnr'];
+        if (!empty($strasseHnr)) {
+            $parts[] = implode(' ', $strasseHnr);
+        }
+
+        // Ort-Ortsteil
+        $ortOrtsteil = [];
+        if (!empty($decoded['ort'])) $ortOrtsteil[] = $decoded['ort'];
+        if (!empty($decoded['ortsteil'])) $ortOrtsteil[] = $decoded['ortsteil'];
+        if (!empty($ortOrtsteil)) {
+            $parts[] = implode('-', $ortOrtsteil);
+        }
+    }
+    $adresse_text = implode(', ', $parts);
+    if (!empty($transportziel_display) && !empty($adresse_text)) {
+        $transportziel_display .= ', ' . $adresse_text;
+    } elseif (!empty($adresse_text)) {
+        $transportziel_display = $adresse_text;
+    }
+}
 
 $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'false';
 ?>
@@ -220,33 +292,28 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                     <input type="text" class="w-100 print__field" value="<?= !empty($daten['edatum']) ? date('d.m.Y', strtotime($daten['edatum'])) . " " . $daten['ezeit'] : '' . " " . $daten['ezeit'] ?>" readonly>
                                 </div>
                                 <div class="print__field-wrapper" data-field-name="Einsatz-Ort">
-                                    <input type="text" class="w-100 print__field" value="<?= $daten['eort'] ?>" readonly>
+                                    <input type="text" class="w-100 print__field" value="<?= $einsatzort_display ?>" readonly>
+                                </div>
+                                <div class="print__field-wrapper" data-field-name="Transp.-Ziel">
+                                    <input type="text" class="w-100 print__field" value="<?= $transportziel_display ?>" readonly>
                                 </div>
                                 <?php
-                                $zielname = '';
-                                if (!empty($daten['transportziel'])) {
-                                    $stmt = $pdo->prepare("SELECT name FROM intra_edivi_ziele WHERE identifier = :id LIMIT 1");
-                                    $stmt->execute(['id' => $daten['transportziel']]);
-                                    $zielname = $stmt->fetchColumn();
-                                }
-                                ?>
-                                <div class="print__field-wrapper" data-field-name="Versorgung/Transp.-Ziel">
-                                    <input type="text" class="w-100 print__field" value="<?= $zielname ?>" readonly>
-                                </div>
-                                <?php
-                                $einsatzarten = [
-                                    1  => 'Notfallrettung - Primäreinsatz mit NA',
-                                    11 => 'Notfallrettung - Primäreinsatz ohne NA',
-                                    2  => 'Notfallrettung - Verlegung mit NA',
-                                    21 => 'Notfallrettung - Verlegung ohne NA',
-                                    3  => 'Intensivtransport',
-                                    4  => 'Krankentransport',
+                                $versorgungsarten = [
+                                    1  => 'ambulante Versorgung vor Ort',
+                                    2  => 'Transport ohne NA (oder mit TNA)',
+                                    21 => 'Transport mit NA (bodengebunden)',
+                                    22 => 'Transport mit NA (RTH)',
+                                    3  => 'Übergabe anderes Rettungsmittel',
+                                    4  => 'Fehleinsatz - kein Patient',
+                                    5  => 'Patient nicht transportfähig',
+                                    6  => 'primäre Todesfeststellung (ohne CPR)',
+                                    99 => 'Sonstige',
                                 ];
 
-                                $eart_text = $einsatzarten[$daten['eart'] ?? ''] ?? '';
+                                $versorgung_text = $versorgungsarten[$daten['transportziel'] ?? ''] ?? '';
                                 ?>
-                                <div class="print__field-wrapper" data-field-name="Einsatz-Art">
-                                    <input type="text" class="w-100 print__field" value="<?= $eart_text ?>" readonly>
+                                <div class="print__field-wrapper" data-field-name="Versorgung">
+                                    <input type="text" class="w-100 print__field" value="<?= $versorgung_text ?>" readonly>
                                 </div>
                             </div>
                         </div>
@@ -1512,6 +1579,62 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                         ?>
                         <div class="print__field-wrapper">
                             <textarea rows="18" style="resize:none" class="w-100 print__textbox" readonly><?= displayAllMedikamente($daten['medis'] ?? ''); ?></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="row border border-dark border-top-0">
+                    <div class="col">
+                        <h6 class="print__heading">Zeiten</h6>
+                        <div class="row">
+                            <div class="col-3">
+                                <div class="print__field-wrapper" data-field-name="Alarm">
+                                    <input type="text" class="w-100 print__field" value="<?= !empty($zeiten['salarm']) ? date('H:i', strtotime($zeiten['salarm'])) : '' ?>" readonly>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="print__field-wrapper" data-field-name="aus (3)">
+                                    <input type="text" class="w-100 print__field" value="<?= !empty($zeiten['s3']) ? date('H:i', strtotime($zeiten['s3'])) : '' ?>" readonly>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="print__field-wrapper" data-field-name="E.-an (4)">
+                                    <input type="text" class="w-100 print__field" value="<?= !empty($zeiten['s4']) ? date('H:i', strtotime($zeiten['s4'])) : '' ?>" readonly>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="print__field-wrapper" data-field-name="Pat.-an">
+                                    <input type="text" class="w-100 print__field" value="<?= !empty($zeiten['spat']) ? date('H:i', strtotime($zeiten['spat'])) : '' ?>" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-3">
+                                <div class="print__field-wrapper" data-field-name="E.-ab (7)">
+                                    <input type="text" class="w-100 print__field" value="<?= !empty($zeiten['s7']) ? date('H:i', strtotime($zeiten['s7'])) : '' ?>" readonly>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="print__field-wrapper" data-field-name="KH an (8)">
+                                    <input type="text" class="w-100 print__field" value="<?= !empty($zeiten['s8']) ? date('H:i', strtotime($zeiten['s8'])) : '' ?>" readonly>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="print__field-wrapper" data-field-name="frei (1)">
+                                    <input type="text" class="w-100 print__field" value="<?= !empty($zeiten['s1']) ? date('H:i', strtotime($zeiten['s1'])) : '' ?>" readonly>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="print__field-wrapper" data-field-name="Wache (2)">
+                                    <input type="text" class="w-100 print__field" value="<?= !empty($zeiten['s2']) ? date('H:i', strtotime($zeiten['s2'])) : '' ?>" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-3">
+                                <div class="print__field-wrapper" data-field-name="Ende">
+                                    <input type="text" class="w-100 print__field" value="<?= !empty($zeiten['sende']) ? date('H:i', strtotime($zeiten['sende'])) : '' ?>" readonly>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
