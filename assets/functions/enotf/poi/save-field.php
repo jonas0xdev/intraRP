@@ -6,10 +6,10 @@ require_once __DIR__ . '/../../../config/database.php';
 header('Content-Type: application/json');
 
 // Nur für eingeloggte User
-if (!isset($_SESSION['userid'])) {
-    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
-    exit();
-}
+// if (!isset($_SESSION['userid'])) {
+//     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+//     exit();
+// }
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['success' => false, 'message' => 'Invalid request method']);
