@@ -8,8 +8,8 @@ if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
 }
 
 session_start();
-require_once __DIR__ . '/../../config/config.php';
-require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../../../config/config.php';
+require_once __DIR__ . '/../../../config/database.php';
 
 // Alle bisherigen Ausgaben verwerfen
 ob_end_clean();
@@ -17,10 +17,10 @@ ob_end_clean();
 header('Content-Type: application/json');
 
 // Nur für eingeloggte User
-if (!isset($_SESSION['userid'])) {
-    echo json_encode(['error' => 'Unauthorized']);
-    exit();
-}
+// if (!isset($_SESSION['userid'])) {
+//     echo json_encode(['error' => 'Unauthorized']);
+//     exit();
+// }
 
 $searchTerm = $_GET['search'] ?? '';
 
