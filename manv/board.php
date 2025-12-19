@@ -43,18 +43,20 @@ $ressourcen = $manvRessource->getByLage((int)$lageId, 'fahrzeug');
 foreach ($patienten as &$patient) {
     if (!empty($patient['transportmittel_rufname'])) {
         $fahrzeugStmt = $pdo->prepare("
-            SELECT f.rd_type 
+            SELECT f.rd_type, f.name as rufname
             FROM intra_manv_ressourcen r
-            LEFT JOIN intra_fahrzeuge f ON r.rufname = f.identifier OR r.bezeichnung = f.name
+            LEFT JOIN intra_fahrzeuge f ON r.bezeichnung = f.name
             WHERE r.manv_lage_id = ? 
-            AND r.rufname = ?
+            AND r.bezeichnung = ?
             LIMIT 1
         ");
         $fahrzeugStmt->execute([(int)$lageId, $patient['transportmittel_rufname']]);
         $fahrzeugData = $fahrzeugStmt->fetch(PDO::FETCH_ASSOC);
         $patient['fahrzeug_rd_type'] = $fahrzeugData['rd_type'] ?? null;
+        $patient['fahrzeug_rufname'] = $fahrzeugData['rufname'] ?? $patient['transportmittel_rufname'];
     } else {
         $patient['fahrzeug_rd_type'] = null;
+        $patient['fahrzeug_rufname'] = null;
     }
 }
 unset($patient);
@@ -261,7 +263,7 @@ foreach ($patienten as $patient) {
                                         </td>
                                         <td>
                                             <?php if ($patient['transportmittel_rufname']): ?>
-                                                <i class="fas fa-ambulance me-1"></i><?= htmlspecialchars($patient['transportmittel_rufname']) ?>
+                                                <i class="fas fa-ambulance me-1"></i><?= htmlspecialchars($patient['fahrzeug_rufname'] ?? $patient['transportmittel_rufname']) ?>
                                             <?php else: ?>
                                                 <span class="text-muted">Nicht zugewiesen</span>
                                             <?php endif; ?>

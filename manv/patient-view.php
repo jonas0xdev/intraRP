@@ -42,11 +42,11 @@ $lage = $manvLage->getById((int)$patient['manv_lage_id']);
 $verfuegbareFahrzeugeStmt = $pdo->prepare("
     SELECT r.*, f.rd_type 
     FROM intra_manv_ressourcen r
-    LEFT JOIN intra_fahrzeuge f ON r.rufname = f.identifier OR r.bezeichnung = f.name
+    LEFT JOIN intra_fahrzeuge f ON r.bezeichnung = f.name
     WHERE r.manv_lage_id = ? 
     AND r.typ = 'fahrzeug'
     AND (
-        r.rufname NOT IN (
+        r.bezeichnung NOT IN (
             SELECT transportmittel_rufname 
             FROM intra_manv_patienten 
             WHERE manv_lage_id = ? 
@@ -54,9 +54,9 @@ $verfuegbareFahrzeugeStmt = $pdo->prepare("
             AND transport_abfahrt IS NULL
             AND id != ?
         )
-        OR r.rufname = ?
+        OR r.bezeichnung = ?
     )
-    ORDER BY r.rufname ASC
+    ORDER BY r.bezeichnung ASC
 ");
 $verfuegbareFahrzeugeStmt->execute([
     (int)$patient['manv_lage_id'],

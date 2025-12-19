@@ -480,17 +480,17 @@ $material = $manvRessource->getByLage((int)$lageId, 'material');
             searchResults.innerHTML = matches.map(fzg => `
                 <button type="button" class="list-group-item list-group-item-action" 
                         data-id="${fzg.id}"
-                        data-identifier="${escapeHtml(fzg.identifier)}"
+                        data-name="${escapeHtml(fzg.name)}"
                         data-type="${escapeHtml(fzg.veh_type)}"
                         style="background-color: #2a2a2a; border-color: #444; color: #fff; padding: 14px 16px; transition: all 0.2s; overflow: hidden;">
                     <div class="d-flex justify-content-between align-items-center gap-2" style="flex-wrap: nowrap; overflow: hidden;">
                         <div style="min-width: 0; flex: 1; overflow: hidden;">
                             <i class="fas fa-ambulance me-2" style="color: #0d6efd;"></i>
-                            <strong style="font-size: 1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; max-width: 100%;">${escapeHtml(fzg.identifier)}</strong>
+                            <strong style="font-size: 1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; max-width: 100%;">${escapeHtml(fzg.name)}</strong>
                         </div>
                         <span class="badge" style="background-color: #495057; font-size: 0.85rem; padding: 6px 10px; flex-shrink: 0; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(fzg.veh_type)}</span>
                     </div>
-                    ${fzg.name ? `<small class="d-block mt-1 ms-4" style="color: #adb5bd; font-size: 0.875rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(fzg.name)}</small>` : ''}
+                    ${fzg.identifier ? `<small class="d-block mt-1 ms-4" style="color: #adb5bd; font-size: 0.875rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(fzg.identifier)}</small>` : ''}
                 </button>
             `).join('');
 
@@ -517,18 +517,18 @@ $material = $manvRessource->getByLage((int)$lageId, 'material');
             searchResults.querySelectorAll('.list-group-item').forEach(item => {
                 item.addEventListener('click', function() {
                     const id = this.dataset.id;
-                    const identifier = this.dataset.identifier;
+                    const name = this.dataset.name;
                     const type = this.dataset.type;
 
                     // Setze Werte
                     fahrzeugIdInput.value = id;
-                    bezeichnungInput.value = identifier;
+                    bezeichnungInput.value = name;
                     fahrzeugtypInput.value = type;
-                    searchInput.value = identifier;
+                    searchInput.value = name;
 
                     selectedVehicle = {
                         id: id,
-                        displayText: identifier
+                        displayText: name
                     };
 
                     // Verstecke Ergebnisse
