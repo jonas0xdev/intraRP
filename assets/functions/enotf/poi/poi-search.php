@@ -31,8 +31,9 @@ try {
         $stmt->execute();
     } else {
         // Suche nach Name oder Ort
-        $stmt = $pdo->prepare("SELECT id, name, strasse, hnr, ort, ortsteil, typ FROM intra_edivi_pois WHERE active = 1 AND (name LIKE :search OR ort LIKE :search) ORDER BY name ASC LIMIT 50");
-        $stmt->execute(['search' => '%' . $searchTerm . '%']);
+        $searchPattern = '%' . $searchTerm . '%';
+        $stmt = $pdo->prepare("SELECT id, name, strasse, hnr, ort, ortsteil, typ FROM intra_edivi_pois WHERE active = 1 AND (name LIKE ? OR ort LIKE ?) ORDER BY name ASC LIMIT 50");
+        $stmt->execute([$searchPattern, $searchPattern]);
     }
 
     $pois = $stmt->fetchAll(PDO::FETCH_ASSOC);
