@@ -86,10 +86,10 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             ?>
                             <div class="row">
                                 <div class="col">
-                                    <select class="form-select medikament-field-ignore" name="medis-select" id="medis-select" required autocomplete="off" style="background-color: #333333; color: white;" data-ignore-autosave="true">
+                                    <select class="form-select medikament-field-ignore" name="medis-select" id="medis-select" required autocomplete="off" style="background-color: #333333; color: white;" data-ignore-autosave="true" data-custom-dropdown="true" data-search-threshold="10">
                                         <option value="" disabled hidden selected>Wirkstoff</option>
                                         <?php foreach ($medikamente as $med): ?>
-                                            <?php 
+                                            <?php
                                             $displayName = htmlspecialchars($med['wirkstoff']);
                                             if (!empty($med['herstellername'])) {
                                                 $displayName = htmlspecialchars($med['herstellername']) . ' (' . htmlspecialchars($med['wirkstoff']) . ')';
@@ -106,7 +106,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                 </div>
                                 <div class="col">
                                     <div class="col">
-                                        <select class="form-select medikament-field-ignore" name="medis-admission" id="medis-admission" required autocomplete="off" style="background-color: #333333; color: white;" data-ignore-autosave="true">
+                                        <select class="form-select medikament-field-ignore" name="medis-admission" id="medis-admission" required autocomplete="off" style="background-color: #333333; color: white;" data-ignore-autosave="true" data-custom-dropdown="true">
                                             <option value="" disabled hidden selected>Applikationsart</option>
                                             <option value="i.v.">i.v.</option>
                                             <option value="i.o.">i.o.</option>
@@ -126,7 +126,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                     </div>
                                 </div>
                                 <div class="col">
-                                    <select class="form-select medikament-field-ignore" name="medis-unit" id="medis-unit" required autocomplete="off" style="background-color: #333333; color: white;" data-ignore-autosave="true">
+                                    <select class="form-select medikament-field-ignore" name="medis-unit" id="medis-unit" required autocomplete="off" style="background-color: #333333; color: white;" data-ignore-autosave="true" data-custom-dropdown="true">
                                         <option value="" disabled hidden selected>Einheit</option>
                                         <option value="mcg">&micro;g</option>
                                         <option value="mg">mg</option>
@@ -272,7 +272,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
             // Setup custom dropdown for dosage
             const dosierungInput = document.getElementById('medis-concentration');
             const dosierungDropdown = document.getElementById('dosierung-dropdown');
-            
+
             if (dosierungInput && dosierungDropdown) {
                 // Show dropdown on focus
                 dosierungInput.addEventListener('focus', function() {
@@ -286,7 +286,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                     const value = this.value.toLowerCase();
                     const items = dosierungDropdown.querySelectorAll('.dosierung-item');
                     let hasVisible = false;
-                    
+
                     items.forEach(item => {
                         if (item.textContent.toLowerCase().includes(value)) {
                             item.style.display = 'block';
@@ -295,9 +295,9 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             item.style.display = 'none';
                         }
                     });
-                    
+
                     dosierungDropdown.style.display = hasVisible ? 'block' : 'none';
-                    
+
                     // Also try to parse and set unit
                     parseDosierungAndSetUnit(this.value);
                 });
@@ -315,10 +315,10 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
             const selectedOption = selectElement.options[selectElement.selectedIndex];
             const dosierungen = selectedOption.dataset.dosierungen || '';
             const dropdown = document.getElementById('dosierung-dropdown');
-            
+
             // Clear existing options
             dropdown.innerHTML = '';
-            
+
             if (dosierungen) {
                 // Split by comma and create styled options
                 const dosierungValues = dosierungen.split(',').map(d => d.trim()).filter(d => d);
@@ -327,7 +327,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                     item.className = 'dosierung-item';
                     item.textContent = value;
                     item.style.cssText = 'padding: 8px 12px; cursor: pointer; color: white; border-bottom: 1px solid #555;';
-                    
+
                     item.addEventListener('mouseenter', function() {
                         this.style.backgroundColor = '#555';
                     });
@@ -340,10 +340,10 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                         // Parse and set unit
                         parseDosierungAndSetUnit(value);
                     });
-                    
+
                     dropdown.appendChild(item);
                 });
-                
+
                 // Remove border from last item
                 if (dropdown.lastChild) {
                     dropdown.lastChild.style.borderBottom = 'none';
@@ -368,7 +368,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                 const numericValue = match[1];
                 const unit = match[2].toLowerCase();
                 const unitSelectValue = unitMap[unit];
-                
+
                 if (unitSelectValue) {
                     // Set the numeric value in the input field
                     document.getElementById('medis-concentration').value = numericValue;

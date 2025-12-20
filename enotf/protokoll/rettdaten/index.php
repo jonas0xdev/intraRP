@@ -154,7 +154,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                             <?php
                                             if ($daten['patsex'] === NULL) {
                                             ?>
-                                                <select name="patsex" id="patsex" class="w-100 form-select edivi__input-check" required>
+                                                <select name="patsex" id="patsex" class="w-100 form-select edivi__input-check" required data-custom-dropdown="true">
                                                     <option disabled hidden selected>---</option>
                                                     <option value="0">männlich</option>
                                                     <option value="1">weiblich</option>
@@ -163,7 +163,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                             <?php
                                             } else {
                                             ?>
-                                                <select name="patsex" id="patsex" class="w-100 form-select edivi__input-check" required autocomplete="off">
+                                                <select name="patsex" id="patsex" class="w-100 form-select edivi__input-check" required autocomplete="off" data-custom-dropdown="true">
                                                     <option disabled hidden selected>---</option>
                                                     <option value="0" <?php echo ($daten['patsex'] == 0 ? 'selected' : '') ?>>männlich</option>
                                                     <option value="1" <?php echo ($daten['patsex'] == 1 ? 'selected' : '') ?>>weiblich</option>
@@ -215,7 +215,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                     <div class="row my-2">
                                         <div class="col">
                                             <label for="transportziel" class="edivi__description">Versorgung</label>
-                                            <select name="transportziel" id="transportziel" class="w-100 form-select edivi__input-check" required autocomplete="off">
+                                            <select name="transportziel" id="transportziel" class="w-100 form-select edivi__input-check" required autocomplete="off" data-custom-dropdown="true" data-search-threshold="8">
                                                 <option disabled hidden selected>---</option>
                                                 <option value="1" <?php echo ($daten['transportziel'] == 1 ? 'selected' : '') ?>>ambulante Versorgung vor Ort</option>
                                                 <option value="2" <?php echo ($daten['transportziel'] == 2 ? 'selected' : '') ?>>Transport ohne NA (oder mit TNA)</option>
@@ -230,7 +230,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                         </div>
                                         <div class="col">
                                             <label for="eart" class="edivi__description">Einsatzart</label>
-                                            <select name="eart" id="eart" class="w-100 form-select edivi__input-check" required autocomplete="off">
+                                            <select name="eart" id="eart" class="w-100 form-select edivi__input-check" required autocomplete="off" data-custom-dropdown="true">
                                                 <option disabled hidden selected>---</option>
                                                 <option value="1" <?php echo ($daten['eart'] == 1 ? 'selected' : '') ?>>Notfallrettung - Primäreinsatz mit NA</option>
                                                 <option value="11" <?php echo ($daten['eart'] == 11 ? 'selected' : '') ?>>Notfallrettung - Primäreinsatz ohne NA</option>

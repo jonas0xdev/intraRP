@@ -302,7 +302,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                     <div class="row">
                                         <div class="col">
                                             <label for="ziel" class="edivi__description">Zielklinik</label>
-                                            <select name="ziel" id="ziel" class="w-100 form-select" required>
+                                            <select name="ziel" id="ziel" class="w-100 form-select" required data-custom-dropdown="true" data-search-threshold="5">
                                                 <option disabled hidden selected value="NULL">---</option>
                                                 <?php
                                                 require __DIR__ . '/../../assets/config/database.php';
@@ -334,7 +334,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                                 $fahrzeuge = $stmt->fetchAll();
                                                 ?>
 
-                                                <select name="fahrzeug" id="fahrzeug" class="w-100 form-select" required>
+                                                <select name="fahrzeug" id="fahrzeug" class="w-100 form-select" required data-custom-dropdown="true" data-search-threshold="5">
                                                     <option value="NULL" <?= $selectedFzg === 'NULL' ? 'selected' : '' ?>>Fzg. Transp.</option>
                                                     <?php foreach ($fahrzeuge as $row): ?>
                                                         <?php
@@ -377,7 +377,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                     <div class="row">
                                         <div class="col">
                                             <label for="geschlecht" class="edivi__description">Geschlecht</label>
-                                            <select name="geschlecht" id="geschlecht" class="w-100 form-select" readonly autocomplete="off">
+                                            <select name="geschlecht" id="geschlecht" class="w-100 form-select" readonly autocomplete="off" data-custom-dropdown="true">
                                                 <option disabled hidden selected>---</option>
                                                 <option value="0" <?php echo ($daten['patsex'] == 0 ? 'selected' : '') ?>>männlich</option>
                                                 <option value="1" <?php echo ($daten['patsex'] == 1 ? 'selected' : '') ?>>weiblich</option>
@@ -398,7 +398,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                     <div class="row mt-2">
                                         <div class="col">
                                             <label for="kreislauf" class="edivi__description">Kreislauf</label>
-                                            <select name="kreislauf" id="kreislauf" class="w-100 form-select" required autocomplete="off">
+                                            <select name="kreislauf" id="kreislauf" class="w-100 form-select" required autocomplete="off" data-custom-dropdown="true">
                                                 <option disabled hidden selected>---</option>
                                                 <option value="1">stabil</option>
                                                 <option value="0">instabil</option>
@@ -406,7 +406,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                         </div>
                                         <div class="col">
                                             <label for="intubiert" class="edivi__description">Intubiert</label>
-                                            <select name="intubiert" id="intubiert" class="w-100 form-select" required autocomplete="off">
+                                            <select name="intubiert" id="intubiert" class="w-100 form-select" required autocomplete="off" data-custom-dropdown="true">
                                                 <option disabled hidden selected>---</option>
                                                 <option value="0">nein</option>
                                                 <option value="1">ja</option>
@@ -437,7 +437,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                     <div class="row mt-2">
                                         <div class="col">
                                             <label for="priority" class="edivi__description">Priorität</label>
-                                            <select name="priority" id="priority" class="w-100 form-select" required autocomplete="off">
+                                            <select name="priority" id="priority" class="w-100 form-select" required autocomplete="off" data-custom-dropdown="true">
                                                 <option disabled hidden selected>---</option>
                                                 <option value="0">Nicht dringlich</option>
                                                 <option value="1">Dringlich</option>

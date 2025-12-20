@@ -151,7 +151,7 @@ if (!Permissions::check(['admin', 'vehicles.view'])) {
 
                             <div class="mb-3">
                                 <label for="poi-typ" class="form-label">Typ</label>
-                                <select class="form-select" name="typ" id="poi-typ">
+                                <select class="form-select" name="typ" id="poi-typ" data-custom-dropdown="true">
                                     <option value="">--- Kein Typ ---</option>
                                     <option value="Polizeiwache">Polizeiwache</option>
                                     <option value="Rettungswache">Rettungswache</option>
@@ -229,7 +229,7 @@ if (!Permissions::check(['admin', 'vehicles.view'])) {
 
                             <div class="mb-3">
                                 <label for="new-poi-typ" class="form-label">Typ</label>
-                                <select class="form-select" name="typ" id="new-poi-typ">
+                                <select class="form-select" name="typ" id="new-poi-typ" data-custom-dropdown="true">
                                     <option value="">--- Kein Typ ---</option>
                                     <option value="Polizeiwache">Polizeiwache</option>
                                     <option value="Rettungswache">Rettungswache</option>

@@ -110,12 +110,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mitarbeiterStmt = $pdo->prepare("SELECT discordtag FROM intra_mitarbeiter WHERE fullname = ? LIMIT 1");
             $mitarbeiterStmt->execute([$row['pfname']]);
             $mitarbeiter = $mitarbeiterStmt->fetch(PDO::FETCH_ASSOC);
-            
+
             if ($mitarbeiter && !empty($mitarbeiter['discordtag'])) {
                 // Now look up the user by discord tag
                 $notificationManager = new NotificationManager($pdo);
                 $userId = $notificationManager->getUserIdByDiscordTag($mitarbeiter['discordtag']);
-                
+
                 if ($userId) {
                     $notificationManager->create(
                         $userId,
@@ -159,7 +159,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="row mt-3">
                 <div class="col-3 fw-bold">Status</div>
                 <div class="col">
-                    <select name="protokoll_status" id="protokoll_status" class="form-select w-100 edivi__admin" style="border-radius: 0 !important">
+                    <select name="protokoll_status" id="protokoll_status" class="form-select w-100 edivi__admin" style="border-radius: 0 !important" data-custom-dropdown="true">
                         <option value="0" <?php echo ($row['protokoll_status'] == 0 ? 'selected' : '') ?>>Ungesehen</option>
                         <option value="1" <?php echo ($row['protokoll_status'] == 1 ? 'selected' : '') ?>>in Prüfung</option>
                         <option value="2" <?php echo ($row['protokoll_status'] == 2 ? 'selected' : '') ?>>Freigegeben</option>
