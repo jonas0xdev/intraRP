@@ -72,7 +72,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                         <div class="col">
                             <div class="w-100 p-3" style="background-color: #333333; min-height: 60vh; border-radius: 8px;" id="medis-list">
                                 <div class="text-center text-muted p-4">
-                                    <i class="las la-spinner la-spin" style="font-size: 2em;"></i>
+                                    <i class="fa-solid fa-spinner fa-spin" style="font-size: 2em;"></i>
                                     <div class="mt-2">Medikamente werden geladen...</div>
                                 </div>
                             </div>
@@ -447,7 +447,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
             const enr = new URLSearchParams(window.location.search).get('enr');
 
             const listContainer = document.getElementById('medis-list');
-            listContainer.innerHTML = '<div class="text-center text-muted p-4"><i class="las la-spinner la-spin" style="font-size: 2em;"></i><div class="mt-2">Medikamente werden geladen...</div></div>';
+            listContainer.innerHTML = '<div class="text-center text-muted p-4"><i class="fa-solid fa-spinner fa-spin" style="font-size: 2em;"></i><div class="mt-2">Medikamente werden geladen...</div></div>';
 
             fetch('./load_medikamente.php', {
                     method: 'POST',
@@ -467,7 +467,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                 })
                 .catch(error => {
                     console.error('Error loading medikamente:', error);
-                    listContainer.innerHTML = '<div class="text-center text-danger p-4"><i class="las la-exclamation-triangle" style="font-size: 2em;"></i><div class="mt-2">Fehler beim Laden der Medikamente:<br>' + error.message + '</div></div>';
+                    listContainer.innerHTML = '<div class="text-center text-danger p-4"><i class="fa-solid fa-triangle-exclamation" style="font-size: 2em;"></i><div class="mt-2">Fehler beim Laden der Medikamente:<br>' + error.message + '</div></div>';
                 });
         }
 
@@ -501,7 +501,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
             listContainer.innerHTML = '';
 
             if (!medikamente || medikamente.length === 0) {
-                listContainer.innerHTML = '<div class="text-center p-4"><i class="las la-pills" style="font-size: 3em;"></i><div class="mt-2">Keine Medikamente eingetragen</div></div>';
+                listContainer.innerHTML = '<div class="text-center p-4"><i class="fa-solid fa-pills" style="font-size: 3em;"></i><div class="mt-2">Keine Medikamente eingetragen</div></div>';
                 return;
             }
 

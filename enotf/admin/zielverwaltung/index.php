@@ -42,7 +42,7 @@ if (!Permissions::check(['admin', 'edivi.view'])) {
 
                         <?php if (Permissions::check('admin')) : ?>
                             <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createFahrzeugModal">
-                                <i class="las la-plus"></i> Ziel erstellen
+                                <i class="fa-solid fa-plus"></i> Ziel erstellen
                             </button>
                         <?php endif; ?>
                     </div>
@@ -275,7 +275,11 @@ if (!Permissions::check(['admin', 'edivi.view'])) {
             });
 
             document.getElementById('delete-fahrzeug-btn').addEventListener('click', function() {
-                showConfirm('Möchtest du dieses Ziel wirklich löschen?', {danger: true, confirmText: 'Löschen', title: 'Ziel löschen'}).then(result => {
+                showConfirm('Möchtest du dieses Ziel wirklich löschen?', {
+                    danger: true,
+                    confirmText: 'Löschen',
+                    title: 'Ziel löschen'
+                }).then(result => {
                     if (result) {
                         document.getElementById('delete-fahrzeug-form').submit();
                     }

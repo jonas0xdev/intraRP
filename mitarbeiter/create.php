@@ -165,6 +165,63 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php
     include __DIR__ . "/../assets/components/_base/admin/head.php";
     ?>
+    <style>
+        .dienstnr-container {
+            position: relative;
+        }
+
+        .dienstnr-status {
+            position: absolute;
+            right: 30px;
+            /* Platz für die number input arrows lassen */
+            top: 8px;
+            /* Feste Position von oben, unabhängig vom feedback */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            pointer-events: none;
+            /* Klicks durchlassen */
+        }
+
+        .dienstnr-status.loading .spinner {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3498db;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .dienstnr-status.available {
+            color: #28a745;
+            font-size: 20px;
+        }
+
+        .dienstnr-status.unavailable {
+            color: #dc3545;
+            font-size: 20px;
+        }
+
+        .form-control.valid {
+            border-color: #28a745;
+        }
+
+        .form-control.invalid {
+            border-color: #dc3545;
+        }
+    </style>
 </head>
 
 <body data-bs-theme="dark" data-page="mitarbeiter">
@@ -183,7 +240,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <form id="profil" method="post" novalidate>
                                 <div class="intra__tile py-2 px-3">
                                     <div class="w-100 text-center">
-                                        <i class="las la-user-circle" style="font-size:94px"></i>
+                                        <i class="fa-solid fa-circle-user" style="font-size:94px"></i>
                                         <?php
                                         require __DIR__ . '/../assets/config/database.php';
                                         $stmt = $pdo->prepare("SELECT id,name,priority FROM intra_mitarbeiter_dienstgrade WHERE archive = 0 ORDER BY priority ASC");
@@ -274,7 +331,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     </div>
                                 </div>
                                 <a href="#" class="mt-4 btn btn-success btn-sm" id="personal-save">
-                                    <i class="las la-plus-circle"></i> Benutzer erstellen
+                                    <i class="fa-solid fa-circle-plus"></i> Benutzer erstellen
                                 </a>
                             </form>
                         </div>
@@ -323,19 +380,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         response = response.trim();
 
                         if (response === 'exists') {
-                            statusElement.innerHTML = '<i class="las la-times"></i>';
+                            statusElement.innerHTML = '<i class="fa-solid fa-xmark"></i>';
                             statusElement.classList.add('unavailable');
                             dienstnrInput.classList.add('invalid');
                             feedbackElement.textContent = 'Diese Dienstnummer ist bereits vergeben.';
                             feedbackElement.style.display = 'block';
                             isDienstnrAvailable = false;
                         } else if (response === 'not_exists') {
-                            statusElement.innerHTML = '<i class="las la-check"></i>';
+                            statusElement.innerHTML = '<i class="fa-solid fa-check"></i>';
                             statusElement.classList.add('available');
                             dienstnrInput.classList.add('valid');
                             isDienstnrAvailable = true;
                         } else {
-                            statusElement.innerHTML = '<i class="las la-exclamation-triangle"></i>';
+                            statusElement.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
                             statusElement.classList.add('unavailable');
                             feedbackElement.textContent = 'Unerwartete Antwort vom Server: ' + response;
                             feedbackElement.style.display = 'block';
@@ -344,7 +401,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     },
                     error: function(xhr, status, error) {
                         statusElement.classList.remove('loading');
-                        statusElement.innerHTML = '<i class="las la-exclamation-triangle"></i>';
+                        statusElement.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
                         statusElement.classList.add('unavailable');
                         feedbackElement.textContent = 'Verbindungsfehler: ' + xhr.status + ' - ' + error;
                         feedbackElement.style.display = 'block';

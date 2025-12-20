@@ -241,7 +241,7 @@ $totalVitals = $stmtCount->fetch(PDO::FETCH_ASSOC)['count'];
                         <div class="d-flex justify-content-between align-items-center">
                             <div class="d-flex gap-2">
                                 <a href="list.php?enr=<?= $enr ?>&action=manage" class="btn btn-outline-light">
-                                    <i class="las la-list"></i> Verlauf bearbeiten
+                                    <i class="fa-solid fa-list"></i> Verlauf bearbeiten
                                 </a>
                             </div>
                         </div>
@@ -252,14 +252,14 @@ $totalVitals = $stmtCount->fetch(PDO::FETCH_ASSOC)['count'];
                     <div class="col">
                         <div class="vitals-info">
                             <h6 class="text-light mb-2">
-                                <i class="las la-chart-line"></i> Vitalparameter-Übersicht
+                                <i class="fa-solid fa-chart-line"></i> Vitalparameter-Übersicht
                             </h6>
                             <div>
                                 <span class="vitals-stat">
-                                    <i class="las la-database"></i> <?= $totalVitals ?> Einzelwerte erfasst
+                                    <i class="fa-solid fa-database"></i> <?= $totalVitals ?> Einzelwerte erfasst
                                 </span>
                                 <span class="vitals-stat">
-                                    <i class="las la-clock"></i> <?= count($vitals) ?> Zeitpunkte dokumentiert
+                                    <i class="fa-regular fa-clock"></i> <?= count($vitals) ?> Zeitpunkte dokumentiert
                                 </span>
                             </div>
                         </div>
@@ -277,7 +277,7 @@ $totalVitals = $stmtCount->fetch(PDO::FETCH_ASSOC)['count'];
                                 </div>
                                 <div class="chart-container position-relative" onclick="addValues()">
                                     <div class="chart-click-hint">
-                                        <i class="las la-plus"></i> Klicken zum Hinzufügen
+                                        <i class="fa-solid fa-plus"></i> Klicken zum Hinzufügen
                                     </div>
                                     <canvas id="chartCombined" width="400" height="200"></canvas>
                                 </div>
@@ -290,7 +290,7 @@ $totalVitals = $stmtCount->fetch(PDO::FETCH_ASSOC)['count'];
                     <div class="row mt-3">
                         <div class="col text-center">
                             <div class="alert alert-info">
-                                <h5><i class="las la-info-circle"></i> Noch keine Vitalparameter dokumentiert</h5>
+                                <h5><i class="fa-solid fa-circle-info"></i> Noch keine Vitalparameter dokumentiert</h5>
                                 <p>Klicken Sie auf "Werte hinzufügen" oder auf den Chart-Bereich, um die ersten Vitalparameter zu erfassen.</p>
                             </div>
                         </div>

@@ -96,7 +96,7 @@
     var warning = document.createElement("div");
     warning.id = "pin-inactivity-warning";
     warning.style.cssText = "\n            position: fixed;\n            top: 20px;\n            right: 20px;\n            background: #ff6b6b;\n            color: white;\n            padding: 15px 20px;\n            border-radius: 0;\n            box-shadow: 0 4px 8px rgba(0,0,0,0.3);\n            z-index: 10000;\n            font-size: 14px;\n            max-width: 300px;\n            animation: slideIn 0.3s ease-out;\n        ";
-    warning.innerHTML = "\n            <strong><i class=\"las la-exclamation-triangle\"></i> Inaktivit\xE4tswarnung</strong><br>\n            System wird in 1 Minute gesperrt\n        ";
+    warning.innerHTML = "\n            <strong><i class=\"fa-solid fa-triangle-exclamation\"></i> Inaktivit\xE4tswarnung</strong><br>\n            System wird in 1 Minute gesperrt\n        ";
     var style = document.createElement("style");
     style.textContent = "\n            @keyframes slideIn {\n                from {\n                    transform: translateX(400px);\n                    opacity: 0;\n                }\n                to {\n                    transform: translateX(0);\n                    opacity: 1;\n                }\n            }\n            @keyframes slideOut {\n                from {\n                    transform: translateX(0);\n                    opacity: 1;\n                }\n                to {\n                    transform: translateX(400px);\n                    opacity: 0;\n                }\n            }\n        ";
     document.head.appendChild(style);

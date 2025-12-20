@@ -57,11 +57,6 @@ class UserHelper
      */
     public function getCurrentUserFullname(): string
     {
-        // Handle support mode
-        if (isset($_SESSION['support_mode']) && $_SESSION['support_mode'] === true) {
-            return 'Support-Zugang';
-        }
-
         if (!isset($_SESSION['discordtag'])) {
             return 'Unknown';
         }
@@ -78,23 +73,18 @@ class UserHelper
      */
     public function getCurrentUserFullnameForAction(): string
     {
-        // Handle support mode
-        if (isset($_SESSION['support_mode']) && $_SESSION['support_mode'] === true) {
-            return 'Support-Zugang';
-        }
-
         if (!isset($_SESSION['discordtag'])) {
             $userId = $_SESSION['userid'] ?? 'Unknown';
             return 'Admin #' . $userId;
         }
 
         $fullname = $this->getFullnameByDiscordId($_SESSION['discordtag']);
-        
+
         if ($fullname === null) {
             $userId = $_SESSION['userid'] ?? 'Unknown';
             return 'Admin #' . $userId;
         }
-        
+
         return $fullname;
     }
 

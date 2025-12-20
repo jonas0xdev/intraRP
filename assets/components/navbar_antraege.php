@@ -24,7 +24,7 @@ use App\Auth\Permissions; ?>
         <?php }
     } else { ?>
         <div class="cirs-login">
-            <a href="<?= BASE_PATH ?>login.php" class="text-decoration-none"><i class="las la-user"></i> Login</a>
+            <a href="<?= BASE_PATH ?>login.php" class="text-decoration-none"><i class="fa-solid fa-user"></i> Login</a>
         </div>
     <?php } ?>
 </div>

@@ -11,10 +11,6 @@ class Permissions
 {
     public static function retrieveFromDatabase(PDO $pdo, int $userId): array
     {
-        if (isset($_SESSION['support_mode']) && $_SESSION['support_mode'] === true) {
-            return ['full_admin'];
-        }
-
         try {
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
@@ -55,10 +51,6 @@ class Permissions
 
     public static function check(array|string $requiredPermissions): bool
     {
-        if (isset($_SESSION['support_mode']) && $_SESSION['support_mode'] === true) {
-            return true;
-        }
-
         if (!isset($_SESSION['permissions']) || !is_array($_SESSION['permissions'])) {
             return false;
         }
@@ -70,43 +62,6 @@ class Permissions
         $requiredPermissions = (array) $requiredPermissions;
         return (bool) array_intersect($requiredPermissions, $_SESSION['permissions']);
     }
-
-    public static function validateSupportSession(): void
-    {
-        if (!isset($_SESSION['support_mode']) || $_SESSION['support_mode'] !== true) {
-            return;
-        }
-
-        if (isset($_SESSION['support_expires_at'])) {
-            $expiresAt = strtotime($_SESSION['support_expires_at']);
-
-            if ($expiresAt < time()) {
-                self::terminateSupportSession('Session abgelaufen');
-            }
-        }
-    }
-
-    private static function terminateSupportSession(string $reason): void
-    {
-        unset($_SESSION['support_mode']);
-        unset($_SESSION['support_session_id']);
-        unset($_SESSION['support_password_id']);
-        unset($_SESSION['support_created_by']);
-        unset($_SESSION['support_expires_at']);
-        unset($_SESSION['permissions']);
-        unset($_SESSION['userid']);
-
-        header('Location: /support/login.php?expired=1&reason=' . urlencode($reason));
-        exit;
-    }
 }
 
-if (session_status() === PHP_SESSION_ACTIVE) {
-    Permissions::validateSupportSession();
-}
-
-if (!isset($_SESSION['support_mode']) || $_SESSION['support_mode'] !== true) {
-    $_SESSION['permissions'] = Permissions::retrieveFromDatabase($pdo, $_SESSION['userid'] ?? 0);
-} else {
-    $_SESSION['permissions'] = ['full_admin'];
-}
+$_SESSION['permissions'] = Permissions::retrieveFromDatabase($pdo, $_SESSION['userid'] ?? 0);

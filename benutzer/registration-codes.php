@@ -158,7 +158,7 @@ $registrationMode = defined('REGISTRATION_MODE') ? REGISTRATION_MODE : 'open';
                                                         <input type="hidden" name="action" value="delete">
                                                         <input type="hidden" name="code_id" value="<?= $code['id'] ?>">
                                                         <button type="submit" class="btn btn-sm btn-danger">
-                                                            <i class="las la-trash"></i> Löschen
+                                                            <i class="fa-solid fa-trash"></i> Löschen
                                                         </button>
                                                     </form>
                                                 <?php else: ?>

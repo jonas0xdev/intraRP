@@ -44,7 +44,7 @@ if (count($row) == 0) {
             if ($log_row['log_aktion'] == 0) {
     ?>
                 <div class='row edivi__box edivi__log-comment mb-3'>
-                    <div class="col-1 d-flex justify-content-center align-items-center"><i class="las la-info"></i></div>
+                    <div class="col-1 d-flex justify-content-center align-items-center"><i class="fa-solid fa-circle-info"></i></div>
                     <div class='col'>
                         <small style="opacity:.6" class='mb-0'><b><?= htmlspecialchars($log_row['bearbeiter']) ?></b> | <?= $log_row['timestamp'] ?></small>
                         <p class='mb-0'><?= htmlspecialchars($log_row['kommentar']) ?></p>
@@ -54,7 +54,7 @@ if (count($row) == 0) {
             } else if ($log_row['log_aktion'] == 1) {
             ?>
                 <div class='row edivi__box edivi__log-comment mb-3'>
-                    <div class="col-1 d-flex justify-content-center align-items-center"><i class="las la-cog"></i></div>
+                    <div class="col-1 d-flex justify-content-center align-items-center"><i class="fa-solid fa-gear"></i></div>
                     <div class='col'>
                         <small style="opacity:.6" class='mb-0'><b><?= htmlspecialchars($log_row['bearbeiter']) ?></b> | <?= $log_row['timestamp'] ?></small>
                         <p class='mb-0'><?= $log_row['kommentar'] ?></p>

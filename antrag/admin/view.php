@@ -89,7 +89,7 @@ if (isset($_POST['save'])) {
     // Create notification for the applicant
     $statusText = ['In Bearbeitung', 'Abgelehnt', 'Aufgeschoben', 'Angenommen'];
     $statusName = $statusText[$cirs_status] ?? 'Unbekannt';
-    
+
     $userId = $notificationManager->getUserIdByDiscordTag($antrag['discordid']);
     if ($userId) {
         $notificationManager->create(
@@ -108,13 +108,13 @@ if (isset($_POST['save'])) {
 
 // Status-Mapping
 $statusMapping = [
-    0 => ['class' => 'info', 'text' => 'In Bearbeitung', 'icon' => 'las la-clock'],
-    1 => ['class' => 'danger', 'text' => 'Abgelehnt', 'icon' => 'las la-times-circle'],
-    2 => ['class' => 'warning', 'text' => 'Aufgeschoben', 'icon' => 'las la-pause-circle'],
-    3 => ['class' => 'success', 'text' => 'Angenommen', 'icon' => 'las la-check-circle'],
+    0 => ['class' => 'info', 'text' => 'In Bearbeitung', 'icon' => 'fa-regular fa-clock'],
+    1 => ['class' => 'danger', 'text' => 'Abgelehnt', 'icon' => 'fa-solid fa-circle-xmark'],
+    2 => ['class' => 'warning', 'text' => 'Aufgeschoben', 'icon' => 'fa-solid fa-circle-pause'],
+    3 => ['class' => 'success', 'text' => 'Angenommen', 'icon' => 'fa-solid fa-circle-check'],
 ];
 
-$currentStatus = $statusMapping[$antrag['cirs_status'] ?? ''] ?? ['class' => 'dark', 'text' => 'Unbekannt', 'icon' => 'las la-question-circle'];
+$currentStatus = $statusMapping[$antrag['cirs_status'] ?? ''] ?? ['class' => 'dark', 'text' => 'Unbekannt', 'icon' => 'fa-solid fa-circle-question'];
 $createDate = new DateTime($antrag['time_added'] ?? 'now');
 ?>
 
@@ -122,6 +122,7 @@ $createDate = new DateTime($antrag['time_added'] ?? 'now');
 <html lang="en" data-bs-theme="light">
 
 <head>
+
     <head>
         <?php
         $SITE_TITLE = htmlspecialchars($antrag['typ_name']) . ' bearbeiten [#' . htmlspecialchars($caseid) . ']';
@@ -171,7 +172,7 @@ $createDate = new DateTime($antrag['time_added'] ?? 'now');
                                 <!-- Antragsteller -->
                                 <div class="intra__tile mb-4">
                                     <h5 class="mb-3">
-                                        <i class="las la-user me-2"></i>Antragsteller
+                                        <i class="fa-solid fa-user me-2"></i>Antragsteller
                                     </h5>
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
@@ -188,7 +189,7 @@ $createDate = new DateTime($antrag['time_added'] ?? 'now');
                                 <!-- Antragsinhalt -->
                                 <div class="intra__tile mb-4">
                                     <h5 class="mb-3">
-                                        <i class="las la-file-alt me-2"></i>Antragsinhalt
+                                        <i class="fa-solid fa-file-lines me-2"></i>Antragsinhalt
                                     </h5>
 
                                     <?php
@@ -207,7 +208,7 @@ $createDate = new DateTime($antrag['time_added'] ?? 'now');
                                             <div class="field-label"><?= htmlspecialchars($feld['label']) ?></div>
                                             <div class="field-value">
                                                 <?php if ($feld['feldtyp'] === 'checkbox'): ?>
-                                                    <?= $feld['wert'] ? '<i class="las la-check-square text-success"></i> Ja' : '<i class="las la-square text-muted"></i> Nein' ?>
+                                                    <?= $feld['wert'] ? '<i class="fa-solid fa-square-check text-success"></i> Ja' : '<i class="fa-regular fa-square text-muted"></i> Nein' ?>
                                                 <?php elseif (empty($feld['wert'])): ?>
                                                     <span class="text-muted"><i>Keine Angabe</i></span>
                                                 <?php else: ?>
@@ -230,7 +231,7 @@ $createDate = new DateTime($antrag['time_added'] ?? 'now');
                                 <!-- Bearbeitung -->
                                 <div class="intra__tile mb-4">
                                     <h5 class="mb-3">
-                                        <i class="las la-clipboard-check me-2"></i>Bearbeitung
+                                        <i class="fa-solid fa-clipboard-check me-2"></i>Bearbeitung
                                     </h5>
 
                                     <div class="mb-3">
@@ -276,7 +277,7 @@ $createDate = new DateTime($antrag['time_added'] ?? 'now');
                                 <!-- Antragsdetails -->
                                 <div class="intra__tile mb-4">
                                     <h6 class="mb-3">
-                                        <i class="las la-info-circle me-2"></i>Antragsdetails
+                                        <i class="fa-solid fa-circle-info me-2"></i>Antragsdetails
                                     </h6>
                                     <div class="small">
                                         <div class="d-flex justify-content-between py-2 border-bottom border-secondary">
@@ -314,14 +315,14 @@ $createDate = new DateTime($antrag['time_added'] ?? 'now');
                                 <!-- Aktionen -->
                                 <div class="intra__tile">
                                     <h6 class="mb-3">
-                                        <i class="las la-tools me-2"></i>Aktionen
+                                        <i class="fa-solid fa-screwdriver-wrench me-2"></i>Aktionen
                                     </h6>
                                     <div class="d-grid gap-2">
                                         <button type="submit" name="save" class="btn btn-success">
-                                            <i class="las la-save me-2"></i>Änderungen speichern
+                                            <i class="fa-solid fa-floppy-disk me-2"></i>Änderungen speichern
                                         </button>
                                         <a href="<?= BASE_PATH ?>antrag/admin/list.php" class="btn btn-secondary">
-                                            <i class="las la-arrow-left me-2"></i>Zurück zur Übersicht
+                                            <i class="fa-solid fa-arrow-left me-2"></i>Zurück zur Übersicht
                                         </a>
                                     </div>
                                 </div>

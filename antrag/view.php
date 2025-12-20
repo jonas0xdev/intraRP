@@ -61,13 +61,13 @@ $felder_daten = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Status-Mapping
 $statusMapping = [
-    0 => ['class' => 'info', 'text' => 'In Bearbeitung', 'icon' => 'las la-clock'],
-    1 => ['class' => 'danger', 'text' => 'Abgelehnt', 'icon' => 'las la-times-circle'],
-    2 => ['class' => 'warning', 'text' => 'Aufgeschoben', 'icon' => 'las la-pause-circle'],
-    3 => ['class' => 'success', 'text' => 'Angenommen', 'icon' => 'las la-check-circle'],
+    0 => ['class' => 'info', 'text' => 'In Bearbeitung', 'icon' => 'fa-regular fa-clock'],
+    1 => ['class' => 'danger', 'text' => 'Abgelehnt', 'icon' => 'fa-solid fa-circle-xmark'],
+    2 => ['class' => 'warning', 'text' => 'Aufgeschoben', 'icon' => 'fa-solid fa-circle-pause'],
+    3 => ['class' => 'success', 'text' => 'Angenommen', 'icon' => 'fa-solid fa-circle-check'],
 ];
 
-$currentStatus = $statusMapping[$antrag['cirs_status'] ?? ''] ?? ['class' => 'dark', 'text' => 'Unbekannt', 'icon' => 'las la-question-circle'];
+$currentStatus = $statusMapping[$antrag['cirs_status'] ?? ''] ?? ['class' => 'dark', 'text' => 'Unbekannt', 'icon' => 'fa-solid fa-circle-question'];
 $createDate = new DateTime($antrag['time_added'] ?? 'now');
 ?>
 
@@ -164,7 +164,7 @@ $createDate = new DateTime($antrag['time_added'] ?? 'now');
                                             <div class="field-label"><?= htmlspecialchars($feld['label']) ?></div>
                                             <div class="field-value">
                                                 <?php if ($feld['feldtyp'] === 'checkbox'): ?>
-                                                    <?= $feld['wert'] ? '<i class="las la-check-square text-success"></i> Ja' : '<i class="las la-square text-muted"></i> Nein' ?>
+                                                    <?= $feld['wert'] ? '<i class="fa-solid fa-square-check text-success"></i> Ja' : '<i class="fa-regular fa-square text-muted"></i> Nein' ?>
                                                 <?php elseif (empty($feld['wert'])): ?>
                                                     <span class="text-muted"><i>Keine Angabe</i></span>
                                                 <?php else: ?>
@@ -265,7 +265,7 @@ $createDate = new DateTime($antrag['time_added'] ?? 'now');
                             <!-- Aktionen -->
                             <div class="intra__tile p-2">
                                 <h6 class="mb-3">
-                                    <i class="las la-tools me-2"></i>Aktionen
+                                    <i class="fa-solid fa-screwdriver-wrench me-2"></i>Aktionen
                                 </h6>
                                 <div class="d-grid gap-2">
                                     <a href="<?= BASE_PATH ?>index.php" class="btn btn-secondary">

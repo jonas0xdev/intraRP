@@ -4,7 +4,7 @@ try {
     INSERT IGNORE INTO `intra_antrag_typen` 
         (`name`, `beschreibung`, `icon`, `aktiv`, `sortierung`, `tabelle_name`) 
         VALUES 
-    ('Beförderungsantrag', 'Antrag auf Beförderung in den nächsten Dienstgrad', 'las la-angle-double-up', 1, 1, NULL);
+    ('Beförderungsantrag', 'Antrag auf Beförderung in den nächsten Dienstgrad', 'fa-solid fa-angles-up', 1, 1, NULL);
 
     SET @bef_typ_id = LAST_INSERT_ID();
 
@@ -18,7 +18,7 @@ try {
     INSERT IGNORE INTO `intra_antrag_typen` 
         (`name`, `beschreibung`, `icon`, `aktiv`, `sortierung`, `tabelle_name`) 
         VALUES 
-    ('Urlaubsantrag', 'Beantragung von Urlaub oder Dienstfreistellung', 'las la-umbrella-beach', 1, 2, NULL);
+    ('Urlaubsantrag', 'Beantragung von Urlaub oder Dienstfreistellung', 'fa-solid fa-umbrella-beach', 1, 2, NULL);
 
     SET @urlaub_typ_id = LAST_INSERT_ID();
 

@@ -329,7 +329,7 @@ $prot_url = "https://" . SYSTEM_URL . "/enotf/prot/index.php?enr=" . $enr;
                     <div class="row mb-3">
                         <div class="col">
                             <div class="alert alert-warning">
-                                <i class="las la-lock"></i> <strong>Hinweis:</strong> Diese Dokumentation ist freigegeben und kann nicht mehr bearbeitet werden.
+                                <i class="fa-solid fa-lock"></i> <strong>Hinweis:</strong> Diese Dokumentation ist freigegeben und kann nicht mehr bearbeitet werden.
                             </div>
                         </div>
                     </div>
@@ -339,13 +339,13 @@ $prot_url = "https://" . SYSTEM_URL . "/enotf/prot/index.php?enr=" . $enr;
                 <?php if (!empty($grouped_vitals)): ?>
                     <div class="stats-row">
                         <span class="stat-item">
-                            <i class="las la-clock"></i> <?= count($grouped_vitals) ?> Zeitpunkte
+                            <i class="fa-regular fa-clock"></i> <?= count($grouped_vitals) ?> Zeitpunkte
                         </span>
                         <span class="stat-item">
-                            <i class="las la-heartbeat"></i> <?= count($vitalparameter) ?> Einzelwerte
+                            <i class="fa-solid fa-heart-pulse"></i> <?= count($vitalparameter) ?> Einzelwerte
                         </span>
                         <span class="stat-item">
-                            <i class="las la-calendar"></i> <?= !empty($vitalparameter) ? date('d.m.Y H:i', strtotime($vitalparameter[0]['zeitpunkt'])) . ' - ' . date('d.m.Y H:i', strtotime(end($vitalparameter)['zeitpunkt'])) : 'Keine Daten' ?>
+                            <i class="fa-regular fa-calendar"></i> <?= !empty($vitalparameter) ? date('d.m.Y H:i', strtotime($vitalparameter[0]['zeitpunkt'])) . ' - ' . date('d.m.Y H:i', strtotime(end($vitalparameter)['zeitpunkt'])) : 'Keine Daten' ?>
                         </span>
                     </div>
                 <?php endif; ?>
@@ -355,7 +355,7 @@ $prot_url = "https://" . SYSTEM_URL . "/enotf/prot/index.php?enr=" . $enr;
                     <div class="row">
                         <div class="col">
                             <div class="no-data-compact">
-                                <i class="las la-info-circle" style="font-size: 32px; margin-bottom: 10px;"></i>
+                                <i class="fa-solid fa-circle-info" style="font-size: 32px; margin-bottom: 10px;"></i>
                                 <h6>Noch keine Vitalparameter erfasst</h6>
                                 <p class="mb-0" style="font-size: 13px;">
                                     <?php if (!$ist_freigegeben): ?>
@@ -393,7 +393,7 @@ $prot_url = "https://" . SYSTEM_URL . "/enotf/prot/index.php?enr=" . $enr;
                                             if ($zeitpunkt !== $lastZeitpunkt): ?>
                                                 <tr class="time-group">
                                                     <td colspan="<?= !$ist_freigegeben ? '5' : '4' ?>">
-                                                        <i class="las la-clock"></i> <?= $zeitpunktFormatted ?> Uhr
+                                                        <i class="fa-regular fa-clock"></i> <?= $zeitpunktFormatted ?> Uhr
                                                         <small style="margin-left: 15px; color: rgba(255,255,255,0.6);">
                                                             (<?= count($vitals) ?> Parameter)
                                                         </small>
@@ -422,7 +422,7 @@ $prot_url = "https://" . SYSTEM_URL . "/enotf/prot/index.php?enr=" . $enr;
                                                             <a href="?enr=<?= $enr ?>&action=delete&id=<?= $vital['id'] ?>"
                                                                 class="btn-delete-compact"
                                                                 onclick="event.preventDefault(); showConfirm('Parameter \'<?= htmlspecialchars($vital['parameter_name']) ?>\' (<?= htmlspecialchars($vital['parameter_wert']) ?> <?= htmlspecialchars($vital['parameter_einheit']) ?>) löschen?', {danger: true, confirmText: 'Löschen', title: 'Parameter löschen'}).then(result => { if(result) window.location.href = this.href; });">
-                                                                <i class="las la-trash"></i>
+                                                                <i class="fa-solid fa-trash"></i>
                                                                 Löschen
                                                             </a>
                                                         </td>

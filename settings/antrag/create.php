@@ -100,7 +100,7 @@ $default_sort = ($max_sort ?? 0) + 1;
             <div class="row">
                 <div class="col-lg-8 mx-auto">
                     <hr class="text-light my-3">
-                    <h1><i class="las la-plus-circle me-2"></i>Neuen Antragstyp erstellen</h1>
+                    <h1><i class="fa-solid fa-circle-plus me-2"></i>Neuen Antragstyp erstellen</h1>
 
                     <?php Flash::render(); ?>
 
@@ -141,18 +141,18 @@ $default_sort = ($max_sort ?? 0) + 1;
                                     </label>
                                     <div class="input-group">
                                         <span class="input-group-text">
-                                            <i id="icon-preview" class="<?= htmlspecialchars($_POST['icon'] ?? 'las la-file-alt') ?> fs-4"></i>
+                                            <i id="icon-preview" class="<?= htmlspecialchars($_POST['icon'] ?? 'fa-solid fa-file-lines') ?> fs-4"></i>
                                         </span>
                                         <input type="text"
                                             class="form-control"
                                             id="icon"
                                             name="icon"
-                                            placeholder="las la-file-alt"
-                                            value="<?= htmlspecialchars($_POST['icon'] ?? 'las la-file-alt') ?>">
+                                            placeholder="fa-solid fa-file-lines"
+                                            value="<?= htmlspecialchars($_POST['icon'] ?? 'fa-solid fa-file-lines') ?>">
                                     </div>
                                     <small class="text-muted">
-                                        Line Awesome Icon-Klasse
-                                        <a href="https://icons8.com/line-awesome" target="_blank" class="text-info">
+                                        Font Awesome Icon-Klasse
+                                        <a href="https://fontawesome.com/search?o=r&m=free" target="_blank" class="text-info">
                                             (Icons durchsuchen)
                                         </a>
                                     </small>
@@ -190,16 +190,16 @@ $default_sort = ($max_sort ?? 0) + 1;
                             <hr class="text-light my-4">
 
                             <div class="alert alert-info">
-                                <i class="las la-info-circle me-2"></i>
+                                <i class="fa-solid fa-circle-info me-2"></i>
                                 <strong>Hinweis:</strong> Nach dem Erstellen können Sie Formularfelder für diesen Antragstyp hinzufügen.
                             </div>
 
                             <div class="d-flex justify-content-between">
                                 <a href="<?= BASE_PATH ?>settings/antrag/list.php" class="btn btn-secondary">
-                                    <i class="las la-times me-2"></i>Abbrechen
+                                    <i class="fa-solid fa-xmark me-2"></i>Abbrechen
                                 </a>
                                 <button type="submit" name="submit" class="btn btn-success">
-                                    <i class="las la-save me-2"></i>Antragstyp erstellen
+                                    <i class="fa-solid fa-floppy-disk me-2"></i>Antragstyp erstellen
                                 </button>
                             </div>
                         </form>
@@ -212,7 +212,7 @@ $default_sort = ($max_sort ?? 0) + 1;
     <script>
         // Live Icon-Vorschau
         $('#icon').on('input', function() {
-            const iconClass = $(this).val() || 'las la-file-alt';
+            const iconClass = $(this).val() || 'fa-solid fa-file-lines';
             $('#icon-preview').attr('class', iconClass + ' fs-4');
         });
     </script>

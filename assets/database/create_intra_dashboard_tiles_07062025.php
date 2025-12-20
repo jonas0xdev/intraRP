@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS `intra_dashboard_tiles` (
   `category` int(11) NOT NULL DEFAULT 0,
   `title` varchar(255) NOT NULL,
   `url` varchar(255) NOT NULL DEFAULT '#',
-  `icon` varchar(255) NOT NULL DEFAULT 'las la-external-link-alt',
+  `icon` varchar(255) NOT NULL DEFAULT 'fa-solid fa-up-right-from-square',
   `priority` int(11) NOT NULL DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),

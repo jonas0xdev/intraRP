@@ -131,7 +131,7 @@
             animation: slideIn 0.3s ease-out;
         `;
     warning.innerHTML = `
-            <strong><i class="las la-exclamation-triangle"></i> Inaktivitätswarnung</strong><br>
+            <strong><i class="fa-solid fa-triangle-exclamation"></i> Inaktivitätswarnung</strong><br>
             System wird in 1 Minute gesperrt
         `;
 

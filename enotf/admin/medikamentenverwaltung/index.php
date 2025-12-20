@@ -43,7 +43,7 @@ if (!Permissions::check(['admin', 'edivi.view'])) {
 
                         <?php if (Permissions::check('admin')) : ?>
                             <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createMedikamentModal">
-                                <i class="las la-plus"></i> Medikament erstellen
+                                <i class="fa-solid fa-plus"></i> Medikament erstellen
                             </button>
                         <?php endif; ?>
                     </div>
@@ -273,7 +273,11 @@ if (!Permissions::check(['admin', 'edivi.view'])) {
             });
 
             document.getElementById('delete-medikament-btn').addEventListener('click', function() {
-                showConfirm('Möchtest du dieses Medikament wirklich löschen?', {danger: true, confirmText: 'Löschen', title: 'Medikament löschen'}).then(result => {
+                showConfirm('Möchtest du dieses Medikament wirklich löschen?', {
+                    danger: true,
+                    confirmText: 'Löschen',
+                    title: 'Medikament löschen'
+                }).then(result => {
                     if (result) {
                         document.getElementById('delete-medikament-form').submit();
                     }

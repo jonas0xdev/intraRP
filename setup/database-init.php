@@ -300,9 +300,6 @@ $migrationFiles = [
     // 13.10.2025
     ['file' => 'alter_intra_edivi_13102025.php', 'type' => 'alter'],
 
-    // 28.10.2025
-    ['file' => 'create_intra_support_db_28102025.php', 'type' => 'create', 'tables' => ['intra_support_passwords', 'intra_support_sessions', 'intra_support_actions_log']],
-
     // 02.11.2025
     ['file' => 'alter_intra_mitarbeiter_02112025.php', 'type' => 'alter'],
     ['file' => 'create_intra_registration_codes_02112025.php', 'type' => 'create'],

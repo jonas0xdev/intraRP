@@ -296,6 +296,3 @@ use App\Notifications\NotificationManager;
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
     const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
 </script>
-
-<?php
-include __DIR__ . '/support/banner.php';

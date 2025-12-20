@@ -5,7 +5,7 @@ try {
         `id` int(11) NOT NULL AUTO_INCREMENT,
         `name` varchar(255) NOT NULL,
         `beschreibung` text DEFAULT NULL,
-        `icon` varchar(50) DEFAULT 'las la-file-alt',
+        `icon` varchar(50) DEFAULT 'fa-solid fa-file-alt',
         `aktiv` tinyint(1) NOT NULL DEFAULT 1,
         `sortierung` int(11) DEFAULT 0,
         `tabelle_name` varchar(100) DEFAULT NULL COMMENT 'Name der Zieltabelle (z.B. intra_antrag_bef)',

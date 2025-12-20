@@ -55,11 +55,11 @@ $antraege = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h1 class="mb-0">
-                            <i class="las la-clipboard-list me-2"></i>Antragsübersicht
+                            <i class="fa-solid fa-clipboard-list me-2"></i>Antragsübersicht
                         </h1>
                         <?php if (Permissions::check(['admin'])): ?>
                             <a href="<?= BASE_PATH ?>settings/antrag/list.php" class="btn btn-primary">
-                                <i class="las la-cog me-2"></i>Antragstypen verwalten
+                                <i class="fa-solid fa-gear me-2"></i>Antragstypen verwalten
                             </a>
                         <?php endif; ?>
                     </div>
@@ -134,7 +134,7 @@ $antraege = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                             </td>
                                             <td>
                                                 <a class='btn btn-main-color btn-sm' href='{$view_url}'>
-                                                    <i class='las la-eye me-1'></i>Öffnen
+                                                    <i class='fa-solid fa-eye me-1'></i>Öffnen
                                                 </a>
                                             </td>
                                         </tr>";

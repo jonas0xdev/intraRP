@@ -72,7 +72,7 @@ $typen = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                     <?php if (empty($typen)): ?>
                         <div class="alert alert-info">
-                            <i class="las la-info-circle me-2"></i>
+                            <i class="fa-solid fa-circle-info me-2"></i>
                             Aktuell sind keine Antragstypen verfügbar.
                         </div>
                     <?php else: ?>
