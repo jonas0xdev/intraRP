@@ -182,7 +182,7 @@ $own_url = "https://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
                 <div class="col"></div>
             </div>
             <div class="urkunde-disclaimer text-center mt-4">
-                Diese fiktive Urkunde ist lediglich für das GTA Roleplay Projekt „<?php echo SERVER_NAME ?>“ ausgelegt. Der Besitz dieser Urkunde befugt in keinster Weise zum Führen einer echten Qualifikation.
+                Diese fiktive Urkunde ist lediglich für das Roleplay-Projekt „<?php echo SERVER_NAME ?>“ ausgelegt. Der Besitz dieser Urkunde befugt in keinster Weise zum Führen einer echten Qualifikation.
             </div>
         </div>
     </div>
