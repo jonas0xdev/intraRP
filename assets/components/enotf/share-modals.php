@@ -86,7 +86,7 @@
                     </label>
                 </div>
                 <div id="existingProtocolsContainer" class="ms-4 mb-3 d-none">
-                    <select class="form-select" id="existingProtocolSelect">
+                    <select class="form-select" id="existingProtocolSelect" data-custom-dropdown="true" data-search-threshold="8">
                         <option value="">Protokoll auswählen...</option>
                     </select>
                 </div>

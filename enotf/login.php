@@ -46,6 +46,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
         .name-autocomplete-wrapper {
             position: relative;
         }
+
         .name-dropdown {
             display: none;
             position: absolute;
@@ -58,17 +59,20 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
             border-radius: 4px;
             max-height: 200px;
             overflow-y: auto;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
         }
+
         .name-item {
             padding: 8px 12px;
             cursor: pointer;
             color: white;
             border-bottom: 1px solid #555;
         }
+
         .name-item:last-child {
             border-bottom: none;
         }
+
         .name-item:hover {
             background-color: #555;
         }
@@ -97,7 +101,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                     <label for="fahrername">Fahrer-Name</label>
                                 </div>
                                 <div class="col-3">
-                                    <select class="form-select my-2" name="fahrerquali" id="fahrerquali" required>
+                                    <select class="form-select my-2" name="fahrerquali" id="fahrerquali" required data-custom-dropdown="true" data-placeholder="Qualifikation">
                                         <option value="" selected></option>
                                         <option value="RH">RettHelfer</option>
                                         <option value="RS/A">RettSan i.A.</option>
@@ -118,7 +122,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                     <label for="beifahrername">Beifahrer-Name</label>
                                 </div>
                                 <div class="col-3">
-                                    <select class="form-select my-2" name="beifahrerquali" id="beifahrerquali">
+                                    <select class="form-select my-2" name="beifahrerquali" id="beifahrerquali" data-custom-dropdown="true" data-placeholder="Qualifikation">
                                         <option value="" selected></option>
                                         <option value="RH">RettHelfer</option>
                                         <option value="RS/A">RettSan i.A.</option>
@@ -138,7 +142,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                         <div class="col">
                             <div class="row">
                                 <div class="col">
-                                    <select name="protfzg" id="protfzg" class="form-select my-2" required>
+                                    <select name="protfzg" id="protfzg" class="form-select my-2" required data-custom-dropdown="true" data-search-threshold="5">
                                         <option value="" disabled selected>Fahrzeug wählen</option>
                                         <?php
                                         $stmt = $pdo->prepare("SELECT * FROM intra_fahrzeuge WHERE active = 1 AND rd_type <> 0 ORDER BY priority ASC");
@@ -178,7 +182,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
             // Populate dropdown with all names initially
             function populateDropdown(filterValue = '') {
                 dropdown.innerHTML = '';
-                const filteredNames = nameSuggestions.filter(name => 
+                const filteredNames = nameSuggestions.filter(name =>
                     name.toLowerCase().includes(filterValue.toLowerCase())
                 );
 
@@ -214,9 +218,9 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
 
             // Hide dropdown when clicking outside
             document.addEventListener('click', function(e) {
-                if (!e.target.closest('.name-autocomplete-wrapper') || 
-                    (e.target.closest('.name-autocomplete-wrapper') && 
-                     e.target.closest('.name-autocomplete-wrapper').querySelector('input') !== input)) {
+                if (!e.target.closest('.name-autocomplete-wrapper') ||
+                    (e.target.closest('.name-autocomplete-wrapper') &&
+                        e.target.closest('.name-autocomplete-wrapper').querySelector('input') !== input)) {
                     dropdown.style.display = 'none';
                 }
             });

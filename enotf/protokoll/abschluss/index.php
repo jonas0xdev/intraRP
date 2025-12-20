@@ -220,7 +220,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                                 <div class="col-3">
                                                     <label for="fzg_transp" class="edivi__description">Fahrzeug Transport</label>
                                                     <?php if ($daten['fzg_transp'] === NULL) : ?>
-                                                        <select name="fzg_transp" id="fzg_transp" class="w-100 form-select">
+                                                        <select name="fzg_transp" id="fzg_transp" class="w-100 form-select" data-custom-dropdown="true" data-search-threshold="5">
                                                             <option selected value="NULL">Fzg. Transp.</option>
                                                             <?php
                                                             require __DIR__ . '/../../../assets/config/database.php';
@@ -235,7 +235,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                                             ?>
                                                         </select>
                                                     <?php else : ?>
-                                                        <select name="fzg_transp" id="fzg_transp" class="w-100 form-select">
+                                                        <select name="fzg_transp" id="fzg_transp" class="w-100 form-select" data-custom-dropdown="true" data-search-threshold="5">
                                                             <option selected value="NULL">Fzg. Transp.</option>
                                                             <?php
                                                             require __DIR__ . '/../../../assets/config/database.php';
@@ -274,7 +274,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                                 <div class="col-3">
                                                     <label for="fzg_na" class="edivi__description">Fahrzeug Notarzt</label>
                                                     <?php if ($daten['fzg_na'] === NULL) : ?>
-                                                        <select name="fzg_na" id="fzg_na" class="w-100 form-select">
+                                                        <select name="fzg_na" id="fzg_na" class="w-100 form-select" data-custom-dropdown="true" data-search-threshold="5">
                                                             <option selected value="NULL">Fzg. NA</option>
                                                             <?php
                                                             require __DIR__ . '/../../../assets/config/database.php';
@@ -289,7 +289,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                                             ?>
                                                         </select>
                                                     <?php else : ?>
-                                                        <select name="fzg_na" id="fzg_na" class="w-100 form-select">
+                                                        <select name="fzg_na" id="fzg_na" class="w-100 form-select" data-custom-dropdown="true" data-search-threshold="5">
                                                             <option selected value="NULL">Fzg. NA</option>
                                                             <?php
                                                             require __DIR__ . '/../../../assets/config/database.php';
@@ -355,7 +355,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                             <div class="row my-2">
                                                 <div class="col">
                                                     <label for="prot_by" class="edivi__description">Protokoll durch</label>
-                                                    <select name="prot_by" id="prot_by" class="w-100 form-select edivi__input-check" readonly required autocomplete="off">
+                                                    <select name="prot_by" id="prot_by" class="w-100 form-select edivi__input-check" readonly required autocomplete="off" data-custom-dropdown="true">
                                                         <option disabled hidden selected>---</option>
                                                         <option value="0" <?php echo ($daten['prot_by'] == 0 ? 'selected' : '') ?>>Transportmittel</option>
                                                         <option value="1" <?php echo ($daten['prot_by'] == 1 ? 'selected' : '') ?>>Notarzt</option>

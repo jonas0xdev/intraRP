@@ -384,32 +384,21 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                                 <div class="col-4">
                                                     <div class="row my-2">
                                                         <div class="col">
-                                                            <select class="w-100 form-select gcs-select edivi__input-check" name="d_gcs_1" id="d_gcs_1" required data-mapping="4,3,2,1" autocomplete="off" style="display:none">
-                                                                <option disabled hidden selected>---</option>
-                                                                <option value="0" <?php echo ($daten['d_gcs_1'] == 0 ? 'selected' : '') ?>>(4)</option>
-                                                                <option value="1" <?php echo ($daten['d_gcs_1'] == 1 ? 'selected' : '') ?>>(3)</option>
-                                                                <option value="2" <?php echo ($daten['d_gcs_1'] == 2 ? 'selected' : '') ?>>(2)</option>
-                                                                <option value="3" <?php echo ($daten['d_gcs_1'] == 3 ? 'selected' : '') ?>>(1)</option>
-                                                            </select>
-                                                            <select class="w-100 form-select gcs-select edivi__input-check" name="d_gcs_2" id="d_gcs_2" required data-mapping="5,4,3,2,1" autocomplete="off" style="display:none">
-                                                                <option disabled hidden selected>---</option>
-                                                                <option value="0" <?php echo ($daten['d_gcs_2'] == 0 ? 'selected' : '') ?>>(5)</option>
-                                                                <option value="1" <?php echo ($daten['d_gcs_2'] == 1 ? 'selected' : '') ?>>(4)</option>
-                                                                <option value="2" <?php echo ($daten['d_gcs_2'] == 2 ? 'selected' : '') ?>>(3)</option>
-                                                                <option value="3" <?php echo ($daten['d_gcs_2'] == 3 ? 'selected' : '') ?>>(2)</option>
-                                                                <option value="4" <?php echo ($daten['d_gcs_2'] == 4 ? 'selected' : '') ?>>(1)</option>
-                                                            </select>
-                                                            <select class="w-100 form-select gcs-select edivi__input-check" name="d_gcs_3" id="d_gcs_3" required data-mapping="6,5,4,3,2,1" autocomplete="off" style="display:none">
-                                                                <option disabled hidden selected>---</option>
-                                                                <option value="0" <?php echo ($daten['d_gcs_3'] == 0 ? 'selected' : '') ?>>(6)</option>
-                                                                <option value="1" <?php echo ($daten['d_gcs_3'] == 1 ? 'selected' : '') ?>>(5)</option>
-                                                                <option value="2" <?php echo ($daten['d_gcs_3'] == 2 ? 'selected' : '') ?>>(4)</option>
-                                                                <option value="3" <?php echo ($daten['d_gcs_3'] == 3 ? 'selected' : '') ?>>(3)</option>
-                                                                <option value="4" <?php echo ($daten['d_gcs_3'] == 4 ? 'selected' : '') ?>>(2)</option>
-                                                                <option value="5" <?php echo ($daten['d_gcs_3'] == 5 ? 'selected' : '') ?>>(1)</option>
-                                                            </select>
+                                                            <?php
+                                                            // GCS-Berechnung: nur anzeigen wenn alle drei Werte gesetzt sind
+                                                            $gcs_value = '--';
+                                                            if (
+                                                                isset($daten['d_gcs_1']) && isset($daten['d_gcs_2']) && isset($daten['d_gcs_3']) &&
+                                                                $daten['d_gcs_1'] !== null && $daten['d_gcs_2'] !== null && $daten['d_gcs_3'] !== null
+                                                            ) {
+                                                                $gcs_augen = 4 - $daten['d_gcs_1'];
+                                                                $gcs_verbal = 5 - $daten['d_gcs_2'];
+                                                                $gcs_motorik = 6 - $daten['d_gcs_3'];
+                                                                $gcs_value = $gcs_augen + $gcs_verbal + $gcs_motorik;
+                                                            }
+                                                            ?>
                                                             <label for="_GCS_" class="edivi__description">GCS</label>
-                                                            <input type="text" name="_GCS_" id="_GCS_" class="w-100 form-control" value="" readonly>
+                                                            <input type="text" name="_GCS_" id="_GCS_" class="w-100 form-control" value="<?= $gcs_value ?>" readonly>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -631,30 +620,6 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
     include __DIR__ . '/../../../assets/functions/enotf/field_checks.php';
     include __DIR__ . '/../../../assets/functions/enotf/clock.php';
     ?>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const selects = document.querySelectorAll('.gcs-select');
-            const gcsInput = document.getElementById('_GCS_');
-
-            function updateGCS() {
-                let total = 0;
-                selects.forEach(sel => {
-                    const mapping = sel.dataset.mapping.split(',').map(Number);
-                    const selectedIndex = parseInt(sel.value);
-                    if (!isNaN(selectedIndex) && selectedIndex < mapping.length) {
-                        total += mapping[selectedIndex];
-                    }
-                });
-                gcsInput.value = total;
-            }
-
-            selects.forEach(sel => {
-                sel.addEventListener('change', updateGCS);
-            });
-
-            updateGCS();
-        });
-    </script>
     <?php if ($ist_freigegeben) : ?>
         <script>
             var formElements = document.querySelectorAll('input, textarea');

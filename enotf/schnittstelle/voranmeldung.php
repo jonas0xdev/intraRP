@@ -302,7 +302,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                     <div class="row">
                                         <div class="col">
                                             <label for="ziel" class="edivi__description">Zielklinik</label>
-                                            <select name="ziel" id="ziel" class="w-100 form-select" required>
+                                            <select name="ziel" id="ziel" class="w-100 form-select" required data-custom-dropdown="true" data-search-threshold="5">
                                                 <option disabled hidden selected value="NULL">---</option>
                                                 <?php
                                                 require __DIR__ . '/../../assets/config/database.php';
@@ -334,7 +334,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                                 $fahrzeuge = $stmt->fetchAll();
                                                 ?>
 
-                                                <select name="fahrzeug" id="fahrzeug" class="w-100 form-select" required>
+                                                <select name="fahrzeug" id="fahrzeug" class="w-100 form-select" required data-custom-dropdown="true" data-search-threshold="5">
                                                     <option value="NULL" <?= $selectedFzg === 'NULL' ? 'selected' : '' ?>>Fzg. Transp.</option>
                                                     <?php foreach ($fahrzeuge as $row): ?>
                                                         <?php
@@ -377,7 +377,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                     <div class="row">
                                         <div class="col">
                                             <label for="geschlecht" class="edivi__description">Geschlecht</label>
-                                            <select name="geschlecht" id="geschlecht" class="w-100 form-select" readonly autocomplete="off">
+                                            <select name="geschlecht" id="geschlecht" class="w-100 form-select" readonly autocomplete="off" data-custom-dropdown="true">
                                                 <option disabled hidden selected>---</option>
                                                 <option value="0" <?php echo ($daten['patsex'] == 0 ? 'selected' : '') ?>>männlich</option>
                                                 <option value="1" <?php echo ($daten['patsex'] == 1 ? 'selected' : '') ?>>weiblich</option>
@@ -392,13 +392,26 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                         </div>
                                         <div class="col">
                                             <label for="_GCS_" class="edivi__description">GCS</label>
-                                            <input type="text" class="form-control" id="_GCS_" name="_GCS_" placeholder="3" value="" readonly>
+                                            <?php
+                                            // GCS-Berechnung: nur anzeigen wenn alle drei Werte gesetzt sind
+                                            $gcs_total = '';
+                                            if (
+                                                isset($daten['d_gcs_1']) && isset($daten['d_gcs_2']) && isset($daten['d_gcs_3']) &&
+                                                $daten['d_gcs_1'] !== null && $daten['d_gcs_2'] !== null && $daten['d_gcs_3'] !== null
+                                            ) {
+                                                $gcs_augen = 4 - $daten['d_gcs_1'];
+                                                $gcs_verbal = 5 - $daten['d_gcs_2'];
+                                                $gcs_motorik = 6 - $daten['d_gcs_3'];
+                                                $gcs_total = $gcs_augen + $gcs_verbal + $gcs_motorik;
+                                            }
+                                            ?>
+                                            <input type="text" class="form-control" id="_GCS_" name="_GCS_" placeholder="--" value="<?= $gcs_total ?>" readonly>
                                         </div>
                                     </div>
                                     <div class="row mt-2">
                                         <div class="col">
                                             <label for="kreislauf" class="edivi__description">Kreislauf</label>
-                                            <select name="kreislauf" id="kreislauf" class="w-100 form-select" required autocomplete="off">
+                                            <select name="kreislauf" id="kreislauf" class="w-100 form-select" required autocomplete="off" data-custom-dropdown="true">
                                                 <option disabled hidden selected>---</option>
                                                 <option value="1">stabil</option>
                                                 <option value="0">instabil</option>
@@ -406,7 +419,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                         </div>
                                         <div class="col">
                                             <label for="intubiert" class="edivi__description">Intubiert</label>
-                                            <select name="intubiert" id="intubiert" class="w-100 form-select" required autocomplete="off">
+                                            <select name="intubiert" id="intubiert" class="w-100 form-select" required autocomplete="off" data-custom-dropdown="true">
                                                 <option disabled hidden selected>---</option>
                                                 <option value="0">nein</option>
                                                 <option value="1">ja</option>
@@ -437,7 +450,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                     <div class="row mt-2">
                                         <div class="col">
                                             <label for="priority" class="edivi__description">Priorität</label>
-                                            <select name="priority" id="priority" class="w-100 form-select" required autocomplete="off">
+                                            <select name="priority" id="priority" class="w-100 form-select" required autocomplete="off" data-custom-dropdown="true">
                                                 <option disabled hidden selected>---</option>
                                                 <option value="0">Nicht dringlich</option>
                                                 <option value="1">Dringlich</option>
@@ -460,32 +473,6 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                         </div>
                     </div>
                 </div>
-            </div>
-            <div style="display:none">
-                <select class="w-100 form-select gcs-select edivi__input-check" name="d_gcs_1" id="d_gcs_1" data-mapping="4,3,2,1" autocomplete="off">
-                    <option disabled hidden selected>---</option>
-                    <option value="0" <?php echo ($daten['d_gcs_1'] == 0 ? 'selected' : '') ?>>spontan (4)</option>
-                    <option value="1" <?php echo ($daten['d_gcs_1'] == 1 ? 'selected' : '') ?>>auf Aufforderung (3)</option>
-                    <option value="2" <?php echo ($daten['d_gcs_1'] == 2 ? 'selected' : '') ?>>auf Schmerzreiz (2)</option>
-                    <option value="3" <?php echo ($daten['d_gcs_1'] == 3 ? 'selected' : '') ?>>kein Öffnen (1)</option>
-                </select>
-                <select class="w-100 form-select gcs-select edivi__input-check" name="d_gcs_2" id="d_gcs_2" data-mapping="5,4,3,2,1" autocomplete="off">
-                    <option disabled hidden selected>---</option>
-                    <option value="0" <?php echo ($daten['d_gcs_2'] == 0 ? 'selected' : '') ?>>orientiert (5)</option>
-                    <option value="1" <?php echo ($daten['d_gcs_2'] == 1 ? 'selected' : '') ?>>desorientiert (4)</option>
-                    <option value="2" <?php echo ($daten['d_gcs_2'] == 2 ? 'selected' : '') ?>>inadäquate Äußerungen (3)</option>
-                    <option value="3" <?php echo ($daten['d_gcs_2'] == 3 ? 'selected' : '') ?>>unverständliche Laute (2)</option>
-                    <option value="4" <?php echo ($daten['d_gcs_2'] == 4 ? 'selected' : '') ?>>keine Reaktion (1)</option>
-                </select>
-                <select class="w-100 form-select gcs-select edivi__input-check" name="d_gcs_3" id="d_gcs_3" data-mapping="6,5,4,3,2,1" autocomplete="off">
-                    <option disabled hidden selected>---</option>
-                    <option value="0" <?php echo ($daten['d_gcs_3'] == 0 ? 'selected' : '') ?>>folgt Aufforderung (6)</option>
-                    <option value="1" <?php echo ($daten['d_gcs_3'] == 1 ? 'selected' : '') ?>>gezielte Abwehrbewegungen (5)</option>
-                    <option value="2" <?php echo ($daten['d_gcs_3'] == 2 ? 'selected' : '') ?>>ungezielte Abwehrbewegungen (4)</option>
-                    <option value="3" <?php echo ($daten['d_gcs_3'] == 3 ? 'selected' : '') ?>>Beugesynergismen (3)</option>
-                    <option value="4" <?php echo ($daten['d_gcs_3'] == 4 ? 'selected' : '') ?>>Strecksynergismen (2)</option>
-                    <option value="5" <?php echo ($daten['d_gcs_3'] == 5 ? 'selected' : '') ?>>keine Reaktion (1)</option>
-                </select>
             </div>
     </form>
     <script>
@@ -513,31 +500,6 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
 
         document.addEventListener('DOMContentLoaded', updateAge);
         document.getElementById('patgebdat').addEventListener('input', updateAge);
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const selects = document.querySelectorAll('.gcs-select');
-            const gcsInput = document.getElementById('_GCS_');
-
-            function updateGCS() {
-                let total = 0;
-                selects.forEach(sel => {
-                    const mapping = sel.dataset.mapping.split(',').map(Number);
-                    const selectedIndex = parseInt(sel.value);
-                    if (!isNaN(selectedIndex) && selectedIndex < mapping.length) {
-                        total += mapping[selectedIndex];
-                    }
-                });
-                gcsInput.value = total;
-            }
-
-            selects.forEach(sel => {
-                sel.addEventListener('change', updateGCS);
-            });
-
-
-            updateGCS();
-        });
     </script>
     <script src="<?= BASE_PATH ?>assets/js/pin_activity.js"></script>
 </body>
