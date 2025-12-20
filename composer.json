@@ -18,6 +18,10 @@
       "App\\": "src/"
     }
   },
+  "config": {
+    "optimize-autoloader": true,
+    "classmap-authoritative": false
+  },
   "scripts": {
     "db:migrate": "@php setup/database-init.php",
     "db:validate": "@php setup/validate-migrations.php",
