@@ -1090,43 +1090,26 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             </tr>
                             <tr>
                                 <td>
-                                    Augen<br><span class="fw-bold"><?= 4 - $daten['d_gcs_1'] ?></span>
+                                    <?php
+                                    // GCS-Berechnung
+                                    $gcs_augen = isset($daten['d_gcs_1']) ? (4 - $daten['d_gcs_1']) : 0;
+                                    $gcs_verbal = isset($daten['d_gcs_2']) ? (5 - $daten['d_gcs_2']) : 0;
+                                    $gcs_motorik = isset($daten['d_gcs_3']) ? (6 - $daten['d_gcs_3']) : 0;
+                                    $gcs_total = $gcs_augen + $gcs_verbal + $gcs_motorik;
+                                    ?>
+                                    Augen<br><span class="fw-bold"><?= $gcs_augen ?></span>
                                 </td>
                                 <td>
-                                    Verbal<br><span class="fw-bold"><?= 5 - $daten['d_gcs_2'] ?></span>
+                                    Verbal<br><span class="fw-bold"><?= $gcs_verbal ?></span>
                                 </td>
                                 <td>
-                                    Motorik<br><span class="fw-bold"><?= 6 - $daten['d_gcs_2'] ?></span>
+                                    Motorik<br><span class="fw-bold"><?= $gcs_motorik ?></span>
                                 </td>
                                 <td>
-                                    Summe<br><span class="fw-bold" style="font-size: 8pt"><span id="_GCS_"></span> GCS</span>
+                                    Summe<br><span class="fw-bold" style="font-size: 8pt"><?= $gcs_total ?> GCS</span>
                                 </td>
                             </tr>
                         </table>
-                        <select class="w-100 form-select gcs-select edivi__input-check" name="d_gcs_1" id="d_gcs_1" required data-mapping="4,3,2,1" autocomplete="off" style="display:none">
-                            <option disabled hidden selected>---</option>
-                            <option value="0" <?php echo ($daten['d_gcs_1'] == 0 ? 'selected' : '') ?>>(4)</option>
-                            <option value="1" <?php echo ($daten['d_gcs_1'] == 1 ? 'selected' : '') ?>>(3)</option>
-                            <option value="2" <?php echo ($daten['d_gcs_1'] == 2 ? 'selected' : '') ?>>(2)</option>
-                            <option value="3" <?php echo ($daten['d_gcs_1'] == 3 ? 'selected' : '') ?>>(1)</option>
-                        </select>
-                        <select class="w-100 form-select gcs-select edivi__input-check" name="d_gcs_2" id="d_gcs_2" required data-mapping="5,4,3,2,1" autocomplete="off" style="display:none">
-                            <option disabled hidden selected>---</option>
-                            <option value="0" <?php echo ($daten['d_gcs_2'] == 0 ? 'selected' : '') ?>>(5)</option>
-                            <option value="1" <?php echo ($daten['d_gcs_2'] == 1 ? 'selected' : '') ?>>(4)</option>
-                            <option value="2" <?php echo ($daten['d_gcs_2'] == 2 ? 'selected' : '') ?>>(3)</option>
-                            <option value="3" <?php echo ($daten['d_gcs_2'] == 3 ? 'selected' : '') ?>>(2)</option>
-                            <option value="4" <?php echo ($daten['d_gcs_2'] == 4 ? 'selected' : '') ?>>(1)</option>
-                        </select>
-                        <select class="w-100 form-select gcs-select edivi__input-check" name="d_gcs_3" id="d_gcs_3" required data-mapping="6,5,4,3,2,1" autocomplete="off" style="display:none">
-                            <option disabled hidden selected>---</option>
-                            <option value="0" <?php echo ($daten['d_gcs_3'] == 0 ? 'selected' : '') ?>>(6)</option>
-                            <option value="1" <?php echo ($daten['d_gcs_3'] == 1 ? 'selected' : '') ?>>(5)</option>
-                            <option value="2" <?php echo ($daten['d_gcs_3'] == 2 ? 'selected' : '') ?>>(4)</option>
-                            <option value="3" <?php echo ($daten['d_gcs_3'] == 3 ? 'selected' : '') ?>>(3)</option>
-                            <option value="4" <?php echo ($daten['d_gcs_3'] == 4 ? 'selected' : '') ?>>(2)</option>
-                            <option value="5" <?php echo ($daten['d_gcs_3'] == 5 ? 'selected' : '') ?>>(1)</option>
-                        </select>
                     </div>
                 </div>
                 <div class="row border border-dark border-top-0">
@@ -2662,30 +2645,6 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
         }
 
         document.addEventListener('DOMContentLoaded', updateAge);
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const selects = document.querySelectorAll('.gcs-select');
-            const gcsInput = document.getElementById('_GCS_');
-
-            function updateGCS() {
-                let total = 0;
-                selects.forEach(sel => {
-                    const mapping = sel.dataset.mapping.split(',').map(Number);
-                    const selectedIndex = parseInt(sel.value);
-                    if (!isNaN(selectedIndex) && selectedIndex < mapping.length) {
-                        total += mapping[selectedIndex];
-                    }
-                });
-                gcsInput.innerText = total;
-            }
-
-            selects.forEach(sel => {
-                sel.addEventListener('change', updateGCS);
-            });
-
-            updateGCS();
-        });
     </script>
     <script>
         let currentZoom = 1;
