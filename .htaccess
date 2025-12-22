@@ -26,5 +26,5 @@ RewriteRule ^dokumente/zertifikate/fachlehrgang/(\d+)$ dokumente/zertifikate/fac
 # RewriteRule ^antraege/antrag(\d+)$ antraege/t-view.php?antrag=$1 [L]
 # RewriteRule ^enotf/divi(\d+)$ enotf/view.php?id=$1 [L]
 # RewriteRule ^users/user(\d+)$ users/edit.php?id=$1 [L]
-RewriteRule ^enotf/([\w-]+)$ enotf/protokoll.php?enr=$1 [L]
+# RewriteRule ^enotf/([\w-]+)$ enotf/protokoll.php?enr=$1 [L]
 # RewriteRule ^personal/(\d+)$ personal/profile.php?id=$1 [L]
