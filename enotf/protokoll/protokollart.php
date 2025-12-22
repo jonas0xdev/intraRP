@@ -4,6 +4,18 @@ if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
     ini_set('session.cookie_secure', '1');
 }
 
+$userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+if (strpos($userAgent, 'CitizenFX') !== false) {
+    // Remove ALL existing CSP headers
+    header_remove('Content-Security-Policy');
+    header_remove('X-Frame-Options');
+
+    // Set permissive headers for FiveM
+    header('Content-Security-Policy: frame-ancestors *', true);
+    header('Access-Control-Allow-Origin: *');
+}
+
+
 session_start();
 require_once __DIR__ . '/../../assets/config/config.php';
 require_once __DIR__ . '/../../vendor/autoload.php';

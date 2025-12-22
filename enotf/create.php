@@ -4,6 +4,18 @@ if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
     ini_set('session.cookie_secure', '1');
 }
 
+$userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+if (strpos($userAgent, 'CitizenFX') !== false) {
+    // Remove ALL existing CSP headers
+    header_remove('Content-Security-Policy');
+    header_remove('X-Frame-Options');
+
+    // Set permissive headers for FiveM
+    header('Content-Security-Policy: frame-ancestors *', true);
+    header('Access-Control-Allow-Origin: *');
+}
+
+
 session_start();
 require_once __DIR__ . '/../assets/config/config.php';
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -117,13 +129,19 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
 
             if (protBy !== '0' && protBy !== '1') {
                 e.preventDefault();
-                showAlert("Bitte wähle ein Protokoll aus (RD oder NA).", {type: 'warning', title: 'Protokollauswahl erforderlich'});
+                showAlert("Bitte wähle ein Protokoll aus (RD oder NA).", {
+                    type: 'warning',
+                    title: 'Protokollauswahl erforderlich'
+                });
                 return;
             }
 
             if (!enr) {
                 e.preventDefault();
-                showAlert("Bitte gib eine Einsatznummer ein.", {type: 'warning', title: 'Einsatznummer erforderlich'});
+                showAlert("Bitte gib eine Einsatznummer ein.", {
+                    type: 'warning',
+                    title: 'Einsatznummer erforderlich'
+                });
                 return;
             }
 

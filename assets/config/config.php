@@ -19,7 +19,7 @@ try {
 } catch (Exception $e) {
     // Fallback to default values if database is not available or table doesn't exist
     error_log("Could not load config from database: " . $e->getMessage());
-    
+
     // BASIS DATEN - Fallback defaults
     if (!defined('API_KEY')) define('API_KEY', 'CHANGE_ME');
     if (!defined('SYSTEM_NAME')) define('SYSTEM_NAME', 'intraRP');
@@ -27,16 +27,16 @@ try {
     if (!defined('SYSTEM_URL')) define('SYSTEM_URL', 'CHANGE_ME');
     if (!defined('SYSTEM_LOGO')) define('SYSTEM_LOGO', '/assets/img/defaultLogo.webp');
     if (!defined('META_IMAGE_URL')) define('META_IMAGE_URL', '');
-    
+
     // SERVER DATEN
     if (!defined('SERVER_NAME')) define('SERVER_NAME', 'CHANGE_ME');
     if (!defined('SERVER_CITY')) define('SERVER_CITY', 'Musterstadt');
-    
+
     // RP DATEN
     if (!defined('RP_ORGTYPE')) define('RP_ORGTYPE', 'Berufsfeuerwehr');
     if (!defined('RP_STREET')) define('RP_STREET', 'Musterweg 0815');
     if (!defined('RP_ZIP')) define('RP_ZIP', '1337');
-    
+
     // FUNKTIONEN
     if (!defined('CHAR_ID')) define('CHAR_ID', true);
     if (!defined('ENOTF_PREREG')) define('ENOTF_PREREG', true);
