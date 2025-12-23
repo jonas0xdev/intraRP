@@ -64,7 +64,7 @@ try {
     }
 
     #intra-nav .nav-link.menu-open .nav-icon {
-        color: var(--main-color);
+        color: rgba(255, 255, 255, 0.7);
     }
 
     .mega-menu {
@@ -72,11 +72,11 @@ try {
         width: 100%;
         left: 0;
         top: 100%;
-        background-color: var(--body-bg-darker);
+        background-color: #191919;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
         display: none;
         z-index: 1000;
-        border-top: 1px solid var(--darkgray);
+        /* border-top: 1px solid var(--darkgray); */
     }
 
     .mega-menu.show {
@@ -96,7 +96,7 @@ try {
         font-size: 0.75rem;
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        color: var(--main-color);
+        color: #fff;
         margin-bottom: 0.75rem;
         font-weight: 600;
     }
@@ -126,8 +126,8 @@ try {
     }
 
     #intra-nav .dropdown-menu {
-        background-color: var(--body-bg-lighter);
-        border: 1px solid var(--darkgray);
+        background-color: var(--body-bg);
+        border-bottom: 2px solid var(--darkgray);
         border-radius: 0;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     }
@@ -398,7 +398,7 @@ try {
 
                 <?php if (Permissions::check(['admin', 'users.view', 'personnel.view'])): ?>
                     <li class="nav-item dropdown position-static">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" data-page="personal">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-page="personal">
                             <i class="fa-solid fa-users nav-icon"></i><span>Personal</span>
                         </a>
                         <div class="dropdown-menu mega-menu w-100">
@@ -438,7 +438,7 @@ try {
                 <?php endif; ?>
 
                 <li class="nav-item dropdown position-static">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" data-page="protokolle">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-page="protokolle">
                         <i class="fa-solid fa-file-medical nav-icon"></i><span>Protokolle</span>
                     </a>
                     <div class="dropdown-menu mega-menu w-100">
@@ -481,7 +481,7 @@ try {
 
                 <?php if (Permissions::check(['admin', 'personnel.view', 'vehicles.view', 'edivi.view', 'dashboard.manage'])): ?>
                     <li class="nav-item dropdown position-static">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" data-page="settings">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-page="settings">
                             <i class="fa-solid fa-sliders nav-icon"></i><span>Einstellungen</span>
                         </a>
                         <div class="dropdown-menu mega-menu w-100">
@@ -644,19 +644,42 @@ try {
             $(".nav-link[data-page='" + pageMapping[currentPage] + "']").addClass("active");
         }
 
-        $(document).on('click', function(e) {
-            if (!$(e.target).closest('.dropdown').length) {
-                $('.mega-menu').removeClass('show');
+        // Handle mega menu clicks
+        $('.nav-item.dropdown .nav-link.dropdown-toggle').on('click', function(e) {
+            const $dropdown = $(this).closest('.dropdown');
+            const $megaMenu = $dropdown.find('.mega-menu');
+
+            if ($megaMenu.length > 0) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                // Toggle the mega menu
+                if ($megaMenu.hasClass('show')) {
+                    $megaMenu.removeClass('show');
+                    $(this).removeClass('menu-open');
+                } else {
+                    // Close all other mega menus
+                    $('.mega-menu').removeClass('show');
+                    $('.nav-link.dropdown-toggle').removeClass('menu-open');
+
+                    // Open this mega menu
+                    $megaMenu.addClass('show');
+                    $(this).addClass('menu-open');
+                }
             }
         });
 
-        // Mark open mega-menu nav-links
-        $('.dropdown').on('show.bs.dropdown', function() {
-            $(this).find('.nav-link').addClass('menu-open');
+        // Close mega menu when clicking outside
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.nav-item.dropdown').length) {
+                $('.mega-menu').removeClass('show');
+                $('.nav-link.dropdown-toggle').removeClass('menu-open');
+            }
         });
 
-        $('.dropdown').on('hide.bs.dropdown', function() {
-            $(this).find('.nav-link').removeClass('menu-open');
+        // Prevent mega menu from closing when clicking inside it
+        $('.mega-menu').on('click', function(e) {
+            e.stopPropagation();
         });
 
         $('.mark-as-read-btn').on('click', function(e) {
