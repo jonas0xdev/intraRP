@@ -623,7 +623,7 @@ function fmt_elapsed(int|string $seconds): string
                                                                                     <small class="d-block"><strong>Startdruck:</strong> <?= htmlspecialchars($trupp['startPressure']) ?></small>
                                                                                 <?php endif; ?>
                                                                                 <?php if (!empty($trupp['elapsedTime'])): ?>
-                                                                                    <small class="d-block"><strong>Einsatzzeit:</strong> <?= fmt_elapsed($trupp['elapsedTime']) ?> (mm:ss)</small>
+                                                                                    <small class="d-block"><strong>Einsatzzeit:</strong> <?= fmt_elapsed($trupp['elapsedTime']) ?> Min.</small>
                                                                                 <?php endif; ?>
                                                                             </div>
                                                                         <?php endif; ?>
