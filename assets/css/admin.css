@@ -40,33 +40,87 @@ select.form-select {
 #intra-nav {
   opacity: 1;
 }
+
 #intra-nav .dropdown-menu {
   --bs-dropdown-link-active-bg: var(--main-color);
   border-radius: 0 !important;
 }
+
 #intra-nav .navbar-nav .nav-item,
 #intra-nav .navbar-nav .nav-link {
   margin-left: 0.15rem;
   margin-right: 0.15rem;
 }
+
 #intra-nav .nav-link {
   border-bottom-color: transparent;
 }
+
 #intra-nav .nav-link.active {
   background-color: rgba(255, 255, 255, 0.2);
   border-radius: 8px;
   color: var(--white);
 }
+
 #intra-nav .nav-link.active i {
   color: var(--white);
 }
+
 #intra-nav .nav-link.active:hover {
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 8px;
 }
+
 #intra-nav .nav-link:hover {
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 8px;
+}
+
+#moduleOffcanvas {
+  background-color: var(--body-bg);
+  color: var(--white);
+  border-left: 1px solid var(--darkgray);
+}
+
+#moduleOffcanvas .offcanvas-header {
+  background-color: var(--body-bg-darker);
+  border-bottom: 1px solid var(--darkgray);
+}
+
+#moduleOffcanvas .offcanvas-title i {
+  color: var(--white);
+}
+
+#moduleOffcanvas .offcanvas-body {
+  background-color: var(--body-bg);
+}
+
+#moduleOffcanvas .accordion {
+  --bs-accordion-bg: transparent;
+  --bs-accordion-btn-bg: transparent;
+  --bs-accordion-border-color: var(--darkgray);
+  --bs-accordion-color: var(--bs-body-color);
+}
+
+#moduleOffcanvas .accordion-item {
+  background-color: transparent;
+}
+
+#moduleOffcanvas .accordion-button {
+  color: var(--white);
+}
+
+#moduleOffcanvas .list-group-item {
+  background-color: transparent;
+  border-color: transparent;
+}
+
+#moduleOffcanvas a {
+  color: var(--white);
+}
+
+#moduleOffcanvas a:hover {
+  text-decoration: underline;
 }
 
 #qmActionsModal .modal-content,
@@ -74,15 +128,18 @@ select.form-select {
   background-color: var(--body-bg);
   border: 1px solid var(--darkgray);
 }
+
 #qmActionsModal .modal-header,
 #qmLogModal .modal-header {
   border-bottom: 1px solid var(--darkgray);
   background-color: var(--body-bg-darker);
 }
+
 #qmActionsModal .modal-body,
 #qmLogModal .modal-body {
   background-color: var(--body-bg);
 }
+
 #qmActionsModal .edivi__box,
 #qmLogModal .edivi__box {
   background: #333333;
@@ -91,6 +148,7 @@ select.form-select {
   border-radius: 0;
   padding: 1rem;
 }
+
 #qmActionsModal .edivi__box.edivi__log-comment,
 #qmLogModal .edivi__box.edivi__log-comment {
   background: #333333;
@@ -100,6 +158,7 @@ select.form-select {
   font-size: 0.8rem;
   margin-bottom: 10px !important;
 }
+
 #qmActionsModal .edivi__box.edivi__log-comment i,
 #qmLogModal .edivi__box.edivi__log-comment i {
   padding: 6px 9px;
@@ -109,6 +168,7 @@ select.form-select {
   opacity: 0.6;
   font-size: 1rem !important;
 }
+
 #qmActionsModal .edivi__admin,
 #qmLogModal .edivi__admin {
   background: transparent;
@@ -117,12 +177,14 @@ select.form-select {
   border: 0;
   font-size: 1.2rem;
 }
+
 #qmActionsModal .edivi__admin:focus,
 #qmLogModal .edivi__admin:focus {
   box-shadow: 0 0 0 1px #5783cf !important;
   background: transparent;
   color: #fff;
 }
+
 #qmActionsModal .edivi__admin[readonly],
 #qmLogModal .edivi__admin[readonly] {
   box-shadow: none !important;
@@ -131,11 +193,13 @@ select.form-select {
   pointer-events: none;
   cursor: default;
 }
+
 #qmActionsModal .edivi__admin option,
 #qmLogModal .edivi__admin option {
   background: #333333;
   color: #fff;
 }
+
 #qmActionsModal .edivi__iconlink-button,
 #qmLogModal .edivi__iconlink-button {
   background: none;
@@ -147,11 +211,13 @@ select.form-select {
   font: inherit;
   text-align: center;
 }
+
 #qmActionsModal .edivi__iconlink-button:hover,
 #qmLogModal .edivi__iconlink-button:hover {
   color: inherit;
   text-decoration: none;
 }
+
 #qmActionsModal .edivi__iconlink-button:focus,
 #qmLogModal .edivi__iconlink-button:focus {
   outline: none;
@@ -165,6 +231,7 @@ select.form-select {
   position: relative;
   overflow: hidden;
 }
+
 .intra__stats-card .card-title {
   font-size: 0.8rem;
   text-transform: uppercase;
@@ -172,12 +239,14 @@ select.form-select {
   color: rgba(255, 255, 255, 0.85) !important;
   margin: 0 !important;
 }
+
 .intra__stats-card .card-text {
   font-size: 2.75rem;
   font-weight: bold;
   color: var(--white);
   margin: 0 !important;
 }
+
 .intra__stats-card i {
   position: absolute;
   right: -1.5rem;
@@ -185,15 +254,19 @@ select.form-select {
   font-size: 6rem;
   color: rgba(255, 255, 255, 0.25);
 }
+
 .intra__stats-card.intra__stats-users {
   --stat-bg-color: #D10000;
 }
+
 .intra__stats-card.intra__stats-workers {
   --stat-bg-color: #B80000;
 }
+
 .intra__stats-card.intra__stats-enotf {
   --stat-bg-color: #8F0000;
 }
+
 .intra__stats-card.intra__stats-documents {
   --stat-bg-color: #660000;
 }

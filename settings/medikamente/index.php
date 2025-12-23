@@ -1,7 +1,7 @@
 <?php
 session_start();
-require_once __DIR__ . '/../../../assets/config/config.php';
-require_once __DIR__ . '/../../../vendor/autoload.php';
+require_once __DIR__ . '/../../assets/config/config.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
 if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
     $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
 
@@ -24,12 +24,12 @@ if (!Permissions::check(['admin', 'edivi.view'])) {
 
 <head>
     <?php
-    include __DIR__ . "/../../../assets/components/_base/admin/head.php";
+    include __DIR__ . "/../../assets/components/_base/admin/head.php";
     ?>
 </head>
 
-<body data-bs-theme="dark" data-page="edivi">
-    <?php include __DIR__ . "/../../../assets/components/navbar.php"; ?>
+<body data-bs-theme="dark" data-page="settings">
+    <?php include __DIR__ . "/../../assets/components/navbar.php"; ?>
     <div class="container-full position-relative" id="mainpageContainer">
         <!-- ------------ -->
         <!-- PAGE CONTENT -->
@@ -62,7 +62,7 @@ if (!Permissions::check(['admin', 'edivi.view'])) {
                             </thead>
                             <tbody>
                                 <?php
-                                require __DIR__ . '/../../../assets/config/database.php';
+                                require __DIR__ . '/../../assets/config/database.php';
                                 $stmt = $pdo->prepare("SELECT * FROM intra_edivi_medikamente ORDER BY wirkstoff ASC");
                                 $stmt->execute();
                                 $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -110,7 +110,7 @@ if (!Permissions::check(['admin', 'edivi.view'])) {
         <div class="modal fade" id="editMedikamentModal" tabindex="-1" aria-labelledby="editMedikamentModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <form action="<?= BASE_PATH ?>enotf/admin/medikamentenverwaltung/update.php" method="POST">
+                    <form action="<?= BASE_PATH ?>settings/medikamente/update.php" method="POST">
                         <div class="modal-header">
                             <h5 class="modal-title" id="editMedikamentModalLabel">Medikament bearbeiten</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
@@ -154,7 +154,7 @@ if (!Permissions::check(['admin', 'edivi.view'])) {
                         </div>
                     </form>
 
-                    <form id="delete-medikament-form" action="<?= BASE_PATH ?>enotf/admin/medikamentenverwaltung/delete.php" method="POST" style="display:none;">
+                    <form id="delete-medikament-form" action="<?= BASE_PATH ?>settings/medikamente/delete.php" method="POST" style="display:none;">
                         <input type="hidden" name="id" id="medikament-delete-id">
                     </form>
 
@@ -168,7 +168,7 @@ if (!Permissions::check(['admin', 'edivi.view'])) {
         <div class="modal fade" id="createMedikamentModal" tabindex="-1" aria-labelledby="createMedikamentModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <form action="<?= BASE_PATH ?>enotf/admin/medikamentenverwaltung/create.php" method="POST">
+                    <form action="<?= BASE_PATH ?>settings/medikamente/create.php" method="POST">
                         <div class="modal-header">
                             <h5 class="modal-title" id="createMedikamentModalLabel">Neues Medikament anlegen</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
@@ -285,7 +285,7 @@ if (!Permissions::check(['admin', 'edivi.view'])) {
             });
         });
     </script>
-    <?php include __DIR__ . "/../../../assets/components/footer.php"; ?>
+    <?php include __DIR__ . "/../../assets/components/footer.php"; ?>
 </body>
 
 </html>

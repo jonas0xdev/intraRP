@@ -1,8 +1,8 @@
 <?php
 session_start();
-require_once __DIR__ . '/../../../assets/config/config.php';
-require_once __DIR__ . '/../../../vendor/autoload.php';
-require_once __DIR__ . '/../../../assets/config/database.php';
+require_once __DIR__ . '/../../assets/config/config.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
+require_once __DIR__ . '/../../assets/config/database.php';
 
 use App\Auth\Permissions;
 use App\Helpers\Flash;
@@ -10,7 +10,7 @@ use App\Utils\AuditLogger;
 
 if (!Permissions::check('admin')) {
     Flash::set('error', 'no-permissions');
-    header("Location: " . BASE_PATH . "enotf/admin/medikamentenverwaltung/index.php");
+    header("Location: " . BASE_PATH . "settings/medikamente/index.php");
     exit();
 }
 
@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($id <= 0 || empty($wirkstoff)) {
         Flash::set('error', 'missing-fields');
-        header("Location: " . BASE_PATH . "enotf/admin/medikamentenverwaltung/index.php");
+        header("Location: " . BASE_PATH . "settings/medikamente/index.php");
         exit;
     }
 
@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         Flash::set('success', 'updated');
         $auditLogger = new AuditLogger($pdo);
         $auditLogger->log($_SESSION['userid'], 'Medikament aktualisiert [ID: ' . $id . ']', NULL, 'Medikamente', 1);
-        header("Location: " . BASE_PATH . "enotf/admin/medikamentenverwaltung/index.php");
+        header("Location: " . BASE_PATH . "settings/medikamente/index.php");
         exit;
     } catch (PDOException $e) {
         error_log("PDO Error: " . $e->getMessage());
@@ -52,10 +52,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             Flash::set('error', 'exception');
         }
-        header("Location: " . BASE_PATH . "enotf/admin/medikamentenverwaltung/index.php");
+        header("Location: " . BASE_PATH . "settings/medikamente/index.php");
         exit;
     }
 } else {
-    header("Location: " . BASE_PATH . "enotf/admin/medikamentenverwaltung/index.php");
+    header("Location: " . BASE_PATH . "settings/medikamente/index.php");
     exit;
 }

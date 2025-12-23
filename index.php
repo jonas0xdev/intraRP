@@ -39,7 +39,7 @@ use App\Helpers\Flash;
                     ?>
                 </div>
             </div>
-           <?php include __DIR__ . '/assets/components/index/stats.php' ?>
+            <?php include __DIR__ . '/assets/components/index/stats.php' ?>
             <div class="row mt-4">
                 <div class="col intra__tile">
                     <h4 class="mt-2 mb-3">Eigene Dokumente</h4>

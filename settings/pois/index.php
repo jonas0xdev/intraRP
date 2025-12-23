@@ -1,7 +1,7 @@
 <?php
 session_start();
-require_once __DIR__ . '/../../../assets/config/config.php';
-require_once __DIR__ . '/../../../vendor/autoload.php';
+require_once __DIR__ . '/../../assets/config/config.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
 if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
     $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
 
@@ -23,12 +23,12 @@ if (!Permissions::check(['admin', 'vehicles.view'])) {
 
 <head>
     <?php
-    include __DIR__ . '/../../../assets/components/_base/admin/head.php';
+    include __DIR__ . '/../../assets/components/_base/admin/head.php';
     ?>
 </head>
 
-<body data-bs-theme="dark" data-page="edivi">
-    <?php include __DIR__ . "/../../../assets/components/navbar.php"; ?>
+<body data-bs-theme="dark" data-page="settings">
+    <?php include __DIR__ . "/../../assets/components/navbar.php"; ?>
     <div class="container-full position-relative" id="mainpageContainer">
         <!-- ------------ -->
         <!-- PAGE CONTENT -->
@@ -65,7 +65,7 @@ if (!Permissions::check(['admin', 'vehicles.view'])) {
                             </thead>
                             <tbody>
                                 <?php
-                                require __DIR__ . '/../../../assets/config/database.php';
+                                require __DIR__ . '/../../assets/config/database.php';
                                 $stmt = $pdo->prepare("SELECT * FROM intra_edivi_pois ORDER BY name ASC");
                                 $stmt->execute();
                                 $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -116,7 +116,7 @@ if (!Permissions::check(['admin', 'vehicles.view'])) {
         <div class="modal fade" id="editPoiModal" tabindex="-1" aria-labelledby="editPoiModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <form action="<?= BASE_PATH ?>enotf/admin/pois/update.php" method="POST">
+                    <form action="<?= BASE_PATH ?>settings/pois/update.php" method="POST">
                         <div class="modal-header">
                             <h5 class="modal-title" id="editPoiModalLabel">POI bearbeiten <small class="text-muted" id="poi-id-display"></small></h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
@@ -180,7 +180,7 @@ if (!Permissions::check(['admin', 'vehicles.view'])) {
                         </div>
                     </form>
 
-                    <form id="delete-poi-form" action="<?= BASE_PATH ?>enotf/admin/pois/delete.php" method="POST" style="display:none;">
+                    <form id="delete-poi-form" action="<?= BASE_PATH ?>settings/pois/delete.php" method="POST" style="display:none;">
                         <input type="hidden" name="id" id="poi-delete-id">
                     </form>
 
@@ -195,7 +195,7 @@ if (!Permissions::check(['admin', 'vehicles.view'])) {
         <div class="modal fade" id="createPoiModal" tabindex="-1" aria-labelledby="createPoiModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <form action="<?= BASE_PATH ?>enotf/admin/pois/create.php" method="POST">
+                    <form action="<?= BASE_PATH ?>settings/pois/create.php" method="POST">
                         <div class="modal-header">
                             <h5 class="modal-title" id="createPoiModalLabel">Neuen POI anlegen</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
@@ -335,7 +335,7 @@ if (!Permissions::check(['admin', 'vehicles.view'])) {
             });
         });
     </script>
-    <?php include __DIR__ . "/../../../assets/components/footer.php"; ?>
+    <?php include __DIR__ . "/../../assets/components/footer.php"; ?>
 </body>
 
 </html>
