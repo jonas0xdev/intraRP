@@ -457,58 +457,186 @@ function fmt_dt(?string $ts): string
                 <div class="intra__tile p-3 mb-3">
                     <h4>Atemschutzüberwachung (ASU)</h4>
                     <?php if (empty($asuProtocols)): ?>
-                        <div class="alert alert-info">Keine ASU-Protokolle vorhanden</div>
+                        <p class="text-muted mb-0">Keine ASU-Protokolle vorhanden</p>
                     <?php else: ?>
-                        <div class="row g-3">
+                        <div class="row g-2">
                             <?php foreach ($asuProtocols as $asu): ?>
                                 <?php $protocolData = json_decode($asu['data'], true) ?? []; ?>
-                                <div class="col-12">
-                                    <div class="card border-primary">
-                                        <div class="card-header bg-primary text-white">
-                                            <strong><?= htmlspecialchars($asu['supervisor']) ?></strong>
-                                            <small class="float-end"><?= fmt_dt($asu['created_at']) ?></small>
-                                        </div>
-                                        <div class="card-body">
-                                            <?php if (!empty($asu['mission_location'])): ?>
-                                                <p class="mb-2"><strong>Ort:</strong> <?= htmlspecialchars($asu['mission_location']) ?></p>
-                                            <?php endif; ?>
-                                            <?php if (!empty($asu['mission_date'])): ?>
-                                                <p class="mb-2"><strong>Datum:</strong> <?= htmlspecialchars($asu['mission_date']) ?></p>
-                                            <?php endif; ?>
+                                <div class="col-auto">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#asuModal<?= (int)$asu['id'] ?>">
+                                        <i class="fa-solid fa-shield"></i>
+                                        <?= htmlspecialchars($asu['supervisor']) ?>
+                                        <br>
+                                        <small><?= fmt_dt($asu['created_at']) ?></small>
+                                    </button>
+                                </div>
 
-                                            <?php
-                                            $trupps = [];
-                                            for ($i = 1; $i <= 10; $i++) {
-                                                $truppKey = 'trupp' . $i;
-                                                if (isset($protocolData[$truppKey]) && !empty($protocolData[$truppKey])) {
-                                                    $trupps[] = $protocolData[$truppKey];
-                                                }
-                                            }
-                                            ?>
-                                            <?php if (!empty($trupps)): ?>
-                                                <div class="mt-3">
-                                                    <strong>Trupps:</strong>
-                                                    <div class="row g-2 mt-2">
-                                                        <?php foreach ($trupps as $trupp): ?>
+                                <!-- Modal für ASU Protokoll -->
+                                <div class="modal fade" id="asuModal<?= (int)$asu['id'] ?>" tabindex="-1" aria-labelledby="asuModalLabel<?= (int)$asu['id'] ?>" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="asuModalLabel<?= (int)$asu['id'] ?>">
+                                                    ASU-Protokoll: <?= htmlspecialchars($asu['supervisor']) ?>
+                                                </h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <!-- Grundinformationen -->
+                                                <div class="mb-4">
+                                                    <h6 class="mb-3">Einsatzinformationen</h6>
+                                                    <div class="row g-3">
+                                                        <div class="col-md-6">
+                                                            <small class="text-muted d-block mb-1">Überwacher</small>
+                                                            <p class="mb-0"><strong><?= htmlspecialchars($asu['supervisor']) ?></strong></p>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <small class="text-muted d-block mb-1">Erfasst am</small>
+                                                            <p class="mb-0"><?= fmt_dt($asu['created_at']) ?></p>
+                                                        </div>
+                                                        <?php if (!empty($asu['mission_location'])): ?>
                                                             <div class="col-md-6">
-                                                                <div class="border rounded p-2 bg-light">
-                                                                    <strong>Trupp <?= htmlspecialchars($trupp['truppNumber'] ?? '-') ?></strong>
-                                                                    <ul class="small mb-0 mt-1">
-                                                                        <?php if (!empty($trupp['tf'])): ?><li><strong>TF:</strong> <?= htmlspecialchars($trupp['tf']) ?></li><?php endif; ?>
-                                                                        <?php if (!empty($trupp['tm1'])): ?><li><strong>TM1:</strong> <?= htmlspecialchars($trupp['tm1']) ?></li><?php endif; ?>
-                                                                        <?php if (!empty($trupp['tm2'])): ?><li><strong>TM2:</strong> <?= htmlspecialchars($trupp['tm2']) ?></li><?php endif; ?>
-                                                                        <?php if (!empty($trupp['startTime'])): ?><li><strong>Start:</strong> <?= htmlspecialchars($trupp['startTime']) ?></li><?php endif; ?>
-                                                                        <?php if (!empty($trupp['retreat'])): ?><li><strong>Rückzug:</strong> <?= htmlspecialchars($trupp['retreat']) ?></li><?php endif; ?>
-                                                                        <?php if (!empty($trupp['end'])): ?><li><strong>Ende:</strong> <?= htmlspecialchars($trupp['end']) ?></li><?php endif; ?>
-                                                                        <?php if (!empty($trupp['mission'])): ?><li><strong>Einsatz:</strong> <?= htmlspecialchars($trupp['mission']) ?></li><?php endif; ?>
-                                                                        <?php if (!empty($trupp['objective'])): ?><li><strong>Ziel:</strong> <?= htmlspecialchars($trupp['objective']) ?></li><?php endif; ?>
-                                                                    </ul>
-                                                                </div>
+                                                                <small class="text-muted d-block mb-1">Einsatzort</small>
+                                                                <p class="mb-0"><?= htmlspecialchars($asu['mission_location']) ?></p>
                                                             </div>
-                                                        <?php endforeach; ?>
+                                                        <?php endif; ?>
+                                                        <?php if (!empty($asu['mission_date'])): ?>
+                                                            <div class="col-md-6">
+                                                                <small class="text-muted d-block mb-1">Einsatzdatum</small>
+                                                                <p class="mb-0">
+                                                                    <?php
+                                                                    if (preg_match('/(\d{4})-(\d{2})-(\d{2})/', $asu['mission_date'], $matches)) {
+                                                                        echo htmlspecialchars($matches[3] . '.' . $matches[2] . '.' . $matches[1]);
+                                                                    } else {
+                                                                        echo htmlspecialchars($asu['mission_date']);
+                                                                    }
+                                                                    ?>
+                                                                </p>
+                                                            </div>
+                                                        <?php endif; ?>
                                                     </div>
                                                 </div>
-                                            <?php endif; ?>
+
+                                                <!-- Trupps -->
+                                                <?php
+                                                $trupps = [];
+                                                for ($i = 1; $i <= 10; $i++) {
+                                                    $truppKey = 'trupp' . $i;
+                                                    if (isset($protocolData[$truppKey]) && !empty($protocolData[$truppKey])) {
+                                                        $trupp = $protocolData[$truppKey];
+                                                        if (
+                                                            !empty($trupp['tf']) || !empty($trupp['tm1']) || !empty($trupp['tm2']) ||
+                                                            !empty($trupp['startTime']) || !empty($trupp['retreat']) || !empty($trupp['end']) ||
+                                                            !empty($trupp['mission']) || !empty($trupp['objective']) || !empty($trupp['startPressure']) ||
+                                                            !empty($trupp['elapsedTime']) || !empty($trupp['check1']) || !empty($trupp['check2']) ||
+                                                            !empty($trupp['remarks'])
+                                                        ) {
+                                                            $trupps[] = $trupp;
+                                                        }
+                                                    }
+                                                }
+                                                ?>
+                                                <?php if (!empty($trupps)): ?>
+                                                    <div class="mb-4">
+                                                        <h6 class="mb-3">Trupps</h6>
+                                                        <div class="row g-3">
+                                                            <?php
+                                                            $truppCount = count($trupps);
+                                                            $colClass = match ($truppCount) {
+                                                                1 => 'col-12',
+                                                                2 => 'col-md-6',
+                                                                default => 'col-lg-4 col-md-6'
+                                                            };
+                                                            ?>
+                                                            <?php foreach ($trupps as $trupp): ?>
+                                                                <div class="<?= $colClass ?>">
+                                                                    <div class="border rounded p-3" style="background-color: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.1) !important;">
+                                                                        <h6 class="mb-3 pb-2 border-bottom">
+                                                                            Trupp <?= htmlspecialchars($trupp['truppNumber'] ?? '-') ?>
+                                                                        </h6>
+
+                                                                        <?php if (!empty($trupp['tf']) || !empty($trupp['tm1']) || !empty($trupp['tm2'])): ?>
+                                                                            <div class="mb-3">
+                                                                                <small class="text-muted d-block mb-2"><strong>Personal</strong></small>
+                                                                                <?php if (!empty($trupp['tf'])): ?>
+                                                                                    <small class="d-block"><strong>TF:</strong> <?= htmlspecialchars($trupp['tf']) ?></small>
+                                                                                <?php endif; ?>
+                                                                                <?php if (!empty($trupp['tm1'])): ?>
+                                                                                    <small class="d-block"><strong>TM1:</strong> <?= htmlspecialchars($trupp['tm1']) ?></small>
+                                                                                <?php endif; ?>
+                                                                                <?php if (!empty($trupp['tm2'])): ?>
+                                                                                    <small class="d-block"><strong>TM2:</strong> <?= htmlspecialchars($trupp['tm2']) ?></small>
+                                                                                <?php endif; ?>
+                                                                            </div>
+                                                                        <?php endif; ?>
+
+                                                                        <?php if (!empty($trupp['mission']) || !empty($trupp['objective'])): ?>
+                                                                            <div class="mb-3">
+                                                                                <small class="text-muted d-block mb-2"><strong>Einsatz</strong></small>
+                                                                                <?php if (!empty($trupp['mission'])): ?>
+                                                                                    <small class="d-block"><strong>Art:</strong> <?= htmlspecialchars($trupp['mission']) ?></small>
+                                                                                <?php endif; ?>
+                                                                                <?php if (!empty($trupp['objective'])): ?>
+                                                                                    <small class="d-block"><strong>Ziel:</strong> <?= htmlspecialchars($trupp['objective']) ?></small>
+                                                                                <?php endif; ?>
+                                                                            </div>
+                                                                        <?php endif; ?>
+
+                                                                        <?php if (!empty($trupp['startTime']) || !empty($trupp['retreat']) || !empty($trupp['end'])): ?>
+                                                                            <div class="mb-3">
+                                                                                <small class="text-muted d-block mb-2"><strong>Zeiten</strong></small>
+                                                                                <?php if (!empty($trupp['startTime'])): ?>
+                                                                                    <small class="d-block"><strong>Start:</strong> <?= htmlspecialchars($trupp['startTime']) ?></small>
+                                                                                <?php endif; ?>
+                                                                                <?php if (!empty($trupp['retreat'])): ?>
+                                                                                    <small class="d-block"><strong>Rückzug:</strong> <?= htmlspecialchars($trupp['retreat']) ?></small>
+                                                                                <?php endif; ?>
+                                                                                <?php if (!empty($trupp['end'])): ?>
+                                                                                    <small class="d-block"><strong>Ende:</strong> <?= htmlspecialchars($trupp['end']) ?></small>
+                                                                                <?php endif; ?>
+                                                                            </div>
+                                                                        <?php endif; ?>
+
+                                                                        <?php if (!empty($trupp['startPressure']) || !empty($trupp['elapsedTime'])): ?>
+                                                                            <div class="mb-3">
+                                                                                <small class="text-muted d-block mb-2"><strong>Ausrüstung</strong></small>
+                                                                                <?php if (!empty($trupp['startPressure'])): ?>
+                                                                                    <small class="d-block"><strong>Startdruck:</strong> <?= htmlspecialchars($trupp['startPressure']) ?></small>
+                                                                                <?php endif; ?>
+                                                                                <?php if (!empty($trupp['elapsedTime'])): ?>
+                                                                                    <small class="d-block"><strong>Einsatzzeit:</strong> <?= htmlspecialchars($trupp['elapsedTime']) ?> min</small>
+                                                                                <?php endif; ?>
+                                                                            </div>
+                                                                        <?php endif; ?>
+
+                                                                        <?php if (!empty($trupp['check1']) || !empty($trupp['check2'])): ?>
+                                                                            <div class="mb-3">
+                                                                                <small class="text-muted d-block mb-2"><strong>Druckkontrollen</strong></small>
+                                                                                <?php if (!empty($trupp['check1'])): ?>
+                                                                                    <small class="d-block">1. Kontrolle: <?= htmlspecialchars($trupp['check1']) ?></small>
+                                                                                <?php endif; ?>
+                                                                                <?php if (!empty($trupp['check2'])): ?>
+                                                                                    <small class="d-block">2. Kontrolle: <?= htmlspecialchars($trupp['check2']) ?></small>
+                                                                                <?php endif; ?>
+                                                                            </div>
+                                                                        <?php endif; ?>
+
+                                                                        <?php if (!empty($trupp['remarks'])): ?>
+                                                                            <div>
+                                                                                <small class="text-muted d-block mb-2"><strong>Bemerkungen</strong></small>
+                                                                                <small class="d-block"><?= nl2br(htmlspecialchars($trupp['remarks'])) ?></small>
+                                                                            </div>
+                                                                        <?php endif; ?>
+                                                                    </div>
+                                                                </div>
+                                                            <?php endforeach; ?>
+                                                        </div>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
