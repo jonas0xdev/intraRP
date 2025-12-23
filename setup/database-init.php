@@ -350,6 +350,9 @@ $migrationFiles = [
 
     // 08.01.2026
     ['file' => 'alter_intra_fire_incidents_20250108_add_incident_number.php', 'type' => 'alter'],
+
+    // 01.01.2025 (ASU-Protokolle)
+    ['file' => 'create_intra_fire_incident_asu_20250101.php', 'type' => 'create'],
 ];
 
 $executed = 0;
