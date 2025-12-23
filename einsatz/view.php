@@ -192,6 +192,16 @@ function fmt_dt(?string $ts): string
         return $ts;
     }
 }
+
+// Helper to format seconds as MM:SS
+function fmt_elapsed(int|string $seconds): string
+{
+    $sec = (int)$seconds;
+    if ($sec <= 0) return '00:00';
+    $mins = floor($sec / 60);
+    $secs = $sec % 60;
+    return sprintf('%02d:%02d', $mins, $secs);
+}
 ?>
 <!DOCTYPE html>
 <html lang="de" data-bs-theme="light">
@@ -613,7 +623,7 @@ function fmt_dt(?string $ts): string
                                                                                     <small class="d-block"><strong>Startdruck:</strong> <?= htmlspecialchars($trupp['startPressure']) ?></small>
                                                                                 <?php endif; ?>
                                                                                 <?php if (!empty($trupp['elapsedTime'])): ?>
-                                                                                    <small class="d-block"><strong>Einsatzzeit:</strong> <?= htmlspecialchars($trupp['elapsedTime']) ?> min</small>
+                                                                                    <small class="d-block"><strong>Einsatzzeit:</strong> <?= fmt_elapsed($trupp['elapsedTime']) ?> (mm:ss)</small>
                                                                                 <?php endif; ?>
                                                                             </div>
                                                                         <?php endif; ?>
