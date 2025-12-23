@@ -105,8 +105,9 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                 <div class="col d-flex justify-content-start align-items-center">
                                     <h4 class="fw-bold">Einsatzprotokolle</h4>
                                 </div>
-                                <div class="col d-flex justify-content-end align-items-center">
-                                    <a href="create.php" class="edivi__nidabutton" style="display:inline-block"><i class="fa-solid fa-plus"></i></a>
+                                <div class="col d-flex justify-content-end align-items-center gap-2">
+                                    <button type="button" class="edivi__nidabutton" style="display:inline-block" onclick="window.location.reload();" title="Seite neu laden"><i class="fa-solid fa-rotate-right"></i></button>
+                                    <a href="create.php" class="edivi__nidabutton" style="display:inline-block"><i class="fa-solid fa-plus" title="Neuen Einsatz erstellen"></i></a>
                                 </div>
                             </div>
                             <div class="row ps-3">

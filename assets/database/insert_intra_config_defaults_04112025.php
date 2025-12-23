@@ -2,26 +2,26 @@
 try {
     // Generate a random API key for new installations (32 bytes = 64 hexadecimal characters)
     $apiKey = bin2hex(random_bytes(32));
-    
+
     // Insert default configuration values from config.php
     $configs = [
         // BASIS DATEN
         ['key' => 'API_KEY', 'value' => $apiKey, 'type' => 'string', 'category' => 'basis', 'description' => 'API-Schlüssel für externe Schnittstellen', 'editable' => 0, 'order' => 1],
         ['key' => 'SYSTEM_NAME', 'value' => 'intraRP', 'type' => 'string', 'category' => 'basis', 'description' => 'Eigenname des Intranets', 'editable' => 1, 'order' => 2],
         ['key' => 'SYSTEM_COLOR', 'value' => '#d10000', 'type' => 'color', 'category' => 'basis', 'description' => 'Hauptfarbe des Systems', 'editable' => 1, 'order' => 3],
-        ['key' => 'SYSTEM_URL', 'value' => 'CHANGE_ME', 'type' => 'url', 'category' => 'basis', 'description' => 'Domain des Systems', 'editable' => 1, 'order' => 4],
+        ['key' => 'SYSTEM_URL', 'value' => 'CHANGE_ME', 'type' => 'url', 'category' => 'basis', 'description' => 'Domain des Systems (ohne https://)', 'editable' => 1, 'order' => 4],
         ['key' => 'SYSTEM_LOGO', 'value' => '/assets/img/defaultLogo.webp', 'type' => 'url', 'category' => 'basis', 'description' => 'Ort des Logos (relativer Pfad oder Link)', 'editable' => 1, 'order' => 5],
         ['key' => 'META_IMAGE_URL', 'value' => '', 'type' => 'url', 'category' => 'basis', 'description' => 'Bild für Link-Vorschau (als Link angeben)', 'editable' => 1, 'order' => 6],
-        
+
         // SERVER DATEN
         ['key' => 'SERVER_NAME', 'value' => 'CHANGE_ME', 'type' => 'string', 'category' => 'server', 'description' => 'Name des Servers', 'editable' => 1, 'order' => 10],
         ['key' => 'SERVER_CITY', 'value' => 'Musterstadt', 'type' => 'string', 'category' => 'server', 'description' => 'Name der Stadt in welcher der Server spielt', 'editable' => 1, 'order' => 11],
-        
+
         // RP DATEN
         ['key' => 'RP_ORGTYPE', 'value' => 'Berufsfeuerwehr', 'type' => 'string', 'category' => 'rp', 'description' => 'Art/Name der Organisation', 'editable' => 1, 'order' => 20],
         ['key' => 'RP_STREET', 'value' => 'Musterweg 0815', 'type' => 'string', 'category' => 'rp', 'description' => 'Straße der Organisation', 'editable' => 1, 'order' => 21],
         ['key' => 'RP_ZIP', 'value' => '1337', 'type' => 'string', 'category' => 'rp', 'description' => 'PLZ der Organisation', 'editable' => 1, 'order' => 22],
-        
+
         // FUNKTIONEN
         ['key' => 'CHAR_ID', 'value' => 'true', 'type' => 'boolean', 'category' => 'funktionen', 'description' => 'Wird eine eindeutige Charakter-ID verwendet?', 'editable' => 1, 'order' => 30],
         ['key' => 'ENOTF_PREREG', 'value' => 'true', 'type' => 'boolean', 'category' => 'funktionen', 'description' => 'Wird das Voranmeldungssystem des eNOTF verwendet?', 'editable' => 1, 'order' => 31],
