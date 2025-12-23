@@ -116,6 +116,12 @@ function handleAsuProtocol($data, $pdo)
 
         $timestamp = $protocolData['timestamp'] ?? date('Y-m-d\TH:i:s.000\Z');
 
+        // Konvertiere ISO 8601 Timestamp zu MySQL DATETIME Format
+        if ($timestamp && preg_match('/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/', $timestamp, $matches)) {
+            $timestamp = $matches[1] . '-' . $matches[2] . '-' . $matches[3] . ' ' . $matches[4] . ':' . $matches[5] . ':' . $matches[6];
+            logSync("Timestamp konvertiert: {$protocolData['timestamp']} → $timestamp", 'DEBUG');
+        }
+
         if ($existingAsu) {
             // Update existierendes ASU-Protokoll
             $updateStmt = $pdo->prepare("
