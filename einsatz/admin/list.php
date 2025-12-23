@@ -67,9 +67,6 @@ try {
                             if ($i['status'] === 'gesichtet') {
                                 $badge = 'bg-success';
                                 $statusText = 'Gesichtet';
-                            } elseif ($i['status'] === 'negativ') {
-                                $badge = 'bg-danger';
-                                $statusText = 'Negativ';
                             }
                         }
                         ?>
@@ -120,6 +117,7 @@ try {
             });
         });
     </script>
+    <?php include __DIR__ . '/../../assets/components/footer.php'; ?>
 </body>
 
 </html>

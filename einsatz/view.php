@@ -296,9 +296,9 @@ function fmt_dt(?string $ts): string
                     <label class="form-label">Einsatzgeschehen</label>
                     <textarea class="form-control" name="edit_notes" rows="5" <?= $incident['finalized'] ? 'disabled' : '' ?> form="coreUpdateForm"><?= htmlspecialchars($incident['notes'] ?? '') ?></textarea>
                 </div>
-                <?php if (Permissions::check(['admin', 'fire.incident.create', 'fire.incident.qm'])): ?>
+                <?php if (!$incident['finalized'] && Permissions::check(['admin', 'fire.incident.create', 'fire.incident.qm'])): ?>
                     <div class="col-12 d-flex justify-content-end align-items-end">
-                        <button type="submit" class="btn btn-primary" form="coreUpdateForm" <?= $incident['finalized'] ? 'disabled' : '' ?>>Speichern</button>
+                        <button type="submit" class="btn btn-primary" form="coreUpdateForm">Speichern</button>
                     </div>
                 <?php endif; ?>
             </div>
@@ -345,7 +345,7 @@ function fmt_dt(?string $ts): string
                         </tbody>
                     </table>
 
-                    <?php if (Permissions::check(['admin', 'fire.incident.create', 'fire.incident.qm'])): ?>
+                    <?php if (!$incident['finalized'] && Permissions::check(['admin', 'fire.incident.create', 'fire.incident.qm'])): ?>
                         <form method="post" class="mt-3">
                             <input type="hidden" name="action" value="add_vehicle">
                             <div class="row g-2">
@@ -406,25 +406,21 @@ function fmt_dt(?string $ts): string
                         <?php endforeach; ?>
                     </ul>
 
-                    <?php if (Permissions::check(['admin', 'fire.incident.create', 'fire.incident.qm'])): ?>
+                    <?php if (!$incident['finalized'] && Permissions::check(['admin', 'fire.incident.create', 'fire.incident.qm'])): ?>
                         <form method="post" class="mt-3">
                             <input type="hidden" name="action" value="add_sitrep">
                             <div class="row g-2">
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <label class="form-label">Datum</label>
-                                    <input type="date" name="rt_date" class="form-control" required <?= $incident['finalized'] ? 'disabled' : '' ?>>
+                                    <input type="date" name="rt_date" class="form-control" required>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <label class="form-label">Uhrzeit</label>
-                                    <input type="time" name="rt_time" class="form-control" required <?= $incident['finalized'] ? 'disabled' : '' ?>>
+                                    <input type="time" name="rt_time" class="form-control" required>
                                 </div>
-                                <div class="col-12">
-                                    <label class="form-label">Text</label>
-                                    <textarea name="text" class="form-control" rows="3" required <?= $incident['finalized'] ? 'disabled' : '' ?>></textarea>
-                                </div>
-                                <div class="col-12">
-                                    <label class="form-label">Fahrzeug vor Ort</label>
-                                    <select name="sitrep_attached_vehicle_id" class="form-select" required <?= $incident['finalized'] ? 'disabled' : '' ?>>
+                                <div class="col-md-6">
+                                    <label class="form-label">Durch</label>
+                                    <select name="sitrep_attached_vehicle_id" class="form-select" required>
                                         <option value="">– auswählen –</option>
                                         <?php foreach ($attachedVehicles as $av): ?>
                                             <?php
@@ -435,8 +431,12 @@ function fmt_dt(?string $ts): string
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
+                                <div class="col-12">
+                                    <label class="form-label">Text</label>
+                                    <textarea name="text" class="form-control" rows="3" required></textarea>
+                                </div>
                                 <div class="col-12 d-flex justify-content-end">
-                                    <button type="submit" class="btn btn-primary" <?= $incident['finalized'] ? 'disabled' : '' ?>>Speichern</button>
+                                    <button type="submit" class="btn btn-primary">Speichern</button>
                                 </div>
                             </div>
                         </form>
@@ -465,7 +465,6 @@ function fmt_dt(?string $ts): string
                                 <select name="status" class="form-select" style="max-width: 240px;">
                                     <option value="in_sichtung" <?= $incident['status'] === 'in_sichtung' ? 'selected' : '' ?>>Ungesichtet</option>
                                     <option value="gesichtet" <?= $incident['status'] === 'gesichtet' ? 'selected' : '' ?>>Gesichtet</option>
-                                    <option value="negativ" <?= $incident['status'] === 'negativ' ? 'selected' : '' ?>>Negativ</option>
                                 </select>
                                 <button class="btn btn-primary" type="submit">Speichern</button>
                             </form>
@@ -473,24 +472,26 @@ function fmt_dt(?string $ts): string
 
                         <hr>
 
-                        <div>
-                            <h6 class="mb-2">Protokoll abschließen</h6>
-                            <?php if (!$canFinalize): ?>
-                                <div class="alert alert-warning py-2">
-                                    <div class="small">Abschluss nicht möglich. Bitte folgende Pflichtangaben ergänzen:</div>
-                                    <ul class="small mb-0">
-                                        <?php foreach ($missingRequired as $mr): ?>
-                                            <li><?= htmlspecialchars($mr) ?></li>
-                                        <?php endforeach; ?>
-                                    </ul>
-                                </div>
-                            <?php endif; ?>
-                            <form method="post" class="d-flex justify-content-between align-items-center">
-                                <input type="hidden" name="action" value="finalize">
-                                <div class="text-muted small">Markiert zur QM-Sichtung; Daten werden gesperrt.</div>
-                                <button type="submit" class="btn btn-success" <?= $canFinalize ? '' : 'disabled' ?>>Abschließen</button>
-                            </form>
-                        </div>
+                        <?php if (!$incident['finalized']): ?>
+                            <div>
+                                <h6 class="mb-2">Protokoll abschließen</h6>
+                                <?php if (!$canFinalize): ?>
+                                    <div class="alert alert-warning py-2">
+                                        <div class="small">Abschluss nicht möglich. Bitte folgende Pflichtangaben ergänzen:</div>
+                                        <ul class="small mb-0">
+                                            <?php foreach ($missingRequired as $mr): ?>
+                                                <li><?= htmlspecialchars($mr) ?></li>
+                                            <?php endforeach; ?>
+                                        </ul>
+                                    </div>
+                                <?php endif; ?>
+                                <form method="post" class="d-flex justify-content-between align-items-center">
+                                    <input type="hidden" name="action" value="finalize">
+                                    <div class="text-muted small">Markiert zur QM-Sichtung; Daten werden gesperrt.</div>
+                                    <button type="submit" class="btn btn-success" <?= $canFinalize ? '' : 'disabled' ?>>Abschließen</button>
+                                </form>
+                            </div>
+                        <?php endif; ?>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
@@ -499,6 +500,7 @@ function fmt_dt(?string $ts): string
             </div>
         </div>
     <?php endif; ?>
+    <?php include __DIR__ . '/../assets/components/footer.php'; ?>
 </body>
 
 </html>

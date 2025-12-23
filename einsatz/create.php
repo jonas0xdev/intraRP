@@ -159,6 +159,7 @@ try {
             </div>
         </form>
     </div>
+    <?php include __DIR__ . '/../../assets/components/footer.php'; ?>
 </body>
 
 </html>
