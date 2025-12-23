@@ -174,7 +174,7 @@ try {
 // Load ASU protocols
 $asuProtocols = [];
 try {
-    $stmt = $pdo->prepare("SELECT * FROM intra_fire_incident_asu WHERE incident_id = ? ORDER BY supervisor ASC");
+    $stmt = $pdo->prepare("SELECT * FROM intra_fire_incident_asu WHERE incident_id = ? ORDER BY created_at DESC");
     $stmt->execute([$id]);
     $asuProtocols = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
@@ -551,8 +551,17 @@ function fmt_dt(?string $ts): string
                                                             <?php foreach ($trupps as $trupp): ?>
                                                                 <div class="<?= $colClass ?>">
                                                                     <div class="border rounded p-3" style="background-color: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.1) !important;">
+                                                                        <?php
+                                                                        $num = isset($trupp['truppNumber']) ? (int)$trupp['truppNumber'] : 0;
+                                                                        $label = match ($num) {
+                                                                            1 => '1. Trupp',
+                                                                            2 => '2. Trupp',
+                                                                            3 => 'Sicherheitstrupp',
+                                                                            default => $num > 0 ? ('Trupp ' . $num) : 'Trupp'
+                                                                        };
+                                                                        ?>
                                                                         <h6 class="mb-3 pb-2 border-bottom">
-                                                                            Trupp <?= htmlspecialchars($trupp['truppNumber'] ?? '-') ?>
+                                                                            <?= htmlspecialchars($label) ?>
                                                                         </h6>
 
                                                                         <?php if (!empty($trupp['tf']) || !empty($trupp['tm1']) || !empty($trupp['tm2'])): ?>
