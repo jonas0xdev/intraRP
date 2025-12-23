@@ -114,10 +114,12 @@ if (!Permissions::check(['admin', 'users.view'])) {
                                     'application.view' => 'Anträge ansehen',
                                     'application.edit' => 'Anträge bearbeiten'
                                 ],
-                                'eNOTF / Rettungsdienst' => [
+                                'Protokolle' => [
                                     'edivi.view' => 'eNOTF Protokolle ansehen',
                                     'edivi.edit' => 'eNOTF Protokolle bearbeiten',
-                                    'manv.manage' => 'MANV-Lagen verwalten'
+                                    'manv.manage' => 'MANV-Lagen verwalten',
+                                    'fire.incident.create' => 'FW Einsatzprotokolle erstellen',
+                                    'fire.incident.qm' => 'FW Einsatzprotokolle bearbeiten'
                                 ],
                                 'Wissensdatenbank' => [
                                     'kb.view' => 'Wissensdatenbank ansehen',

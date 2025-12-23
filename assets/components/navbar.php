@@ -75,6 +75,13 @@ use App\Notifications\NotificationManager;
                         <i class="fa-solid fa-book-medical" style="margin-right:3px"></i> Wissensdatenbank
                     </a>
                 </li>
+                <?php if (Permissions::check(['admin', 'fire.incident.create', 'fire.incident.qm'])) { ?>
+                    <li class="nav-item">
+                        <a class="nav-link" data-page="einsatz" href="<?= BASE_PATH ?>einsatz/admin/list.php">
+                            <i class="fa-solid fa-fire-extinguisher" style="margin-right:3px"></i> Einsätze
+                        </a>
+                    </li>
+                <?php } ?>
                 <?php if (Permissions::check(['admin', 'personnel.view', 'vehicles.view', 'edivi.view', 'dashboard.manage'])) { ?>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" data-page="settings" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">

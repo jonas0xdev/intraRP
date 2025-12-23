@@ -342,6 +342,14 @@ $migrationFiles = [
     // 17.12.2025
     ['file' => 'alter_intra_manv_patienten_17122025.php', 'type' => 'alter'],
     ['file' => 'create_intra_edivi_share_requests_17122025.php', 'type' => 'create'],
+
+    // 23.12.2025
+    ['file' => 'create_intra_fire_incidents_23122025.php', 'type' => 'create'],
+    ['file' => 'create_intra_fire_incident_vehicles_23122025.php', 'type' => 'create'],
+    ['file' => 'create_intra_fire_incident_sitreps_23122025.php', 'type' => 'create'],
+
+    // 08.01.2026
+    ['file' => 'alter_intra_fire_incidents_20250108_add_incident_number.php', 'type' => 'alter'],
 ];
 
 $executed = 0;
