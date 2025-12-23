@@ -107,6 +107,13 @@ function handleAsuProtocol($data, $pdo)
 
         $missionLocation = $protocolData['missionLocation'] ?? null;
         $missionDate = $protocolData['missionDate'] ?? null;
+
+        // Konvertiere Datumsformat von DD.MM.YYYY zu YYYY-MM-DD
+        if ($missionDate && preg_match('/(\d{1,2})\.(\d{1,2})\.(\d{4})/', $missionDate, $matches)) {
+            $missionDate = $matches[3] . '-' . str_pad($matches[2], 2, '0', STR_PAD_LEFT) . '-' . str_pad($matches[1], 2, '0', STR_PAD_LEFT);
+            logSync("Datumsformat konvertiert: {$protocolData['missionDate']} → $missionDate", 'DEBUG');
+        }
+
         $timestamp = $protocolData['timestamp'] ?? date('Y-m-d\TH:i:s.000\Z');
 
         if ($existingAsu) {

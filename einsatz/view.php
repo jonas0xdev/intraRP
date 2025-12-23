@@ -171,6 +171,15 @@ try {
 } catch (PDOException $e) {
 }
 
+// Load ASU protocols
+$asuProtocols = [];
+try {
+    $stmt = $pdo->prepare("SELECT * FROM intra_fire_incident_asu WHERE incident_id = ? ORDER BY supervisor ASC");
+    $stmt->execute([$id]);
+    $asuProtocols = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+}
+
 // Helper for date/time formatting
 function fmt_dt(?string $ts): string
 {
@@ -440,6 +449,71 @@ function fmt_dt(?string $ts): string
                                 </div>
                             </div>
                         </form>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="intra__tile p-3 mb-3">
+                    <h4>Atemschutzüberwachung (ASU)</h4>
+                    <?php if (empty($asuProtocols)): ?>
+                        <div class="alert alert-info">Keine ASU-Protokolle vorhanden</div>
+                    <?php else: ?>
+                        <div class="row g-3">
+                            <?php foreach ($asuProtocols as $asu): ?>
+                                <?php $protocolData = json_decode($asu['data'], true) ?? []; ?>
+                                <div class="col-12">
+                                    <div class="card border-primary">
+                                        <div class="card-header bg-primary text-white">
+                                            <strong><?= htmlspecialchars($asu['supervisor']) ?></strong>
+                                            <small class="float-end"><?= fmt_dt($asu['created_at']) ?></small>
+                                        </div>
+                                        <div class="card-body">
+                                            <?php if (!empty($asu['mission_location'])): ?>
+                                                <p class="mb-2"><strong>Ort:</strong> <?= htmlspecialchars($asu['mission_location']) ?></p>
+                                            <?php endif; ?>
+                                            <?php if (!empty($asu['mission_date'])): ?>
+                                                <p class="mb-2"><strong>Datum:</strong> <?= htmlspecialchars($asu['mission_date']) ?></p>
+                                            <?php endif; ?>
+
+                                            <?php
+                                            $trupps = [];
+                                            for ($i = 1; $i <= 10; $i++) {
+                                                $truppKey = 'trupp' . $i;
+                                                if (isset($protocolData[$truppKey]) && !empty($protocolData[$truppKey])) {
+                                                    $trupps[] = $protocolData[$truppKey];
+                                                }
+                                            }
+                                            ?>
+                                            <?php if (!empty($trupps)): ?>
+                                                <div class="mt-3">
+                                                    <strong>Trupps:</strong>
+                                                    <div class="row g-2 mt-2">
+                                                        <?php foreach ($trupps as $trupp): ?>
+                                                            <div class="col-md-6">
+                                                                <div class="border rounded p-2 bg-light">
+                                                                    <strong>Trupp <?= htmlspecialchars($trupp['truppNumber'] ?? '-') ?></strong>
+                                                                    <ul class="small mb-0 mt-1">
+                                                                        <?php if (!empty($trupp['tf'])): ?><li><strong>TF:</strong> <?= htmlspecialchars($trupp['tf']) ?></li><?php endif; ?>
+                                                                        <?php if (!empty($trupp['tm1'])): ?><li><strong>TM1:</strong> <?= htmlspecialchars($trupp['tm1']) ?></li><?php endif; ?>
+                                                                        <?php if (!empty($trupp['tm2'])): ?><li><strong>TM2:</strong> <?= htmlspecialchars($trupp['tm2']) ?></li><?php endif; ?>
+                                                                        <?php if (!empty($trupp['startTime'])): ?><li><strong>Start:</strong> <?= htmlspecialchars($trupp['startTime']) ?></li><?php endif; ?>
+                                                                        <?php if (!empty($trupp['retreat'])): ?><li><strong>Rückzug:</strong> <?= htmlspecialchars($trupp['retreat']) ?></li><?php endif; ?>
+                                                                        <?php if (!empty($trupp['end'])): ?><li><strong>Ende:</strong> <?= htmlspecialchars($trupp['end']) ?></li><?php endif; ?>
+                                                                        <?php if (!empty($trupp['mission'])): ?><li><strong>Einsatz:</strong> <?= htmlspecialchars($trupp['mission']) ?></li><?php endif; ?>
+                                                                        <?php if (!empty($trupp['objective'])): ?><li><strong>Ziel:</strong> <?= htmlspecialchars($trupp['objective']) ?></li><?php endif; ?>
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+                                                        <?php endforeach; ?>
+                                                    </div>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
                     <?php endif; ?>
                 </div>
             </div>
