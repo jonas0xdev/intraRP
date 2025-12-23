@@ -174,7 +174,7 @@ try {
 // Load ASU protocols
 $asuProtocols = [];
 try {
-    $stmt = $pdo->prepare("SELECT * FROM intra_fire_incident_asu WHERE incident_id = ? ORDER BY created_at DESC");
+    $stmt = $pdo->prepare("SELECT * FROM intra_fire_incident_asu WHERE incident_id = ? ORDER BY created_at ASC");
     $stmt->execute([$id]);
     $asuProtocols = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
@@ -467,7 +467,7 @@ function fmt_dt(?string $ts): string
                                         <i class="fa-solid fa-shield"></i>
                                         <?= htmlspecialchars($asu['supervisor']) ?>
                                         <br>
-                                        <small><?= fmt_dt($asu['created_at']) ?></small>
+                                        <small><?= fmt_dt(!empty($asu['updated_at']) && strtotime($asu['updated_at']) > strtotime($asu['created_at']) ? $asu['updated_at'] : $asu['created_at']) ?></small>
                                     </button>
                                 </div>
 

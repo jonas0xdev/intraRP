@@ -47,6 +47,7 @@ try {
             <table class="table table-striped" id="table-incidents">
                 <thead>
                     <tr>
+                        <th>Einsatznummer</th>
                         <th>Beginn</th>
                         <th>Ort</th>
                         <th>Stichwort</th>
@@ -71,6 +72,7 @@ try {
                         }
                         ?>
                         <tr>
+                            <td><?= htmlspecialchars($i['incident_number'] ?? '-') ?></td>
                             <td><?= htmlspecialchars($i['started_at']) ?></td>
                             <td><?= htmlspecialchars($i['location']) ?></td>
                             <td><?= htmlspecialchars($i['keyword']) ?></td>
