@@ -87,7 +87,7 @@ try {
     <?php include __DIR__ . '/../assets/components/_base/admin/head.php'; ?>
 </head>
 
-<body data-bs-theme="dark">
+<body data-bs-theme="dark" data-page="protokolle">
     <?php include __DIR__ . '/../assets/components/navbar.php'; ?>
     <div class="container my-4">
         <h1>Feuerwehr-Einsatz anlegen</h1>

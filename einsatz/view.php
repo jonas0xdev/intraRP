@@ -200,7 +200,7 @@ function fmt_dt(?string $ts): string
     <?php include __DIR__ . '/../assets/components/_base/admin/head.php'; ?>
 </head>
 
-<body data-bs-theme="dark">
+<body data-bs-theme="dark" data-page="protokolle">
     <?php include __DIR__ . '/../assets/components/navbar.php'; ?>
     <div class="container my-4">
         <div class="d-flex justify-content-between align-items-center mb-3">

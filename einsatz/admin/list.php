@@ -34,7 +34,7 @@ try {
     <?php include __DIR__ . '/../../assets/components/_base/admin/head.php'; ?>
 </head>
 
-<body data-bs-theme="dark" data-page="einsatz">
+<body data-bs-theme="dark" data-page="protokolle">
     <?php include __DIR__ . '/../../assets/components/navbar.php'; ?>
     <div class="container my-4">
         <div class="d-flex justify-content-between align-items-center">
