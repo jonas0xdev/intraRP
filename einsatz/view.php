@@ -605,13 +605,13 @@ function fmt_elapsed(int|string $seconds): string
                                                                             <div class="mb-3">
                                                                                 <small class="text-muted d-block mb-2"><strong>Zeiten</strong></small>
                                                                                 <?php if (!empty($trupp['startTime'])): ?>
-                                                                                    <small class="d-block"><strong>Start:</strong> <?= htmlspecialchars($trupp['startTime']) ?></small>
+                                                                                    <small class="d-block"><strong>Start:</strong> <?= htmlspecialchars($trupp['startTime']) ?> Uhr</small>
                                                                                 <?php endif; ?>
                                                                                 <?php if (!empty($trupp['retreat'])): ?>
-                                                                                    <small class="d-block"><strong>Rückzug:</strong> <?= htmlspecialchars($trupp['retreat']) ?></small>
+                                                                                    <small class="d-block"><strong>Rückzug:</strong> <?= htmlspecialchars($trupp['retreat']) ?> Uhr</small>
                                                                                 <?php endif; ?>
                                                                                 <?php if (!empty($trupp['end'])): ?>
-                                                                                    <small class="d-block"><strong>Ende:</strong> <?= htmlspecialchars($trupp['end']) ?></small>
+                                                                                    <small class="d-block"><strong>Ende:</strong> <?= htmlspecialchars($trupp['end']) ?> Uhr</small>
                                                                                 <?php endif; ?>
                                                                             </div>
                                                                         <?php endif; ?>
