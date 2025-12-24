@@ -12,10 +12,24 @@ if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
     exit();
 }
 
+// Check if logged into vehicle
+if (!isset($_SESSION['einsatz_vehicle_id']) || !isset($_SESSION['einsatz_operator_id'])) {
+    Flash::error('Bitte melden Sie sich zuerst auf einem Fahrzeug an.');
+    header("Location: " . BASE_PATH . "einsatz/login-fahrzeug.php");
+    exit();
+}
+
 if (!Permissions::check(['admin', 'fire.incident.create'])) {
     Flash::set('error', 'no-permissions');
     header("Location: " . BASE_PATH . "index.php");
     exit();
+}
+
+// Clear all einsatz_viewed session variables when creating new incident
+foreach (array_keys($_SESSION) as $key) {
+    if (strpos($key, 'einsatz_viewed_') === 0) {
+        unset($_SESSION[$key]);
+    }
 }
 
 require __DIR__ . '/../assets/config/database.php';
@@ -47,6 +61,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($errors)) {
         try {
+            $pdo->beginTransaction();
+
+            // Insert incident
             $stmt = $pdo->prepare("INSERT INTO intra_fire_incidents (incident_number, location, keyword, started_at, leader_id, owner_type, owner_name, owner_contact, notes, status, created_by) VALUES (?,?,?,?,?,?,?,?,?, 'in_sichtung', ?)");
             $stmt->execute([
                 $incident_number,
@@ -62,10 +79,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
 
             $incidentId = (int)$pdo->lastInsertId();
+
+            // Automatically add the logged-in vehicle
+            if (isset($_SESSION['einsatz_vehicle_id'])) {
+                $stmt = $pdo->prepare("INSERT INTO intra_fire_incident_vehicles (incident_id, vehicle_id, from_other_org, created_by) VALUES (?,?,0,?)");
+                $stmt->execute([$incidentId, $_SESSION['einsatz_vehicle_id'], $_SESSION['userid']]);
+            }
+
+            // Log the creation
+            $logEntry = "Einsatz erstellt";
+            $stmt = $pdo->prepare("INSERT INTO intra_fire_incident_log (incident_id, action_type, action_description, vehicle_id, operator_id, created_by) VALUES (?,?,?,?,?,?)");
+            $stmt->execute([
+                $incidentId,
+                'created',
+                $logEntry,
+                $_SESSION['einsatz_vehicle_id'] ?? null,
+                $_SESSION['einsatz_operator_id'] ?? null,
+                $_SESSION['userid']
+            ]);
+
+            $pdo->commit();
             Flash::success('Einsatz wurde erstellt.');
             header('Location: ' . BASE_PATH . 'einsatz/view.php?id=' . $incidentId);
             exit();
         } catch (PDOException $e) {
+            $pdo->rollBack();
             $errors[] = 'Fehler beim Speichern: ' . $e->getMessage();
         }
     }
@@ -85,6 +123,7 @@ try {
 
 <head>
     <?php include __DIR__ . '/../assets/components/_base/admin/head.php'; ?>
+    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/css/enotf-custom-dropdown.css">
     <style>
         .sidebar-nav .nav-link {
             padding: 0.75rem 1rem;
@@ -108,20 +147,58 @@ try {
         <!-- Sidebar Navigation -->
         <div class="sidebar-nav" style="width: 250px; min-height: 100vh; background-color: #1a1a1a; border-right: 1px solid #333;">
             <div class="p-3">
-                <h5 class="text-white mb-4">Einsatz-System</h5>
+                <div class="text-center mb-3">
+                    <img src="https://dev.intrarp.de/assets/img/defaultLogo.webp" alt="Logo" style="max-width: 120px; height: auto;">
+                </div>
+                <h5 class="text-white mb-4 text-center">fireTab</h5>
+
+                <!-- Vehicle Login Info -->
+                <?php if (isset($_SESSION['einsatz_vehicle_name'])): ?>
+                    <div class="card bg-dark mb-3" style="font-size: 0.85rem;">
+                        <div class="card-body p-2">
+                            <div class="text-muted small mb-1">Angemeldet auf:</div>
+                            <div class="fw-bold">
+                                <i class="fas fa-truck me-1"></i>
+                                <?= htmlspecialchars($_SESSION['einsatz_vehicle_name']) ?>
+                            </div>
+                            <?php if (isset($_SESSION['einsatz_operator_name'])): ?>
+                                <div class="text-muted small mt-1">
+                                    <i class="fas fa-user me-1"></i>
+                                    <?= htmlspecialchars($_SESSION['einsatz_operator_name']) ?>
+                                </div>
+                            <?php endif; ?>
+                            <a href="<?= BASE_PATH ?>einsatz/login-fahrzeug.php?logout=1" class="btn btn-sm btn-outline-light mt-2 w-100">
+                                <i class="fas fa-sign-out-alt me-1"></i>Abmelden
+                            </a>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
                 <ul class="nav flex-column">
                     <li class="nav-item">
                         <a class="nav-link text-white active" href="<?= BASE_PATH ?>einsatz/create.php">
-                            <i class="fa-solid fa-plus me-2"></i>Einsatz anlegen
+                            <i class="fa-solid fa-plus me-2"></i>Neuer Einsatz
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-white" href="<?= BASE_PATH ?>einsatz/admin/list.php">
-                            <i class="fa-solid fa-list me-2"></i>Einsatzliste
+                        <a class="nav-link text-white" href="<?= BASE_PATH ?>einsatz/list.php">
+                            <i class="fa-solid fa-list me-2"></i>Meine Einsätze
                         </a>
                     </li>
+
+                    <?php if (Permissions::check(['admin', 'fire.incident.qm'])): ?>
+                        <li class="nav-item mt-4">
+                            <small class="text-muted px-3 d-block mb-2">VERWALTUNG</small>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="<?= BASE_PATH ?>einsatz/admin/list.php">
+                                <i class="fa-solid fa-shield-alt me-2"></i>Alle Einsätze
+                            </a>
+                        </li>
+                    <?php endif; ?>
+
                     <li class="nav-item mt-4">
-                        <a class="nav-link text-white" href="<?= BASE_PATH ?>index.php">
+                        <a class="nav-link text-white" href="<?= BASE_PATH ?>einsatz/list.php">
                             <i class="fa-solid fa-arrow-left me-2"></i>Zurück
                         </a>
                     </li>
@@ -158,7 +235,7 @@ try {
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Datum*</label>
-                            <input type="date" name="date" class="form-control" required>
+                            <input type="date" name="date" class="form-control" value="<?= date('Y-m-d') ?>" required>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Uhrzeit*</label>
@@ -166,7 +243,7 @@ try {
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Einsatzleiter*</label>
-                            <select name="leader_id" class="form-select" required>
+                            <select name="leader_id" class="form-select" required data-custom-dropdown="true" data-search-threshold="5">
                                 <option value="">– auswählen –</option>
                                 <?php foreach ($leaders as $l): ?>
                                     <option value="<?= (int)$l['id'] ?>"><?= htmlspecialchars($l['fullname']) ?></option>
@@ -187,13 +264,6 @@ try {
                         <div class="col-12">
                             <small class="text-muted">Optional: Angaben zum Geschädigten, Eigentümer oder Halter (Name/Kontakt).</small>
                         </div>
-                        <div class="col-12">
-                            <hr>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">Einsatzgeschehen</label>
-                            <textarea name="notes" class="form-control" rows="5" placeholder="Optional: Kurzbeschreibung des Einsatzgeschehens..."></textarea>
-                        </div>
                     </div>
                     <div class="mt-3 d-flex justify-content-end">
                         <a href="<?= BASE_PATH ?>index.php" class="btn btn-secondary me-2">Abbrechen</a>
@@ -203,6 +273,18 @@ try {
             </div>
         </div>
     </div>
+
+    <script src="<?= BASE_PATH ?>assets/js/enotf-custom-dropdown.js"></script>
+    <script>
+        // Initialize custom dropdowns when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                eNotfCustomDropdown.init();
+            });
+        } else {
+            eNotfCustomDropdown.init();
+        }
+    </script>
 </body>
 
 </html>

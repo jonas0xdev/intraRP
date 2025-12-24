@@ -61,13 +61,6 @@ $startTime = $dtStart ? $dtStart->format('H:i') : '';
                 <label class="form-label">Geschädigter – Kontakt</label>
                 <input type="text" class="form-control" name="edit_owner_contact" value="<?= htmlspecialchars($incident['owner_contact'] ?? '') ?>" <?= $incident['finalized'] ? 'disabled' : '' ?>>
             </div>
-            <div class="col-12">
-                <hr class="my-2">
-            </div>
-            <div class="col-12">
-                <label class="form-label">Einsatzgeschehen</label>
-                <textarea class="form-control" name="edit_notes" rows="5" <?= $incident['finalized'] ? 'disabled' : '' ?> placeholder="Kurzbeschreibung des Einsatzgeschehens..."><?= htmlspecialchars($incident['notes'] ?? '') ?></textarea>
-            </div>
             <?php if (!$incident['finalized'] && \App\Auth\Permissions::check(['admin', 'fire.incident.create', 'fire.incident.qm'])): ?>
                 <div class="col-12 d-flex justify-content-end align-items-end mt-3">
                     <button type="submit" class="btn btn-primary">

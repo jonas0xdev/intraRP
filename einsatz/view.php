@@ -12,6 +12,13 @@ if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
     exit();
 }
 
+// Check if logged into vehicle
+if (!isset($_SESSION['einsatz_vehicle_id']) || !isset($_SESSION['einsatz_operator_id'])) {
+    Flash::error('Bitte melden Sie sich zuerst auf einem Fahrzeug an.');
+    header("Location: " . BASE_PATH . "einsatz/login-fahrzeug.php");
+    exit();
+}
+
 require __DIR__ . '/../assets/config/database.php';
 
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -22,6 +29,13 @@ if ($id <= 0) {
     exit();
 }
 
+// Clear viewed sessions for other incidents when switching between incidents
+foreach (array_keys($_SESSION) as $key) {
+    if (strpos($key, 'einsatz_viewed_') === 0 && $key !== 'einsatz_viewed_' . $id) {
+        unset($_SESSION[$key]);
+    }
+}
+
 // Load incident
 try {
     $stmt = $pdo->prepare("SELECT i.*, m.fullname AS leader_name FROM intra_fire_incidents i LEFT JOIN intra_mitarbeiter m ON i.leader_id = m.id WHERE i.id = ?");
@@ -30,6 +44,17 @@ try {
     if (!$incident) {
         Flash::error('Einsatz nicht gefunden');
         header('Location: ' . BASE_PATH . 'index.php');
+        exit();
+    }
+
+    // Check if user's vehicle is assigned to this incident
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM intra_fire_incident_vehicles WHERE incident_id = ? AND vehicle_id = ?");
+    $stmt->execute([$id, $_SESSION['einsatz_vehicle_id']]);
+    $isAssigned = $stmt->fetchColumn() > 0;
+
+    if (!$isAssigned && !Permissions::check(['admin', 'fire.incident.qm'])) {
+        Flash::error('Ihr Fahrzeug ist diesem Einsatz nicht zugeordnet. Zugriff verweigert.');
+        header('Location: ' . BASE_PATH . 'einsatz/list.php');
         exit();
     }
 } catch (PDOException $e) {
@@ -72,8 +97,8 @@ function fmt_dt(?string $ts): string
 {
     if (!$ts) return '-';
     try {
-        $dt = new DateTime($ts, new DateTimeZone('UTC'));
-        $dt->setTimezone(new DateTimeZone('Europe/Berlin'));
+        // Assume timestamp is already in Europe/Berlin timezone from database
+        $dt = new DateTime($ts, new DateTimeZone('Europe/Berlin'));
         return $dt->format('d.m.Y H:i');
     } catch (Exception $e) {
         return $ts;
@@ -119,6 +144,7 @@ function fmt_elapsed(int|string $seconds): string
             font-weight: 600;
         }
     </style>
+    <script src="<?= BASE_PATH ?>assets/js/dialogs.js"></script>
 </head>
 
 <body data-bs-theme="dark" data-page="protokolle">
@@ -126,18 +152,55 @@ function fmt_elapsed(int|string $seconds): string
         <!-- Sidebar Navigation -->
         <div class="sidebar-nav" style="width: 250px; min-height: 100vh; background-color: #1a1a1a; border-right: 1px solid #333;">
             <div class="p-3">
-                <h5 class="text-white mb-4">Einsatz-System</h5>
+                <div class="text-center mb-3">
+                    <img src="https://dev.intrarp.de/assets/img/defaultLogo.webp" alt="Logo" style="max-width: 120px; height: auto;">
+                </div>
+                <h5 class="text-white mb-4 text-center">fireTab</h5>
+
+                <!-- Vehicle Login Info -->
+                <?php if (isset($_SESSION['einsatz_vehicle_name'])): ?>
+                    <div class="card bg-dark mb-3" style="font-size: 0.85rem;">
+                        <div class="card-body p-2">
+                            <div class="text-muted small mb-1">Angemeldet auf:</div>
+                            <div class="fw-bold">
+                                <i class="fas fa-truck me-1"></i>
+                                <?= htmlspecialchars($_SESSION['einsatz_vehicle_name']) ?>
+                            </div>
+                            <?php if (isset($_SESSION['einsatz_operator_name'])): ?>
+                                <div class="text-muted small mt-1">
+                                    <i class="fas fa-user me-1"></i>
+                                    <?= htmlspecialchars($_SESSION['einsatz_operator_name']) ?>
+                                </div>
+                            <?php endif; ?>
+                            <a href="<?= BASE_PATH ?>einsatz/login-fahrzeug.php?logout=1" class="btn btn-sm btn-outline-light mt-2 w-100">
+                                <i class="fas fa-sign-out-alt me-1"></i>Abmelden
+                            </a>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
                 <ul class="nav flex-column">
                     <li class="nav-item">
                         <a class="nav-link text-white" href="<?= BASE_PATH ?>einsatz/create.php">
-                            <i class="fa-solid fa-plus me-2"></i>Einsatz anlegen
+                            <i class="fa-solid fa-plus me-2"></i>Neuer Einsatz
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-white" href="<?= BASE_PATH ?>einsatz/admin/list.php">
-                            <i class="fa-solid fa-list me-2"></i>Einsatzliste
+                        <a class="nav-link text-white" href="<?= BASE_PATH ?>einsatz/list.php">
+                            <i class="fa-solid fa-list me-2"></i>Meine Einsätze
                         </a>
                     </li>
+
+                    <?php if (Permissions::check(['admin', 'fire.incident.qm'])): ?>
+                        <li class="nav-item mt-4">
+                            <small class="text-muted px-3 d-block mb-2">VERWALTUNG</small>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="<?= BASE_PATH ?>einsatz/admin/list.php">
+                                <i class="fa-solid fa-shield-alt me-2"></i>Alle Einsätze
+                            </a>
+                        </li>
+                    <?php endif; ?>
 
                     <li class="nav-item mt-4">
                         <small class="text-muted px-3 d-block mb-2">EINSATZPROTOKOLL</small>
@@ -154,7 +217,7 @@ function fmt_elapsed(int|string $seconds): string
                     </li>
                     <li class="nav-item">
                         <a class="nav-link text-white <?= $activeTab === 'fahrzeuge' ? 'active' : '' ?>" href="<?= BASE_PATH ?>einsatz/view.php?id=<?= $id ?>&tab=fahrzeuge">
-                            <i class="fa-solid fa-truck me-2"></i>Beteiligte Fahrzeuge
+                            <i class="fa-solid fa-truck me-2"></i>Einsatzmittel
                         </a>
                     </li>
                     <li class="nav-item">
@@ -167,9 +230,14 @@ function fmt_elapsed(int|string $seconds): string
                             <i class="fa-solid fa-check-circle me-2"></i>Abschluss
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white <?= $activeTab === 'log' ? 'active' : '' ?>" href="<?= BASE_PATH ?>einsatz/view.php?id=<?= $id ?>&tab=log">
+                            <i class="fa-solid fa-history me-2"></i>Protokoll
+                        </a>
+                    </li>
 
                     <li class="nav-item mt-4">
-                        <a class="nav-link text-white" href="<?= BASE_PATH ?>index.php">
+                        <a class="nav-link text-white" href="<?= BASE_PATH ?>einsatz/list.php">
                             <i class="fa-solid fa-arrow-left me-2"></i>Zurück
                         </a>
                     </li>
@@ -215,7 +283,7 @@ function fmt_elapsed(int|string $seconds): string
                 <!-- Tab Content -->
                 <?php
                 // Load the active tab content
-                $validTabs = ['stammdaten', 'bericht', 'fahrzeuge', 'lagemeldungen', 'abschluss'];
+                $validTabs = ['stammdaten', 'bericht', 'fahrzeuge', 'lagemeldungen', 'abschluss', 'log'];
                 if (!in_array($activeTab, $validTabs)) {
                     $activeTab = 'stammdaten';
                 }

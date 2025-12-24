@@ -41,7 +41,7 @@
                                         <input type="hidden" name="incident_id" value="<?= $id ?>">
                                         <input type="hidden" name="return_tab" value="fahrzeuge">
                                         <input type="hidden" name="vehicle_row_id" value="<?= (int)$av['id'] ?>">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Fahrzeug wirklich entfernen?')">
+                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="event.preventDefault(); showConfirm('Fahrzeug wirklich entfernen?', {danger: true, confirmText: 'Entfernen', title: 'Fahrzeug entfernen'}).then(result => { if(result) this.closest('form').submit(); });">
                                             <i class="fa-solid fa-trash"></i>
                                         </button>
                                     </form>
