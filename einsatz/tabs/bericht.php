@@ -21,27 +21,17 @@
         </div>
     <?php else: ?>
         <!-- Editable form -->
-        <?php if (\App\Auth\Permissions::check(['admin', 'fire.incident.qm'])): ?>
-            <form method="post" action="<?= BASE_PATH ?>einsatz/actions.php">
-                <input type="hidden" name="action" value="update_notes">
-                <input type="hidden" name="incident_id" value="<?= $id ?>">
-                <input type="hidden" name="return_tab" value="bericht">
-                <textarea name="notes" class="form-control mb-2" rows="5" placeholder="Beschreiben Sie hier das Einsatzgeschehen..."><?= htmlspecialchars($incident['notes'] ?? '') ?></textarea>
-                <div class="text-end">
-                    <button type="submit" class="btn btn-primary btn-sm">
-                        <i class="fa-solid fa-save me-1"></i>Speichern
-                    </button>
-                </div>
-            </form>
-        <?php else: ?>
-            <div class="alert alert-secondary mb-0">
-                <?php if (!empty($incident['notes'])): ?>
-                    <?= nl2br(htmlspecialchars($incident['notes'])) ?>
-                <?php else: ?>
-                    <em class="text-muted">Keine Beschreibung vorhanden</em>
-                <?php endif; ?>
+        <form method="post" action="<?= BASE_PATH ?>einsatz/actions.php">
+            <input type="hidden" name="action" value="update_notes">
+            <input type="hidden" name="incident_id" value="<?= $id ?>">
+            <input type="hidden" name="return_tab" value="bericht">
+            <textarea name="notes" class="form-control mb-2" rows="5" placeholder="Beschreiben Sie hier das Einsatzgeschehen..."><?= htmlspecialchars($incident['notes'] ?? '') ?></textarea>
+            <div class="text-end">
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="fa-solid fa-save me-1"></i>Speichern
+                </button>
             </div>
-        <?php endif; ?>
+        </form>
     <?php endif; ?>
 </div>
 

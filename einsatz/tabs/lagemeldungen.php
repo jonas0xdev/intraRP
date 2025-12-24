@@ -35,7 +35,7 @@
         </ul>
     <?php endif; ?>
 
-    <?php if (!$incident['finalized'] && \App\Auth\Permissions::check(['admin', 'fire.incident.qm'])): ?>
+    <?php if (!$incident['finalized']): ?>
         <hr class="my-4">
         <h5>Neue Lagemeldung hinzufügen</h5>
         <form method="post" action="<?= BASE_PATH ?>einsatz/actions.php" class="mt-3">

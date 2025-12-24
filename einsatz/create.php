@@ -307,7 +307,6 @@ try {
                         </div>
                     </div>
                     <div class="mt-3 d-flex justify-content-end">
-                        <a href="<?= BASE_PATH ?>index.php" class="btn btn-secondary me-2">Abbrechen</a>
                         <button type="submit" class="btn btn-primary">Einsatz erstellen</button>
                     </div>
                 </form>

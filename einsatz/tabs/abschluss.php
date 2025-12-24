@@ -18,109 +18,100 @@ if ($incident) {
 <div class="intra__tile p-3 mb-3">
     <h4 class="mb-4">Einsatz abschließen</h4>
 
-    <?php if (\App\Auth\Permissions::check(['admin', 'fire.incident.qm'])): ?>
+    <?php if ($incident['finalized']): ?>
+        <div class="alert alert-success">
+            <i class="fa-solid fa-check-circle me-2"></i>
+            <strong>Dieser Einsatz wurde bereits abgeschlossen</strong>
+        </div>
 
-        <?php if ($incident['finalized']): ?>
-            <div class="alert alert-success">
-                <i class="fa-solid fa-check-circle me-2"></i>
-                <strong>Dieser Einsatz wurde bereits abgeschlossen</strong>
-            </div>
-
-            <div class="row g-3 mt-3">
-                <div class="col-md-6">
-                    <div class="card bg-dark">
-                        <div class="card-body">
-                            <h6 class="card-title">Abgeschlossen am</h6>
-                            <p class="card-text">
-                                <?php
-                                if ($incident['finalized_at']) {
-                                    $dt = new DateTime($incident['finalized_at'], new DateTimeZone('UTC'));
-                                    $dt->setTimezone(new DateTimeZone('Europe/Berlin'));
-                                    echo $dt->format('d.m.Y H:i');
-                                } else {
-                                    echo '-';
-                                }
-                                ?>
-                            </p>
-                        </div>
+        <div class="row g-3 mt-3">
+            <div class="col-md-6">
+                <div class="card bg-dark">
+                    <div class="card-body">
+                        <h6 class="card-title">Abgeschlossen am</h6>
+                        <p class="card-text">
+                            <?php
+                            if ($incident['finalized_at']) {
+                                $dt = new DateTime($incident['finalized_at'], new DateTimeZone('UTC'));
+                                $dt->setTimezone(new DateTimeZone('Europe/Berlin'));
+                                echo $dt->format('d.m.Y H:i');
+                            } else {
+                                echo '-';
+                            }
+                            ?>
+                        </p>
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="card bg-dark">
-                        <div class="card-body">
-                            <h6 class="card-title">QM-Status</h6>
-                            <p class="card-text">
-                                <?php
+            </div>
+            <div class="col-md-6">
+                <div class="card bg-dark">
+                    <div class="card-body">
+                        <h6 class="card-title">QM-Status</h6>
+                        <p class="card-text">
+                            <?php
+                            $badge = 'bg-danger';
+                            $statusText = 'Ungesichtet';
+                            if ($incident['status'] === 'gesichtet') {
+                                $badge = 'bg-success';
+                                $statusText = 'Gesichtet';
+                            } elseif ($incident['status'] === 'negativ') {
                                 $badge = 'bg-danger';
-                                $statusText = 'Ungesichtet';
-                                if ($incident['status'] === 'gesichtet') {
-                                    $badge = 'bg-success';
-                                    $statusText = 'Gesichtet';
-                                } elseif ($incident['status'] === 'negativ') {
-                                    $badge = 'bg-danger';
-                                    $statusText = 'Negativ';
-                                }
-                                ?>
-                                <span class="badge <?= $badge ?>"><?= htmlspecialchars($statusText) ?></span>
-                            </p>
-                        </div>
+                                $statusText = 'Negativ';
+                            }
+                            ?>
+                            <span class="badge <?= $badge ?>"><?= htmlspecialchars($statusText) ?></span>
+                        </p>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="alert alert-info mt-4">
-                <i class="fa-solid fa-info-circle me-2"></i>
-                Das Protokoll ist zur QM-Sichtung markiert und kann nicht mehr bearbeitet werden.
-            </div>
-
-        <?php else: ?>
-            <!-- Not finalized yet -->
-
-            <?php if (!$canFinalize): ?>
-                <div class="alert alert-warning">
-                    <h5 class="alert-heading">
-                        <i class="fa-solid fa-exclamation-triangle me-2"></i>
-                        Abschluss nicht möglich
-                    </h5>
-                    <p class="mb-2">Bitte ergänzen Sie folgende Pflichtangaben in den Stammdaten:</p>
-                    <ul class="mb-0">
-                        <?php foreach ($missingRequired as $mr): ?>
-                            <li><?= htmlspecialchars($mr) ?></li>
-                        <?php endforeach; ?>
-                    </ul>
-                </div>
-            <?php else: ?>
-                <div class="alert alert-info">
-                    <i class="fa-solid fa-info-circle me-2"></i>
-                    Sie können diesen Einsatz nun abschließen.
-                </div>
-            <?php endif; ?>
-
-            <div class="card bg-dark mt-4">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">Was passiert beim Abschluss?</h5>
-                    <ul class="mb-0">
-                        <li>Das Protokoll wird zur <strong>QM-Sichtung</strong> markiert</li>
-                        <li>Alle Daten werden <strong>gesperrt</strong> und können nicht mehr bearbeitet werden</li>
-                        <li>Der Status wird auf "Ungesichtet" gesetzt</li>
-                        <li>QM-Berechtigte können anschließend den Status ändern</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="d-flex justify-content-center mt-4">
-                <button type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#finalizeConfirmModal" <?= $canFinalize ? '' : 'disabled' ?>>
-                    <i class="fa-solid fa-check-circle me-2"></i>
-                    Einsatz jetzt abschließen
-                </button>
-            </div>
-
-        <?php endif; ?>
+        <div class="alert alert-info mt-4">
+            <i class="fa-solid fa-info-circle me-2"></i>
+            Das Protokoll ist zur QM-Sichtung markiert und kann nicht mehr bearbeitet werden.
+        </div>
 
     <?php else: ?>
-        <div class="alert alert-warning">
-            <i class="fa-solid fa-lock me-2"></i>
-            Sie haben keine Berechtigung, Einsätze abzuschließen. Bitte wenden Sie sich an einen Administrator oder QM-Verantwortlichen.
+        <!-- Not finalized yet -->
+
+        <?php if (!$canFinalize): ?>
+            <div class="alert alert-warning">
+                <h5 class="alert-heading">
+                    <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                    Abschluss nicht möglich
+                </h5>
+                <p class="mb-2">Bitte ergänzen Sie folgende Pflichtangaben in den Stammdaten:</p>
+                <ul class="mb-0">
+                    <?php foreach ($missingRequired as $mr): ?>
+                        <li><?= htmlspecialchars($mr) ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+        <?php else: ?>
+            <div class="alert alert-info">
+                <i class="fa-solid fa-info-circle me-2"></i>
+                Sie können diesen Einsatz nun abschließen.
+            </div>
+        <?php endif; ?>
+
+        <div class="card bg-dark mt-4">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Was passiert beim Abschluss?</h5>
+                <ul class="mb-0">
+                    <li>Das Protokoll wird zur <strong>QM-Sichtung</strong> markiert</li>
+                    <li>Alle Daten werden <strong>gesperrt</strong> und können nicht mehr bearbeitet werden</li>
+                    <li>Der Status wird auf "Ungesichtet" gesetzt</li>
+                    <li>QM-Berechtigte können anschließend den Status ändern</li>
+                </ul>
+            </div>
         </div>
+
+        <div class="d-flex justify-content-center mt-4">
+            <button type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#finalizeConfirmModal" <?= $canFinalize ? '' : 'disabled' ?>>
+                <i class="fa-solid fa-check-circle me-2"></i>
+                Einsatz jetzt abschließen
+            </button>
+        </div>
+
     <?php endif; ?>
 </div>
