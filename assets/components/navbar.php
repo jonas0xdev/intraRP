@@ -460,19 +460,15 @@ try {
                                     </ul>
                                 </div>
                             <?php endif; ?>
-                            <?php if (Permissions::check(['admin', 'fire.incident.qm']) || isset($_SESSION['einsatz_vehicle_id'])): ?>
-                                <div class="mega-menu-section">
-                                    <h6>FW Einsatzprotokolle</h6>
-                                    <ul class="list-unstyled">
-                                        <?php if (isset($_SESSION['einsatz_vehicle_id'])): ?>
-                                            <li><a href="<?= BASE_PATH ?>einsatz/create.php"><i class="fa-solid fa-plus"></i> Einsatz erstellen</a></li>
-                                        <?php endif; ?>
-                                        <?php if (Permissions::check(['admin', 'fire.incident.qm'])): ?>
-                                            <li><a href="<?= BASE_PATH ?>einsatz/admin/list.php"><i class="fa-solid fa-list-check"></i> Qualitätsmanagement</a></li>
-                                        <?php endif; ?>
-                                    </ul>
-                                </div>
-                            <?php endif; ?>
+                            <div class="mega-menu-section">
+                                <h6>FW Einsatzprotokolle</h6>
+                                <ul class="list-unstyled">
+                                    <li><a href="<?= BASE_PATH ?>einsatz/create.php" target="_blank"><i class="fa-solid fa-plus"></i> fireTab öffnen</a></li>
+                                    <?php if (Permissions::check(['admin', 'fire.incident.qm'])): ?>
+                                        <li><a href="<?= BASE_PATH ?>einsatz/admin/list.php"><i class="fa-solid fa-list-check"></i> Qualitätsmanagement</a></li>
+                                    <?php endif; ?>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </li>
@@ -581,9 +577,7 @@ try {
             <?php if (Permissions::check(['admin', 'manv.manage'])): ?>
                 <a href="<?= BASE_PATH ?>manv/index.php" class="offcanvas-link"><i class="fa-solid fa-house-medical"></i> MANV-Board</a>
             <?php endif; ?>
-            <?php if (isset($_SESSION['einsatz_vehicle_id'])): ?>
-                <a href="<?= BASE_PATH ?>einsatz/create.php" class="offcanvas-link"><i class="fa-solid fa-plus"></i> Einsatz erstellen</a>
-            <?php endif; ?>
+            <a href="<?= BASE_PATH ?>einsatz/create.php" class="offcanvas-link" target="_blank"><i class="fa-solid fa-plus"></i> Einsatz erstellen</a>
             <?php if (Permissions::check(['admin', 'fire.incident.qm'])): ?>
                 <a href="<?= BASE_PATH ?>einsatz/admin/list.php" class="offcanvas-link"><i class="fa-solid fa-list-check"></i> Qualitätsmanagement</a>
             <?php endif; ?>
