@@ -45,14 +45,27 @@ function fmt_dt(?string $ts): string
 $prefill_number = $_GET['incident_number'] ?? '';
 $prefill_location = $_GET['location'] ?? '';
 $prefill_incident_id = $_GET['incident_id'] ?? null;
+$asu_id = $_GET['asu_id'] ?? null;
 
-// Load existing ASU protocols if incident_id is provided
-$asuProtocols = [];
-if ($prefill_incident_id) {
+// Load existing ASU protocol to edit if asu_id is provided
+$existingProtocol = null;
+if ($asu_id) {
     try {
-        $stmt = $pdo->prepare("SELECT * FROM intra_fire_incident_asu WHERE incident_id = ? ORDER BY created_at DESC");
-        $stmt->execute([$prefill_incident_id]);
-        $asuProtocols = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt = $pdo->prepare("SELECT * FROM intra_fire_incident_asu WHERE id = ?");
+        $stmt->execute([$asu_id]);
+        $existingProtocol = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($existingProtocol) {
+            $protocolData = json_decode($existingProtocol['data'], true) ?? [];
+
+            // Pre-fill basic data from existing protocol
+            if (!$prefill_number && !empty($protocolData['missionNumber'])) {
+                $prefill_number = $protocolData['missionNumber'];
+            }
+            if (!$prefill_location && !empty($protocolData['missionLocation'])) {
+                $prefill_location = $protocolData['missionLocation'];
+            }
+        }
     } catch (PDOException $e) {
         // Silently fail if query doesn't work
     }
@@ -94,6 +107,28 @@ if ($prefill_incident_id) {
                 <div class="text-center mb-3">
                     <img src="https://dev.intrarp.de/assets/img/defaultLogo.webp" alt="Logo" style="max-width: 120px; height: auto;">
                 </div>
+                <!-- Vehicle Login Info -->
+                <?php if (isset($_SESSION['einsatz_vehicle_name'])): ?>
+                    <div class="card bg-dark mb-3" style="font-size: 0.85rem;">
+                        <div class="card-body p-2">
+                            <div class="text-muted small mb-1">Angemeldet auf:</div>
+                            <div class="fw-bold">
+                                <i class="fas fa-truck me-1"></i>
+                                <?= htmlspecialchars($_SESSION['einsatz_vehicle_name']) ?>
+                            </div>
+                            <?php if (isset($_SESSION['einsatz_operator_name'])): ?>
+                                <div class="text-muted small mt-1">
+                                    <i class="fas fa-user me-1"></i>
+                                    <?= htmlspecialchars($_SESSION['einsatz_operator_name']) ?>
+                                </div>
+                            <?php endif; ?>
+                            <a href="<?= BASE_PATH ?>einsatz/login-fahrzeug.php?logout=1" class="btn btn-sm btn-outline-light mt-2 w-100">
+                                <i class="fas fa-sign-out-alt me-1"></i>Abmelden
+                            </a>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
                 <ul class="nav flex-column" style="list-style: none; padding: 0; margin: 0;">
                     <li class="nav-item">
                         <a class="nav-link text-white" href="<?= BASE_PATH ?>einsatz/create.php">
@@ -143,55 +178,7 @@ if ($prefill_incident_id) {
                     </div>
                 </div>
 
-                <!-- Gespeicherte ASU-Protokolle -->
-                <?php if (count($asuProtocols) > 0): ?>
-                    <div class="intra__tile p-3 mb-3">
-                        <h4 class="mb-3">Gespeicherte ASU-Protokolle</h4>
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Überwacher</th>
-                                        <th>Einsatzort</th>
-                                        <th>Datum</th>
-                                        <th>Trupps</th>
-                                        <th>Erstellt am</th>
-                                        <th width="100">Aktionen</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($asuProtocols as $asu):
-                                        $data = json_decode($asu['data'], true) ?? [];
-                                        $truppCount = 0;
-                                        if (!empty($data['trupp1']['tf'])) $truppCount++;
-                                        if (!empty($data['trupp2']['tf'])) $truppCount++;
-                                        if (!empty($data['trupp3']['tf'])) $truppCount++;
-                                    ?>
-                                        <tr>
-                                            <td><?= htmlspecialchars($asu['supervisor'] ?? '-') ?></td>
-                                            <td><?= htmlspecialchars($data['missionLocation'] ?? '-') ?></td>
-                                            <td><?= htmlspecialchars($data['missionDate'] ?? '-') ?></td>
-                                            <td><span class="badge bg-info"><?= $truppCount ?> Trupp<?= $truppCount !== 1 ? 's' : '' ?></span></td>
-                                            <td><?= fmt_dt($asu['created_at']) ?></td>
-                                            <td>
-                                                <button type="button" class="btn btn-sm btn-info" onclick="viewASUProtocol(<?= htmlspecialchars(json_encode($data)) ?>)">
-                                                    <i class="fa-solid fa-eye"></i>
-                                                </button>
-                                                <?php if (Permissions::check('fire.incident.edit')): ?>
-                                                    <button type="button" class="btn btn-sm btn-danger" onclick="deleteASUProtocol(<?= (int)$asu['id'] ?>)">
-                                                        <i class="fa-solid fa-trash"></i>
-                                                    </button>
-                                                <?php endif; ?>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                <?php endif; ?>
-
-                <!-- Neue ASU-Überwachung erstellen -->
+                <!-- ASU-Überwachung -->
                 <div class="intra__tile p-3">
                     <!-- <h4 class="mb-3"><i class="fa-solid fa-plus me-2"></i>Neue Atemschutzüberwachung</h4> -->
 
@@ -249,7 +236,64 @@ if ($prefill_incident_id) {
             </div>
         </div>
     </div>
+
+    <!-- Footer -->
+    <?php include __DIR__ . '/../assets/components/footer.php'; ?>
+
     <script src="<?= BASE_PATH ?>assets/js/asu.js"></script>
+
+    <?php if ($existingProtocol): ?>
+        <script>
+            // Load existing protocol data
+            document.addEventListener('DOMContentLoaded', function() {
+                const protocolData = <?= json_encode(json_decode($existingProtocol['data'], true)) ?>;
+
+                // Load basic information
+                if (protocolData.missionDate) document.getElementById('missionDate').value = protocolData.missionDate;
+                if (protocolData.supervisor) document.getElementById('supervisor').value = protocolData.supervisor;
+
+                // Load trupp data for all 3 trupps
+                for (let i = 1; i <= 3; i++) {
+                    const truppKey = 'trupp' + i;
+                    const truppData = protocolData[truppKey];
+
+                    if (truppData) {
+                        // Personal
+                        if (truppData.tf) document.getElementById(truppKey + 'TF').value = truppData.tf;
+                        if (truppData.tm1) document.getElementById(truppKey + 'TM1').value = truppData.tm1;
+                        if (truppData.tm2) document.getElementById(truppKey + 'TM2').value = truppData.tm2;
+
+                        // Mission details
+                        if (truppData.startPressure) document.getElementById(truppKey + 'StartPressure').value = truppData.startPressure;
+                        if (truppData.startTime) document.getElementById(truppKey + 'StartTime').value = truppData.startTime;
+                        if (truppData.mission) document.getElementById(truppKey + 'Mission').value = truppData.mission;
+
+                        // Checks
+                        if (truppData.check1) document.getElementById(truppKey + 'Check1').value = truppData.check1;
+                        if (truppData.check2) document.getElementById(truppKey + 'Check2').value = truppData.check2;
+
+                        // End details
+                        if (truppData.objective) document.getElementById(truppKey + 'Objective').value = truppData.objective;
+                        if (truppData.retreat) document.getElementById(truppKey + 'Retreat').value = truppData.retreat;
+                        if (truppData.end) document.getElementById(truppKey + 'End').value = truppData.end;
+                        if (truppData.remarks) document.getElementById(truppKey + 'Remarks').value = truppData.remarks;
+
+                        // Restore timer state
+                        if (truppData.elapsedTime && truppData.elapsedTime > 0) {
+                            truppTimers[i].elapsedSeconds = truppData.elapsedTime;
+                            updateTruppDisplay(i);
+
+                            // Auto-start timer if no end time is set
+                            if (!truppData.end || truppData.end === '') {
+                                console.log(`Auto-starting Trupp ${i} from saved state`);
+                                startTrupp(i);
+                            }
+                        }
+                    }
+                }
+            });
+        </script>
+    <?php endif; ?>
 </body>
 
 </html>

@@ -247,6 +247,11 @@
                                 <?php endif; ?>
                             </div>
                             <div class="modal-footer">
+                                <?php if (!$incident['finalized']): ?>
+                                    <a href="<?= BASE_PATH ?>einsatz/asu.php?incident_id=<?= $id ?>&incident_number=<?= urlencode($incident['incident_number']) ?>&location=<?= urlencode($incident['location']) ?>&asu_id=<?= (int)$asu['id'] ?>" class="btn btn-primary">
+                                        <i class="fa-solid fa-edit me-1"></i>Protokoll fortführen
+                                    </a>
+                                <?php endif; ?>
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
                             </div>
                         </div>
