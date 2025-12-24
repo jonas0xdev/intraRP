@@ -56,7 +56,7 @@ if (!Permissions::check(['admin', 'vehicles.view'])) {
                                     <th scope="col">Priorität</th>
                                     <th scope="col">Bezeichnung (Typ)</th>
                                     <th scope="col">Kennzeichen</th>
-                                    <th scope="col">Fahrzeugtyp (RD)</th>
+                                    <th scope="col">Fahrzeugtyp</th>
                                     <th scope="col">Aktiv?</th>
                                     <th scope="col"></th>
                                 </tr>
@@ -70,13 +70,16 @@ if (!Permissions::check(['admin', 'vehicles.view'])) {
                                 foreach ($result as $row) {
                                     switch ($row['rd_type']) {
                                         case 1:
-                                            $docYes = "<span class='badge text-bg-danger'>Notarzt</span>";
+                                            $docYes = "<span class='badge text-bg-warning'>RD - Mit NA</span>";
                                             break;
                                         case 2:
-                                            $docYes = "<span class='badge text-bg-warning'>Transport</span>";
+                                            $docYes = "<span class='badge text-bg-success'>RD - Ohne NA</span>";
+                                            break;
+                                        case 3:
+                                            $docYes = "<span class='badge text-bg-danger'>Feuerwehr</span>";
                                             break;
                                         default:
-                                            $docYes = "<span class='badge text-bg-secondary'>Keiner</span>";
+                                            $docYes = "<span class='badge text-bg-dark'>Andere</span>";
                                             break;
                                     }
 
@@ -160,9 +163,10 @@ if (!Permissions::check(['admin', 'vehicles.view'])) {
                             <div class="form-group mb-3">
                                 <label for="fahrzeug-rd_type">Typ (Rettungsdienstlich)</label>
                                 <select class="form-control" name="rd_type" id="fahrzeug-rd_type">
-                                    <option value="0">Kein RD Fahrzeug</option>
-                                    <option value="1">Notarztbesetzt</option>
-                                    <option value="2">Transportmittel</option>
+                                    <option value="0">Andere</option>
+                                    <option value="1">Rettungsdienst mit NA</option>
+                                    <option value="2">Rettungsdienst ohne NA</option>
+                                    <option value="3">Feuerwehr</option>
                                 </select>
                             </div>
 
@@ -231,9 +235,10 @@ if (!Permissions::check(['admin', 'vehicles.view'])) {
                             <div class="form-group mb-3">
                                 <label for="new-fahrzeug-rd_type">Typ (Rettungsdienstlich)</label>
                                 <select class="form-control" name="rd_type" id="new-fahrzeug-rd_type">
-                                    <option value="0">Kein RD Fahrzeug</option>
-                                    <option value="1">Notarztbesetzt</option>
-                                    <option value="2">Transportmittel</option>
+                                    <option value="0">Andere</option>
+                                    <option value="1">Rettungsdienst mit NA</option>
+                                    <option value="2">Rettungsdienst ohne NA</option>
+                                    <option value="3">Feuerwehr</option>
                                 </select>
                             </div>
 

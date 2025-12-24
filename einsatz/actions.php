@@ -1,0 +1,173 @@
+<?php
+session_start();
+require_once __DIR__ . '/../assets/config/config.php';
+require_once __DIR__ . '/../vendor/autoload.php';
+
+use App\Auth\Permissions;
+use App\Helpers\Flash;
+
+if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
+    header('HTTP/1.1 403 Forbidden');
+    exit('Unauthorized');
+}
+
+require __DIR__ . '/../assets/config/database.php';
+
+$id = isset($_POST['incident_id']) ? (int)$_POST['incident_id'] : (isset($_GET['id']) ? (int)$_GET['id'] : 0);
+$returnTab = $_POST['return_tab'] ?? $_GET['tab'] ?? 'stammdaten';
+if ($id <= 0) {
+    Flash::error('Ungültige Einsatz-ID');
+    header('Location: ' . BASE_PATH . 'index.php');
+    exit();
+}
+
+// Preload incident for guards
+$incident = null;
+try {
+    $stmt = $pdo->prepare("SELECT * FROM intra_fire_incidents WHERE id = ?");
+    $stmt->execute([$id]);
+    $incident = $stmt->fetch(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    Flash::error('Fehler beim Laden des Einsatzes.');
+    header('Location: ' . BASE_PATH . 'einsatz/view.php?id=' . $id);
+    exit();
+}
+
+if (!$incident) {
+    Flash::error('Einsatz nicht gefunden.');
+    header('Location: ' . BASE_PATH . 'index.php');
+    exit();
+}
+
+// Handle POST actions
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $action = $_POST['action'] ?? '';
+
+    try {
+        // Add vehicle
+        if ($action === 'add_vehicle' && Permissions::check(['admin', 'fire.incident.create', 'fire.incident.qm'])) {
+            if ($incident['finalized']) {
+                Flash::error('Einsatz ist bereits abgeschlossen.');
+                goto post_done;
+            }
+
+            $vehicle_id = !empty($_POST['vehicle_id']) ? (int)$_POST['vehicle_id'] : null;
+            $vehicle_name = trim($_POST['vehicle_name'] ?? '');
+            $vehicle_identifier = trim($_POST['vehicle_identifier'] ?? '');
+            $radio_name = trim($_POST['radio_name'] ?? '');
+            $from_other = ($vehicle_id === null) ? 1 : 0;
+
+            if ($vehicle_id !== null) {
+                $dup = $pdo->prepare("SELECT COUNT(*) FROM intra_fire_incident_vehicles WHERE incident_id = ? AND vehicle_id = ?");
+                $dup->execute([$id, $vehicle_id]);
+                if ($dup->fetchColumn() > 0) {
+                    Flash::error('Fahrzeug bereits hinzugefügt.');
+                    goto post_done;
+                }
+            }
+
+            $stmt = $pdo->prepare("INSERT INTO intra_fire_incident_vehicles (incident_id, vehicle_id, vehicle_name, vehicle_identifier, from_other_org, radio_name, created_by) VALUES (?,?,?,?,?,?,?)");
+            $stmt->execute([$id, $vehicle_id, $vehicle_name ?: null, $vehicle_identifier ?: null, $from_other, $radio_name ?: null, $_SESSION['userid']]);
+            Flash::success('Einsatzmittel hinzugefügt.');
+        }
+
+        // Remove vehicle
+        if ($action === 'remove_vehicle' && Permissions::check(['admin', 'fire.incident.create', 'fire.incident.qm'])) {
+            if ($incident['finalized']) {
+                Flash::error('Einsatz ist bereits abgeschlossen.');
+                goto post_done;
+            }
+
+            $rowId = (int)($_POST['vehicle_row_id'] ?? 0);
+            if ($rowId > 0) {
+                $del = $pdo->prepare("DELETE FROM intra_fire_incident_vehicles WHERE id = ? AND incident_id = ?");
+                $del->execute([$rowId, $id]);
+                Flash::success('Fahrzeug entfernt.');
+            }
+        }
+
+        // Add sitrep
+        if ($action === 'add_sitrep' && Permissions::check(['admin', 'fire.incident.create', 'fire.incident.qm'])) {
+            if ($incident['finalized']) {
+                Flash::error('Einsatz ist bereits abgeschlossen.');
+                goto post_done;
+            }
+
+            $rt_date = $_POST['rt_date'] ?? '';
+            $rt_time = $_POST['rt_time'] ?? '';
+            $text = trim($_POST['text'] ?? '');
+            $vehicle_attached_id = !empty($_POST['sitrep_attached_vehicle_id']) ? (int)$_POST['sitrep_attached_vehicle_id'] : null;
+
+            if ($rt_date && $rt_time && $text !== '' && $vehicle_attached_id) {
+                $report_time = date('Y-m-d H:i:s', strtotime($rt_date . ' ' . $rt_time));
+                $infoStmt = $pdo->prepare("SELECT v.radio_name, f.name AS sys_name FROM intra_fire_incident_vehicles v LEFT JOIN intra_fahrzeuge f ON v.vehicle_id = f.id WHERE v.id = ? AND v.incident_id = ?");
+                $infoStmt->execute([$vehicle_attached_id, $id]);
+                $vinfo = $infoStmt->fetch(PDO::FETCH_ASSOC);
+                $radio = $vinfo['radio_name'] ?? $vinfo['sys_name'] ?? null;
+                $stmt = $pdo->prepare("INSERT INTO intra_fire_incident_sitreps (incident_id, report_time, text, vehicle_radio_name, vehicle_id, created_by) VALUES (?,?,?,?,?,?)");
+                $stmt->execute([$id, $report_time, $text, $radio ?: null, null, $_SESSION['userid']]);
+                Flash::success('Lagemeldung gespeichert.');
+            } else {
+                Flash::error('Bitte Datum, Uhrzeit, Text und Fahrzeug vor Ort wählen.');
+            }
+        }
+
+        // Finalize incident
+        if ($action === 'finalize' && Permissions::check(['admin', 'fire.incident.qm'])) {
+            $stmt = $pdo->prepare("SELECT location, keyword, started_at, leader_id FROM intra_fire_incidents WHERE id = ?");
+            $stmt->execute([$id]);
+            $inc = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($inc && $inc['location'] && $inc['keyword'] && $inc['started_at'] && !empty($inc['leader_id'])) {
+                $upd = $pdo->prepare("UPDATE intra_fire_incidents SET finalized = 1, finalized_at = NOW(), finalized_by = ?, status = 'in_sichtung' WHERE id = ?");
+                $upd->execute([$_SESSION['userid'], $id]);
+                Flash::success('Protokoll zur QM-Sichtung markiert.');
+            } else {
+                Flash::error('Pflichtangaben fehlen für Abschluss (inkl. Einsatzleiter).');
+            }
+        }
+
+        // Set QM status
+        if ($action === 'set_status' && Permissions::check(['admin', 'fire.incident.qm'])) {
+            $status = $_POST['status'] ?? 'in_sichtung';
+            if (in_array($status, ['gesichtet', 'in_sichtung', 'negativ'], true)) {
+                $upd = $pdo->prepare("UPDATE intra_fire_incidents SET status = ?, updated_by = ?, updated_at = NOW() WHERE id = ?");
+                $upd->execute([$status, $_SESSION['userid'], $id]);
+                Flash::success('Status aktualisiert.');
+            }
+        }
+
+        // Update core data
+        if ($action === 'update_core' && Permissions::check(['admin', 'fire.incident.create', 'fire.incident.qm'])) {
+            if (!$incident['finalized']) {
+                $loc = trim($_POST['edit_location'] ?? '');
+                $keyw = trim($_POST['edit_keyword'] ?? '');
+                $incno = trim($_POST['edit_incident_number'] ?? '');
+                $date = $_POST['edit_date'] ?? '';
+                $time = $_POST['edit_time'] ?? '';
+                $leader = !empty($_POST['edit_leader_id']) ? (int)$_POST['edit_leader_id'] : null;
+                $notes = trim($_POST['edit_notes'] ?? '');
+                $owner_name = trim($_POST['edit_owner_name'] ?? '');
+                $owner_contact = trim($_POST['edit_owner_contact'] ?? '');
+
+                if ($incno === '' || $loc === '' || $keyw === '' || $date === '' || $time === '' || $leader === null) {
+                    Flash::error('Bitte alle Pflichtfelder ausfüllen (Nummer, Ort, Stichwort, Beginn, Einsatzleiter).');
+                } else {
+                    $started = date('Y-m-d H:i:s', strtotime($date . ' ' . $time));
+                    $upd = $pdo->prepare("UPDATE intra_fire_incidents SET incident_number = ?, location = ?, keyword = ?, started_at = ?, leader_id = ?, owner_type = NULL, owner_name = ?, owner_contact = ?, notes = ?, updated_by = ?, updated_at = NOW() WHERE id = ?");
+                    $upd->execute([$incno, $loc, $keyw, $started, $leader, $owner_name ?: null, $owner_contact ?: null, $notes ?: null, $_SESSION['userid'], $id]);
+                    Flash::success('Einsatzdaten gespeichert.');
+                }
+            } else {
+                Flash::error('Einsatz ist bereits abgeschlossen und kann nicht mehr bearbeitet werden.');
+            }
+        }
+    } catch (PDOException $e) {
+        Flash::error('Fehler: ' . $e->getMessage());
+    }
+
+    post_done:
+}
+
+// Redirect back to view with tab parameter
+header('Location: ' . BASE_PATH . 'einsatz/view.php?id=' . $id . '&tab=' . urlencode($returnTab));
+exit();

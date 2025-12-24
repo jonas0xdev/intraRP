@@ -157,7 +157,7 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                                     <select name="protfzg" id="protfzg" class="form-select my-2" required data-custom-dropdown="true" data-search-threshold="5">
                                         <option value="" disabled selected>Fahrzeug wählen</option>
                                         <?php
-                                        $stmt = $pdo->prepare("SELECT * FROM intra_fahrzeuge WHERE active = 1 AND rd_type <> 0 ORDER BY priority ASC");
+                                        $stmt = $pdo->prepare("SELECT * FROM intra_fahrzeuge WHERE active = 1 AND rd_type IN (1, 2) ORDER BY priority ASC");
                                         $stmt->execute();
                                         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         foreach ($result as $row) {
