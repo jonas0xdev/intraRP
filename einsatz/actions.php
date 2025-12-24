@@ -80,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         // Add vehicle
-        if ($action === 'add_vehicle' && Permissions::check(['admin', 'fire.incident.qm'])) {
+        if ($action === 'add_vehicle') {
             if ($incident['finalized']) {
                 Flash::error('Einsatz ist bereits abgeschlossen.');
                 goto post_done;
@@ -124,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Remove vehicle
-        if ($action === 'remove_vehicle' && Permissions::check(['admin', 'fire.incident.qm'])) {
+        if ($action === 'remove_vehicle') {
             if ($incident['finalized']) {
                 Flash::error('Einsatz ist bereits abgeschlossen.');
                 goto post_done;
@@ -156,7 +156,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Add sitrep
-        if ($action === 'add_sitrep' && Permissions::check(['admin', 'fire.incident.qm'])) {
+        if ($action === 'add_sitrep') {
             if ($incident['finalized']) {
                 Flash::error('Einsatz ist bereits abgeschlossen.');
                 goto post_done;
@@ -190,7 +190,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Finalize incident
-        if ($action === 'finalize' && Permissions::check(['admin', 'fire.incident.qm'])) {
+        if ($action === 'finalize') {
             $stmt = $pdo->prepare("SELECT location, keyword, started_at, leader_id FROM intra_fire_incidents WHERE id = ?");
             $stmt->execute([$id]);
             $inc = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -236,7 +236,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Update notes (Einsatzgeschehen)
-        if ($action === 'update_notes' && Permissions::check(['admin', 'fire.incident.qm'])) {
+        if ($action === 'update_notes') {
             if (!$incident['finalized']) {
                 $notes = trim($_POST['notes'] ?? '');
 
@@ -257,7 +257,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Update core data
-        if ($action === 'update_core' && Permissions::check(['admin', 'fire.incident.qm'])) {
+        if ($action === 'update_core') {
             if (!$incident['finalized']) {
                 $loc = trim($_POST['edit_location'] ?? '');
                 $keyw = trim($_POST['edit_keyword'] ?? '');
@@ -290,7 +290,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Add ASU (Atemschutzüberwachung) protocol
-        if ($action === 'add_asu' && Permissions::check(['admin', 'fire.incident.qm'])) {
+        if ($action === 'add_asu') {
             if ($incident['finalized']) {
                 Flash::error('Einsatz ist bereits abgeschlossen.');
                 goto post_done;
@@ -350,7 +350,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Delete ASU protocol
-        if ($action === 'delete_asu' && Permissions::check(['admin', 'fire.incident.qm'])) {
+        if ($action === 'delete_asu') {
             if ($incident['finalized']) {
                 Flash::error('Einsatz ist bereits abgeschlossen.');
                 goto post_done;
