@@ -164,7 +164,6 @@ try {
                 <div class="text-center mb-3">
                     <img src="https://dev.intrarp.de/assets/img/defaultLogo.webp" alt="Logo" style="max-width: 120px; height: auto;">
                 </div>
-                <h5 class="text-white mb-4 text-center">fireTab</h5>
 
                 <!-- Vehicle Login Info -->
                 <?php if (isset($_SESSION['einsatz_vehicle_name'])): ?>
@@ -199,6 +198,11 @@ try {
                             <i class="fa-solid fa-list me-2"></i>Meine Einsätze
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="<?= BASE_PATH ?>einsatz/asu.php">
+                            <i class="fa-solid fa-mask-ventilator me-2"></i>AS-Überwachung
+                        </a>
+                    </li>
 
                     <?php if (Permissions::check(['admin', 'fire.incident.qm'])): ?>
                         <li class="nav-item mt-4">
@@ -210,12 +214,6 @@ try {
                             </a>
                         </li>
                     <?php endif; ?>
-
-                    <li class="nav-item mt-4">
-                        <a class="nav-link text-white" href="<?= BASE_PATH ?>einsatz/list.php">
-                            <i class="fa-solid fa-arrow-left me-2"></i>Zurück
-                        </a>
-                    </li>
                 </ul>
             </div>
         </div>
@@ -223,7 +221,7 @@ try {
         <!-- Main Content -->
         <div class="flex-grow-1" style="overflow-y: auto;">
             <div class="container my-4">
-                <h1>Feuerwehr-Einsatz anlegen</h1>
+                <h1>Neuen Einsatz anlegen</h1>
                 <?php App\Helpers\Flash::render(); ?>
                 <?php if (!empty($errors)): ?>
                     <div class="alert alert-danger">

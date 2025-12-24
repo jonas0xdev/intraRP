@@ -165,6 +165,10 @@ function fmt_elapsed(int|string $seconds): string
         }
     </style>
     <script src="<?= BASE_PATH ?>assets/js/dialogs.js"></script>
+    <script>
+        // Make BASE_PATH available to JavaScript
+        const basePath = '<?= BASE_PATH ?>';
+    </script>
 </head>
 
 <body data-bs-theme="dark" data-page="protokolle">
@@ -175,7 +179,6 @@ function fmt_elapsed(int|string $seconds): string
                 <div class="text-center mb-3">
                     <img src="https://dev.intrarp.de/assets/img/defaultLogo.webp" alt="Logo" style="max-width: 120px; height: auto;">
                 </div>
-                <h5 class="text-white mb-4 text-center">fireTab</h5>
 
                 <!-- Vehicle Login Info -->
                 <?php if (isset($_SESSION['einsatz_vehicle_name'])): ?>
@@ -208,6 +211,11 @@ function fmt_elapsed(int|string $seconds): string
                     <li class="nav-item">
                         <a class="nav-link text-white" href="<?= BASE_PATH ?>einsatz/list.php">
                             <i class="fa-solid fa-list me-2"></i>Meine Einsätze
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="<?= BASE_PATH ?>einsatz/asu.php">
+                            <i class="fa-solid fa-mask-ventilator me-2"></i>AS-Überwachung
                         </a>
                     </li>
 
@@ -253,12 +261,6 @@ function fmt_elapsed(int|string $seconds): string
                     <li class="nav-item">
                         <a class="nav-link text-white <?= $activeTab === 'log' ? 'active' : '' ?>" href="<?= BASE_PATH ?>einsatz/view.php?id=<?= $id ?>&tab=log">
                             <i class="fa-solid fa-history me-2"></i>Protokoll
-                        </a>
-                    </li>
-
-                    <li class="nav-item mt-4">
-                        <a class="nav-link text-white" href="<?= BASE_PATH ?>einsatz/list.php">
-                            <i class="fa-solid fa-arrow-left me-2"></i>Zurück
                         </a>
                     </li>
                 </ul>

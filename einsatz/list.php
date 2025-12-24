@@ -131,7 +131,6 @@ function fmt_dt(?string $ts): string
                 <div class="text-center mb-3">
                     <img src="https://dev.intrarp.de/assets/img/defaultLogo.webp" alt="Logo" style="max-width: 120px; height: auto;">
                 </div>
-                <h5 class="text-white mb-3 text-center">fireTab</h5>
 
                 <!-- Vehicle Login Info -->
                 <?php if (isset($_SESSION['einsatz_vehicle_name'])): ?>
@@ -164,6 +163,11 @@ function fmt_dt(?string $ts): string
                     <li class="nav-item">
                         <a class="nav-link text-white active" href="<?= BASE_PATH ?>einsatz/list.php">
                             <i class="fa-solid fa-list me-2"></i>Meine Einsätze
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="<?= BASE_PATH ?>einsatz/asu.php">
+                            <i class="fa-solid fa-mask-ventilator me-2"></i>AS-Überwachung
                         </a>
                     </li>
 

@@ -47,7 +47,15 @@
 
 <!-- ASU-Protokolle -->
 <div class="intra__tile p-3 mb-3">
-    <h4>Atemschutzüberwachung (ASU)</h4>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Atemschutzüberwachung (ASU)</h4>
+        <?php if (!$incident['finalized']): ?>
+            <a href="<?= BASE_PATH ?>einsatz/asu.php?incident_id=<?= $id ?>&incident_number=<?= urlencode($incident['incident_number']) ?>&location=<?= urlencode($incident['location']) ?>" class="btn btn-danger btn-sm">
+                ASU starten
+            </a>
+        <?php endif; ?>
+    </div>
+
     <?php if (empty($asuProtocols)): ?>
         <div class="alert alert-secondary">
             <i class="fa-solid fa-info-circle me-2"></i>
@@ -58,7 +66,7 @@
             <?php foreach ($asuProtocols as $asu): ?>
                 <?php $protocolData = json_decode($asu['data'], true) ?? []; ?>
                 <div class="col-auto">
-                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#asuModal<?= (int)$asu['id'] ?>">
+                    <button type="button" class="btn btn-outline-light btn-sm" data-bs-toggle="modal" data-bs-target="#asuModal<?= (int)$asu['id'] ?>">
                         <i class="fa-solid fa-shield"></i>
                         <?= htmlspecialchars($asu['supervisor']) ?>
                         <br>

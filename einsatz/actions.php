@@ -288,6 +288,96 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 Flash::error('Einsatz ist bereits abgeschlossen und kann nicht mehr bearbeitet werden.');
             }
         }
+
+        // Add ASU (Atemschutzüberwachung) protocol
+        if ($action === 'add_asu' && Permissions::check(['admin', 'fire.incident.qm'])) {
+            if ($incident['finalized']) {
+                Flash::error('Einsatz ist bereits abgeschlossen.');
+                goto post_done;
+            }
+
+            $asuDataJson = $_POST['asu_data'] ?? '';
+            if (empty($asuDataJson)) {
+                Flash::error('Keine ASU-Daten übermittelt.');
+                goto post_done;
+            }
+
+            $asuData = json_decode($asuDataJson, true);
+            if (!$asuData) {
+                Flash::error('Ungültige ASU-Daten.');
+                goto post_done;
+            }
+
+            // Validate required fields
+            if (empty($asuData['supervisor']) || empty($asuData['missionNumber']) || empty($asuData['missionLocation']) || empty($asuData['missionDate'])) {
+                Flash::error('Pflichtfelder fehlen (Überwacher, Einsatznummer, Ort, Datum).');
+                goto post_done;
+            }
+
+            // Parse date from DD.MM.YYYY to YYYY-MM-DD
+            $dateParts = explode('.', $asuData['missionDate']);
+            if (count($dateParts) === 3) {
+                $missionDate = $dateParts[2] . '-' . $dateParts[1] . '-' . $dateParts[0];
+            } else {
+                $missionDate = $asuData['missionDate'];
+            }
+
+            try {
+                $stmt = $pdo->prepare("INSERT INTO intra_fire_incident_asu (incident_id, supervisor, mission_location, mission_date, timestamp, data) VALUES (?, ?, ?, ?, NOW(), ?)");
+                $stmt->execute([
+                    $id,
+                    $asuData['supervisor'],
+                    $asuData['missionLocation'],
+                    $missionDate,
+                    $asuDataJson
+                ]);
+
+                logAction(
+                    $pdo,
+                    $id,
+                    'asu_added',
+                    "ASU-Protokoll hinzugefügt (Überwacher: " . $asuData['supervisor'] . ")"
+                );
+
+                Flash::success('ASU-Protokoll erfolgreich gespeichert.');
+            } catch (PDOException $e) {
+                if ($e->getCode() == '23000') {
+                    Flash::error('Ein ASU-Protokoll für diesen Überwacher existiert bereits.');
+                } else {
+                    Flash::error('Fehler beim Speichern: ' . $e->getMessage());
+                }
+            }
+        }
+
+        // Delete ASU protocol
+        if ($action === 'delete_asu' && Permissions::check(['admin', 'fire.incident.qm'])) {
+            if ($incident['finalized']) {
+                Flash::error('Einsatz ist bereits abgeschlossen.');
+                goto post_done;
+            }
+
+            $asuId = (int)($_POST['asu_id'] ?? 0);
+            if ($asuId > 0) {
+                // Get ASU info before deletion for log
+                $asuStmt = $pdo->prepare("SELECT supervisor FROM intra_fire_incident_asu WHERE id = ? AND incident_id = ?");
+                $asuStmt->execute([$asuId, $id]);
+                $asuInfo = $asuStmt->fetch(PDO::FETCH_ASSOC);
+
+                $del = $pdo->prepare("DELETE FROM intra_fire_incident_asu WHERE id = ? AND incident_id = ?");
+                $del->execute([$asuId, $id]);
+
+                if ($asuInfo) {
+                    logAction(
+                        $pdo,
+                        $id,
+                        'asu_deleted',
+                        "ASU-Protokoll gelöscht (Überwacher: " . $asuInfo['supervisor'] . ")"
+                    );
+                }
+
+                Flash::success('ASU-Protokoll gelöscht.');
+            }
+        }
     } catch (PDOException $e) {
         Flash::error('Fehler: ' . $e->getMessage());
     }
