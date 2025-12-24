@@ -21,12 +21,22 @@ require_once __DIR__ . '/../assets/config/config.php';
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use App\Auth\Permissions;
+use App\Helpers\Flash;
 
-// Check permissions
-if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
-    $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
-    header('Location: ' . BASE_PATH . 'login.php');
-    exit;
+// Check if user authentication is required for vehicle login
+if (defined('FIRE_INCIDENT_REQUIRE_USER_AUTH') && FIRE_INCIDENT_REQUIRE_USER_AUTH === true) {
+    if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
+        $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
+        header("Location: " . BASE_PATH . "login.php");
+        exit();
+    }
+}
+
+// Check if logged into vehicle
+if (!isset($_SESSION['einsatz_vehicle_id']) || !isset($_SESSION['einsatz_operator_id'])) {
+    Flash::error('Bitte melden Sie sich zuerst auf einem Fahrzeug an.');
+    header("Location: " . BASE_PATH . "einsatz/login-fahrzeug.php");
+    exit();
 }
 
 // Helper for date/time formatting
