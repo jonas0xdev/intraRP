@@ -224,10 +224,6 @@ try {
                                         <i class="fa-solid fa-sign-in-alt me-2"></i>
                                         Anmelden
                                     </button>
-                                    <a href="<?= BASE_PATH ?>index.php" class="btn btn-outline-secondary">
-                                        <i class="fa-solid fa-arrow-left me-2"></i>
-                                        Zurück
-                                    </a>
                                 </div>
                             </form>
                         <?php endif; ?>
