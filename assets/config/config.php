@@ -43,6 +43,7 @@ try {
     if (!defined('ENOTF_USE_PIN')) define('ENOTF_USE_PIN', true);
     if (!defined('ENOTF_PIN')) define('ENOTF_PIN', '1234');
     if (!defined('ENOTF_REQUIRE_USER_AUTH')) define('ENOTF_REQUIRE_USER_AUTH', false);
+    if (!defined('FIRE_INCIDENT_REQUIRE_USER_AUTH')) define('FIRE_INCIDENT_REQUIRE_USER_AUTH', false);
     if (!defined('REGISTRATION_MODE')) define('REGISTRATION_MODE', 'open');
     if (!defined('BASE_PATH')) define('BASE_PATH', '/');
     if (!defined('KB_PUBLIC_ACCESS')) define('KB_PUBLIC_ACCESS', false);

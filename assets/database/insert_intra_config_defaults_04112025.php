@@ -28,8 +28,9 @@ try {
         ['key' => 'ENOTF_USE_PIN', 'value' => 'true', 'type' => 'boolean', 'category' => 'funktionen', 'description' => 'Wird die PIN-Funktion des eNOTF verwendet?', 'editable' => 1, 'order' => 32],
         ['key' => 'ENOTF_PIN', 'value' => '1234', 'type' => 'string', 'category' => 'funktionen', 'description' => 'PIN für den Zugang zum eNOTF (4-6 Zahlen)', 'editable' => 1, 'order' => 33],
         ['key' => 'ENOTF_REQUIRE_USER_AUTH', 'value' => 'false', 'type' => 'boolean', 'category' => 'funktionen', 'description' => 'Wird eine Registrierung/Anmeldung im Hauptsystem für den Zugang zum eNOTF vorausgesetzt?', 'editable' => 1, 'order' => 34],
-        ['key' => 'REGISTRATION_MODE', 'value' => 'open', 'type' => 'string', 'category' => 'funktionen', 'description' => 'Registrierungsmodus: open = für jeden möglich, code = nur mit Code, closed = keine Registrierung', 'editable' => 1, 'order' => 35],
-        ['key' => 'BASE_PATH', 'value' => '/', 'type' => 'string', 'category' => 'funktionen', 'description' => 'Basis-Pfad des Systems (z.B. /intraRP/)', 'editable' => 1, 'order' => 36],
+        ['key' => 'FIRE_INCIDENT_REQUIRE_USER_AUTH', 'value' => 'false', 'type' => 'boolean', 'category' => 'funktionen', 'description' => 'Wird eine Registrierung/Anmeldung im Hauptsystem für die Fahrzeuganmeldung im Einsatzprotokoll vorausgesetzt?', 'editable' => 1, 'order' => 35],
+        ['key' => 'REGISTRATION_MODE', 'value' => 'open', 'type' => 'string', 'category' => 'funktionen', 'description' => 'Registrierungsmodus: open = für jeden möglich, code = nur mit Code, closed = keine Registrierung', 'editable' => 1, 'order' => 36],
+        ['key' => 'BASE_PATH', 'value' => '/', 'type' => 'string', 'category' => 'funktionen', 'description' => 'Basis-Pfad des Systems (z.B. /intraRP/)', 'editable' => 1, 'order' => 37],
     ];
 
     $stmt = $pdo->prepare("

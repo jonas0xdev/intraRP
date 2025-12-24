@@ -61,7 +61,7 @@ $startTime = $dtStart ? $dtStart->format('H:i') : '';
                 <label class="form-label">Geschädigter – Kontakt</label>
                 <input type="text" class="form-control" name="edit_owner_contact" value="<?= htmlspecialchars($incident['owner_contact'] ?? '') ?>" <?= $incident['finalized'] ? 'disabled' : '' ?>>
             </div>
-            <?php if (!$incident['finalized'] && \App\Auth\Permissions::check(['admin', 'fire.incident.create', 'fire.incident.qm'])): ?>
+            <?php if (!$incident['finalized'] && \App\Auth\Permissions::check(['admin', 'fire.incident.qm'])): ?>
                 <div class="col-12 d-flex justify-content-end align-items-end mt-3">
                     <button type="submit" class="btn btn-primary">
                         <i class="fa-solid fa-save me-1"></i>Änderungen speichern

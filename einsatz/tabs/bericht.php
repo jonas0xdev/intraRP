@@ -21,7 +21,7 @@
         </div>
     <?php else: ?>
         <!-- Editable form -->
-        <?php if (\App\Auth\Permissions::check(['admin', 'fire.incident.create', 'fire.incident.qm'])): ?>
+        <?php if (\App\Auth\Permissions::check(['admin', 'fire.incident.qm'])): ?>
             <form method="post" action="<?= BASE_PATH ?>einsatz/actions.php">
                 <input type="hidden" name="action" value="update_notes">
                 <input type="hidden" name="incident_id" value="<?= $id ?>">

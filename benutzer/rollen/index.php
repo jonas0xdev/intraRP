@@ -118,7 +118,6 @@ if (!Permissions::check(['admin', 'users.view'])) {
                                     'edivi.view' => 'eNOTF Protokolle ansehen',
                                     'edivi.edit' => 'eNOTF Protokolle bearbeiten',
                                     'manv.manage' => 'MANV-Lagen verwalten',
-                                    'fire.incident.create' => 'FW Einsatzprotokolle erstellen',
                                     'fire.incident.qm' => 'FW Einsatzprotokolle bearbeiten'
                                 ],
                                 'Wissensdatenbank' => [

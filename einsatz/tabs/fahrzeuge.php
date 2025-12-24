@@ -35,7 +35,7 @@
                             <td><?= htmlspecialchars($ruf) ?></td>
                             <td><?= htmlspecialchars($ident) ?></td>
                             <td class="text-end">
-                                <?php if (!$incident['finalized'] && \App\Auth\Permissions::check(['admin', 'fire.incident.create', 'fire.incident.qm'])): ?>
+                                <?php if (!$incident['finalized'] && \App\Auth\Permissions::check(['admin', 'fire.incident.qm'])): ?>
                                     <form method="post" action="<?= BASE_PATH ?>einsatz/actions.php" class="d-inline">
                                         <input type="hidden" name="action" value="remove_vehicle">
                                         <input type="hidden" name="incident_id" value="<?= $id ?>">
@@ -54,7 +54,7 @@
         </div>
     <?php endif; ?>
 
-    <?php if (!$incident['finalized'] && \App\Auth\Permissions::check(['admin', 'fire.incident.create', 'fire.incident.qm'])): ?>
+    <?php if (!$incident['finalized'] && \App\Auth\Permissions::check(['admin', 'fire.incident.qm'])): ?>
         <hr class="my-4">
         <h5>Fahrzeug hinzufügen</h5>
         <form method="post" action="<?= BASE_PATH ?>einsatz/actions.php" class="mt-3">

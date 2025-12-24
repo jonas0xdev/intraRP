@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         // Add vehicle
-        if ($action === 'add_vehicle' && Permissions::check(['admin', 'fire.incident.create', 'fire.incident.qm'])) {
+        if ($action === 'add_vehicle' && Permissions::check(['admin', 'fire.incident.qm'])) {
             if ($incident['finalized']) {
                 Flash::error('Einsatz ist bereits abgeschlossen.');
                 goto post_done;
@@ -107,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Remove vehicle
-        if ($action === 'remove_vehicle' && Permissions::check(['admin', 'fire.incident.create', 'fire.incident.qm'])) {
+        if ($action === 'remove_vehicle' && Permissions::check(['admin', 'fire.incident.qm'])) {
             if ($incident['finalized']) {
                 Flash::error('Einsatz ist bereits abgeschlossen.');
                 goto post_done;
@@ -139,7 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Add sitrep
-        if ($action === 'add_sitrep' && Permissions::check(['admin', 'fire.incident.create', 'fire.incident.qm'])) {
+        if ($action === 'add_sitrep' && Permissions::check(['admin', 'fire.incident.qm'])) {
             if ($incident['finalized']) {
                 Flash::error('Einsatz ist bereits abgeschlossen.');
                 goto post_done;
@@ -219,7 +219,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Update notes (Einsatzgeschehen)
-        if ($action === 'update_notes' && Permissions::check(['admin', 'fire.incident.create', 'fire.incident.qm'])) {
+        if ($action === 'update_notes' && Permissions::check(['admin', 'fire.incident.qm'])) {
             if (!$incident['finalized']) {
                 $notes = trim($_POST['notes'] ?? '');
 
@@ -240,7 +240,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Update core data
-        if ($action === 'update_core' && Permissions::check(['admin', 'fire.incident.create', 'fire.incident.qm'])) {
+        if ($action === 'update_core' && Permissions::check(['admin', 'fire.incident.qm'])) {
             if (!$incident['finalized']) {
                 $loc = trim($_POST['edit_location'] ?? '');
                 $keyw = trim($_POST['edit_keyword'] ?? '');

@@ -460,11 +460,11 @@ try {
                                     </ul>
                                 </div>
                             <?php endif; ?>
-                            <?php if (Permissions::check(['admin', 'fire.incident.create', 'fire.incident.qm'])): ?>
+                            <?php if (Permissions::check(['admin', 'fire.incident.qm']) || isset($_SESSION['einsatz_vehicle_id'])): ?>
                                 <div class="mega-menu-section">
                                     <h6>FW Einsatzprotokolle</h6>
                                     <ul class="list-unstyled">
-                                        <?php if (Permissions::check(['admin', 'fire.incident.create'])): ?>
+                                        <?php if (isset($_SESSION['einsatz_vehicle_id'])): ?>
                                             <li><a href="<?= BASE_PATH ?>einsatz/create.php"><i class="fa-solid fa-plus"></i> Einsatz erstellen</a></li>
                                         <?php endif; ?>
                                         <?php if (Permissions::check(['admin', 'fire.incident.qm'])): ?>
@@ -581,7 +581,7 @@ try {
             <?php if (Permissions::check(['admin', 'manv.manage'])): ?>
                 <a href="<?= BASE_PATH ?>manv/index.php" class="offcanvas-link"><i class="fa-solid fa-house-medical"></i> MANV-Board</a>
             <?php endif; ?>
-            <?php if (Permissions::check(['admin', 'fire.incident.create'])): ?>
+            <?php if (isset($_SESSION['einsatz_vehicle_id'])): ?>
                 <a href="<?= BASE_PATH ?>einsatz/create.php" class="offcanvas-link"><i class="fa-solid fa-plus"></i> Einsatz erstellen</a>
             <?php endif; ?>
             <?php if (Permissions::check(['admin', 'fire.incident.qm'])): ?>

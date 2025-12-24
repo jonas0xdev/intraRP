@@ -5,10 +5,13 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 use App\Helpers\Flash;
 
-if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
-    $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
-    header("Location: " . BASE_PATH . "login.php");
-    exit();
+// Check if user authentication is required for vehicle login
+if (defined('FIRE_INCIDENT_REQUIRE_USER_AUTH') && FIRE_INCIDENT_REQUIRE_USER_AUTH === true) {
+    if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
+        $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
+        header("Location: " . BASE_PATH . "login.php");
+        exit();
+    }
 }
 
 require __DIR__ . '/../assets/config/database.php';
@@ -88,7 +91,7 @@ try {
 <head>
     <?php include __DIR__ . '/../assets/components/_base/admin/head.php'; ?>
     <link rel="stylesheet" href="<?= BASE_PATH ?>assets/css/enotf-custom-dropdown.css">
-    
+
     <style>
         .login-container {
             max-width: 600px;
