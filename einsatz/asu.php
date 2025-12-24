@@ -246,10 +246,6 @@ if ($asu_id) {
             </div>
         </div>
     </div>
-
-    <!-- Footer -->
-    <?php include __DIR__ . '/../assets/components/footer.php'; ?>
-
     <script src="<?= BASE_PATH ?>assets/js/asu.js"></script>
 
     <?php if ($existingProtocol): ?>
