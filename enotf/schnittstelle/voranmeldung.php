@@ -4,17 +4,14 @@ if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
     ini_set('session.cookie_secure', '1');
 }
 
+// Für CitizenFX: Nur Header entfernen, KEINE neuen setzen!
 $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
 if (strpos($userAgent, 'CitizenFX') !== false) {
-    // Remove ALL existing CSP headers
+    // Entferne CSP Header - .htaccess kümmert sich um den Rest
     header_remove('Content-Security-Policy');
     header_remove('X-Frame-Options');
-
-    // Set permissive headers for FiveM
-    header('Content-Security-Policy: frame-ancestors *', true);
-    header('Access-Control-Allow-Origin: *');
+    // KEIN neuer CSP wird gesetzt!
 }
-
 
 session_start();
 require_once __DIR__ . '/../../assets/config/config.php';
