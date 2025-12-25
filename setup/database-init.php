@@ -347,12 +347,15 @@ $migrationFiles = [
     ['file' => 'create_intra_fire_incidents_23122025.php', 'type' => 'create'],
     ['file' => 'create_intra_fire_incident_vehicles_23122025.php', 'type' => 'create'],
     ['file' => 'create_intra_fire_incident_sitreps_23122025.php', 'type' => 'create'],
-
-    // 08.01.2026
     ['file' => 'alter_intra_fire_incidents_20250108_add_incident_number.php', 'type' => 'alter'],
-
-    // 01.01.2025 (ASU-Protokolle)
     ['file' => 'create_intra_fire_incident_asu_20250101.php', 'type' => 'create'],
+
+    // 24.12.2025
+    ['file' => 'create_intra_fire_incident_log_24122025.php', 'type' => 'create'],
+    ['file' => 'insert_config_24122025_fire_auth.php', 'type' => 'insert'],
+
+    // 25.12.2025
+    ['file' => 'alter_intra_fire_incidents_20250125_allow_null.php', 'type' => 'alter'],
 ];
 
 $executed = 0;
