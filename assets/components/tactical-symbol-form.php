@@ -166,8 +166,8 @@ if (!isset($showPreview)) {
     </div>
 
     <div class="mb-3">
-        <label for="<?= $prefix ?>tz_typ" class="form-label">Typ</label>
-        <input type="text" class="form-control" name="tz_typ" id="<?= $prefix ?>tz_typ"
+        <label for="<?= $prefix ?>typ" class="form-label">Typ</label>
+        <input type="text" class="form-control" name="typ" id="<?= $prefix ?>typ"
             placeholder="z.B. HLF20, RTW, DLK23/12">
         <small class="text-muted">Fahrzeugtyp oder Typ des taktischen Zeichens</small>
     </div>
@@ -201,7 +201,7 @@ if (!isset($showPreview)) {
             const fachaufgabe = document.getElementById('<?= $prefix ?>fachaufgabe').value;
             const einheit = document.getElementById('<?= $prefix ?>einheit').value;
             const symbol = document.getElementById('<?= $prefix ?>symbol').value;
-            const typ = document.getElementById('<?= $prefix ?>tz_typ').value;
+            const typ = document.getElementById('<?= $prefix ?>typ').value;
             const text = document.getElementById('<?= $prefix ?>text').value;
             const tz_name = document.getElementById('<?= $prefix ?>tz_name').value;
 

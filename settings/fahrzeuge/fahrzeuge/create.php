@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $fachaufgabe = trim($_POST['fachaufgabe'] ?? '');
     $einheit = trim($_POST['einheit'] ?? '');
     $symbol = trim($_POST['symbol'] ?? '');
-    $tz_typ = trim($_POST['tz_typ'] ?? '');
+    $typ = trim($_POST['typ'] ?? '');
     $text = trim($_POST['text'] ?? '');
     $tz_name = trim($_POST['tz_name'] ?? '');
 
@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':fachaufgabe' => $fachaufgabe ?: null,
             ':einheit' => $einheit ?: null,
             ':symbol' => $symbol ?: null,
-            ':tz_typ' => $tz_typ ?: null,
+            ':typ' => $typ ?: null,
             ':text' => $text ?: null,
             ':tz_name' => $tz_name ?: null
         ]);

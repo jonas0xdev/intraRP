@@ -365,7 +365,7 @@ if (!Permissions::check(['admin', 'vehicles.view'])) {
                     document.getElementById('fahrzeug-fachaufgabe').value = this.dataset.tzFachaufgabe || '';
                     document.getElementById('fahrzeug-einheit').value = this.dataset.tzEinheit || '';
                     document.getElementById('fahrzeug-symbol').value = this.dataset.tzSymbol || '';
-                    document.getElementById('fahrzeug-tz_typ').value = this.dataset.tzTyp || '';
+                    document.getElementById('fahrzeug-typ').value = this.dataset.tzTyp || '';
                     document.getElementById('fahrzeug-text').value = this.dataset.tzText || '';
                     document.getElementById('fahrzeug-tz_name').value = this.dataset.tzName || '';
 
@@ -412,7 +412,7 @@ if (!Permissions::check(['admin', 'vehicles.view'])) {
                     document.getElementById('new-fahrzeug-fachaufgabe').value = this.dataset.tzFachaufgabe || '';
                     document.getElementById('new-fahrzeug-einheit').value = this.dataset.tzEinheit || '';
                     document.getElementById('new-fahrzeug-symbol').value = this.dataset.tzSymbol || '';
-                    document.getElementById('new-fahrzeug-tz_typ').value = this.dataset.tzTyp || '';
+                    document.getElementById('new-fahrzeug-typ').value = this.dataset.tzTyp || '';
                     document.getElementById('new-fahrzeug-text').value = this.dataset.tzText || '';
                     document.getElementById('new-fahrzeug-tz_name').value = this.dataset.tzName || '';
 
