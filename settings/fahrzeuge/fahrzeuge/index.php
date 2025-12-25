@@ -175,8 +175,8 @@ if (!Permissions::check(['admin', 'vehicles.view'])) {
                             </div>
 
                             <div class="mb-3">
-                                <label for="fahrzeug-typ" class="form-label">Typ <small style="opacity:.5">(RTW,NEF,RTH etc.)</small></label>
-                                <input type="text" class="form-control" name="veh_type" id="fahrzeug-typ" required>
+                                <label for="fahrzeug-veh_typ" class="form-label">Typ <small style="opacity:.5">(RTW,NEF,RTH etc.)</small></label>
+                                <input type="text" class="form-control" name="veh_type" id="fahrzeug-veh_typ" required>
                             </div>
 
                             <div class="mb-3">
@@ -253,8 +253,8 @@ if (!Permissions::check(['admin', 'vehicles.view'])) {
                             </div>
 
                             <div class="mb-3">
-                                <label for="new-fahrzeug-typ" class="form-label">Typ <small style="opacity:.5">(RTW,NEF,RTH etc.)</small></label>
-                                <input type="text" class="form-control" name="veh_type" id="new-fahrzeug-typ" required>
+                                <label for="new-fahrzeug-veh_typ" class="form-label">Typ <small style="opacity:.5">(RTW,NEF,RTH etc.)</small></label>
+                                <input type="text" class="form-control" name="veh_type" id="new-fahrzeug-veh_typ" required>
                             </div>
 
                             <div class="mb-3">
@@ -347,10 +347,10 @@ if (!Permissions::check(['admin', 'vehicles.view'])) {
                     document.getElementById('fahrzeug-id').value = id;
                     document.getElementById('fahrzeug-name').value = this.dataset.name;
                     document.getElementById('fahrzeug-kennzeichen').value = this.dataset.kennzeichen || '';
-                    document.getElementById('fahrzeug-typ').value = this.dataset.type;
+                    document.getElementById('fahrzeug-veh_typ').value = this.dataset.type;
                     document.getElementById('fahrzeug-priority').value = this.dataset.priority;
                     document.getElementById('fahrzeug-identifier').value = this.dataset.identifier;
-                    document.getElementById('fahrzeug-rd_type').value = this.dataset.rd_type || '0';
+                    document.getElementById('fahrzeug-rd_type').value = this.dataset.rdType || '0';
                     document.getElementById('fahrzeug-active').checked = this.dataset.active == 1;
 
                     // Reset preview first
@@ -400,10 +400,10 @@ if (!Permissions::check(['admin', 'vehicles.view'])) {
                     // Fill the create modal with the data from the vehicle to copy
                     document.getElementById('new-fahrzeug-name').value = this.dataset.name;
                     document.getElementById('new-fahrzeug-kennzeichen').value = this.dataset.kennzeichen || '';
-                    document.getElementById('new-fahrzeug-typ').value = this.dataset.type;
+                    document.getElementById('new-fahrzeug-veh_typ').value = this.dataset.type;
                     document.getElementById('new-fahrzeug-priority').value = this.dataset.priority;
                     document.getElementById('new-fahrzeug-identifier').value = this.dataset.identifier + '(1)';
-                    document.getElementById('new-fahrzeug-rd_type').value = this.dataset.rd_type || '0';
+                    document.getElementById('new-fahrzeug-rd_type').value = this.dataset.rdType || '0';
                     document.getElementById('new-fahrzeug-active').checked = this.dataset.active == 1;
 
                     // Copy tactical symbol data

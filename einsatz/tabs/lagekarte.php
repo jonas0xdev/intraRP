@@ -349,16 +349,16 @@ try {
 
     .zone-instruction {
         position: absolute;
-        top: 10px;
-        left: 50%;
-        transform: translateX(-50%);
+        top: 20px;
+        left: 20px;
         background: rgba(0, 0, 0, 0.8);
         color: white;
         padding: 8px 16px;
         border-radius: 4px;
         font-size: 14px;
-        z-index: 20;
+        z-index: 1050;
         pointer-events: none;
+        display: inline-block;
     }
 
     .zone-color-option {
@@ -879,24 +879,109 @@ try {
     </div>
 </div>
 
-<!-- Load taktische-zeichen library from CDN -->
+<!-- Load taktische-zeichen library from CDN with Firefox-compatible fallbacks -->
 <script type="module">
-    import {
-        erzeugeTaktischesZeichen
-    } from 'https://esm.sh/taktische-zeichen-core@0.10.0';
+    // Suppress console errors for subsystem status (known issue with taktische-zeichen-core)
+    const originalError = console.error;
+    const errorFilter = (msg) => {
+        if (typeof msg === 'string' && (msg.includes('subsystem status') || msg.includes('UNSUPPORTED_OS'))) return true;
+        if (typeof msg === 'object' && msg?.message === 'UNSUPPORTED_OS') return true;
+        return false;
+    };
 
-    // Make it globally available
-    window.erzeugeTaktischesZeichen = erzeugeTaktischesZeichen;
+    console.error = function(...args) {
+        if (!args.some(arg => errorFilter(arg))) {
+            originalError.apply(console, args);
+        }
+    };
 
-    // Initialize tactical symbols immediately
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(initializeTacticalSymbols, 50);
-        });
-    } else {
-        // DOM already loaded
-        setTimeout(initializeTacticalSymbols, 50);
+    // Multiple CDN sources for better compatibility
+    const cdnSources = [
+        // Skypack is most Firefox-compatible
+        {
+            url: 'https://cdn.skypack.dev/taktische-zeichen-core@0.10.0',
+            name: 'Skypack'
+        },
+        // UNPKG as fallback
+        {
+            url: 'https://unpkg.com/taktische-zeichen-core@0.10.0?module',
+            name: 'UNPKG'
+        },
+        // esm.sh as last resort
+        {
+            url: 'https://esm.sh/taktische-zeichen-core@0.10.0',
+            name: 'esm.sh'
+        }
+    ];
+
+    let loadSuccess = false;
+
+    async function tryLoadFromCDN(source) {
+        try {
+            console.log(`Versuche taktische-zeichen zu laden von ${source.name}...`);
+
+            const module = await import(source.url);
+
+            // Try different export patterns
+            const erzeugeTaktischesZeichen =
+                module.erzeugeTaktischesZeichen ||
+                module.default?.erzeugeTaktischesZeichen ||
+                module.default;
+
+            if (typeof erzeugeTaktischesZeichen === 'function') {
+                console.log(`✓ Taktische Zeichen erfolgreich geladen von ${source.name}`);
+                return erzeugeTaktischesZeichen;
+            }
+
+            throw new Error('Function not found in module');
+        } catch (error) {
+            console.warn(`✗ ${source.name} fehlgeschlagen:`, error.message);
+            return null;
+        }
     }
+
+    async function loadTacticalSymbols() {
+        // Try each CDN in sequence
+        for (const source of cdnSources) {
+            const fn = await tryLoadFromCDN(source);
+            if (fn) {
+                // Restore original console.error
+                console.error = originalError;
+
+                // Make it globally available
+                window.erzeugeTaktischesZeichen = fn;
+                window.tacticalSymbolsAvailable = true;
+                loadSuccess = true;
+
+                // Initialize tactical symbols
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', () => {
+                        setTimeout(initializeTacticalSymbols, 50);
+                    });
+                } else {
+                    setTimeout(initializeTacticalSymbols, 50);
+                }
+
+                return;
+            }
+        }
+
+        // All CDNs failed
+        console.error = originalError;
+        console.warn('⚠ Taktische Zeichen konnten von keinem CDN geladen werden');
+        console.info('ℹ Fallback-Modus aktiviert: Lagekarte verwendet Emoji-Icons');
+
+        window.tacticalSymbolsAvailable = false;
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                console.log('Lagekarte läuft im Fallback-Modus');
+            });
+        }
+    }
+
+    // Start loading process
+    loadTacticalSymbols();
 </script>
 
 <script>
@@ -977,14 +1062,43 @@ try {
         });
     });
 
+    // Track initialization attempts to prevent infinite retry
+    let tacticalSymbolInitAttempts = 0;
+    const MAX_INIT_ATTEMPTS = 30; // 3 seconds max (30 * 100ms)
+    let libraryLoadNotified = false;
+
     function initializeTacticalSymbols() {
         if (!window.erzeugeTaktischesZeichen) {
-            console.warn('Tactical symbols library not loaded yet, retrying...');
+            tacticalSymbolInitAttempts++;
+
+            if (tacticalSymbolInitAttempts >= MAX_INIT_ATTEMPTS) {
+                console.warn('⚠ Taktische Zeichen Library konnte nach ' + MAX_INIT_ATTEMPTS + ' Versuchen nicht geladen werden');
+                console.info('ℹ Verwende Fallback-Icons (Emojis)');
+                window.tacticalSymbolsAvailable = false;
+
+                // Notify user once
+                if (!libraryLoadNotified && typeof showAlert === 'function') {
+                    libraryLoadNotified = true;
+                    showAlert(
+                        'Taktische Zeichen sind aktuell nicht verfügbar. Die Lagekarte verwendet Fallback-Symbole. Alle Funktionen sind verfügbar.',
+                        'info',
+                        5000
+                    );
+                }
+                return;
+            }
+
             setTimeout(initializeTacticalSymbols, 100);
             return;
         }
 
+        window.tacticalSymbolsAvailable = true;
+        console.log('✓ Taktische Zeichen erfolgreich initialisiert');
+
         const legendItems = document.querySelectorAll('[data-tz-icon]');
+        let successCount = 0;
+        let errorCount = 0;
+
         legendItems.forEach(iconContainer => {
             const item = iconContainer.closest('.legend-item');
             if (!item) return;
@@ -1022,14 +1136,78 @@ try {
                         svg.style.width = '32px';
                         svg.style.height = '32px';
                     }
+                    successCount++;
                 }
             } catch (e) {
                 console.error('Error creating tactical symbol:', e, item.dataset);
                 if (iconContainer) {
                     iconContainer.textContent = '📌';
                 }
+                errorCount++;
             }
         });
+
+        if (successCount > 0) {
+            console.log(`✓ ${successCount} taktische Zeichen erfolgreich erstellt`);
+        }
+        if (errorCount > 0) {
+            console.warn(`⚠ ${errorCount} taktische Zeichen konnten nicht erstellt werden (Fallback-Icons verwendet)`);
+        }
+
+        // IMPORTANT: Re-render existing markers with tactical symbols now that library is loaded
+        reRenderMarkersWithTacticalSymbols();
+    }
+
+    // Re-render markers that were created before the library was loaded
+    function reRenderMarkersWithTacticalSymbols() {
+        console.log('🔄 Re-rendering markers with tactical symbols...');
+        const markers = document.querySelectorAll('.map-marker');
+        let updatedCount = 0;
+
+        markers.forEach(markerEl => {
+            const markerId = markerEl.dataset.markerId;
+            const markerData = existingMarkers.find(m => m.id == markerId);
+
+            if (!markerData || !markerData.grundzeichen) {
+                return; // Skip markers without grundzeichen data
+            }
+
+            // Find the icon element
+            const icon = markerEl.querySelector('.map-marker-icon');
+            if (!icon) return;
+
+            // Check if it's currently showing emoji (fallback)
+            const currentContent = icon.textContent.trim();
+            const isEmoji = currentContent.match(/[\u{1F300}-\u{1F9FF}]/u);
+
+            if (isEmoji && window.erzeugeTaktischesZeichen) {
+                try {
+                    const config = {
+                        grundzeichen: markerData.grundzeichen
+                    };
+                    if (markerData.organisation) config.organisation = markerData.organisation;
+                    if (markerData.fachaufgabe) config.fachaufgabe = markerData.fachaufgabe;
+                    if (markerData.einheit) config.einheit = markerData.einheit;
+                    if (markerData.symbol) config.symbol = markerData.symbol;
+                    if (markerData.typ) config.typ = markerData.typ;
+                    if (markerData.text) config.text = markerData.text;
+                    if (markerData.name) config.name = markerData.name;
+
+                    console.log(`Updating marker ${markerId} with tactical symbol`);
+                    const tz = window.erzeugeTaktischesZeichen(config);
+                    icon.innerHTML = tz.toString();
+                    updatedCount++;
+                } catch (e) {
+                    console.error(`Error updating marker ${markerId}:`, e);
+                }
+            }
+        });
+
+        if (updatedCount > 0) {
+            console.log(`✓ ${updatedCount} Marker mit taktischen Zeichen aktualisiert`);
+        } else {
+            console.log('ℹ Keine Marker zum Aktualisieren gefunden');
+        }
     }
 
     function initializePanZoom() {
@@ -1375,6 +1553,43 @@ try {
                         toggleBtn.click();
                     }
                     mapContainer.classList.add('zone-drawing');
+
+                    // Show instruction immediately when zone mode is activated
+                    if (!zoneInstructionEl) {
+                        zoneInstructionEl = document.createElement('div');
+                        zoneInstructionEl.className = 'zone-instruction';
+                        zoneInstructionEl.textContent = 'Doppelklick zum Hinzufügen weiterer Punkte. Punkte können verschoben werden. (min. 3 Punkte)';
+                        mapContainer.appendChild(zoneInstructionEl);
+                    }
+
+                    // Show finish button below instruction
+                    let finishBtn = document.getElementById('finishZoneBtn');
+                    if (!finishBtn) {
+                        finishBtn = document.createElement('button');
+                        finishBtn.id = 'finishZoneBtn';
+                        finishBtn.className = 'btn btn-success btn-sm';
+                        finishBtn.style.position = 'absolute';
+                        finishBtn.style.top = '65px';
+                        finishBtn.style.left = '20px';
+                        finishBtn.style.zIndex = '1050';
+                        finishBtn.style.backgroundColor = 'rgba(25, 135, 84, 0.6)';
+                        finishBtn.style.borderColor = 'rgba(25, 135, 84, 0.6)';
+                        finishBtn.style.backdropFilter = 'blur(4px)';
+                        finishBtn.innerHTML = '<i class="fa-solid fa-check me-1"></i>Zone erstellen';
+                        finishBtn.addEventListener('click', function() {
+                            finishZoneDrawing();
+                        });
+                        finishBtn.addEventListener('mouseenter', function() {
+                            this.style.backgroundColor = 'rgba(25, 135, 84, 0.9)';
+                            this.style.borderColor = 'rgba(25, 135, 84, 0.9)';
+                        });
+                        finishBtn.addEventListener('mouseleave', function() {
+                            this.style.backgroundColor = 'rgba(25, 135, 84, 0.6)';
+                            this.style.borderColor = 'rgba(25, 135, 84, 0.6)';
+                        });
+                        mapContainer.appendChild(finishBtn);
+                    }
+                    finishBtn.style.display = 'block';
                 } else {
                     mapContainer.classList.remove('zone-drawing');
                     // Clean up any drawing state
@@ -1437,33 +1652,8 @@ try {
                 viewport.appendChild(pointEl);
                 zonePointElements.push(pointEl);
 
-                // Show instruction on first point
-                if (zonePoints.length === 1) {
-                    zoneInstructionEl = document.createElement('div');
-                    zoneInstructionEl.className = 'zone-instruction';
-                    zoneInstructionEl.textContent = 'Doppelklick zum Hinzufügen weiterer Punkte. Punkte können verschoben werden. (min. 3 Punkte)';
-                    mapContainer.appendChild(zoneInstructionEl);
-                }
-
-                // Show finish button after first point
-                if (zonePoints.length >= 1) {
-                    let finishBtn = document.getElementById('finishZoneBtn');
-                    if (!finishBtn) {
-                        finishBtn = document.createElement('button');
-                        finishBtn.id = 'finishZoneBtn';
-                        finishBtn.className = 'btn btn-success';
-                        finishBtn.style.position = 'absolute';
-                        finishBtn.style.bottom = '20px';
-                        finishBtn.style.right = '20px';
-                        finishBtn.style.zIndex = '1050';
-                        finishBtn.innerHTML = '<i class="fa-solid fa-check me-1"></i>Zone abschließen';
-                        finishBtn.addEventListener('click', function() {
-                            finishZoneDrawing();
-                        });
-                        mapContainer.appendChild(finishBtn);
-                    }
-                    finishBtn.style.display = 'block';
-                }
+                // Instruction and finish button are now shown when zone mode is activated
+                // (no need to create them here)
 
                 // Update preview polygon
                 updateZonePreview();
@@ -1667,7 +1857,11 @@ try {
         }
 
         if (!window.erzeugeTaktischesZeichen) {
-            showAlert('Fehler: Taktische Zeichen Bibliothek noch nicht geladen. Bitte einen Moment warten und erneut versuchen.', 'warning');
+            if (window.tacticalSymbolsAvailable === false) {
+                showAlert('Taktische Zeichen Bibliothek ist nicht verfügbar. Bitte verwenden Sie Standard-Marker oder kontaktieren Sie den Administrator.', 'danger');
+            } else {
+                showAlert('Taktische Zeichen Bibliothek wird noch geladen. Bitte einen Moment warten und erneut versuchen.', 'warning');
+            }
             return;
         }
 
@@ -2014,7 +2208,7 @@ try {
         const icon = document.createElement('div');
         icon.className = 'map-marker-icon';
 
-        // Try to generate tactical symbol if data is available
+        // Try to generate tactical symbol if data is available and library is loaded
         if (marker.grundzeichen && window.erzeugeTaktischesZeichen) {
             try {
                 const config = {
@@ -2031,11 +2225,12 @@ try {
                 const tz = window.erzeugeTaktischesZeichen(config);
                 icon.innerHTML = tz.toString();
             } catch (e) {
-                console.error('Error creating tactical symbol for marker:', e);
+                console.error('Error creating tactical symbol for marker:', marker.id, e);
                 icon.textContent = getFallbackIcon(marker.marker_type);
             }
         } else {
             // Fallback to emoji icons
+            // Note: If library loads later, markers will be re-rendered automatically
             icon.textContent = getFallbackIcon(marker.marker_type);
         }
 
