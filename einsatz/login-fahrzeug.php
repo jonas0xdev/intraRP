@@ -110,6 +110,31 @@ try {
     <link rel="stylesheet" href="<?= BASE_PATH ?>assets/css/enotf-custom-dropdown.css">
 
     <style>
+        html::-webkit-scrollbar,
+        body::-webkit-scrollbar,
+        .sidebar-nav::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        html::-webkit-scrollbar-track,
+        body::-webkit-scrollbar-track,
+        .sidebar-nav::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        html::-webkit-scrollbar-thumb,
+        body::-webkit-scrollbar-thumb,
+        .sidebar-nav::-webkit-scrollbar-thumb {
+            background: #4a4a4a;
+            border-radius: 4px;
+        }
+
+        html::-webkit-scrollbar-thumb:hover,
+        body::-webkit-scrollbar-thumb:hover,
+        .sidebar-nav::-webkit-scrollbar-thumb:hover {
+            background: #5a5a5a;
+        }
+
         .login-container {
             max-width: 600px;
             margin: 100px auto;
