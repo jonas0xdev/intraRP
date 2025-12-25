@@ -64,9 +64,9 @@
 
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label class="form-label">Systemfahrzeug</label>
-                    <select name="vehicle_id" class="form-select">
-                        <option value="">– Optional: Systemfahrzeug wählen –</option>
+                    <label class="form-label">Vorhandene Fahrzeuge</label>
+                    <select name="vehicle_id" class="form-select" data-custom-dropdown="true" data-search-threshold="5">
+                        <option value="">Bitte wählen....</option>
                         <?php
                         $attachedIds = array_filter(array_map(fn($x) => $x['vehicle_id'] ?? null, $attachedVehicles));
                         $attachedIds = array_map('intval', $attachedIds);
@@ -79,7 +79,7 @@
                     <small class="text-muted">Oder Freitext-Felder unten nutzen</small>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">Rufname (Funkrufname)</label>
+                    <label class="form-label">Freitext Funkrufname</label>
                     <input type="text" name="radio_name" class="form-control" placeholder="z.B. Florian Musterhausen 1/44/1">
                 </div>
                 <div class="col-md-6">

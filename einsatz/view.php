@@ -146,6 +146,7 @@ function fmt_elapsed(int|string $seconds): string
 
 <head>
     <?php include __DIR__ . '/../assets/components/_base/admin/head.php'; ?>
+    <link rel="stylesheet" href="<?= BASE_PATH ?>assets/css/enotf-custom-dropdown.css">
     <style>
         html::-webkit-scrollbar,
         body::-webkit-scrollbar,
@@ -197,6 +198,18 @@ function fmt_elapsed(int|string $seconds): string
             text-transform: uppercase;
             letter-spacing: 0.5px;
             font-weight: 600;
+        }
+
+        .enotf-dropdown-container.form-select {
+            padding: .375rem .75rem;
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.5;
+            color: var(--bs-body-color);
+            background-color: var(--bs-body-bg);
+            background-clip: padding-box;
+            border: var(--bs-border-width) solid var(--bs-border-color);
+            transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
         }
     </style>
     <script src="<?= BASE_PATH ?>assets/js/dialogs.js"></script>
@@ -409,6 +422,18 @@ function fmt_elapsed(int|string $seconds): string
             </div>
         </div>
     <?php endif; ?>
+
+    <script src="<?= BASE_PATH ?>assets/js/enotf-custom-dropdown.js"></script>
+    <script>
+        // Initialize custom dropdowns when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                eNotfCustomDropdown.init();
+            });
+        } else {
+            eNotfCustomDropdown.init();
+        }
+    </script>
 </body>
 
 </html>
