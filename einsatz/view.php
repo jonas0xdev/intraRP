@@ -70,10 +70,13 @@ try {
         exit();
     }
 
-    // Check if user's vehicle is assigned to this incident
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM intra_fire_incident_vehicles WHERE incident_id = ? AND vehicle_id = ?");
-    $stmt->execute([$id, $_SESSION['einsatz_vehicle_id']]);
-    $isAssigned = $stmt->fetchColumn() > 0;
+    // Check if user's vehicle is assigned to this incident (only if vehicle login exists)
+    $isAssigned = false;
+    if (isset($_SESSION['einsatz_vehicle_id'])) {
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM intra_fire_incident_vehicles WHERE incident_id = ? AND vehicle_id = ?");
+        $stmt->execute([$id, $_SESSION['einsatz_vehicle_id']]);
+        $isAssigned = $stmt->fetchColumn() > 0;
+    }
 
     if (!$isAssigned && !Permissions::check(['admin', 'fire.incident.qm'])) {
         Flash::error('Ihr Fahrzeug ist diesem Einsatz nicht zugeordnet. Zugriff verweigert.');
