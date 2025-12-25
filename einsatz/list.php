@@ -65,6 +65,7 @@ try {
             WHERE iv.incident_id = i.id 
             AND iv.vehicle_id = ?
         )
+        AND i.finalized = 0
         GROUP BY i.id
         ORDER BY i.started_at DESC, i.created_at DESC
     ");

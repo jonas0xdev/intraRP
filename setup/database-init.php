@@ -353,6 +353,9 @@ $migrationFiles = [
     // 24.12.2025
     ['file' => 'create_intra_fire_incident_log_24122025.php', 'type' => 'create'],
     ['file' => 'insert_config_24122025_fire_auth.php', 'type' => 'insert'],
+
+    // 25.12.2025
+    ['file' => 'alter_intra_fire_incidents_20250125_allow_null.php', 'type' => 'alter'],
 ];
 
 $executed = 0;

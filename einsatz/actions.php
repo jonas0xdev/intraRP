@@ -23,11 +23,6 @@ require_once __DIR__ . '/../vendor/autoload.php';
 use App\Auth\Permissions;
 use App\Helpers\Flash;
 
-if (!isset($_SESSION['userid']) || !isset($_SESSION['permissions'])) {
-    header('HTTP/1.1 403 Forbidden');
-    exit('Unauthorized');
-}
-
 require __DIR__ . '/../assets/config/database.php';
 
 // Helper function to log actions
@@ -41,7 +36,7 @@ function logAction($pdo, $incidentId, $actionType, $description)
             $description,
             $_SESSION['einsatz_vehicle_id'] ?? null,
             $_SESSION['einsatz_operator_id'] ?? null,
-            $_SESSION['userid']
+            $_SESSION['userid'] ?? null
         ]);
     } catch (PDOException $e) {
         // Silently fail - don't stop execution for logging errors
@@ -102,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             $stmt = $pdo->prepare("INSERT INTO intra_fire_incident_vehicles (incident_id, vehicle_id, vehicle_name, vehicle_identifier, from_other_org, radio_name, created_by) VALUES (?,?,?,?,?,?,?)");
-            $stmt->execute([$id, $vehicle_id, $vehicle_name ?: null, $vehicle_identifier ?: null, $from_other, $radio_name ?: null, $_SESSION['userid']]);
+            $stmt->execute([$id, $vehicle_id, $vehicle_name ?: null, $vehicle_identifier ?: null, $from_other, $radio_name ?: null, $_SESSION['userid'] ?? null]);
 
             // Get vehicle name for log
             $displayName = $radio_name ?: $vehicle_name ?: $vehicle_identifier ?: 'Unbekanntes Fahrzeug';
@@ -174,7 +169,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $vinfo = $infoStmt->fetch(PDO::FETCH_ASSOC);
                 $radio = $vinfo['radio_name'] ?? $vinfo['sys_name'] ?? null;
                 $stmt = $pdo->prepare("INSERT INTO intra_fire_incident_sitreps (incident_id, report_time, text, vehicle_radio_name, vehicle_id, created_by) VALUES (?,?,?,?,?,?)");
-                $stmt->execute([$id, $report_time, $text, $radio ?: null, null, $_SESSION['userid']]);
+                $stmt->execute([$id, $report_time, $text, $radio ?: null, null, $_SESSION['userid'] ?? null]);
 
                 logAction(
                     $pdo,
@@ -196,7 +191,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $inc = $stmt->fetch(PDO::FETCH_ASSOC);
             if ($inc && $inc['location'] && $inc['keyword'] && $inc['started_at'] && !empty($inc['leader_id'])) {
                 $upd = $pdo->prepare("UPDATE intra_fire_incidents SET finalized = 1, finalized_at = NOW(), finalized_by = ?, status = 'in_sichtung' WHERE id = ?");
-                $upd->execute([$_SESSION['userid'], $id]);
+                $upd->execute([$_SESSION['userid'] ?? null, $id]);
 
                 logAction(
                     $pdo,
@@ -216,7 +211,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $status = $_POST['status'] ?? 'in_sichtung';
             if (in_array($status, ['gesichtet', 'in_sichtung', 'negativ'], true)) {
                 $upd = $pdo->prepare("UPDATE intra_fire_incidents SET status = ?, updated_by = ?, updated_at = NOW() WHERE id = ?");
-                $upd->execute([$status, $_SESSION['userid'], $id]);
+                $upd->execute([$status, $_SESSION['userid'] ?? null, $id]);
 
                 $statusLabels = [
                     'in_sichtung' => 'In Sichtung',
@@ -241,7 +236,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $notes = trim($_POST['notes'] ?? '');
 
                 $upd = $pdo->prepare("UPDATE intra_fire_incidents SET notes = ?, updated_by = ?, updated_at = NOW() WHERE id = ?");
-                $upd->execute([$notes ?: null, $_SESSION['userid'], $id]);
+                $upd->execute([$notes ?: null, $_SESSION['userid'] ?? null, $id]);
 
                 logAction(
                     $pdo,
@@ -273,7 +268,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } else {
                     $started = date('Y-m-d H:i:s', strtotime($date . ' ' . $time));
                     $upd = $pdo->prepare("UPDATE intra_fire_incidents SET incident_number = ?, location = ?, keyword = ?, started_at = ?, leader_id = ?, owner_type = NULL, owner_name = ?, owner_contact = ?, updated_by = ?, updated_at = NOW() WHERE id = ?");
-                    $upd->execute([$incno, $loc, $keyw, $started, $leader, $owner_name ?: null, $owner_contact ?: null, $_SESSION['userid'], $id]);
+                    $upd->execute([$incno, $loc, $keyw, $started, $leader, $owner_name ?: null, $owner_contact ?: null, $_SESSION['userid'] ?? null, $id]);
 
                     logAction(
                         $pdo,
