@@ -220,8 +220,24 @@ class SystemUpdater
                 throw new Exception('Keine Schreibberechtigung für das Anwendungsverzeichnis. Bitte Dateiberechtigungen prüfen.');
             }
 
+            // Check disk space before starting update
+            $tempDirBase = sys_get_temp_dir();
+            $freeSpaceTemp = disk_free_space($tempDirBase);
+            $freeSpaceApp = disk_free_space($appRoot);
+            $requiredSpace = 200 * 1024 * 1024; // 200 MB minimum
+
+            if ($freeSpaceTemp === false || $freeSpaceTemp < $requiredSpace) {
+                $availableMB = $freeSpaceTemp !== false ? round($freeSpaceTemp / 1024 / 1024, 2) : 0;
+                throw new Exception("Nicht genügend Speicherplatz im temporären Verzeichnis. Benötigt: 200 MB, Verfügbar: {$availableMB} MB");
+            }
+
+            if ($freeSpaceApp === false || $freeSpaceApp < $requiredSpace) {
+                $availableMB = $freeSpaceApp !== false ? round($freeSpaceApp / 1024 / 1024, 2) : 0;
+                throw new Exception("Nicht genügend Speicherplatz im Anwendungsverzeichnis. Benötigt: 200 MB, Verfügbar: {$availableMB} MB");
+            }
+
             // Create temporary directory for update
-            $tempDir = sys_get_temp_dir() . '/intrarp_update_' . bin2hex(random_bytes(8));
+            $tempDir = $tempDirBase . '/intrarp_update_' . bin2hex(random_bytes(8));
             if (!mkdir($tempDir, 0755, true)) {
                 throw new Exception('Konnte temporäres Verzeichnis nicht erstellen. Bitte Berechtigungen für ' . sys_get_temp_dir() . ' prüfen.');
             }
@@ -236,7 +252,13 @@ class SystemUpdater
                     'header' => [
                         'User-Agent: intraRP-Updater'
                     ],
-                    'timeout' => 300
+                    'timeout' => 300,
+                    'follow_location' => 0
+                ],
+                'ssl' => [
+                    'verify_peer' => true,
+                    'verify_peer_name' => true,
+                    'allow_self_signed' => false
                 ]
             ]);
 
@@ -583,12 +605,24 @@ class SystemUpdater
         }
 
         try {
+            // OS detection for proper command syntax
+            $isWindows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
+
             // Use composer's --working-dir option for safer execution
-            $command = sprintf(
-                'timeout 600 %s install --working-dir=%s --no-dev --optimize-autoloader --no-interaction 2>&1',
-                escapeshellarg($composerPath),
-                escapeshellarg($appRoot)
-            );
+            // Windows doesn't have timeout command, so omit it there
+            if ($isWindows) {
+                $command = sprintf(
+                    '%s install --working-dir=%s --no-dev --optimize-autoloader --no-interaction 2>&1',
+                    escapeshellarg($composerPath),
+                    escapeshellarg($appRoot)
+                );
+            } else {
+                $command = sprintf(
+                    'timeout 600 %s install --working-dir=%s --no-dev --optimize-autoloader --no-interaction 2>&1',
+                    escapeshellarg($composerPath),
+                    escapeshellarg($appRoot)
+                );
+            }
 
             // Execute composer command with timeout
             $output = [];
@@ -654,8 +688,9 @@ class SystemUpdater
             }
         }
 
-        // For composer in PATH, use which command with strict validation
+        // For composer in PATH, use which/where command with strict validation
         $pathNames = ['composer', 'composer.phar'];
+        $isWindows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
 
         foreach ($pathNames as $name) {
             // Strict validation: only alphanumeric, underscore, hyphen
@@ -663,7 +698,13 @@ class SystemUpdater
             if (preg_match('/^[a-zA-Z0-9_-]+(\\.phar)?$/', $name)) {
                 $output = [];
                 $returnCode = 0;
-                exec('which ' . escapeshellarg($name) . ' 2>/dev/null', $output, $returnCode);
+
+                // Use correct command for OS
+                $command = $isWindows
+                    ? 'where ' . escapeshellarg($name) . ' 2>NUL'
+                    : 'which ' . escapeshellarg($name) . ' 2>/dev/null';
+
+                exec($command, $output, $returnCode);
 
                 if ($returnCode === 0 && !empty($output)) {
                     $execPath = trim($output[0]);
@@ -673,11 +714,21 @@ class SystemUpdater
 
                     // Verify it's a real file, executable, and in safe directories
                     if ($realPath && file_exists($realPath) && is_executable($realPath)) {
-                        // Only allow paths in standard bin directories
-                        $safePaths = ['/usr/local/bin/', '/usr/bin/', '/bin/'];
-                        foreach ($safePaths as $safePath) {
-                            if (strpos($realPath, $safePath) === 0) {
-                                return $realPath;
+                        if ($isWindows) {
+                            // Windows: Check for common composer installation paths
+                            $safePaths = ['C:\\ProgramData\\ComposerSetup\\', 'C:\\composer\\', 'C:\\tools\\'];
+                            foreach ($safePaths as $safePath) {
+                                if (stripos($realPath, $safePath) === 0) {
+                                    return $realPath;
+                                }
+                            }
+                        } else {
+                            // Unix/Linux: Only allow paths in standard bin directories
+                            $safePaths = ['/usr/local/bin/', '/usr/bin/', '/bin/'];
+                            foreach ($safePaths as $safePath) {
+                                if (strpos($realPath, $safePath) === 0) {
+                                    return $realPath;
+                                }
                             }
                         }
                     }
@@ -946,8 +997,10 @@ class SystemUpdater
                     $output .= '</ul>';
                     $inList = false;
                 }
+                // First escape entire line, then replace markdown markers with HTML
+                $line = htmlspecialchars($line);
                 $line = preg_replace('/\*\*(.+?)\*\*/', '<strong>$1</strong>', $line);
-                $output .= '<p>' . htmlspecialchars_decode($line) . '</p>';
+                $output .= '<p>' . $line . '</p>';
             }
             // Regular text
             elseif (!empty($line)) {
