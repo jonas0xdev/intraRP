@@ -32,11 +32,14 @@ if (defined('FIRE_INCIDENT_REQUIRE_USER_AUTH') && FIRE_INCIDENT_REQUIRE_USER_AUT
     }
 }
 
-// Check if logged into vehicle
+// Check if logged into vehicle (skip for admins and QM users)
 if (!isset($_SESSION['einsatz_vehicle_id']) || !isset($_SESSION['einsatz_operator_id'])) {
-    Flash::error('Bitte melden Sie sich zuerst auf einem Fahrzeug an.');
-    header("Location: " . BASE_PATH . "einsatz/login-fahrzeug.php");
-    exit();
+    // Users with admin or fire.incident.qm permissions can bypass vehicle login
+    if (!Permissions::check(['admin', 'fire.incident.qm'])) {
+        Flash::error('Bitte melden Sie sich zuerst auf einem Fahrzeug an.');
+        header("Location: " . BASE_PATH . "einsatz/login-fahrzeug.php");
+        exit();
+    }
 }
 
 // Clear all einsatz_viewed session variables when creating new incident
