@@ -133,6 +133,8 @@ function handleCreateMarker($pdo)
     $userId = $_SESSION['userid'] ?? null;
     // Use vehicle_id from POST if provided (from legend selection), otherwise use session vehicle
     $vehicleId = isset($_POST['vehicle_id']) ? (int)$_POST['vehicle_id'] : ($_SESSION['einsatz_vehicle_id'] ?? null);
+    // Get operator ID from session
+    $operatorId = $_SESSION['einsatz_operator_id'] ?? null;
 
     // Verify user exists in database if userId is set
     if ($userId !== null) {
@@ -155,8 +157,8 @@ function handleCreateMarker($pdo)
     // Create marker with tactical symbol data
     $stmt = $pdo->prepare("
         INSERT INTO intra_fire_incident_map_markers 
-        (incident_id, marker_type, pos_x, pos_y, description, grundzeichen, organisation, fachaufgabe, einheit, symbol, typ, text, name, created_by, vehicle_id, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+        (incident_id, marker_type, pos_x, pos_y, description, grundzeichen, organisation, fachaufgabe, einheit, symbol, typ, text, name, created_by, vehicle_id, operator_id, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
     ");
 
     $stmt->execute([
@@ -174,7 +176,8 @@ function handleCreateMarker($pdo)
         $text ?: null,
         $name ?: null,
         $userId,
-        $vehicleId
+        $vehicleId,
+        $operatorId
     ]);
 
     $markerId = $pdo->lastInsertId();
@@ -183,13 +186,14 @@ function handleCreateMarker($pdo)
     try {
         $logStmt = $pdo->prepare("
             INSERT INTO intra_fire_incident_log 
-            (incident_id, user_id, vehicle_id, action_type, action_description, created_at)
-            VALUES (?, ?, ?, ?, ?, NOW())
+            (incident_id, created_by, vehicle_id, operator_id, action_type, action_description, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, NOW())
         ");
         $logStmt->execute([
             $incidentId,
-            $userId,
+            $userId ?: 0, // Use 0 if no user ID (required field)
             $vehicleId,
+            $operatorId,
             'marker_created',
             "Lagekarten-Marker hinzugefügt: {$markerType}" . ($description ? " - {$description}" : '')
         ]);
@@ -301,16 +305,18 @@ function handleDeleteMarker($pdo)
     try {
         $userId = $_SESSION['userid'] ?? null;
         $vehicleId = $_SESSION['einsatz_vehicle_id'] ?? null;
+        $operatorId = $_SESSION['einsatz_operator_id'] ?? null;
 
         $logStmt = $pdo->prepare("
             INSERT INTO intra_fire_incident_log 
-            (incident_id, user_id, vehicle_id, action_type, action_description, created_at)
-            VALUES (?, ?, ?, ?, ?, NOW())
+            (incident_id, created_by, vehicle_id, operator_id, action_type, action_description, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, NOW())
         ");
         $logStmt->execute([
             $marker['incident_id'],
-            $userId,
+            $userId ?: 0, // Use 0 if no user ID (required field)
             $vehicleId,
+            $operatorId,
             'marker_deleted',
             "Lagekarten-Marker gelöscht: {$marker['marker_type']}"
         ]);
@@ -337,10 +343,12 @@ function handleListMarkers($pdo)
         SELECT 
             m.*,
             mit.fullname AS created_by_name,
-            v.name AS vehicle_name
+            v.name AS vehicle_name,
+            op.fullname AS operator_name
         FROM intra_fire_incident_map_markers m
         LEFT JOIN intra_mitarbeiter mit ON m.created_by = mit.id
         LEFT JOIN intra_fahrzeuge v ON m.vehicle_id = v.id
+        LEFT JOIN intra_mitarbeiter op ON m.operator_id = op.id
         WHERE m.incident_id = ?
         ORDER BY m.created_at DESC
     ");
@@ -424,6 +432,8 @@ function handleCreateZone($pdo)
                     points TEXT NOT NULL,
                     color VARCHAR(20) NOT NULL DEFAULT '#dc3545',
                     created_by INT,
+                    vehicle_id INT,
+                    operator_id INT,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (incident_id) REFERENCES intra_fire_incidents(id) ON DELETE CASCADE
                 )
@@ -446,11 +456,26 @@ function handleCreateZone($pdo)
         }
     }
 
+    // Get vehicle ID from session
+    $vehicleId = isset($_SESSION['einsatz_vehicle_id']) ? (int)$_SESSION['einsatz_vehicle_id'] : null;
+
+    // Verify vehicle exists in database if vehicleId is set
+    if ($vehicleId !== null) {
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM intra_fahrzeuge WHERE id = ?");
+        $stmt->execute([$vehicleId]);
+        if ($stmt->fetchColumn() == 0) {
+            $vehicleId = null; // Vehicle doesn't exist, set to null
+        }
+    }
+
+    // Get operator ID from session
+    $operatorId = $_SESSION['einsatz_operator_id'] ?? null;
+
     // Insert zone
     $stmt = $pdo->prepare("
         INSERT INTO intra_fire_incident_map_zones 
-        (incident_id, name, description, points, color, created_by)
-        VALUES (?, ?, ?, ?, ?, ?)
+        (incident_id, name, description, points, color, created_by, vehicle_id, operator_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     ");
 
     $stmt->execute([
@@ -459,7 +484,9 @@ function handleCreateZone($pdo)
         $description,
         $points,
         $color,
-        $userId
+        $userId,
+        $vehicleId,
+        $operatorId
     ]);
 
     $zoneId = $pdo->lastInsertId();
@@ -467,13 +494,15 @@ function handleCreateZone($pdo)
     // Log activity
     try {
         $stmt = $pdo->prepare("
-            INSERT INTO intra_fire_incident_activity_log 
-            (incident_id, user_id, vehicle_id, action_type, details)
-            VALUES (?, ?, NULL, ?, ?)
+            INSERT INTO intra_fire_incident_log 
+            (incident_id, created_by, vehicle_id, operator_id, action_type, action_description, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, NOW())
         ");
         $stmt->execute([
             $incidentId,
-            $userId,
+            $userId ?: 0, // Use 0 if no user ID (required field)
+            $vehicleId,
+            $operatorId,
             'zone_created',
             "Zone erstellt: {$name}"
         ]);
@@ -518,15 +547,19 @@ function handleDeleteZone($pdo)
 
     // Log activity
     $userId = isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : null;
+    $vehicleId = $_SESSION['einsatz_vehicle_id'] ?? null;
+    $operatorId = $_SESSION['einsatz_operator_id'] ?? null;
     try {
         $stmt = $pdo->prepare("
-            INSERT INTO intra_fire_incident_activity_log 
-            (incident_id, user_id, vehicle_id, action_type, details)
-            VALUES (?, ?, NULL, ?, ?)
+            INSERT INTO intra_fire_incident_log 
+            (incident_id, created_by, vehicle_id, operator_id, action_type, action_description, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, NOW())
         ");
         $stmt->execute([
             $zone['incident_id'],
-            $userId,
+            $userId ?: 0, // Use 0 if no user ID (required field)
+            $vehicleId,
+            $operatorId,
             'zone_deleted',
             "Zone gelöscht: {$zone['name']}"
         ]);
@@ -552,9 +585,13 @@ function handleListZones($pdo)
     $stmt = $pdo->prepare("
         SELECT 
             z.*,
-            mit.fullname AS created_by_name
+            mit.fullname AS created_by_name,
+            v.name AS vehicle_name,
+            op.fullname AS operator_name
         FROM intra_fire_incident_map_zones z
         LEFT JOIN intra_mitarbeiter mit ON z.created_by = mit.id
+        LEFT JOIN intra_fahrzeuge v ON z.vehicle_id = v.id
+        LEFT JOIN intra_mitarbeiter op ON z.operator_id = op.id
         WHERE z.incident_id = ?
         ORDER BY z.created_at DESC
     ");

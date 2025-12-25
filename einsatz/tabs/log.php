@@ -32,6 +32,10 @@ $actionTypeLabels = [
     'data_updated' => ['label' => 'Daten aktualisiert', 'icon' => 'fa-edit', 'color' => 'primary'],
     'finalized' => ['label' => 'Abgeschlossen', 'icon' => 'fa-check-circle', 'color' => 'success'],
     'status_changed' => ['label' => 'Status geändert', 'icon' => 'fa-exchange-alt', 'color' => 'warning'],
+    'marker_created' => ['label' => 'Marker erstellt', 'icon' => 'fa-map-marker-alt', 'color' => 'info'],
+    'marker_deleted' => ['label' => 'Marker gelöscht', 'icon' => 'fa-map-marker-alt', 'color' => 'danger'],
+    'zone_created' => ['label' => 'Zone erstellt', 'icon' => 'fa-draw-polygon', 'color' => 'info'],
+    'zone_deleted' => ['label' => 'Zone gelöscht', 'icon' => 'fa-draw-polygon', 'color' => 'danger'],
 ];
 ?>
 

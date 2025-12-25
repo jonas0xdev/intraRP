@@ -4,6 +4,27 @@ if (!isset($incident, $pdo, $id)) {
     die('Error: Required context not available');
 }
 
+// Helper function to get display name with fallback to vehicle operator
+function getDisplayName($created_by_name, $operator_name, $vehicle_name)
+{
+    if (!empty($created_by_name)) {
+        return $created_by_name;
+    }
+    // If no user name, use operator name
+    if (!empty($operator_name)) {
+        return $operator_name;
+    }
+    // Fallback to vehicle name if no operator
+    if (!empty($vehicle_name)) {
+        return $vehicle_name . ' Besatzung';
+    }
+    // Last fallback to session operator if available
+    if (isset($_SESSION['einsatz_operator_name'])) {
+        return $_SESSION['einsatz_operator_name'];
+    }
+    return 'Unbekannt';
+}
+
 // Load existing markers for this incident
 $markers = [];
 try {
@@ -11,10 +32,12 @@ try {
         SELECT 
             m.*,
             mit.fullname AS created_by_name,
-            v.name AS vehicle_name
+            v.name AS vehicle_name,
+            op.fullname AS operator_name
         FROM intra_fire_incident_map_markers m
         LEFT JOIN intra_mitarbeiter mit ON m.created_by = mit.id
         LEFT JOIN intra_fahrzeuge v ON m.vehicle_id = v.id
+        LEFT JOIN intra_mitarbeiter op ON m.operator_id = op.id
         WHERE m.incident_id = ?
         ORDER BY m.created_at DESC
     ");
@@ -31,9 +54,13 @@ try {
     $stmt = $pdo->prepare("
         SELECT 
             z.*,
-            mit.fullname AS created_by_name
+            mit.fullname AS created_by_name,
+            v.name AS vehicle_name,
+            op.fullname AS operator_name
         FROM intra_fire_incident_map_zones z
         LEFT JOIN intra_mitarbeiter mit ON z.created_by = mit.id
+        LEFT JOIN intra_fahrzeuge v ON z.vehicle_id = v.id
+        LEFT JOIN intra_mitarbeiter op ON z.operator_id = op.id
         WHERE z.incident_id = ?
         ORDER BY z.created_at DESC
     ");
@@ -521,7 +548,7 @@ try {
                                         <?= htmlspecialchars($marker['marker_type']) ?>
                                     </td>
                                     <td><?= htmlspecialchars($marker['description'] ?? '-') ?></td>
-                                    <td><?= htmlspecialchars($marker['created_by_name'] ?? 'Unbekannt') ?></td>
+                                    <td><?= htmlspecialchars(getDisplayName($marker['created_by_name'], $marker['operator_name'], $marker['vehicle_name'])) ?></td>
                                     <td><?= htmlspecialchars($marker['vehicle_name'] ?? '-') ?></td>
                                     <td><?= fmt_dt($marker['created_at']) ?></td>
                                     <td>
@@ -551,6 +578,7 @@ try {
                             <th>Farbe</th>
                             <th>Beschreibung</th>
                             <th>Erstellt von</th>
+                            <th>Fahrzeug</th>
                             <th>Zeitstempel</th>
                             <th>Aktionen</th>
                         </tr>
@@ -558,7 +586,7 @@ try {
                     <tbody id="zoneTableBody">
                         <?php if (empty($zones)): ?>
                             <tr>
-                                <td colspan="6" class="text-center text-muted">
+                                <td colspan="7" class="text-center text-muted">
                                     Noch keine Zonen erstellt
                                 </td>
                             </tr>
@@ -574,7 +602,8 @@ try {
                                         <div style="width: 40px; height: 20px; background-color: <?= htmlspecialchars($zone['color']) ?>; border: 2px solid <?= htmlspecialchars($zone['color']) ?>; opacity: 0.5; border-radius: 3px;"></div>
                                     </td>
                                     <td><?= htmlspecialchars($zone['description'] ?? '-') ?></td>
-                                    <td><?= htmlspecialchars($zone['created_by_name'] ?? 'Unbekannt') ?></td>
+                                    <td><?= htmlspecialchars(getDisplayName($zone['created_by_name'], $zone['operator_name'], $zone['vehicle_name'])) ?></td>
+                                    <td><?= htmlspecialchars($zone['vehicle_name'] ?? '-') ?></td>
                                     <td><?= fmt_dt($zone['created_at']) ?></td>
                                     <td>
                                         <?php if (!$incident['finalized']): ?>
