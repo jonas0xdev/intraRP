@@ -23,6 +23,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $rd_type = isset($_POST['rd_type']) ? (int)$_POST['rd_type'] : 0;
     $active = isset($_POST['active']) ? 1 : 0;
 
+    // Tactical symbol data
+    $grundzeichen = trim($_POST['grundzeichen'] ?? '');
+    $organisation = trim($_POST['organisation'] ?? '');
+    $fachaufgabe = trim($_POST['fachaufgabe'] ?? '');
+    $einheit = trim($_POST['einheit'] ?? '');
+    $symbol = trim($_POST['symbol'] ?? '');
+    $tz_typ = trim($_POST['tz_typ'] ?? '');
+    $text = trim($_POST['text'] ?? '');
+    $tz_name = trim($_POST['tz_name'] ?? '');
+
     if (empty($name) || empty($veh_type) || empty($identifier)) {
         Flash::set('error', 'missing-fields');
         header("Location: " . BASE_PATH . "settings/fahrzeuge/fahrzeuge/index.php");
@@ -30,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     try {
-        $stmt = $pdo->prepare("INSERT INTO intra_fahrzeuge (name, kennzeichen, veh_type, identifier, priority, rd_type, active) VALUES (:name, :kennzeichen, :veh_type, :identifier, :priority, :rd_type, :active)");
+        $stmt = $pdo->prepare("INSERT INTO intra_fahrzeuge (name, kennzeichen, veh_type, identifier, priority, rd_type, active, grundzeichen, organisation, fachaufgabe, einheit, symbol, typ, text, tz_name) VALUES (:name, :kennzeichen, :veh_type, :identifier, :priority, :rd_type, :active, :grundzeichen, :organisation, :fachaufgabe, :einheit, :symbol, :typ, :text, :tz_name)");
         $stmt->execute([
             ':name' => $name,
             ':kennzeichen' => $kennzeichen,
@@ -38,7 +48,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':identifier' => $identifier,
             ':priority' => $priority,
             ':rd_type' => $rd_type,
-            ':active' => $active
+            ':active' => $active,
+            ':grundzeichen' => $grundzeichen ?: null,
+            ':organisation' => $organisation ?: null,
+            ':fachaufgabe' => $fachaufgabe ?: null,
+            ':einheit' => $einheit ?: null,
+            ':symbol' => $symbol ?: null,
+            ':tz_typ' => $tz_typ ?: null,
+            ':text' => $text ?: null,
+            ':tz_name' => $tz_name ?: null
         ]);
 
         Flash::set('vehicle', 'created');

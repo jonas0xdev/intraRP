@@ -302,6 +302,11 @@ function fmt_elapsed(int|string $seconds): string
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link text-white <?= $activeTab === 'lagekarte' ? 'active' : '' ?>" href="<?= BASE_PATH ?>einsatz/view.php?id=<?= $id ?>&tab=lagekarte">
+                            <i class="fa-solid fa-map-marked-alt me-2"></i>Lagekarte
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link text-white <?= $activeTab === 'abschluss' ? 'active' : '' ?>" href="<?= BASE_PATH ?>einsatz/view.php?id=<?= $id ?>&tab=abschluss">
                             <i class="fa-solid fa-check-circle me-2"></i>Abschluss
                         </a>
@@ -353,7 +358,7 @@ function fmt_elapsed(int|string $seconds): string
                 <!-- Tab Content -->
                 <?php
                 // Load the active tab content
-                $validTabs = ['stammdaten', 'bericht', 'fahrzeuge', 'lagemeldungen', 'abschluss', 'log'];
+                $validTabs = ['stammdaten', 'bericht', 'fahrzeuge', 'lagemeldungen', 'lagekarte', 'abschluss', 'log'];
                 if (!in_array($activeTab, $validTabs)) {
                     $activeTab = 'stammdaten';
                 }

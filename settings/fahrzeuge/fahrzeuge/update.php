@@ -23,6 +23,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $active = isset($_POST['active']) ? 1 : 0;
     $identifier = trim($_POST['identifier'] ?? '');
 
+    // Tactical symbol data
+    $grundzeichen = trim($_POST['grundzeichen'] ?? '');
+    $organisation = trim($_POST['organisation'] ?? '');
+    $fachaufgabe = trim($_POST['fachaufgabe'] ?? '');
+    $einheit = trim($_POST['einheit'] ?? '');
+    $symbol = trim($_POST['symbol'] ?? '');
+    $tz_typ = trim($_POST['tz_typ'] ?? '');
+    $text = trim($_POST['text'] ?? '');
+    $tz_name = trim($_POST['tz_name'] ?? '');
+
     if ($id <= 0 || empty($name) || empty($veh_type) || empty($identifier)) {
         Flash::set('error', 'missing-fields');
         header("Location: " . BASE_PATH . "settings/fahrzeuge/fahrzeuge/index.php");
@@ -30,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     try {
-        $stmt = $pdo->prepare("UPDATE intra_fahrzeuge SET name = :name, kennzeichen = :kennzeichen, veh_type = :veh_type, identifier = :identifier, priority = :priority, rd_type = :rd_type, active = :active WHERE id = :id");
+        $stmt = $pdo->prepare("UPDATE intra_fahrzeuge SET name = :name, kennzeichen = :kennzeichen, veh_type = :veh_type, identifier = :identifier, priority = :priority, rd_type = :rd_type, active = :active, grundzeichen = :grundzeichen, organisation = :organisation, fachaufgabe = :fachaufgabe, einheit = :einheit, symbol = :symbol, typ = :typ, text = :text, tz_name = :tz_name WHERE id = :id");
 
         $stmt->execute([
             ':name' => $name,
@@ -40,6 +50,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':priority' => $priority,
             ':rd_type' => $rd_type,
             ':active' => $active,
+            ':grundzeichen' => $grundzeichen ?: null,
+            ':organisation' => $organisation ?: null,
+            ':fachaufgabe' => $fachaufgabe ?: null,
+            ':einheit' => $einheit ?: null,
+            ':symbol' => $symbol ?: null,
+            ':typ' => $tz_typ ?: null,
+            ':text' => $text ?: null,
+            ':tz_name' => $tz_name ?: null,
             ':id' => $id
         ]);
 

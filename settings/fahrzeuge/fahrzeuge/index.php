@@ -100,8 +100,32 @@ if (!Permissions::check(['admin', 'vehicles.view'])) {
 
                                     $actions = "";
                                     if (Permissions::check(['admin', 'vehicles.manage'])) {
-                                        $actions .= "<a title='Fahrzeug bearbeiten' href='#' class='btn btn-sm btn-primary edit-btn' data-bs-toggle='modal' data-bs-target='#editFahrzeugModal' data-id='{$row['id']}' data-name='{$row['name']}' data-kennzeichen='{$row['kennzeichen']}' data-type='{$row['veh_type']}' data-priority='{$row['priority']}' data-identifier='{$row['identifier']}' data-rd_type='{$row['rd_type']}' data-active='{$row['active']}'><i class='fa-solid fa-pen'></i></a> ";
-                                        $actions .= "<a title='Fahrzeug kopieren' href='#' class='btn btn-sm btn-success copy-btn' data-id='{$row['id']}' data-name='{$row['name']}' data-kennzeichen='{$row['kennzeichen']}' data-type='{$row['veh_type']}' data-priority='{$row['priority']}' data-identifier='{$row['identifier']}' data-rd_type='{$row['rd_type']}' data-active='{$row['active']}'><i class='fa-solid fa-copy'></i></a>";
+                                        $dataAttrs = [
+                                            'id' => $row['id'],
+                                            'name' => $row['name'],
+                                            'kennzeichen' => $row['kennzeichen'],
+                                            'type' => $row['veh_type'],
+                                            'priority' => $row['priority'],
+                                            'identifier' => $row['identifier'],
+                                            'rd_type' => $row['rd_type'],
+                                            'active' => $row['active'],
+                                            'tz-grundzeichen' => $row['grundzeichen'] ?? '',
+                                            'tz-organisation' => $row['organisation'] ?? '',
+                                            'tz-fachaufgabe' => $row['fachaufgabe'] ?? '',
+                                            'tz-einheit' => $row['einheit'] ?? '',
+                                            'tz-symbol' => $row['symbol'] ?? '',
+                                            'tz-typ' => $row['typ'] ?? '',
+                                            'tz-text' => $row['text'] ?? '',
+                                            'tz-name' => $row['tz_name'] ?? ''
+                                        ];
+
+                                        $dataStr = '';
+                                        foreach ($dataAttrs as $key => $val) {
+                                            $dataStr .= " data-{$key}='" . htmlspecialchars($val, ENT_QUOTES) . "'";
+                                        }
+
+                                        $actions .= "<a title='Fahrzeug bearbeiten' href='#' class='btn btn-sm btn-primary edit-btn' data-bs-toggle='modal' data-bs-target='#editFahrzeugModal'{$dataStr}><i class='fa-solid fa-pen'></i></a> ";
+                                        $actions .= "<a title='Fahrzeug kopieren' href='#' class='btn btn-sm btn-success copy-btn'{$dataStr}><i class='fa-solid fa-copy'></i></a>";
                                     }
 
                                     echo "<tr>";
@@ -175,6 +199,12 @@ if (!Permissions::check(['admin', 'vehicles.view'])) {
                                 <label class="form-check-label" for="fahrzeug-active">Aktiv?</label>
                             </div>
 
+                            <?php
+                            $prefix = 'fahrzeug-';
+                            $showPreview = true;
+                            include __DIR__ . '/../../../assets/components/tactical-symbol-form.php';
+                            ?>
+
                         </div>
                         <div class="modal-footer d-flex justify-content-between">
                             <button type="button" class="btn btn-danger" id="delete-fahrzeug-btn">Löschen</button>
@@ -247,6 +277,12 @@ if (!Permissions::check(['admin', 'vehicles.view'])) {
                                 <label class="form-check-label" for="new-fahrzeug-active">Aktiv?</label>
                             </div>
 
+                            <?php
+                            $prefix = 'new-fahrzeug-';
+                            $showPreview = true;
+                            include __DIR__ . '/../../../assets/components/tactical-symbol-form.php';
+                            ?>
+
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
@@ -317,6 +353,29 @@ if (!Permissions::check(['admin', 'vehicles.view'])) {
                     document.getElementById('fahrzeug-rd_type').value = this.dataset.rd_type || '0';
                     document.getElementById('fahrzeug-active').checked = this.dataset.active == 1;
 
+                    // Reset preview first
+                    const previewContainer = document.getElementById('fahrzeug-tz-preview');
+                    if (previewContainer) {
+                        previewContainer.innerHTML = '<span style="font-size: 48px; color: #999;">Kein Symbol</span>';
+                    }
+
+                    // Load tactical symbol data
+                    document.getElementById('fahrzeug-grundzeichen').value = this.dataset.tzGrundzeichen || '';
+                    document.getElementById('fahrzeug-organisation').value = this.dataset.tzOrganisation || '';
+                    document.getElementById('fahrzeug-fachaufgabe').value = this.dataset.tzFachaufgabe || '';
+                    document.getElementById('fahrzeug-einheit').value = this.dataset.tzEinheit || '';
+                    document.getElementById('fahrzeug-symbol').value = this.dataset.tzSymbol || '';
+                    document.getElementById('fahrzeug-tz_typ').value = this.dataset.tzTyp || '';
+                    document.getElementById('fahrzeug-text').value = this.dataset.tzText || '';
+                    document.getElementById('fahrzeug-tz_name').value = this.dataset.tzName || '';
+
+                    // Auto-trigger preview if grundzeichen exists
+                    setTimeout(() => {
+                        if (this.dataset.tzGrundzeichen) {
+                            document.getElementById('fahrzeug-preview-btn')?.click();
+                        }
+                    }, 100);
+
                     document.getElementById('fahrzeug-delete-id').value = id;
                 });
             });
@@ -346,6 +405,16 @@ if (!Permissions::check(['admin', 'vehicles.view'])) {
                     document.getElementById('new-fahrzeug-identifier').value = this.dataset.identifier + '(1)';
                     document.getElementById('new-fahrzeug-rd_type').value = this.dataset.rd_type || '0';
                     document.getElementById('new-fahrzeug-active').checked = this.dataset.active == 1;
+
+                    // Copy tactical symbol data
+                    document.getElementById('new-fahrzeug-grundzeichen').value = this.dataset.tzGrundzeichen || '';
+                    document.getElementById('new-fahrzeug-organisation').value = this.dataset.tzOrganisation || '';
+                    document.getElementById('new-fahrzeug-fachaufgabe').value = this.dataset.tzFachaufgabe || '';
+                    document.getElementById('new-fahrzeug-einheit').value = this.dataset.tzEinheit || '';
+                    document.getElementById('new-fahrzeug-symbol').value = this.dataset.tzSymbol || '';
+                    document.getElementById('new-fahrzeug-tz_typ').value = this.dataset.tzTyp || '';
+                    document.getElementById('new-fahrzeug-text').value = this.dataset.tzText || '';
+                    document.getElementById('new-fahrzeug-tz_name').value = this.dataset.tzName || '';
 
                     // Open the create modal
                     const createModal = new bootstrap.Modal(document.getElementById('createFahrzeugModal'));
