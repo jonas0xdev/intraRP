@@ -361,6 +361,7 @@ $migrationFiles = [
     ['file' => 'alter_intra_fire_incident_map_markers_25122025_add_symbol.php', 'type' => 'alter'],
     ['file' => 'alter_intra_fire_incident_map_markers_25122025_add_text.php', 'type' => 'alter'],
     ['file' => 'alter_intra_fahrzeuge_25122025_tactical_symbols.php', 'type' => 'alter'],
+    ['file' => 'create_intra_fire_incident_map_zones_25122025.php', 'type' => 'create'],
     ['file' => 'add_vehicle_id_to_zones_25122025.php', 'type' => 'alter'],
     ['file' => 'add_operator_id_to_markers_25122025.php', 'type' => 'alter'],
     ['file' => 'add_operator_id_to_zones_25122025.php', 'type' => 'alter'],
