@@ -356,6 +356,11 @@ $migrationFiles = [
 
     // 25.12.2025
     ['file' => 'alter_intra_fire_incidents_20250125_allow_null.php', 'type' => 'alter'],
+    ['file' => 'create_intra_fire_incident_map_markers_25122025.php', 'type' => 'create'],
+    ['file' => 'alter_intra_fire_incident_map_markers_25122025_tactical_symbols.php', 'type' => 'alter'],
+    ['file' => 'alter_intra_fire_incident_map_markers_25122025_add_symbol.php', 'type' => 'alter'],
+    ['file' => 'alter_intra_fire_incident_map_markers_25122025_add_text.php', 'type' => 'alter'],
+    ['file' => 'alter_intra_fahrzeuge_25122025_tactical_symbols.php', 'type' => 'alter'],
 ];
 
 $executed = 0;

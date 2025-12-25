@@ -1,0 +1,240 @@
+<?php
+
+/**
+ * Reusable tactical symbol form fields
+ * Include this file in forms that need tactical symbol configuration
+ * 
+ * Variables to define before including:
+ * - $prefix: string - Form field ID/name prefix (e.g., 'fahrzeug-', 'custom')
+ * - $showPreview: bool - Whether to show preview button (default: true)
+ */
+
+if (!isset($prefix)) {
+    $prefix = '';
+}
+
+if (!isset($showPreview)) {
+    $showPreview = true;
+}
+?>
+
+<div class="tactical-symbol-fields">
+    <hr>
+    <h6 class="mb-3">Taktisches Zeichen</h6>
+
+    <?php if ($showPreview): ?>
+        <div class="mb-3">
+            <label class="form-label">Vorschau</label>
+            <div class="text-center p-3 bg-light rounded">
+                <div id="<?= $prefix ?>tz-preview" style="display: inline-block;">
+                    <span style="font-size: 48px; color: #999;">Kein Symbol</span>
+                </div>
+            </div>
+            <button type="button" class="btn btn-sm btn-secondary mt-2 w-100" id="<?= $prefix ?>preview-btn">
+                <i class="fa-solid fa-eye me-1"></i>Vorschau aktualisieren
+            </button>
+        </div>
+    <?php endif; ?>
+
+    <div class="mb-3">
+        <label for="<?= $prefix ?>grundzeichen" class="form-label">Grundzeichen</label>
+        <select class="form-select" name="grundzeichen" id="<?= $prefix ?>grundzeichen">
+            <option value="">-- Kein Zeichen --</option>
+            <option value="abrollbehaelter">Abrollbehälter</option>
+            <option value="amphibienfahrzeug">Amphibienfahrzeug</option>
+            <option value="anhaenger">Anhänger allgemein</option>
+            <option value="anhaenger-lkw">Anhänger von Lkw gezogen</option>
+            <option value="anhaenger-pkw">Anhänger von Pkw gezogen</option>
+            <option value="anlass">Anlass, Ereignis</option>
+            <option value="befehlsstelle">Befehlsstelle</option>
+            <option value="fahrzeug">Fahrzeug</option>
+            <option value="flugzeug">Flugzeug</option>
+            <option value="gebaeude">Gebäude</option>
+            <option value="gefahr">Gefahr</option>
+            <option value="gefahr-akut">Gefahr (akut)</option>
+            <option value="gefahr-vermutet">Gefahr (vermutet)</option>
+            <option value="hubschrauber">Hubschrauber</option>
+            <option value="ohne">Kein Grundzeichen</option>
+            <option value="kettenfahrzeug">Kettenfahrzeug</option>
+            <option value="kraftfahrzeug-gelaendegaengig">Kraftfahrzeug geländegängig</option>
+            <option value="kraftfahrzeug-landgebunden">Kraftfahrzeug landgebunden</option>
+            <option value="massnahme">Maßnahme</option>
+            <option value="person">Person</option>
+            <option value="rollcontainer">Rollcontainer</option>
+            <option value="schienenfahrzeug">Schienenfahrzeug</option>
+            <option value="stelle">Stelle, Einrichtung</option>
+            <option value="ortsfeste-stelle">Stelle, Einrichtung (ortsfest)</option>
+            <option value="taktische-formation">Taktische Formation</option>
+            <option value="wasserfahrzeug">Wasserfahrzeug</option>
+            <option value="wechselbehaelter">Wechselbehälter/Container</option>
+            <option value="zweirad">Zweirad, Kraftrad</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label for="<?= $prefix ?>organisation" class="form-label">Organisation</label>
+        <select class="form-select" name="organisation" id="<?= $prefix ?>organisation">
+            <option value="">-- Keine --</option>
+            <option value="bundeswehr">Bundeswehr</option>
+            <option value="feuerwehr">Feuerwehr</option>
+            <option value="fuehrung">Führung</option>
+            <option value="gefahrenabwehr">Gefahrenabwehr</option>
+            <option value="hilfsorganisation">Hilfsorganisationen</option>
+            <option value="polizei">Polizei</option>
+            <option value="thw">THW</option>
+            <option value="zivil">Zivile Einheiten</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label for="<?= $prefix ?>fachaufgabe" class="form-label">Fachaufgabe</label>
+        <select class="form-select" name="fachaufgabe" id="<?= $prefix ?>fachaufgabe">
+            <option value="">-- Keine --</option>
+            <option value="abwehr-wassergefahren">Abwehr von Wassergefahren</option>
+            <option value="aerztliche-versorgung">Ärztliche Versorgung</option>
+            <option value="beleuchtung">Beleuchtung</option>
+            <option value="bergung">Bergung</option>
+            <option value="umweltschaeden-gewaesser">Beseitigung von Umweltschäden auf Gewässern</option>
+            <option value="betreuung">Betreuung</option>
+            <option value="brandbekaempfung">Brandbekämpfung</option>
+            <option value="dekontamination">Dekontamination</option>
+            <option value="dekontamination-geraete">Dekontamination Geräte</option>
+            <option value="dekontamination-personen">Dekontamination Personen</option>
+            <option value="wasserfahrzeuge">Einsatz von Wasserfahrzeugen</option>
+            <option value="einsatzeinheit">Einsatzeinheit</option>
+            <option value="entschaerfen">Entschärfung, Kampfmittelräumung</option>
+            <option value="erkundung">Erkundung</option>
+            <option value="fuehrung">Führung, Leitung, Stab</option>
+            <option value="abc">Gefahrenabwehr bei Gefährlichen Stoffen (ABC)</option>
+            <option value="heben">Heben von Lasten</option>
+            <option value="iuk">Information und Kommunikation</option>
+            <option value="instandhaltung">Instandhaltung</option>
+            <option value="krankenhaus">Krankenhaus</option>
+            <option value="messen">Messen, Spüren</option>
+            <option value="pumpen">Pumpen, Lenzen</option>
+            <option value="raeumen">Räumen, Beseitigung von Hindernissen</option>
+            <option value="hoehenrettung">Rettung aus Höhen und Tiefen</option>
+            <option value="rettungswesen">Rettungswesen, Sanitätswesen</option>
+            <option value="schlachten">Schlachten</option>
+            <option value="seelsorge">Seelsorge</option>
+            <option value="sprengen">Sprengen</option>
+            <option value="rettungshunde">Suchen und Orten mit Rettungshunden</option>
+            <option value="technische-hilfeleistung">Technische Hilfeleistung</option>
+            <option value="transport">Transport</option>
+            <option value="unterbringung">Unterbringung</option>
+            <option value="verpflegung">Verpflegung</option>
+            <option value="versorgung">Versorgung</option>
+            <option value="wasserversorgung">Wasserversorgung</option>
+            <option value="werkstatt">Werkstatt</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label for="<?= $prefix ?>einheit" class="form-label">Einheit</label>
+        <select class="form-select" name="einheit" id="<?= $prefix ?>einheit">
+            <option value="">-- Keine --</option>
+            <option value="trupp">Trupp</option>
+            <option value="staffel">Staffel</option>
+            <option value="gruppe">Gruppe</option>
+            <option value="zug">Zug</option>
+            <option value="verband">Verband</option>
+            <option value="bereitschaft">Bereitschaft</option>
+            <option value="groesserer-verband">Größerer Verband</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label for="<?= $prefix ?>symbol" class="form-label">Symbol</label>
+        <select class="form-select" name="symbol" id="<?= $prefix ?>symbol">
+            <option value="">-- Kein Symbol --</option>
+            <option value="abc">ABC</option>
+            <option value="angriff">Angriff</option>
+            <option value="bereitstellung">Bereitstellung</option>
+            <option value="boot">Boot</option>
+            <option value="drehleiter">Drehleiter</option>
+            <option value="erkunden">Erkunden</option>
+            <option value="person-gerettet">Person gerettet</option>
+            <option value="person-tot">Person tot</option>
+            <option value="person-verletzt">Person verletzt</option>
+            <option value="person-vermisst">Person vermisst</option>
+            <option value="sammeln">Sammeln</option>
+            <option value="sammelplatz-betroffene">Sammelplatz Betroffene</option>
+            <option value="vollbrand">Vollbrand</option>
+            <option value="wasser">Wasser</option>
+            <option value="zerstoert">Zerstört</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label for="<?= $prefix ?>tz_typ" class="form-label">Typ</label>
+        <input type="text" class="form-control" name="tz_typ" id="<?= $prefix ?>tz_typ"
+            placeholder="z.B. HLF20, RTW, DLK23/12">
+        <small class="text-muted">Fahrzeugtyp oder Typ des taktischen Zeichens</small>
+    </div>
+
+    <div class="mb-3">
+        <label for="<?= $prefix ?>text" class="form-label">Text</label>
+        <input type="text" class="form-control" name="text" id="<?= $prefix ?>text"
+            placeholder="z.B. LF20, RTW 1/82-1">
+        <small class="text-muted">Wird auf dem taktischen Zeichen angezeigt</small>
+    </div>
+
+    <div class="mb-3">
+        <label for="<?= $prefix ?>tz_name" class="form-label">Name</label>
+        <input type="text" class="form-control" name="tz_name" id="<?= $prefix ?>tz_name"
+            placeholder="z.B. Einsatzabschnitt Nord">
+        <small class="text-muted">Name des taktischen Zeichens</small>
+    </div>
+</div>
+
+<?php if ($showPreview): ?>
+    <script type="module">
+        import {
+            erzeugeTaktischesZeichen
+        } from 'https://esm.sh/taktische-zeichen-core@0.10.0';
+
+        window.erzeugeTaktischesZeichen = window.erzeugeTaktischesZeichen || erzeugeTaktischesZeichen;
+
+        document.getElementById('<?= $prefix ?>preview-btn')?.addEventListener('click', function() {
+            const grundzeichen = document.getElementById('<?= $prefix ?>grundzeichen').value;
+            const organisation = document.getElementById('<?= $prefix ?>organisation').value;
+            const fachaufgabe = document.getElementById('<?= $prefix ?>fachaufgabe').value;
+            const einheit = document.getElementById('<?= $prefix ?>einheit').value;
+            const symbol = document.getElementById('<?= $prefix ?>symbol').value;
+            const typ = document.getElementById('<?= $prefix ?>tz_typ').value;
+            const text = document.getElementById('<?= $prefix ?>text').value;
+            const tz_name = document.getElementById('<?= $prefix ?>tz_name').value;
+
+            const previewContainer = document.getElementById('<?= $prefix ?>tz-preview');
+
+            if (!grundzeichen) {
+                previewContainer.innerHTML = '<span style="font-size: 48px; color: #999;">Kein Symbol</span>';
+                return;
+            }
+
+            try {
+                const config = {
+                    grundzeichen
+                };
+                if (organisation) config.organisation = organisation;
+                if (fachaufgabe) config.fachaufgabe = fachaufgabe;
+                if (einheit) config.einheit = einheit;
+                if (symbol) config.symbol = symbol;
+                if (typ) config.typ = typ;
+                if (text) config.text = text;
+                if (tz_name) config.name = tz_name;
+
+                const tz = window.erzeugeTaktischesZeichen(config);
+                previewContainer.innerHTML = tz.toString();
+
+                const svg = previewContainer.querySelector('svg');
+                if (svg) {
+                    svg.style.width = '64px';
+                    svg.style.height = '64px';
+                }
+            } catch (e) {
+                previewContainer.innerHTML = '<span style="color: red;">Fehler: ' + e.message + '</span>';
+            }
+        });
+    </script>
+<?php endif; ?>
