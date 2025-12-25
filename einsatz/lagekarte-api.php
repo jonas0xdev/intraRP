@@ -50,6 +50,18 @@ try {
             handleListMarkers($pdo);
             break;
 
+        case 'create_zone':
+            handleCreateZone($pdo);
+            break;
+
+        case 'delete_zone':
+            handleDeleteZone($pdo);
+            break;
+
+        case 'list_zones':
+            handleListZones($pdo);
+            break;
+
         default:
             http_response_code(400);
             echo json_encode(['success' => false, 'error' => 'Ungültige Aktion']);
@@ -338,5 +350,219 @@ function handleListMarkers($pdo)
     echo json_encode([
         'success' => true,
         'markers' => $markers
+    ]);
+}
+
+function handleCreateZone($pdo)
+{
+    $incidentId = (int)($_POST['incident_id'] ?? 0);
+    $name = trim($_POST['name'] ?? '');
+    $description = trim($_POST['description'] ?? '');
+    $points = trim($_POST['points'] ?? '');
+    $color = trim($_POST['color'] ?? '#dc3545');
+
+    // Validate input
+    if ($incidentId <= 0) {
+        throw new Exception('Ungültige Einsatz-ID');
+    }
+
+    if (empty($name)) {
+        throw new Exception('Zonenname ist erforderlich');
+    }
+
+    if (empty($points)) {
+        throw new Exception('Zonenpunkte fehlen');
+    }
+
+    // Validate points is valid JSON
+    $pointsArray = json_decode($points, true);
+    if (!is_array($pointsArray) || count($pointsArray) < 3) {
+        throw new Exception('Mindestens 3 Punkte erforderlich');
+    }
+
+    // Verify incident exists and is not finalized
+    $stmt = $pdo->prepare("SELECT finalized FROM intra_fire_incidents WHERE id = ?");
+    $stmt->execute([$incidentId]);
+    $incident = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$incident) {
+        throw new Exception('Einsatz nicht gefunden');
+    }
+
+    if ($incident['finalized']) {
+        throw new Exception('Einsatz ist bereits abgeschlossen');
+    }
+
+    // Create zones table if it doesn't exist or update schema
+    try {
+        // Check if table exists
+        $checkTable = $pdo->query("SHOW TABLES LIKE 'intra_fire_incident_map_zones'");
+        $tableExists = $checkTable->rowCount() > 0;
+
+        if ($tableExists) {
+            // Check if old schema exists (pos_x column)
+            $checkColumn = $pdo->query("SHOW COLUMNS FROM intra_fire_incident_map_zones LIKE 'pos_x'");
+            $hasOldSchema = $checkColumn->rowCount() > 0;
+
+            if ($hasOldSchema) {
+                // Drop old columns and add new points column
+                $pdo->exec("ALTER TABLE intra_fire_incident_map_zones 
+                    DROP COLUMN pos_x,
+                    DROP COLUMN pos_y,
+                    DROP COLUMN width,
+                    DROP COLUMN height,
+                    ADD COLUMN points TEXT NOT NULL AFTER description");
+            }
+        } else {
+            // Create new table with correct schema
+            $pdo->exec("
+                CREATE TABLE intra_fire_incident_map_zones (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    incident_id INT NOT NULL,
+                    name VARCHAR(255) NOT NULL,
+                    description TEXT,
+                    points TEXT NOT NULL,
+                    color VARCHAR(20) NOT NULL DEFAULT '#dc3545',
+                    created_by INT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (incident_id) REFERENCES intra_fire_incidents(id) ON DELETE CASCADE
+                )
+            ");
+        }
+    } catch (PDOException $e) {
+        // Log error but continue
+        error_log("Zone table schema update error: " . $e->getMessage());
+    }
+
+    // Get current user and validate
+    $userId = isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : null;
+
+    // Validate user exists in intra_mitarbeiter if userId is set
+    if ($userId) {
+        $checkUser = $pdo->prepare("SELECT id FROM intra_mitarbeiter WHERE id = ?");
+        $checkUser->execute([$userId]);
+        if (!$checkUser->fetch()) {
+            $userId = null; // User doesn't exist in mitarbeiter table
+        }
+    }
+
+    // Insert zone
+    $stmt = $pdo->prepare("
+        INSERT INTO intra_fire_incident_map_zones 
+        (incident_id, name, description, points, color, created_by)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ");
+
+    $stmt->execute([
+        $incidentId,
+        $name,
+        $description,
+        $points,
+        $color,
+        $userId
+    ]);
+
+    $zoneId = $pdo->lastInsertId();
+
+    // Log activity
+    try {
+        $stmt = $pdo->prepare("
+            INSERT INTO intra_fire_incident_activity_log 
+            (incident_id, user_id, vehicle_id, action_type, details)
+            VALUES (?, ?, NULL, ?, ?)
+        ");
+        $stmt->execute([
+            $incidentId,
+            $userId,
+            'zone_created',
+            "Zone erstellt: {$name}"
+        ]);
+    } catch (PDOException $e) {
+        // Ignore log errors
+    }
+
+    echo json_encode([
+        'success' => true,
+        'zone_id' => $zoneId,
+        'message' => 'Zone erfolgreich erstellt'
+    ]);
+}
+
+function handleDeleteZone($pdo)
+{
+    $zoneId = (int)($_POST['zone_id'] ?? 0);
+
+    if ($zoneId <= 0) {
+        throw new Exception('Ungültige Zonen-ID');
+    }
+
+    // Get zone info
+    $stmt = $pdo->prepare("SELECT z.*, i.finalized 
+                          FROM intra_fire_incident_map_zones z
+                          JOIN intra_fire_incidents i ON z.incident_id = i.id
+                          WHERE z.id = ?");
+    $stmt->execute([$zoneId]);
+    $zone = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$zone) {
+        throw new Exception('Zone nicht gefunden');
+    }
+
+    if ($zone['finalized']) {
+        throw new Exception('Einsatz ist bereits abgeschlossen');
+    }
+
+    // Delete zone
+    $stmt = $pdo->prepare("DELETE FROM intra_fire_incident_map_zones WHERE id = ?");
+    $stmt->execute([$zoneId]);
+
+    // Log activity
+    $userId = isset($_SESSION['userid']) ? (int)$_SESSION['userid'] : null;
+    try {
+        $stmt = $pdo->prepare("
+            INSERT INTO intra_fire_incident_activity_log 
+            (incident_id, user_id, vehicle_id, action_type, details)
+            VALUES (?, ?, NULL, ?, ?)
+        ");
+        $stmt->execute([
+            $zone['incident_id'],
+            $userId,
+            'zone_deleted',
+            "Zone gelöscht: {$zone['name']}"
+        ]);
+    } catch (PDOException $e) {
+        // Ignore log errors
+    }
+
+    echo json_encode([
+        'success' => true,
+        'message' => 'Zone erfolgreich gelöscht'
+    ]);
+}
+
+function handleListZones($pdo)
+{
+    $incidentId = (int)($_GET['incident_id'] ?? 0);
+
+    if ($incidentId <= 0) {
+        throw new Exception('Ungültige Einsatz-ID');
+    }
+
+    // Get all zones for this incident
+    $stmt = $pdo->prepare("
+        SELECT 
+            z.*,
+            mit.fullname AS created_by_name
+        FROM intra_fire_incident_map_zones z
+        LEFT JOIN intra_mitarbeiter mit ON z.created_by = mit.id
+        WHERE z.incident_id = ?
+        ORDER BY z.created_at DESC
+    ");
+    $stmt->execute([$incidentId]);
+    $zones = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    echo json_encode([
+        'success' => true,
+        'zones' => $zones
     ]);
 }

@@ -25,6 +25,25 @@ try {
     $markers = [];
 }
 
+// Load existing zones for this incident
+$zones = [];
+try {
+    $stmt = $pdo->prepare("
+        SELECT 
+            z.*,
+            mit.fullname AS created_by_name
+        FROM intra_fire_incident_map_zones z
+        LEFT JOIN intra_mitarbeiter mit ON z.created_by = mit.id
+        WHERE z.incident_id = ?
+        ORDER BY z.created_at DESC
+    ");
+    $stmt->execute([$id]);
+    $zones = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    // Table might not exist yet
+    $zones = [];
+}
+
 // Load assigned vehicles with tactical symbols configured
 $assignedVehicles = [];
 try {
@@ -162,14 +181,14 @@ try {
     .map-marker {
         position: absolute;
         cursor: pointer;
-        z-index: 10;
+        z-index: 15;
         transition: transform 0.2s;
         pointer-events: auto;
     }
 
     .map-marker:hover {
         transform: scale(1.2);
-        z-index: 20;
+        z-index: 25;
     }
 
     .map-marker-icon {
@@ -276,23 +295,111 @@ try {
         height: 64px !important;
         display: block;
     }
+
+    /* Zone Styles */
+    .map-zone {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 5;
+    }
+
+    .map-zone svg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+    }
+
+    .zone-drawing {
+        cursor: crosshair !important;
+    }
+
+    .zone-preview-polygon {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 15;
+    }
+
+    .zone-point {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        background: white;
+        border: 2px solid #0d6efd;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 16;
+        pointer-events: auto;
+        cursor: move;
+    }
+
+    .zone-point:hover {
+        background: #0d6efd;
+        transform: translate(-50%, -50%) scale(1.3);
+        transition: all 0.2s;
+    }
+
+    .zone-instruction {
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 4px;
+        font-size: 14px;
+        z-index: 20;
+        pointer-events: none;
+    }
+
+    .zone-color-option {
+        width: 40px;
+        height: 40px;
+        border-radius: 4px;
+        cursor: pointer;
+        border: 3px solid transparent;
+        transition: all 0.2s;
+    }
+
+    .zone-color-option:hover {
+        transform: scale(1.1);
+    }
+
+    .zone-color-option.selected {
+        border-color: white;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
 </style>
 
-<div class="card bg-dark">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">
-            <i class="fa-solid fa-map-marked-alt me-2"></i>Lagekarte
-        </h5>
-        <div>
-            <button type="button" class="btn btn-sm btn-outline-light" id="toggleMarkerMode">
-                <i class="fa-solid fa-plus me-1"></i>Marker hinzufügen
-            </button>
-            <button type="button" class="btn btn-sm btn-outline-light" id="refreshMap">
-                <i class="fa-solid fa-sync-alt me-1"></i>Aktualisieren
-            </button>
+<div class="intra__tile p-3 mb-3">
+    <div class="intra__tile-header">
+        <div class="row">
+            <div class="col">
+                <h4>Lagekarte</h4>
+            </div>
+            <div class="col text-end">
+                <button type="button" class="btn btn-sm btn-outline-light" id="toggleMarkerMode">
+                    <i class="fa-solid fa-plus me-1"></i>Marker hinzufügen
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-info" id="toggleZoneMode">
+                    <i class="fa-solid fa-draw-polygon me-1"></i>Zone zeichnen
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-light" id="refreshMap">
+                    <i class="fa-solid fa-sync-alt me-1"></i>Aktualisieren
+                </button>
+            </div>
         </div>
     </div>
-    <div class="card-body">
+    <div class="intra__tile-content">
         <?php if ($incident['finalized']): ?>
             <div class="alert alert-warning">
                 <i class="fa-solid fa-lock me-2"></i>
@@ -387,9 +494,9 @@ try {
 
         <!-- Marker List -->
         <div class="mt-4">
-            <h6 class="mb-3">Platzierte Marker</h6>
+            <h6 class="mb-3"><i class="fa-solid fa-map-pin me-2"></i>Platzierte Marker</h6>
             <div class="table-responsive">
-                <table class="table table-dark table-striped table-hover">
+                <table class="table table-striped table-hover">
                     <thead>
                         <tr>
                             <th>Typ</th>
@@ -421,6 +528,58 @@ try {
                                         <?php if (!$incident['finalized']): ?>
                                             <button class="btn btn-sm btn-outline-danger delete-marker-btn"
                                                 data-marker-id="<?= $marker['id'] ?>">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Zone List -->
+        <div class="mt-4">
+            <h6 class="mb-3"><i class="fa-solid fa-draw-polygon me-2"></i>Markierte Zonen</h6>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Farbe</th>
+                            <th>Beschreibung</th>
+                            <th>Erstellt von</th>
+                            <th>Zeitstempel</th>
+                            <th>Aktionen</th>
+                        </tr>
+                    </thead>
+                    <tbody id="zoneTableBody">
+                        <?php if (empty($zones)): ?>
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">
+                                    Noch keine Zonen erstellt
+                                </td>
+                            </tr>
+                        <?php else: ?>
+                            <?php foreach ($zones as $zone): ?>
+                                <tr data-zone-id="<?= $zone['id'] ?>">
+                                    <td>
+                                        <span class="badge" style="background-color: <?= htmlspecialchars($zone['color']) ?>;">
+                                            <?= htmlspecialchars($zone['name']) ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div style="width: 40px; height: 20px; background-color: <?= htmlspecialchars($zone['color']) ?>; border: 2px solid <?= htmlspecialchars($zone['color']) ?>; opacity: 0.5; border-radius: 3px;"></div>
+                                    </td>
+                                    <td><?= htmlspecialchars($zone['description'] ?? '-') ?></td>
+                                    <td><?= htmlspecialchars($zone['created_by_name'] ?? 'Unbekannt') ?></td>
+                                    <td><?= fmt_dt($zone['created_at']) ?></td>
+                                    <td>
+                                        <?php if (!$incident['finalized']): ?>
+                                            <button class="btn btn-sm btn-outline-danger delete-zone-btn"
+                                                data-zone-id="<?= $zone['id'] ?>">
                                                 <i class="fa-solid fa-trash"></i>
                                             </button>
                                         <?php endif; ?>
@@ -669,6 +828,57 @@ try {
     </div>
 </div>
 
+<!-- Zone Creation Modal -->
+<div class="modal fade" id="zoneModal" tabindex="-1" aria-labelledby="zoneModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark">
+            <div class="modal-header">
+                <h5 class="modal-title" id="zoneModalLabel">Zone benennen</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="zoneForm">
+                    <input type="hidden" id="zonePoints" name="points">
+                    <input type="hidden" id="zoneColor" name="color" value="#dc3545">
+
+                    <div class="mb-3">
+                        <label for="zoneName" class="form-label">Zonenname <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="zoneName" name="name"
+                            placeholder="z.B. Sperrzone, Gefahrenbereich" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="zoneDescription" class="form-label">Beschreibung</label>
+                        <textarea class="form-control" id="zoneDescription" name="description" rows="3"
+                            placeholder="Optionale Beschreibung der Zone..."></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Farbe wählen</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            <div class="zone-color-option selected" data-color="#dc3545" style="background-color: #dc3545;" title="Rot - Gefahr"></div>
+                            <div class="zone-color-option" data-color="#fd7e14" style="background-color: #fd7e14;" title="Orange - Warnung"></div>
+                            <div class="zone-color-option" data-color="#ffc107" style="background-color: #ffc107;" title="Gelb - Vorsicht"></div>
+                            <div class="zone-color-option" data-color="#198754" style="background-color: #198754;" title="Grün - Sicher"></div>
+                            <div class="zone-color-option" data-color="#0dcaf0" style="background-color: #0dcaf0;" title="Cyan - Information"></div>
+                            <div class="zone-color-option" data-color="#0d6efd" style="background-color: #0d6efd;" title="Blau - Einsatz"></div>
+                            <div class="zone-color-option" data-color="#6610f2" style="background-color: #6610f2;" title="Lila"></div>
+                            <div class="zone-color-option" data-color="#d63384" style="background-color: #d63384;" title="Pink"></div>
+                            <div class="zone-color-option" data-color="#6c757d" style="background-color: #6c757d;" title="Grau"></div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+                <button type="button" class="btn btn-primary" id="saveZoneBtn">
+                    <i class="fa-solid fa-save me-1"></i>Speichern
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Load taktische-zeichen library from CDN -->
 <script type="module">
     import {
@@ -694,11 +904,22 @@ try {
     const incidentId = <?= $id ?>;
     const isFinalized = <?= $incident['finalized'] ? 'true' : 'false' ?>;
     const existingMarkers = <?= json_encode($markers) ?>;
+    const existingZonesData = <?= json_encode($zones) ?>;
 
     // State
     let markerMode = false;
+    let zoneMode = false;
     let selectedMarkerType = null;
     let pendingMarkerPosition = null;
+
+    // Zone State
+    let zoneDrawing = false;
+    let zonePoints = [];
+    let zonePreviewEl = null;
+    let zonePointElements = [];
+    let zoneInstructionEl = null;
+    let pendingZone = null;
+    const existingZones = [];
 
     // Pan & Zoom State
     let scale = 1;
@@ -747,9 +968,13 @@ try {
         initializeMap();
         initializePanZoom();
         loadMarkers();
+        loadZones();
 
-        // Update marker positions on window resize
-        window.addEventListener('resize', updateMarkerPositions);
+        // Update marker and zone positions on window resize
+        window.addEventListener('resize', () => {
+            updateMarkerPositions();
+            updateZonePositions();
+        });
     });
 
     function initializeTacticalSymbols() {
@@ -849,7 +1074,7 @@ try {
 
         // Pan with mouse drag
         mapContainer.addEventListener('mousedown', (e) => {
-            if (markerMode) return; // Don't pan in marker mode
+            if (markerMode || zoneMode) return; // Don't pan in marker or zone mode
 
             e.preventDefault(); // Prevent text selection
             isPanning = true;
@@ -881,7 +1106,7 @@ try {
         let lastTouchDistance = 0;
 
         mapContainer.addEventListener('touchstart', (e) => {
-            if (e.touches.length === 1 && !markerMode) {
+            if (e.touches.length === 1 && !markerMode && !zoneMode) {
                 isPanning = true;
                 touchStartX = e.touches[0].clientX - translateX;
                 touchStartY = e.touches[0].clientY - translateY;
@@ -948,10 +1173,89 @@ try {
                 mapViewport.classList.remove('no-transition');
             }
 
+            // Update marker and zone positions after transform
+            updateMarkerPositions();
+            updateZonePositions();
+
             // Save state after transformation
             saveMapState();
         }
     }
+
+    // Zone drawing helper functions - global scope
+    window.updateZonePreview = function() {
+        // Remove old preview
+        if (zonePreviewEl) {
+            zonePreviewEl.remove();
+        }
+
+        if (zonePoints.length < 2) return;
+
+        const viewport = document.getElementById('mapViewport');
+        const img = document.getElementById('mapImage');
+
+        // Create SVG for preview
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('class', 'zone-preview-polygon');
+        svg.style.position = 'absolute';
+        svg.style.top = '0';
+        svg.style.left = '0';
+        svg.style.width = img.offsetWidth + 'px';
+        svg.style.height = img.offsetHeight + 'px';
+        svg.style.pointerEvents = 'none';
+
+        const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+        const points = zonePoints.map(p => {
+            const px = (p.x / 100) * img.offsetWidth;
+            const py = (p.y / 100) * img.offsetHeight;
+            return `${px},${py}`;
+        }).join(' ');
+        polygon.setAttribute('points', points);
+        polygon.setAttribute('fill', 'rgba(220, 53, 69, 0.2)');
+        polygon.setAttribute('stroke', '#dc3545');
+        polygon.setAttribute('stroke-width', '0.5');
+        polygon.setAttribute('stroke-dasharray', '5,5');
+        polygon.setAttribute('vector-effect', 'non-scaling-stroke');
+
+        svg.appendChild(polygon);
+        viewport.appendChild(svg);
+        zonePreviewEl = svg;
+    };
+
+    window.finishZoneDrawing = function() {
+        if (zonePoints.length < 3) {
+            showAlert('Eine Zone muss mindestens 3 Punkte haben.', 'warning');
+            return;
+        }
+
+        pendingZone = {
+            points: zonePoints
+        };
+        showZoneModal();
+    };
+
+    window.cancelZoneDrawing = function() {
+        // Clean up
+        zonePoints = [];
+        zonePointElements.forEach(el => el.remove());
+        zonePointElements = [];
+
+        if (zonePreviewEl) {
+            zonePreviewEl.remove();
+            zonePreviewEl = null;
+        }
+
+        if (zoneInstructionEl) {
+            zoneInstructionEl.remove();
+            zoneInstructionEl = null;
+        }
+
+        // Hide finish button if exists
+        const finishBtn = document.getElementById('finishZoneBtn');
+        if (finishBtn) {
+            finishBtn.style.display = 'none';
+        }
+    };
 
     function initializeMap() {
         const mapContainer = document.getElementById('mapContainer');
@@ -1053,6 +1357,171 @@ try {
         refreshBtn.addEventListener('click', function() {
             location.reload();
         });
+
+        // Zone Mode Toggle
+        const toggleZoneBtn = document.getElementById('toggleZoneMode');
+        if (!isFinalized) {
+            toggleZoneBtn.addEventListener('click', function() {
+                zoneMode = !zoneMode;
+                this.innerHTML = zoneMode ?
+                    '<i class="fa-solid fa-times me-1"></i>Abbrechen' :
+                    '<i class="fa-solid fa-draw-polygon me-1"></i>Zone zeichnen';
+                this.classList.toggle('btn-outline-info');
+                this.classList.toggle('btn-warning');
+
+                if (zoneMode) {
+                    // Disable marker mode when enabling zone mode
+                    if (markerMode) {
+                        toggleBtn.click();
+                    }
+                    mapContainer.classList.add('zone-drawing');
+                } else {
+                    mapContainer.classList.remove('zone-drawing');
+                    // Clean up any drawing state
+                    cancelZoneDrawing();
+                }
+            });
+
+            // Zone drawing with polygon - Double click to add points
+            let draggedPoint = null;
+            let draggedPointIndex = -1;
+
+            mapContainer.addEventListener('dblclick', function(e) {
+                if (!zoneMode || isPanning || markerMode) return;
+
+                const rect = mapContainer.getBoundingClientRect();
+                const viewport = document.getElementById('mapViewport');
+                const img = document.getElementById('mapImage');
+
+                // Get click position in viewport space
+                const clickX = e.clientX - rect.left;
+                const clickY = e.clientY - rect.top;
+
+                // Transform to image space
+                const imageX = (clickX - translateX) / scale;
+                const imageY = (clickY - translateY) / scale;
+
+                // Convert to percentages
+                const percentX = (imageX / img.offsetWidth * 100);
+                const percentY = (imageY / img.offsetHeight * 100);
+
+                // Validate within bounds
+                if (percentX < 0 || percentX > 100 || percentY < 0 || percentY > 100) {
+                    return;
+                }
+
+                // Add point to array
+                const pointIndex = zonePoints.length;
+                zonePoints.push({
+                    x: percentX,
+                    y: percentY
+                });
+
+                // Create visual point marker
+                const pointEl = document.createElement('div');
+                pointEl.className = 'zone-point';
+                pointEl.style.left = imageX + 'px';
+                pointEl.style.top = imageY + 'px';
+                pointEl.style.cursor = 'move';
+                pointEl.dataset.pointIndex = pointIndex;
+
+                // Make point draggable
+                pointEl.addEventListener('mousedown', function(e) {
+                    if (!zoneMode) return;
+                    e.stopPropagation();
+                    draggedPoint = pointEl;
+                    draggedPointIndex = parseInt(pointEl.dataset.pointIndex);
+                    pointEl.style.cursor = 'grabbing';
+                });
+
+                viewport.appendChild(pointEl);
+                zonePointElements.push(pointEl);
+
+                // Show instruction on first point
+                if (zonePoints.length === 1) {
+                    zoneInstructionEl = document.createElement('div');
+                    zoneInstructionEl.className = 'zone-instruction';
+                    zoneInstructionEl.textContent = 'Doppelklick zum Hinzufügen weiterer Punkte. Punkte können verschoben werden. (min. 3 Punkte)';
+                    mapContainer.appendChild(zoneInstructionEl);
+                }
+
+                // Show finish button after first point
+                if (zonePoints.length >= 1) {
+                    let finishBtn = document.getElementById('finishZoneBtn');
+                    if (!finishBtn) {
+                        finishBtn = document.createElement('button');
+                        finishBtn.id = 'finishZoneBtn';
+                        finishBtn.className = 'btn btn-success';
+                        finishBtn.style.position = 'absolute';
+                        finishBtn.style.bottom = '20px';
+                        finishBtn.style.right = '20px';
+                        finishBtn.style.zIndex = '1050';
+                        finishBtn.innerHTML = '<i class="fa-solid fa-check me-1"></i>Zone abschließen';
+                        finishBtn.addEventListener('click', function() {
+                            finishZoneDrawing();
+                        });
+                        mapContainer.appendChild(finishBtn);
+                    }
+                    finishBtn.style.display = 'block';
+                }
+
+                // Update preview polygon
+                updateZonePreview();
+
+                e.preventDefault();
+            });
+
+            // Mouse move for dragging points
+            mapContainer.addEventListener('mousemove', function(e) {
+                if (!draggedPoint || !zoneMode) return;
+
+                const rect = mapContainer.getBoundingClientRect();
+                const viewport = document.getElementById('mapViewport');
+                const img = document.getElementById('mapImage');
+
+                const clickX = e.clientX - rect.left;
+                const clickY = e.clientY - rect.top;
+
+                const imageX = (clickX - translateX) / scale;
+                const imageY = (clickY - translateY) / scale;
+
+                const percentX = (imageX / img.offsetWidth * 100);
+                const percentY = (imageY / img.offsetHeight * 100);
+
+                // Validate within bounds
+                if (percentX >= 0 && percentX <= 100 && percentY >= 0 && percentY <= 100) {
+                    // Update point position
+                    zonePoints[draggedPointIndex] = {
+                        x: percentX,
+                        y: percentY
+                    };
+
+                    draggedPoint.style.left = imageX + 'px';
+                    draggedPoint.style.top = imageY + 'px';
+
+                    updateZonePreview();
+                }
+            });
+
+            // Mouse up to stop dragging
+            document.addEventListener('mouseup', function() {
+                if (draggedPoint) {
+                    draggedPoint.style.cursor = 'move';
+                    draggedPoint = null;
+                    draggedPointIndex = -1;
+                }
+            });
+
+            // ESC to cancel
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && zoneMode) {
+                    cancelZoneDrawing();
+                }
+            });
+        } else {
+            toggleZoneBtn.disabled = true;
+            toggleZoneBtn.title = 'Einsatz ist abgeschlossen';
+        }
     }
 
     function showMarkerModal() {
@@ -1102,6 +1571,84 @@ try {
 
         modal.show();
     }
+
+    function showZoneModal() {
+        const modal = new bootstrap.Modal(document.getElementById('zoneModal'));
+
+        // Set zone data (points as JSON)
+        document.getElementById('zonePoints').value = JSON.stringify(pendingZone.points);
+
+        // Reset form
+        document.getElementById('zoneName').value = '';
+        document.getElementById('zoneDescription').value = '';
+        document.getElementById('zoneColor').value = '#dc3545';
+
+        // Reset color selection
+        document.querySelectorAll('.zone-color-option').forEach(opt => {
+            opt.classList.remove('selected');
+            if (opt.dataset.color === '#dc3545') {
+                opt.classList.add('selected');
+            }
+        });
+
+        modal.show();
+    }
+
+    // Color selection for zones
+    document.querySelectorAll('.zone-color-option').forEach(option => {
+        option.addEventListener('click', function() {
+            document.querySelectorAll('.zone-color-option').forEach(opt =>
+                opt.classList.remove('selected'));
+            this.classList.add('selected');
+            document.getElementById('zoneColor').value = this.dataset.color;
+        });
+    });
+
+    // Handle zone modal dismissal (cancel/close)
+    const zoneModalEl = document.getElementById('zoneModal');
+    zoneModalEl.addEventListener('hidden.bs.modal', function() {
+        // Only clean up if there are pending zone points
+        if (zonePoints.length > 0) {
+            cancelZoneDrawing();
+        }
+    });
+
+    // Save zone
+    document.getElementById('saveZoneBtn').addEventListener('click', async function() {
+        const form = document.getElementById('zoneForm');
+        const formData = new FormData(form);
+        formData.append('incident_id', incidentId);
+        formData.append('action', 'create_zone');
+
+        try {
+            const response = await fetch('<?= BASE_PATH ?>einsatz/lagekarte-api.php', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Close modal
+                bootstrap.Modal.getInstance(document.getElementById('zoneModal')).hide();
+
+                // Clean up drawing state
+                cancelZoneDrawing();
+
+                // Reset form
+                form.reset();
+
+                // Reload page to show new zone
+                location.reload();
+            } else {
+                console.error('API Error:', result);
+                showAlert('Fehler beim Speichern: ' + (result.error || 'Unbekannter Fehler'), 'danger');
+            }
+        } catch (error) {
+            console.error('Error saving zone:', error);
+            showAlert('Fehler beim Speichern der Zone: ' + error.message, 'danger');
+        }
+    });
 
     // Preview custom tactical symbol
     document.getElementById('previewCustomSymbol').addEventListener('click', function() {
@@ -1279,6 +1826,45 @@ try {
         });
     });
 
+    // Delete zone
+    document.querySelectorAll('.delete-zone-btn').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const confirmed = await showConfirm(
+                'Zone löschen',
+                'Möchten Sie diese Zone wirklich löschen?',
+                'Ja, löschen',
+                'Abbrechen'
+            );
+
+            if (!confirmed) {
+                return;
+            }
+
+            const zoneId = this.dataset.zoneId;
+            const formData = new FormData();
+            formData.append('action', 'delete_zone');
+            formData.append('zone_id', zoneId);
+
+            try {
+                const response = await fetch('<?= BASE_PATH ?>einsatz/lagekarte-api.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    location.reload();
+                } else {
+                    showAlert('Fehler beim Löschen: ' + (result.error || 'Unbekannter Fehler'), 'danger');
+                }
+            } catch (error) {
+                console.error('Error deleting zone:', error);
+                showAlert('Fehler beim Löschen der Zone', 'danger');
+            }
+        });
+    });
+
     // Load and display markers on map
     function loadMarkers() {
         const mapViewport = document.getElementById('mapViewport');
@@ -1295,6 +1881,124 @@ try {
         } else {
             img.addEventListener('load', updateMarkerPositions);
         }
+    }
+
+    // Load and display zones on map
+    function loadZones() {
+        const mapViewport = document.getElementById('mapViewport');
+        const img = document.getElementById('mapImage');
+
+        if (!mapViewport) {
+            console.error('mapViewport not found!');
+            return;
+        }
+
+        existingZonesData.forEach(zone => {
+            const zoneEl = createZoneElement(zone);
+            if (zoneEl) {
+                mapViewport.appendChild(zoneEl);
+            } else {
+                console.error('Failed to create zone element');
+            }
+        });
+
+        // Update positions after zones are added
+        if (img.complete) {
+            updateZonePositions();
+        } else {
+            img.addEventListener('load', () => {
+                updateZonePositions();
+            });
+        }
+    }
+
+    function createZoneElement(zone) {
+        const zoneEl = document.createElement('div');
+        zoneEl.className = 'map-zone';
+        zoneEl.dataset.zoneId = zone.id;
+        zoneEl.dataset.points = zone.points;
+        zoneEl.dataset.color = zone.color;
+
+        // Parse points from JSON string
+        let points = [];
+        try {
+            points = JSON.parse(zone.points);
+        } catch (e) {
+            console.error('Error parsing zone points:', e, zone);
+            return null;
+        }
+
+        if (points.length < 3) {
+            console.error('Zone must have at least 3 points:', zone);
+            return null;
+        }
+
+        const img = document.getElementById('mapImage');
+
+        // Create SVG for zone
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.style.position = 'absolute';
+        svg.style.top = '0';
+        svg.style.left = '0';
+        svg.style.width = img.offsetWidth + 'px';
+        svg.style.height = img.offsetHeight + 'px';
+        svg.style.pointerEvents = 'none';
+
+        // Calculate points in pixels (will be recalculated on resize/zoom)
+        const pointsStr = points.map(p => {
+            const px = (p.x / 100) * img.offsetWidth;
+            const py = (p.y / 100) * img.offsetHeight;
+            return `${px},${py}`;
+        }).join(' ');
+
+        const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+        polygon.setAttribute('points', pointsStr);
+        polygon.setAttribute('fill', zone.color);
+        polygon.setAttribute('fill-opacity', '0.3');
+        polygon.setAttribute('stroke', zone.color);
+        polygon.setAttribute('stroke-width', '0.5');
+        polygon.setAttribute('vector-effect', 'non-scaling-stroke');
+
+        svg.appendChild(polygon);
+        zoneEl.appendChild(svg);
+
+        return zoneEl;
+    }
+
+    function updateZonePositions() {
+        const img = document.getElementById('mapImage');
+        const zones = document.querySelectorAll('.map-zone');
+
+        zones.forEach(zone => {
+            const pointsData = zone.dataset.points;
+            if (!pointsData) return;
+
+            try {
+                const points = JSON.parse(pointsData);
+                const svg = zone.querySelector('svg');
+                const polygon = svg ? svg.querySelector('polygon') : null;
+
+                if (!polygon || !svg) {
+                    console.error('SVG or polygon not found in zone');
+                    return;
+                }
+
+                // Update SVG dimensions to match image
+                svg.style.width = img.offsetWidth + 'px';
+                svg.style.height = img.offsetHeight + 'px';
+
+                // Recalculate points based on current image size
+                const pointsStr = points.map(p => {
+                    const px = (p.x / 100) * img.offsetWidth;
+                    const py = (p.y / 100) * img.offsetHeight;
+                    return `${px},${py}`;
+                }).join(' ');
+
+                polygon.setAttribute('points', pointsStr);
+            } catch (e) {
+                console.error('Error updating zone position:', e);
+            }
+        });
     }
 
     function createMarkerElement(marker) {
