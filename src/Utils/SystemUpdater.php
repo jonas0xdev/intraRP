@@ -208,7 +208,8 @@ class SystemUpdater
 
             // Security: Validate version format
             // Allow up to 5 version segments (e.g., v0.5.4.3.1) plus optional pre-release suffix
-            if (!preg_match('/^v?\d+(\.\d+){1,5}(-[a-zA-Z0-9]+)?$/', $newVersion)) {
+            // Note: {0,4} means 0 to 4 additional segments after the first, totaling 1 to 5 segments
+            if (!preg_match('/^v?\d+(\.\d+){0,4}(-[a-zA-Z0-9.-]+)?$/', $newVersion)) {
                 throw new Exception('Ungültiges Versionsformat.');
             }
 
