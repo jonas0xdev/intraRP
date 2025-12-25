@@ -1115,12 +1115,12 @@ try {
         const name = document.getElementById('markerName').value.trim();
 
         if (!grundzeichen) {
-            alert('Bitte geben Sie mindestens ein Grundzeichen ein!');
+            showAlert('Bitte geben Sie mindestens ein Grundzeichen ein!', 'warning');
             return;
         }
 
         if (!window.erzeugeTaktischesZeichen) {
-            alert('Fehler: Taktische Zeichen Bibliothek noch nicht geladen. Bitte einen Moment warten und erneut versuchen.');
+            showAlert('Fehler: Taktische Zeichen Bibliothek noch nicht geladen. Bitte einen Moment warten und erneut versuchen.', 'warning');
             return;
         }
 
@@ -1139,7 +1139,7 @@ try {
             const tz = window.erzeugeTaktischesZeichen(config);
             const iconContainer = document.getElementById('selectedMarkerIcon');
             if (!iconContainer) {
-                alert('Fehler: Vorschau-Container nicht gefunden. Bitte Modal neu öffnen.');
+                showAlert('Fehler: Vorschau-Container nicht gefunden. Bitte Modal neu öffnen.', 'danger');
                 return;
             }
             iconContainer.innerHTML = tz.toString();
@@ -1160,7 +1160,7 @@ try {
             selectedMarkerType.symbol = symbol || undefined;
             selectedMarkerType.typ = typ || undefined;
         } catch (e) {
-            alert('Fehler beim Erstellen des taktischen Zeichens:\n' + e.message + '\n\nBitte überprüfen Sie die eingegebenen Werte.');
+            showAlert('Fehler beim Erstellen des taktischen Zeichens:\n' + e.message + '\n\nBitte überprüfen Sie die eingegebenen Werte.', 'danger');
             console.error('Error creating custom tactical symbol:', e);
         }
     });
@@ -1232,18 +1232,25 @@ try {
                 location.reload();
             } else {
                 console.error('API Error:', result);
-                alert('Fehler beim Speichern: ' + (result.error || 'Unbekannter Fehler'));
+                showAlert('Fehler beim Speichern: ' + (result.error || 'Unbekannter Fehler'), 'danger');
             }
         } catch (error) {
             console.error('Error saving marker:', error);
-            alert('Fehler beim Speichern des Markers: ' + error.message);
+            showAlert('Fehler beim Speichern des Markers: ' + error.message, 'danger');
         }
     });
 
     // Delete marker
     document.querySelectorAll('.delete-marker-btn').forEach(btn => {
         btn.addEventListener('click', async function() {
-            if (!confirm('Möchten Sie diesen Marker wirklich löschen?')) {
+            const confirmed = await showConfirm(
+                'Marker löschen',
+                'Möchten Sie diesen Marker wirklich löschen?',
+                'Ja, löschen',
+                'Abbrechen'
+            );
+
+            if (!confirmed) {
                 return;
             }
 
@@ -1263,11 +1270,11 @@ try {
                 if (result.success) {
                     location.reload();
                 } else {
-                    alert('Fehler beim Löschen: ' + (result.error || 'Unbekannter Fehler'));
+                    showAlert('Fehler beim Löschen: ' + (result.error || 'Unbekannter Fehler'), 'danger');
                 }
             } catch (error) {
                 console.error('Error deleting marker:', error);
-                alert('Fehler beim Löschen des Markers');
+                showAlert('Fehler beim Löschen des Markers', 'danger');
             }
         });
     });
@@ -1436,13 +1443,13 @@ try {
                 const result = await response.json();
                 if (!result.success) {
                     console.error('Failed to update marker position:', result.error);
-                    alert('Fehler beim Verschieben des Markers: ' + result.error);
+                    showAlert('Fehler beim Verschieben des Markers: ' + result.error, 'danger');
                     // Revert position
                     updateMarkerPositions();
                 }
             } catch (error) {
                 console.error('Error updating marker position:', error);
-                alert('Fehler beim Verschieben des Markers');
+                showAlert('Fehler beim Verschieben des Markers', 'danger');
                 // Revert position
                 updateMarkerPositions();
             }
