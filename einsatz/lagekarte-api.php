@@ -38,6 +38,10 @@ try {
             handleCreateMarker($pdo);
             break;
 
+        case 'update':
+            handleUpdateMarker($pdo);
+            break;
+
         case 'delete':
             handleDeleteMarker($pdo);
             break;
@@ -186,6 +190,60 @@ function handleCreateMarker($pdo)
         'marker_id' => $markerId,
         'message' => 'Marker erfolgreich erstellt'
     ]);
+}
+
+function handleUpdateMarker($pdo)
+{
+    $markerId = (int)($_POST['marker_id'] ?? 0);
+    $posX = (float)($_POST['pos_x'] ?? -1);
+    $posY = (float)($_POST['pos_y'] ?? -1);
+
+    // Validate input
+    if ($markerId <= 0) {
+        throw new Exception('Ungültige Marker-ID');
+    }
+
+    if ($posX < 0 || $posX > 100 || $posY < 0 || $posY > 100) {
+        throw new Exception('Ungültige Position');
+    }
+
+    // Get marker details
+    $stmt = $pdo->prepare("
+        SELECT m.*, i.finalized 
+        FROM intra_fire_incident_map_markers m
+        JOIN intra_fire_incidents i ON m.incident_id = i.id
+        WHERE m.id = ?
+    ");
+    $stmt->execute([$markerId]);
+    $marker = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$marker) {
+        throw new Exception('Marker nicht gefunden');
+    }
+
+    if ($marker['finalized']) {
+        throw new Exception('Der Einsatz ist bereits abgeschlossen');
+    }
+
+    // Check permissions
+    if (!Permissions::check(['admin', 'fire.incident.qm'])) {
+        // Check if user's vehicle is assigned
+        if (!isset($_SESSION['einsatz_vehicle_id'])) {
+            throw new Exception('Kein Fahrzeug angemeldet');
+        }
+
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM intra_fire_incident_vehicles WHERE incident_id = ? AND vehicle_id = ?");
+        $stmt->execute([$marker['incident_id'], $_SESSION['einsatz_vehicle_id']]);
+        if ($stmt->fetchColumn() == 0) {
+            throw new Exception('Ihr Fahrzeug ist diesem Einsatz nicht zugeordnet');
+        }
+    }
+
+    // Update marker position
+    $stmt = $pdo->prepare("UPDATE intra_fire_incident_map_markers SET pos_x = ?, pos_y = ? WHERE id = ?");
+    $stmt->execute([$posX, $posY, $markerId]);
+
+    echo json_encode(['success' => true, 'message' => 'Marker-Position aktualisiert']);
 }
 
 function handleDeleteMarker($pdo)

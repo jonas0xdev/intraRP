@@ -174,13 +174,13 @@ try {
 
     .map-marker-icon {
         font-size: 10px;
-        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
     }
 
     .map-marker-icon svg {
         width: 12px;
         height: 12px;
-        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8));
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
     }
 
     .map-marker-label {
@@ -197,6 +197,7 @@ try {
         pointer-events: none;
         opacity: 0;
         transition: opacity 0.2s;
+        z-index: 9999;
     }
 
     .map-marker:hover .map-marker-label {
@@ -410,25 +411,10 @@ try {
                             <?php foreach ($markers as $marker): ?>
                                 <tr data-marker-id="<?= $marker['id'] ?>">
                                     <td>
-                                        <span class="marker-type-icon">
-                                            <?php
-                                            $icons = [
-                                                'fire' => '🔥',
-                                                'vehicle' => '🚗',
-                                                'person' => '👤',
-                                                'water' => '💧',
-                                                'danger' => '⚠️',
-                                                'command' => '🎯',
-                                                'staging' => '📍',
-                                                'other' => '📌'
-                                            ];
-                                            echo $icons[$marker['marker_type']] ?? '📌';
-                                            ?>
-                                        </span>
                                         <?= htmlspecialchars($marker['marker_type']) ?>
                                     </td>
                                     <td><?= htmlspecialchars($marker['description'] ?? '-') ?></td>
-                                    <td><?= htmlspecialchars($marker['created_by_name'] ?? 'System') ?></td>
+                                    <td><?= htmlspecialchars($marker['created_by_name'] ?? 'Unbekannt') ?></td>
                                     <td><?= htmlspecialchars($marker['vehicle_name'] ?? '-') ?></td>
                                     <td><?= fmt_dt($marker['created_at']) ?></td>
                                     <td>
@@ -1354,7 +1340,113 @@ try {
         markerEl.appendChild(label);
         markerEl.appendChild(icon);
 
+        // Make marker draggable if not finalized
+        if (!isFinalized) {
+            makeMarkerDraggable(markerEl);
+        }
+
         return markerEl;
+    }
+
+    function makeMarkerDraggable(markerEl) {
+        let isDragging = false;
+        let dragOffsetX, dragOffsetY;
+
+        markerEl.addEventListener('mousedown', function(e) {
+            // Don't start dragging if clicking on delete button or in marker mode
+            if (e.target.classList.contains('delete-marker-btn') || markerMode) {
+                return;
+            }
+
+            isDragging = true;
+            markerEl.style.cursor = 'grabbing';
+            markerEl.style.zIndex = '1000';
+
+            // Get current position in pixels
+            const currentLeft = parseFloat(markerEl.style.left) || 0;
+            const currentTop = parseFloat(markerEl.style.top) || 0;
+
+            // Calculate offset from marker position to mouse click in viewport space
+            const viewport = document.getElementById('mapViewport');
+            const viewportRect = viewport.getBoundingClientRect();
+
+            // Mouse position in viewport space (accounting for scale and translate)
+            const mouseViewportX = (e.clientX - viewportRect.left - translateX) / scale;
+            const mouseViewportY = (e.clientY - viewportRect.top - translateY) / scale;
+
+            // Calculate offset from marker center to mouse
+            dragOffsetX = mouseViewportX - currentLeft;
+            dragOffsetY = mouseViewportY - currentTop;
+
+            e.preventDefault();
+            e.stopPropagation();
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+
+            const viewport = document.getElementById('mapViewport');
+            const viewportRect = viewport.getBoundingClientRect();
+
+            // Calculate mouse position in viewport space
+            const mouseViewportX = (e.clientX - viewportRect.left - translateX) / scale;
+            const mouseViewportY = (e.clientY - viewportRect.top - translateY) / scale;
+
+            // Set new position
+            const newX = mouseViewportX - dragOffsetX;
+            const newY = mouseViewportY - dragOffsetY;
+
+            markerEl.style.left = newX + 'px';
+            markerEl.style.top = newY + 'px';
+        });
+
+        document.addEventListener('mouseup', async function() {
+            if (!isDragging) return;
+
+            isDragging = false;
+            markerEl.style.cursor = 'pointer';
+            markerEl.style.zIndex = '10';
+
+            // Calculate percentage position
+            const img = document.getElementById('mapImage');
+            const pixelX = parseFloat(markerEl.style.left);
+            const pixelY = parseFloat(markerEl.style.top);
+
+            const percentX = (pixelX / img.offsetWidth * 100).toFixed(2);
+            const percentY = (pixelY / img.offsetHeight * 100).toFixed(2);
+
+            // Update dataset
+            markerEl.dataset.posX = percentX;
+            markerEl.dataset.posY = percentY;
+
+            // Save to server
+            const markerId = markerEl.dataset.markerId;
+            try {
+                const formData = new FormData();
+                formData.append('action', 'update');
+                formData.append('marker_id', markerId);
+                formData.append('pos_x', percentX);
+                formData.append('pos_y', percentY);
+
+                const response = await fetch('<?= BASE_PATH ?>einsatz/lagekarte-api.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (!result.success) {
+                    console.error('Failed to update marker position:', result.error);
+                    alert('Fehler beim Verschieben des Markers: ' + result.error);
+                    // Revert position
+                    updateMarkerPositions();
+                }
+            } catch (error) {
+                console.error('Error updating marker position:', error);
+                alert('Fehler beim Verschieben des Markers');
+                // Revert position
+                updateMarkerPositions();
+            }
+        });
     }
 
     function updateMarkerPositions() {
