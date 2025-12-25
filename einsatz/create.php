@@ -185,6 +185,18 @@ try {
         .sidebar-nav .nav-link.active {
             background-color: rgba(13, 110, 253, 0.5);
         }
+
+        .enotf-dropdown-container.form-select {
+            padding: .375rem .75rem;
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.5;
+            color: var(--bs-body-color);
+            background-color: var(--bs-body-bg);
+            background-clip: padding-box;
+            border: var(--bs-border-width) solid var(--bs-border-color);
+            transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+        }
     </style>
 </head>
 
@@ -288,7 +300,7 @@ try {
                         <div class="col-md-6">
                             <label class="form-label">Einsatzleiter*</label>
                             <select name="leader_id" class="form-select" required data-custom-dropdown="true" data-search-threshold="5">
-                                <option value="">– auswählen –</option>
+                                <option value="">Bitte wählen...</option>
                                 <?php foreach ($leaders as $l): ?>
                                     <option value="<?= (int)$l['id'] ?>"><?= htmlspecialchars($l['fullname']) ?></option>
                                 <?php endforeach; ?>
