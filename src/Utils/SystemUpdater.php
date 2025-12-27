@@ -25,6 +25,7 @@ class SystemUpdater
         $this->composerPendingFile = $appRoot . '/system/updates/composer_pending.json';
         $this->githubApiUrl = "https://api.github.com/repos/{$this->githubRepo}";
         $this->loadCurrentVersion();
+        $this->cleanupOldTempDirectories();
     }
 
     /**
@@ -221,39 +222,53 @@ class SystemUpdater
             }
 
             // Check disk space before starting update
-            $tempDirBase = sys_get_temp_dir();
-            $freeSpaceTemp = disk_free_space($tempDirBase);
             $freeSpaceApp = disk_free_space($appRoot);
             $requiredSpace = 200 * 1024 * 1024; // 200 MB minimum
-
-            if ($freeSpaceTemp === false || $freeSpaceTemp < $requiredSpace) {
-                $availableMB = $freeSpaceTemp !== false ? round($freeSpaceTemp / 1024 / 1024, 2) : 0;
-                throw new Exception("Nicht genügend Speicherplatz im temporären Verzeichnis. Benötigt: 200 MB, Verfügbar: {$availableMB} MB");
-            }
 
             if ($freeSpaceApp === false || $freeSpaceApp < $requiredSpace) {
                 $availableMB = $freeSpaceApp !== false ? round($freeSpaceApp / 1024 / 1024, 2) : 0;
                 throw new Exception("Nicht genügend Speicherplatz im Anwendungsverzeichnis. Benötigt: 200 MB, Verfügbar: {$availableMB} MB");
             }
 
-            // Create temporary directory for update
-            $tempDir = $tempDirBase . '/intrarp_update_' . bin2hex(random_bytes(8));
+            // Use local temp directory for Plesk/Shared hosting compatibility
+            // sys_get_temp_dir() is often not accessible in Plesk environments
+            $tempDirBase = $appRoot . '/storage/temp';
+            if (!is_dir($tempDirBase)) {
+                if (!mkdir($tempDirBase, 0755, true)) {
+                    throw new Exception('Konnte temporäres Basisverzeichnis nicht erstellen: ' . $tempDirBase);
+                }
+            }
+
+            if (!is_writable($tempDirBase)) {
+                throw new Exception('Temporäres Basisverzeichnis ist nicht beschreibbar: ' . $tempDirBase . '. Bitte Berechtigungen prüfen.');
+            }
+
+            // Create temporary directory for this update
+            $tempDir = $tempDirBase . '/update_' . bin2hex(random_bytes(8));
             if (!mkdir($tempDir, 0755, true)) {
-                throw new Exception('Konnte temporäres Verzeichnis nicht erstellen. Bitte Berechtigungen für ' . sys_get_temp_dir() . ' prüfen.');
+                throw new Exception('Konnte temporäres Verzeichnis nicht erstellen: ' . $tempDir);
+            }
+
+            // Verify the temporary directory is writable
+            if (!is_writable($tempDir)) {
+                throw new Exception('Temporäres Verzeichnis ist nicht beschreibbar: ' . $tempDir . '. Bitte Berechtigungen prüfen.');
             }
 
             $zipFile = $tempDir . '/update.zip';
             $extractDir = $tempDir . '/extracted';
 
             // Step 1: Download update
+            // Note: GitHub's zipball_url redirects, so we need to follow location
             $context = stream_context_create([
                 'http' => [
                     'method' => 'GET',
                     'header' => [
-                        'User-Agent: intraRP-Updater'
+                        'User-Agent: intraRP-Updater',
+                        'Accept: application/zip, application/octet-stream'
                     ],
                     'timeout' => 300,
-                    'follow_location' => 0
+                    'follow_location' => 1,
+                    'max_redirects' => 5
                 ],
                 'ssl' => [
                     'verify_peer' => true,
@@ -265,11 +280,31 @@ class SystemUpdater
             $updateContent = @file_get_contents($downloadUrl, false, $context);
 
             if ($updateContent === false) {
-                throw new Exception('Fehler beim Herunterladen des Updates. Bitte Internetverbindung prüfen.');
+                throw new Exception('Fehler beim Herunterladen des Updates von: ' . $downloadUrl . '. Bitte Internetverbindung prüfen.');
             }
 
-            if (!file_put_contents($zipFile, $updateContent)) {
-                throw new Exception('Konnte Update-Datei nicht speichern. Bitte Speicherplatz und Berechtigungen prüfen.');
+            // Check if download has content
+            $downloadSize = strlen($updateContent);
+            if ($downloadSize === 0) {
+                throw new Exception('Download war erfolgreich, aber die Datei ist leer (0 Bytes). URL: ' . $downloadUrl);
+            }
+
+            // Verify it looks like a ZIP file (starts with PK)
+            if (substr($updateContent, 0, 2) !== 'PK') {
+                // It might be an error message or HTML page
+                $preview = substr($updateContent, 0, 200);
+                throw new Exception('Download ist keine gültige ZIP-Datei. Möglicherweise API-Fehler oder Berechtigung fehlt. Inhalt-Start: ' . htmlspecialchars($preview));
+            }
+
+            $bytesWritten = @file_put_contents($zipFile, $updateContent);
+            if ($bytesWritten === false) {
+                $error = error_get_last();
+                $errorMsg = $error ? $error['message'] : 'Unbekannter Fehler';
+                throw new Exception('Konnte Update-Datei nicht speichern in: ' . $zipFile . '. Fehler: ' . $errorMsg . '. Bitte Speicherplatz und Berechtigungen prüfen.');
+            }
+
+            if ($bytesWritten === 0 && $downloadSize > 0) {
+                throw new Exception('Update-Datei wurde mit 0 Bytes geschrieben. Möglicherweise fehlt Speicherplatz oder Schreibrechte für: ' . $zipFile);
             }
 
             // Step 2: Extract ZIP
@@ -277,21 +312,77 @@ class SystemUpdater
                 throw new Exception('ZipArchive PHP-Erweiterung nicht verfügbar. Bitte installieren Sie php-zip.');
             }
 
-            $zip = new \ZipArchive();
-            if ($zip->open($zipFile) !== true) {
-                throw new Exception('Konnte ZIP-Datei nicht öffnen. Datei möglicherweise beschädigt.');
+            // Validate ZIP file exists and has content
+            if (!file_exists($zipFile)) {
+                throw new Exception('ZIP-Datei wurde nicht gefunden: ' . $zipFile);
             }
 
-            if (!$zip->extractTo($extractDir)) {
-                $zip->close();
-                throw new Exception('Konnte ZIP-Datei nicht extrahieren. Bitte Speicherplatz und Berechtigungen prüfen.');
+            $zipSize = filesize($zipFile);
+            if ($zipSize === false || $zipSize === 0) {
+                throw new Exception('ZIP-Datei ist leer oder konnte nicht gelesen werden. Größe: ' . ($zipSize === false ? 'unbekannt' : '0 Bytes'));
             }
+
+            $zip = new \ZipArchive();
+            $openResult = $zip->open($zipFile);
+            if ($openResult !== true) {
+                $errorMessages = [
+                    \ZipArchive::ER_EXISTS => 'Datei existiert bereits',
+                    \ZipArchive::ER_INCONS => 'ZIP-Archiv ist inkonsistent',
+                    \ZipArchive::ER_INVAL => 'Ungültiges Argument',
+                    \ZipArchive::ER_MEMORY => 'Speicherfehler',
+                    \ZipArchive::ER_NOENT => 'Datei existiert nicht',
+                    \ZipArchive::ER_NOZIP => 'Keine gültige ZIP-Datei',
+                    \ZipArchive::ER_OPEN => 'Datei konnte nicht geöffnet werden',
+                    \ZipArchive::ER_READ => 'Lesefehler',
+                    \ZipArchive::ER_SEEK => 'Seek-Fehler'
+                ];
+                $errorMsg = $errorMessages[$openResult] ?? 'Unbekannter Fehler (' . $openResult . ')';
+                throw new Exception('Konnte ZIP-Datei nicht öffnen: ' . $errorMsg . '. Dateigröße: ' . round($zipSize / 1024, 2) . ' KB');
+            }
+
+            $numFiles = $zip->numFiles;
+            if ($numFiles === 0) {
+                $zip->close();
+                throw new Exception('ZIP-Datei enthält keine Dateien. Möglicherweise ist das Update beschädigt.');
+            }
+
+            // Create extraction directory before extracting
+            if (!is_dir($extractDir)) {
+                if (!mkdir($extractDir, 0755, true)) {
+                    $zip->close();
+                    throw new Exception('Konnte Extraktions-Verzeichnis nicht erstellen: ' . $extractDir);
+                }
+            }
+
+            if (!is_writable($extractDir)) {
+                $zip->close();
+                throw new Exception('Extraktions-Verzeichnis ist nicht beschreibbar: ' . $extractDir);
+            }
+
+            $extractResult = $zip->extractTo($extractDir);
             $zip->close();
+
+            if (!$extractResult) {
+                throw new Exception('Konnte ZIP-Datei nicht extrahieren (' . $numFiles . ' Dateien). Bitte Speicherplatz und Berechtigungen prüfen.');
+            }
+
+            // Give filesystem time to sync (especially on Windows/Plesk)
+            clearstatcache();
+            usleep(100000); // 100ms wait
 
             // GitHub zipballs extract to a subdirectory like "EmergencyForge-intraRP-abc123/"
             $extractedDirs = glob($extractDir . '/*', GLOB_ONLYDIR);
             if (empty($extractedDirs)) {
-                throw new Exception('Keine extrahierten Verzeichnisse gefunden. ZIP-Struktur ungültig.');
+                // Debug: List all extracted files/folders
+                $allItems = glob($extractDir . '/*');
+                $itemsList = $allItems ? implode(', ', array_map('basename', $allItems)) : 'keine';
+
+                // Additional check with scandir
+                $scannedItems = @scandir($extractDir);
+                $scannedFiltered = $scannedItems ? array_diff($scannedItems, ['.', '..']) : [];
+                $scannedList = !empty($scannedFiltered) ? implode(', ', $scannedFiltered) : 'keine';
+
+                throw new Exception('Keine extrahierten Verzeichnisse gefunden. ZIP sollte ' . $numFiles . ' Dateien enthalten. Glob-Items: ' . $itemsList . '. Scandir-Items: ' . $scannedList . '. Extract-Dir: ' . $extractDir);
             }
             $sourceDir = $extractedDirs[0];
 
@@ -1105,5 +1196,47 @@ class SystemUpdater
         }
 
         return true;
+    }
+
+    /**
+     * Clean up old temporary directories from storage/temp
+     * Removes directories older than 24 hours
+     */
+    private function cleanupOldTempDirectories(): void
+    {
+        try {
+            $appRoot = dirname(dirname(__DIR__));
+            $tempBase = $appRoot . '/storage/temp';
+
+            if (!is_dir($tempBase)) {
+                return;
+            }
+
+            $maxAge = 24 * 3600; // 24 hours in seconds
+            $now = time();
+
+            $dirs = glob($tempBase . '/update_*', GLOB_ONLYDIR);
+            if ($dirs === false) {
+                return;
+            }
+
+            foreach ($dirs as $dir) {
+                $mtime = @filemtime($dir);
+                if ($mtime === false) {
+                    continue;
+                }
+
+                // Delete directories older than 24 hours
+                if (($now - $mtime) > $maxAge) {
+                    try {
+                        $this->recursiveDelete($dir);
+                    } catch (Exception $e) {
+                        // Ignore errors during cleanup
+                    }
+                }
+            }
+        } catch (Exception $e) {
+            // Ignore all cleanup errors to not break the constructor
+        }
     }
 }
