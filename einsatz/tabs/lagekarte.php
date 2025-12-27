@@ -1163,30 +1163,31 @@ try {
     function updateMarkerScale() {
         // At MAX_SCALE (12), icons should be at their base size (6px)
         // At lower zoom levels, they should scale UP to remain visible
-        // Maximum scale-up factor to prevent icons from becoming too large
+        // Use smooth scaling to avoid jumps at threshold boundaries
 
         const baseIconSize = 6; // Size at max zoom (12x)
         const baseFontSize = 4.5;
         const baseLabelSize = 3;
         const baseLabelTop = -4; // Base top position at max zoom
-        const maxScaleFactor = 4; // Don't make icons more than 4x larger
 
-        // Inverse scaling: as we zoom out (scale decreases), icons get larger
-        // At scale 12, factor = 12/12 = 1 (base size 6px)
-        // At scale 6, factor = 12/6 = 2 (icons 12px)
-        // At scale 1, factor = 12/1 = 12 → capped at 4 (icons 24px)
-        const scaleFactor = Math.min(MAX_SCALE / scale, maxScaleFactor);
+        // Smooth inverse scaling using a gentle power curve to avoid jumps
+        // Using ^0.4 creates a very smooth curve: scale 12→1x, scale 11→1.035x, scale 6→1.2x, scale 1→1.86x
+        // Range: 6px (max zoom) to ~11px (min zoom) - very gentle scaling
+        const scaleFactor = Math.pow(MAX_SCALE / scale, 0.4);
 
-        const iconSize = baseIconSize * scaleFactor;
-        const fontSize = baseFontSize * scaleFactor;
-        const labelSize = baseLabelSize * scaleFactor;
-        const labelTop = baseLabelTop * scaleFactor; // More negative as icons grow
+        // Round all calculated values to whole pixels to avoid browser sub-pixel rendering jumps
+        const iconSize = Math.round(baseIconSize * scaleFactor);
+        const fontSize = Math.round(baseFontSize * scaleFactor);
+        const labelSize = Math.round(baseLabelSize * scaleFactor);
+        const labelTop = Math.round(baseLabelTop * scaleFactor); // More negative as icons grow
 
-        // Separate scaling for auto-location marker (MORE aggressive for better visibility)
-        const locationScaleFactor = Math.min(MAX_SCALE / scale, 5); // Max 5x for 6px -> 30px
-        const locationIconSize = 6 * locationScaleFactor; // Base 6px for location icon (6px - 30px range)
-        const locationLabelSize = baseLabelSize * locationScaleFactor;
-        const locationLabelTop = -5.5 * locationScaleFactor; // Scale label position proportionally
+        // Separate scaling for auto-location marker (slightly more aggressive for better visibility)
+        // Using a slightly steeper curve: scale^0.6 instead of scale^0.5
+        // Range: 6px (max zoom) to ~26px (min zoom)
+        const locationScaleFactor = Math.pow(MAX_SCALE / scale, 0.6);
+        const locationIconSize = Math.round(6 * locationScaleFactor); // Base 6px for location icon
+        const locationLabelSize = Math.round(baseLabelSize * locationScaleFactor);
+        const locationLabelTop = Math.round(-5.5 * locationScaleFactor); // Scale label position proportionally
 
         // Apply to normal markers
         document.querySelectorAll('.map-marker:not(.auto-location) .map-marker-icon').forEach(icon => {
