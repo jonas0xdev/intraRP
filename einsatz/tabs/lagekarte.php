@@ -219,30 +219,32 @@ try {
     }
 
     .map-marker-icon {
-        font-size: 10px;
-        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+        font-size: 4.5px;
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+        transition: font-size 0.1s ease;
     }
 
     .map-marker-icon svg {
-        width: 12px;
-        height: 12px;
-        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
+        width: 6px;
+        height: 6px;
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+        transition: width 0.1s ease, height 0.1s ease;
     }
 
     .map-marker-label {
         position: absolute;
-        top: -10px;
+        top: -4px;
         left: 50%;
         transform: translateX(-50%);
         background: rgba(0, 0, 0, 0.85);
         color: white;
-        padding: 1px 4px;
-        border-radius: 2px;
-        font-size: 6px;
+        padding: 0px 2px;
+        border-radius: 1px;
+        font-size: 3px;
         white-space: nowrap;
         pointer-events: none;
         opacity: 0;
-        transition: opacity 0.2s;
+        transition: opacity 0.2s, font-size 0.1s ease, top 0.1s ease;
         z-index: 9999;
     }
 
@@ -1043,8 +1045,8 @@ try {
     let startPanX = 0;
     let startPanY = 0;
     const MIN_SCALE = 0.5;
-    const MAX_SCALE = 5;
-    const ZOOM_STEP = 0.2;
+    const MAX_SCALE = 12;
+    const ZOOM_STEP = 0.5;
     const MAP_STATE_KEY = `lagekarte_state_${incidentId}`;
 
     // Load saved map state
@@ -1088,8 +1090,48 @@ try {
         window.addEventListener('resize', () => {
             updateMarkerPositions();
             updateZonePositions();
+            updateMarkerScale();
         });
     });
+
+    // Dynamic marker scaling based on zoom level
+    function updateMarkerScale() {
+        // At MAX_SCALE (12), icons should be at their base size (6px)
+        // At lower zoom levels, they should scale UP to remain visible
+        // Maximum scale-up factor to prevent icons from becoming too large
+
+        const baseIconSize = 6; // Size at max zoom (12x)
+        const baseFontSize = 4.5;
+        const baseLabelSize = 3;
+        const baseLabelTop = -4; // Base top position at max zoom
+        const maxScaleFactor = 4; // Don't make icons more than 4x larger
+
+        // Inverse scaling: as we zoom out (scale decreases), icons get larger
+        // At scale 12, factor = 12/12 = 1 (base size 6px)
+        // At scale 6, factor = 12/6 = 2 (icons 12px)
+        // At scale 1, factor = 12/1 = 12 → capped at 4 (icons 24px)
+        const scaleFactor = Math.min(MAX_SCALE / scale, maxScaleFactor);
+
+        const iconSize = baseIconSize * scaleFactor;
+        const fontSize = baseFontSize * scaleFactor;
+        const labelSize = baseLabelSize * scaleFactor;
+        const labelTop = baseLabelTop * scaleFactor; // More negative as icons grow
+
+        // Apply to all markers
+        document.querySelectorAll('.map-marker-icon').forEach(icon => {
+            icon.style.fontSize = fontSize + 'px';
+        });
+
+        document.querySelectorAll('.map-marker-icon svg').forEach(svg => {
+            svg.style.width = iconSize + 'px';
+            svg.style.height = iconSize + 'px';
+        });
+
+        document.querySelectorAll('.map-marker-label').forEach(label => {
+            label.style.fontSize = labelSize + 'px';
+            label.style.top = labelTop + 'px';
+        });
+    }
 
     // Track initialization attempts to prevent infinite retry
     let tacticalSymbolInitAttempts = 0;
@@ -1383,6 +1425,7 @@ try {
             // Update marker and zone positions after transform
             updateMarkerPositions();
             updateZonePositions();
+            updateMarkerScale();
 
             // Save state after transformation
             saveMapState();
@@ -2101,8 +2144,12 @@ try {
         // Update positions after markers are added
         if (img.complete) {
             updateMarkerPositions();
+            updateMarkerScale(); // Apply initial scale
         } else {
-            img.addEventListener('load', updateMarkerPositions);
+            img.addEventListener('load', () => {
+                updateMarkerPositions();
+                updateMarkerScale(); // Apply initial scale
+            });
         }
     }
 
