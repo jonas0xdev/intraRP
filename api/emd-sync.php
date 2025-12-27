@@ -44,12 +44,12 @@ function logSync($message, $level = 'INFO')
 
 /**
  * Verarbeitet abgeschlossene Einsätze (Dispatch Logs)
- * Aktualisiert Fire Incidents mit dispatch_data falls noch nicht manuell geändert
+ * Wird nur zur Validierung verwendet - keine Speicherung nötig
  */
 function handleDispatchLogs($data, $pdo)
 {
     try {
-        logSync('Dispatch-Log-Sync empfangen', 'INFO');
+        logSync('Dispatch-Log-Sync empfangen (keine Speicherung erforderlich)', 'INFO');
 
         $missions = $data['missions'] ?? [];
 
@@ -59,120 +59,14 @@ function handleDispatchLogs($data, $pdo)
             return;
         }
 
-        logSync('Es wurden ' . count($missions) . ' Dispatch-Logs empfangen', 'INFO');
-
-        $updated = 0;
-        $skipped = 0;
-
-        foreach ($missions as $mission) {
-            $missionNumber = $mission['mission_number'] ?? null;
-            $dispatchData = $mission['dispatch_data'] ?? null;
-
-            if (!$missionNumber) {
-                logSync('Mission ohne mission_number übersprungen', 'WARNING');
-                continue;
-            }
-
-            // Prüfe ob Fire Incident für diese Mission existiert
-            $stmt = $pdo->prepare("
-                SELECT id, location, keyword, notes, updated_by 
-                FROM intra_fire_incidents 
-                WHERE incident_number = :incident_number 
-                LIMIT 1
-            ");
-            $stmt->execute([':incident_number' => (string)$missionNumber]);
-            $incident = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if (!$incident) {
-                logSync("Kein Fire Incident für Mission #$missionNumber gefunden", 'DEBUG');
-                $skipped++;
-                continue;
-            }
-
-            $incidentId = (int)$incident['id'];
-
-            // Nur updaten wenn noch nicht manuell geändert wurde (updated_by ist NULL)
-            if ($incident['updated_by'] !== null) {
-                logSync("Fire Incident #$incidentId (Mission #$missionNumber) wurde bereits manuell geändert, wird nicht aktualisiert", 'INFO');
-                $skipped++;
-                continue;
-            }
-
-            // Wenn keine dispatch_data vorhanden, überspringe
-            if (!$dispatchData) {
-                logSync("Keine dispatch_data für Mission #$missionNumber vorhanden", 'DEBUG');
-                $skipped++;
-                continue;
-            }
-
-            logSync("Dispatch-Data für Mission #$missionNumber: " . json_encode($dispatchData), 'DEBUG');
-
-            $location = $incident['location'];
-            $keyword = $incident['keyword'];
-            $notes = $incident['notes'];
-            $hasChanges = false;
-
-            // Update location wenn noch Fallback
-            if ($location === 'BITTE ÄNDERN!' || $location === 'Automatisch erstellt (EMD-Sync)') {
-                if (!empty($dispatchData['postal'])) {
-                    $location = $dispatchData['postal'];
-                    $hasChanges = true;
-                    logSync("Mission #$missionNumber: Location wird aktualisiert auf: $location", 'INFO');
-                }
-            }
-
-            // Update keyword wenn noch Fallback
-            if ($keyword === 'BITTE ÄNDERN!' || $keyword === 'EMD-Sync Einsatz') {
-                if (!empty($dispatchData['dispatch_code'])) {
-                    $keyword = $dispatchData['dispatch_code'];
-                    $hasChanges = true;
-                    logSync("Mission #$missionNumber: Keyword wird aktualisiert auf: $keyword", 'INFO');
-                }
-            }
-
-            // Update notes wenn dispatch_issue vorhanden und notes noch der Standard-Text ist
-            if (strpos($notes, 'Automatisch erstellt durch') !== false) {
-                if (!empty($dispatchData['dispatch_issue'])) {
-                    $notes = $dispatchData['dispatch_issue'] . "\n\n" . 'Automatisch erstellt durch Synchronisation';
-                    $hasChanges = true;
-                    logSync("Mission #$missionNumber: Notes wird aktualisiert mit dispatch_issue", 'INFO');
-                }
-            }
-
-            // Wenn Änderungen vorhanden, update durchführen
-            if ($hasChanges) {
-                $updateStmt = $pdo->prepare("
-                    UPDATE intra_fire_incidents 
-                    SET location = :location, 
-                        keyword = :keyword, 
-                        notes = :notes,
-                        updated_at = NOW()
-                    WHERE id = :id
-                ");
-                $updateStmt->execute([
-                    ':location' => $location,
-                    ':keyword' => $keyword,
-                    ':notes' => $notes,
-                    ':id' => $incidentId
-                ]);
-
-                $updated++;
-                logSync("Fire Incident #$incidentId für Mission #$missionNumber erfolgreich aktualisiert", 'INFO');
-            } else {
-                $skipped++;
-                logSync("Fire Incident #$incidentId für Mission #$missionNumber: Keine Änderungen notwendig", 'DEBUG');
-            }
-        }
-
-        logSync("Dispatch-Log-Verarbeitung abgeschlossen: $updated aktualisiert, $skipped übersprungen", 'INFO');
+        logSync('Es wurden ' . count($missions) . ' abgeschlossene Einsätze empfangen (werden nicht gespeichert)', 'INFO');
 
         echo json_encode([
             'success' => true,
             'type' => 'dispatch_logs',
-            'updated' => $updated,
-            'skipped' => $skipped,
+            'processed' => count($missions),
             'total_received' => count($missions),
-            'message' => "Dispatch-Logs verarbeitet: $updated Fire Incidents aktualisiert"
+            'message' => 'Dispatch-Logs empfangen, Statusmeldungen werden über Status-Sync verarbeitet'
         ]);
     } catch (Exception $e) {
         logSync('Fehler bei Dispatch-Log-Verarbeitung: ' . $e->getMessage(), 'ERROR');
