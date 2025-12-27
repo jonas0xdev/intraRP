@@ -369,6 +369,7 @@ $migrationFiles = [
     // 27.12.2025
     ['file' => 'alter_map_markers_27122025_created_at.php', 'type' => 'alter'],
     ['file' => 'alter_map_zones_27122025_created_at.php', 'type' => 'alter'],
+    ['file' => 'alter_intra_fire_incident_log_27122025_created_by_nullable.php', 'type' => 'alter'],
 ];
 
 $executed = 0;

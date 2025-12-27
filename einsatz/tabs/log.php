@@ -60,6 +60,7 @@ $actionTypeLabels = [
                             <th>Beschreibung</th>
                             <th style="width: 150px;">Fahrzeug</th>
                             <th style="width: 150px;">Operator</th>
+                            <th style="width: 150px;">Erstellt von</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -92,6 +93,17 @@ $actionTypeLabels = [
                                     <?php if ($entry['operator_name']): ?>
                                         <i class="fas fa-user me-1 text-muted"></i>
                                         <?= htmlspecialchars($entry['operator_name']) ?>
+                                    <?php else: ?>
+                                        <span class="text-muted">—</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php if ($entry['created_by_name']): ?>
+                                        <i class="fas fa-user me-1 text-muted"></i>
+                                        <?= htmlspecialchars($entry['created_by_name']) ?>
+                                    <?php elseif ($entry['created_by'] === null): ?>
+                                        <i class="fas fa-cog me-1 text-muted"></i>
+                                        <span class="text-info">System</span>
                                     <?php else: ?>
                                         <span class="text-muted">—</span>
                                     <?php endif; ?>
