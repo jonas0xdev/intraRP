@@ -365,6 +365,10 @@ $migrationFiles = [
     ['file' => 'add_vehicle_id_to_zones_25122025.php', 'type' => 'alter'],
     ['file' => 'add_operator_id_to_markers_25122025.php', 'type' => 'alter'],
     ['file' => 'add_operator_id_to_zones_25122025.php', 'type' => 'alter'],
+
+    // 27.12.2025
+    ['file' => 'alter_map_markers_27122025_created_at.php', 'type' => 'alter'],
+    ['file' => 'alter_map_zones_27122025_created_at.php', 'type' => 'alter'],
 ];
 
 $executed = 0;

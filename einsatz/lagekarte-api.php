@@ -474,8 +474,8 @@ function handleCreateZone($pdo)
     // Insert zone
     $stmt = $pdo->prepare("
         INSERT INTO intra_fire_incident_map_zones 
-        (incident_id, name, description, points, color, created_by, vehicle_id, operator_id)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        (incident_id, name, description, points, color, created_by, vehicle_id, operator_id, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
     ");
 
     $stmt->execute([
