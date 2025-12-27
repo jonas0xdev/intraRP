@@ -458,6 +458,8 @@ try {
                 $dispatchIssue = '';
                 $callerName = '';
                 $callerContact = '';
+                $locationX = null;
+                $locationY = null;
 
                 logSync("Dispatch #$dispatchId: dispatch_data vorhanden: " . ($dispatchData ? 'JA' : 'NEIN'), 'DEBUG');
 
@@ -470,6 +472,16 @@ try {
                         logSync("Dispatch #$dispatchId: Location aus postal gesetzt: $location", 'DEBUG');
                     } else {
                         logSync("Dispatch #$dispatchId: postal ist leer oder nicht vorhanden", 'WARNING');
+                    }
+
+                    // Verwende location_x und location_y für GTA Koordinaten (optional)
+                    if (!empty($dispatchData['location_x'])) {
+                        $locationX = (float)$dispatchData['location_x'];
+                        logSync("Dispatch #$dispatchId: location_x gesetzt: $locationX", 'DEBUG');
+                    }
+                    if (!empty($dispatchData['location_y'])) {
+                        $locationY = (float)$dispatchData['location_y'];
+                        logSync("Dispatch #$dispatchId: location_y gesetzt: $locationY", 'DEBUG');
                     }
 
                     // Verwende dispatch_code für keyword
@@ -510,8 +522,8 @@ try {
 
                 $insertFireIncidentStmt = $pdo->prepare("
                     INSERT INTO intra_fire_incidents 
-                    (incident_number, location, keyword, caller_name, caller_contact, started_at, status, notes, created_by, created_at) 
-                    VALUES (:incident_number, :location, :keyword, :caller_name, :caller_contact, :started_at, 'in_sichtung', :notes, NULL, :created_at)
+                    (incident_number, location, keyword, caller_name, caller_contact, started_at, status, notes, created_by, created_at, location_x, location_y) 
+                    VALUES (:incident_number, :location, :keyword, :caller_name, :caller_contact, :started_at, 'in_sichtung', :notes, NULL, :created_at, :location_x, :location_y)
                 ");
                 $insertFireIncidentStmt->execute([
                     ':incident_number' => (string)$dispatchId,
@@ -521,7 +533,9 @@ try {
                     ':caller_contact' => $callerContact ?: null,
                     ':started_at' => $currentDateTime,
                     ':notes' => $notes,
-                    ':created_at' => $currentDateTime
+                    ':created_at' => $currentDateTime,
+                    ':location_x' => $locationX,
+                    ':location_y' => $locationY
                 ]);
 
                 $fireIncidentId = (int)$pdo->lastInsertId();
