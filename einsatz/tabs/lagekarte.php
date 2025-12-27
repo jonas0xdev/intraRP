@@ -4,6 +4,10 @@ if (!isset($incident, $pdo, $id)) {
     die('Error: Required context not available');
 }
 
+require_once __DIR__ . '/../../vendor/autoload.php';
+
+use App\Helpers\MapCoordinates;
+
 // Helper function to get display name with fallback to vehicle operator
 function getDisplayName($created_by_name, $operator_name, $vehicle_name)
 {
@@ -46,6 +50,54 @@ try {
 } catch (PDOException $e) {
     // Table might not exist yet
     $markers = [];
+}
+
+// Check if incident has GTA coordinates and create automatic location marker
+if (!empty($incident['location_x']) && !empty($incident['location_y'])) {
+    // Convert GTA coordinates to map percentages
+    $mapCoords = MapCoordinates::gtaToMap(
+        (float)$incident['location_x'],
+        (float)$incident['location_y']
+    );
+
+    // Check if location marker already exists
+    $hasLocationMarker = false;
+    foreach ($markers as $marker) {
+        if ($marker['marker_type'] === 'Einsatzort' && $marker['description'] === 'Automatisch aus GTA-Koordinaten') {
+            $hasLocationMarker = true;
+            break;
+        }
+    }
+
+    // Add virtual location marker if it doesn't exist yet
+    if (!$hasLocationMarker) {
+        $locationMarker = [
+            'id' => 'auto_location',
+            'incident_id' => $id,
+            'marker_type' => 'Einsatzort',
+            'pos_x' => $mapCoords['x'],
+            'pos_y' => $mapCoords['y'],
+            'description' => null,
+            'grundzeichen' => 'ohne',
+            'organisation' => null,
+            'fachaufgabe' => null,
+            'einheit' => null,
+            'symbol' => 'feuer',
+            'typ' => null,
+            'text' => '🔥',
+            'name' => 'Einsatzort',
+            'created_by' => null,
+            'vehicle_id' => null,
+            'operator_id' => null,
+            'created_at' => $incident['started_at'],
+            'created_by_name' => 'System',
+            'vehicle_name' => null,
+            'operator_name' => null
+        ];
+
+        // Prepend to markers array so it shows first
+        array_unshift($markers, $locationMarker);
+    }
 }
 
 // Load existing zones for this incident
@@ -213,36 +265,51 @@ try {
         pointer-events: auto;
     }
 
+    .map-marker.auto-location {
+        z-index: 5;
+        cursor: default;
+    }
+
+    .map-marker.auto-location .map-marker-label {
+        top: -5.5px;
+    }
+
     .map-marker:hover {
         transform: scale(1.2);
         z-index: 25;
     }
 
+    .map-marker.auto-location:hover {
+        z-index: 10;
+    }
+
     .map-marker-icon {
-        font-size: 10px;
-        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+        font-size: 4.5px;
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+        transition: font-size 0.1s ease;
     }
 
     .map-marker-icon svg {
-        width: 12px;
-        height: 12px;
-        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
+        width: 6px;
+        height: 6px;
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+        transition: width 0.1s ease, height 0.1s ease;
     }
 
     .map-marker-label {
         position: absolute;
-        top: -10px;
+        top: -4px;
         left: 50%;
         transform: translateX(-50%);
         background: rgba(0, 0, 0, 0.85);
         color: white;
-        padding: 1px 4px;
-        border-radius: 2px;
-        font-size: 6px;
+        padding: 0px 2px;
+        border-radius: 1px;
+        font-size: 3px;
         white-space: nowrap;
         pointer-events: none;
         opacity: 0;
-        transition: opacity 0.2s;
+        transition: opacity 0.2s, font-size 0.1s ease, top 0.1s ease;
         z-index: 9999;
     }
 
@@ -1043,8 +1110,8 @@ try {
     let startPanX = 0;
     let startPanY = 0;
     const MIN_SCALE = 0.5;
-    const MAX_SCALE = 5;
-    const ZOOM_STEP = 0.2;
+    const MAX_SCALE = 12;
+    const ZOOM_STEP = 0.5;
     const MAP_STATE_KEY = `lagekarte_state_${incidentId}`;
 
     // Load saved map state
@@ -1088,8 +1155,67 @@ try {
         window.addEventListener('resize', () => {
             updateMarkerPositions();
             updateZonePositions();
+            updateMarkerScale();
         });
     });
+
+    // Dynamic marker scaling based on zoom level
+    function updateMarkerScale() {
+        // At MAX_SCALE (12), icons should be at their base size (6px)
+        // At lower zoom levels, they should scale UP to remain visible
+        // Use smooth scaling to avoid jumps at threshold boundaries
+
+        const baseIconSize = 6; // Size at max zoom (12x)
+        const baseFontSize = 4.5;
+        const baseLabelSize = 3;
+        const baseLabelTop = -4; // Base top position at max zoom
+
+        // Smooth inverse scaling using a gentle power curve to avoid jumps
+        // Using ^0.4 creates a very smooth curve: scale 12→1x, scale 11→1.035x, scale 6→1.2x, scale 1→1.86x
+        // Range: 6px (max zoom) to ~11px (min zoom) - very gentle scaling
+        const scaleFactor = Math.pow(MAX_SCALE / scale, 0.4);
+
+        // Round all calculated values to whole pixels to avoid browser sub-pixel rendering jumps
+        const iconSize = Math.round(baseIconSize * scaleFactor);
+        const fontSize = Math.round(baseFontSize * scaleFactor);
+        const labelSize = Math.round(baseLabelSize * scaleFactor);
+        const labelTop = Math.round(baseLabelTop * scaleFactor); // More negative as icons grow
+
+        // Separate scaling for auto-location marker (slightly more aggressive for better visibility)
+        // Using a slightly steeper curve: scale^0.6 instead of scale^0.5
+        // Range: 6px (max zoom) to ~26px (min zoom)
+        const locationScaleFactor = Math.pow(MAX_SCALE / scale, 0.6);
+        const locationIconSize = Math.round(6 * locationScaleFactor); // Base 6px for location icon
+        const locationLabelSize = Math.round(baseLabelSize * locationScaleFactor);
+        const locationLabelTop = Math.round(-5.5 * locationScaleFactor); // Scale label position proportionally
+
+        // Apply to normal markers
+        document.querySelectorAll('.map-marker:not(.auto-location) .map-marker-icon').forEach(icon => {
+            icon.style.fontSize = fontSize + 'px';
+        });
+
+        document.querySelectorAll('.map-marker:not(.auto-location) .map-marker-icon svg').forEach(svg => {
+            svg.style.width = iconSize + 'px';
+            svg.style.height = iconSize + 'px';
+        });
+
+        document.querySelectorAll('.map-marker:not(.auto-location) .map-marker-label').forEach(label => {
+            label.style.fontSize = labelSize + 'px';
+            label.style.top = labelTop + 'px';
+        });
+
+        // Apply to auto-location marker with different scaling
+        document.querySelectorAll('.map-marker.auto-location .map-marker-icon svg').forEach(svg => {
+            const size = locationIconSize + 'px';
+            svg.style.width = size;
+            svg.style.height = size;
+        });
+
+        document.querySelectorAll('.map-marker.auto-location .map-marker-label').forEach(label => {
+            label.style.fontSize = locationLabelSize + 'px';
+            label.style.top = locationLabelTop + 'px';
+        });
+    }
 
     // Track initialization attempts to prevent infinite retry
     let tacticalSymbolInitAttempts = 0;
@@ -1383,6 +1509,7 @@ try {
             // Update marker and zone positions after transform
             updateMarkerPositions();
             updateZonePositions();
+            updateMarkerScale();
 
             // Save state after transformation
             saveMapState();
@@ -1541,8 +1668,8 @@ try {
                 const imageY = (clickY - translateY) / scale;
 
                 // Convert to percentage of image dimensions
-                const x = (imageX / img.offsetWidth * 100).toFixed(2);
-                const y = (imageY / img.offsetHeight * 100).toFixed(2);
+                const x = (imageX / img.offsetWidth * 100).toFixed(4);
+                const y = (imageY / img.offsetHeight * 100).toFixed(4);
 
                 // Validate coordinates are within bounds
                 if (x < 0 || x > 100 || y < 0 || y > 100) {
@@ -2101,8 +2228,12 @@ try {
         // Update positions after markers are added
         if (img.complete) {
             updateMarkerPositions();
+            updateMarkerScale(); // Apply initial scale
         } else {
-            img.addEventListener('load', updateMarkerPositions);
+            img.addEventListener('load', () => {
+                updateMarkerPositions();
+                updateMarkerScale(); // Apply initial scale
+            });
         }
     }
 
@@ -2231,14 +2362,24 @@ try {
         markerEl.dataset.posX = marker.pos_x;
         markerEl.dataset.posY = marker.pos_y;
 
+        // Check if this is the auto-location marker
+        const isAutoLocation = marker.id === 'auto_location' || marker.description === 'Automatisch aus GTA-Koordinaten';
+        if (isAutoLocation) {
+            markerEl.classList.add('auto-location');
+        }
+
         // Position will be set by updateMarkerPositions()
-        markerEl.style.transform = 'translate(-50%, -100%)';
+        markerEl.style.transform = 'translate(-50%, -50%)';
 
         const icon = document.createElement('div');
         icon.className = 'map-marker-icon';
 
+        // Use SVG icon for auto-location marker
+        if (isAutoLocation) {
+            icon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" style="filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));"><path fill="#d10000" d="M320 576C178.6 576 64 461.4 64 320C64 178.6 178.6 64 320 64C461.4 64 576 178.6 576 320C576 461.4 461.4 576 320 576zM320 112C205.1 112 112 205.1 112 320C112 434.9 205.1 528 320 528C434.9 528 528 434.9 528 320C528 205.1 434.9 112 320 112zM320 416C267 416 224 373 224 320C224 267 267 224 320 224C373 224 416 267 416 320C416 373 373 416 320 416z"/></svg>`;
+        }
         // Try to generate tactical symbol if data is available and library is loaded
-        if (marker.grundzeichen && window.erzeugeTaktischesZeichen) {
+        else if (marker.grundzeichen && window.erzeugeTaktischesZeichen) {
             try {
                 const config = {
                     grundzeichen: marker.grundzeichen
@@ -2265,8 +2406,12 @@ try {
 
         const label = document.createElement('div');
         label.className = 'map-marker-label';
-        // For vehicle markers, show vehicle name instead of vehicle_X
-        if (marker.marker_type && marker.marker_type.startsWith('vehicle_') && marker.vehicle_name) {
+
+        // Set label text
+        if (isAutoLocation) {
+            label.textContent = 'Einsatzort';
+        } else if (marker.marker_type && marker.marker_type.startsWith('vehicle_') && marker.vehicle_name) {
+            // For vehicle markers, show vehicle name instead of vehicle_X
             label.textContent = marker.vehicle_name;
         } else {
             label.textContent = marker.description || marker.marker_type;
@@ -2275,8 +2420,8 @@ try {
         markerEl.appendChild(label);
         markerEl.appendChild(icon);
 
-        // Make marker draggable if not finalized
-        if (!isFinalized) {
+        // Make marker draggable if not finalized and not auto-generated from GTA coordinates
+        if (!isFinalized && !isAutoLocation) {
             makeMarkerDraggable(markerEl);
         }
 
@@ -2347,8 +2492,8 @@ try {
             const pixelX = parseFloat(markerEl.style.left);
             const pixelY = parseFloat(markerEl.style.top);
 
-            const percentX = (pixelX / img.offsetWidth * 100).toFixed(2);
-            const percentY = (pixelY / img.offsetHeight * 100).toFixed(2);
+            const percentX = (pixelX / img.offsetWidth * 100).toFixed(4);
+            const percentY = (pixelY / img.offsetHeight * 100).toFixed(4);
 
             // Update dataset
             markerEl.dataset.posX = percentX;

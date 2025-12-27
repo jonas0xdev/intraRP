@@ -15,6 +15,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 use App\Auth\Permissions;
 use App\Helpers\Flash;
+use App\Helpers\MapCoordinates;
 
 header('Content-Type: application/json');
 
@@ -60,6 +61,10 @@ try {
 
         case 'list_zones':
             handleListZones($pdo);
+            break;
+
+        case 'create_incident_location_marker':
+            handleCreateIncidentLocationMarker($pdo);
             break;
 
         default:
@@ -602,4 +607,76 @@ function handleListZones($pdo)
         'success' => true,
         'zones' => $zones
     ]);
+}
+
+/**
+ * Create a location marker for an incident based on GTA coordinates
+ */
+function handleCreateIncidentLocationMarker($pdo)
+{
+    $incidentId = (int)($_POST['incident_id'] ?? 0);
+    $gtaX = (float)($_POST['gta_x'] ?? 0);
+    $gtaY = (float)($_POST['gta_y'] ?? 0);
+
+    if ($incidentId <= 0) {
+        throw new Exception('Ungültige Einsatz-ID');
+    }
+
+    // Convert GTA coordinates to map percentages
+    $mapCoords = MapCoordinates::gtaToMap($gtaX, $gtaY);
+
+    // Check if incident already has a location marker
+    $stmt = $pdo->prepare("
+        SELECT id FROM intra_fire_incident_map_markers 
+        WHERE incident_id = ? AND marker_type = 'Einsatzort'
+    ");
+    $stmt->execute([$incidentId]);
+    $existing = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($existing) {
+        // Update existing marker
+        $stmt = $pdo->prepare("
+            UPDATE intra_fire_incident_map_markers 
+            SET pos_x = ?, pos_y = ? 
+            WHERE id = ?
+        ");
+        $stmt->execute([$mapCoords['x'], $mapCoords['y'], $existing['id']]);
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Einsatzort-Marker aktualisiert',
+            'marker_id' => $existing['id'],
+            'map_coords' => $mapCoords,
+            'gta_coords' => ['x' => $gtaX, 'y' => $gtaY]
+        ]);
+    } else {
+        // Create new marker
+        $userId = $_SESSION['userid'] ?? null;
+        $vehicleId = $_SESSION['einsatz_vehicle_id'] ?? null;
+        $operatorId = $_SESSION['einsatz_operator_id'] ?? null;
+
+        $stmt = $pdo->prepare("
+            INSERT INTO intra_fire_incident_map_markers 
+            (incident_id, marker_type, pos_x, pos_y, description, grundzeichen, organisation, symbol, created_by, vehicle_id, operator_id, created_at)
+            VALUES (?, 'Einsatzort', ?, ?, 'Automatisch generiert aus GTA-Koordinaten', 'ohne', NULL, 'feuer', ?, ?, ?, NOW())
+        ");
+        $stmt->execute([
+            $incidentId,
+            $mapCoords['x'],
+            $mapCoords['y'],
+            $userId,
+            $vehicleId,
+            $operatorId
+        ]);
+
+        $markerId = $pdo->lastInsertId();
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Einsatzort-Marker erstellt',
+            'marker_id' => $markerId,
+            'map_coords' => $mapCoords,
+            'gta_coords' => ['x' => $gtaX, 'y' => $gtaY]
+        ]);
+    }
 }
