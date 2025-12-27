@@ -336,6 +336,7 @@ try {
     logSync('Es wurden ' . count($vehicles) . ' Fahrzeuge zur Verarbeitung empfangen', 'INFO');
 
     $vehiclesByDispatch = [];
+    $dispatchDataByDispatch = []; // Speichere dispatch_data für jeden Dispatch
 
     foreach ($vehicles as $vehicle) {
         $dispatchId = intval($vehicle['dispatch'] ?? 0);
@@ -349,6 +350,11 @@ try {
         }
 
         $vehiclesByDispatch[$dispatchId][] = $vehicle;
+
+        // Speichere dispatch_data (falls vorhanden)
+        if (isset($vehicle['dispatch_data']) && !isset($dispatchDataByDispatch[$dispatchId])) {
+            $dispatchDataByDispatch[$dispatchId] = $vehicle['dispatch_data'];
+        }
     }
 
     logSync('Es wurden ' . count($vehiclesByDispatch) . ' eindeutige Einsatznummern gefunden', 'INFO');
@@ -432,6 +438,37 @@ try {
             if (!$existingFireIncident) {
                 // Erstelle neuen Fire Incident
                 $currentDateTime = date('Y-m-d H:i:s');
+
+                // Hole dispatch_data falls vorhanden
+                $dispatchData = $dispatchDataByDispatch[$dispatchId] ?? null;
+                $location = 'BITTE ÄNDERN!';
+                $keyword = 'BITTE ÄNDERN!';
+                $dispatchIssue = '';
+
+                if ($dispatchData) {
+                    // Verwende postal für location
+                    if (!empty($dispatchData['postal'])) {
+                        $location = $dispatchData['postal'];
+                    }
+
+                    // Verwende dispatch_code für keyword
+                    if (!empty($dispatchData['dispatch_code'])) {
+                        $keyword = $dispatchData['dispatch_code'];
+                    }
+
+                    // Verwende dispatch_issue für notes
+                    if (!empty($dispatchData['dispatch_issue'])) {
+                        $dispatchIssue = $dispatchData['dispatch_issue'];
+                    }
+                }
+
+                // Erstelle notes mit dispatch_issue und System-Hinweis
+                $notes = $dispatchIssue;
+                if (!empty($notes)) {
+                    $notes .= "\n\n";
+                }
+                $notes .= 'Automatisch erstellt durch Synchronisation';
+
                 $insertFireIncidentStmt = $pdo->prepare("
                     INSERT INTO intra_fire_incidents 
                     (incident_number, location, keyword, started_at, status, notes, created_by, created_at) 
@@ -439,15 +476,15 @@ try {
                 ");
                 $insertFireIncidentStmt->execute([
                     ':incident_number' => (string)$dispatchId,
-                    ':location' => 'Automatisch erstellt (EMD-Sync)',
-                    ':keyword' => 'EMD-Sync Einsatz',
+                    ':location' => $location,
+                    ':keyword' => $keyword,
                     ':started_at' => $currentDateTime,
-                    ':notes' => 'Automatisch erstellt durch EMD-Synchronisation',
+                    ':notes' => $notes,
                     ':created_at' => $currentDateTime
                 ]);
 
                 $fireIncidentId = (int)$pdo->lastInsertId();
-                logSync("Fire Incident #$fireIncidentId für Dispatch #$dispatchId erstellt", 'INFO');
+                logSync("Fire Incident #$fireIncidentId für Dispatch #$dispatchId erstellt (Location: $location, Keyword: $keyword)", 'INFO');
 
                 // Füge alle Feuerwehrfahrzeuge hinzu
                 foreach ($fireVehicles as $fireVehicle) {
