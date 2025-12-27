@@ -354,6 +354,18 @@ try {
         // Speichere dispatch_data (falls vorhanden)
         if (isset($vehicle['dispatch_data']) && !isset($dispatchDataByDispatch[$dispatchId])) {
             $dispatchDataByDispatch[$dispatchId] = $vehicle['dispatch_data'];
+            logSync("Dispatch-Data für Einsatz #$dispatchId empfangen: " . json_encode($vehicle['dispatch_data']), 'DEBUG');
+        }
+    }
+
+    // Debug: Zeige alle empfangenen dispatch_data
+    if (!empty($dispatchDataByDispatch)) {
+        logSync("Insgesamt " . count($dispatchDataByDispatch) . " Dispatch-Daten empfangen", 'INFO');
+    } else {
+        logSync("Keine dispatch_data in den Fahrzeugdaten gefunden - prüfe Datenstruktur", 'WARNING');
+        // Logge ein Beispiel-Fahrzeug zur Analyse
+        if (!empty($vehicles)) {
+            logSync("Beispiel-Fahrzeug-Datenstruktur: " . json_encode($vehicles[0]), 'DEBUG');
         }
     }
 
@@ -445,21 +457,36 @@ try {
                 $keyword = 'BITTE ÄNDERN!';
                 $dispatchIssue = '';
 
+                logSync("Dispatch #$dispatchId: dispatch_data vorhanden: " . ($dispatchData ? 'JA' : 'NEIN'), 'DEBUG');
+
                 if ($dispatchData) {
+                    logSync("Dispatch #$dispatchId dispatch_data Inhalt: " . json_encode($dispatchData), 'DEBUG');
+
                     // Verwende postal für location
                     if (!empty($dispatchData['postal'])) {
                         $location = $dispatchData['postal'];
+                        logSync("Dispatch #$dispatchId: Location aus postal gesetzt: $location", 'DEBUG');
+                    } else {
+                        logSync("Dispatch #$dispatchId: postal ist leer oder nicht vorhanden", 'WARNING');
                     }
 
                     // Verwende dispatch_code für keyword
                     if (!empty($dispatchData['dispatch_code'])) {
                         $keyword = $dispatchData['dispatch_code'];
+                        logSync("Dispatch #$dispatchId: Keyword aus dispatch_code gesetzt: $keyword", 'DEBUG');
+                    } else {
+                        logSync("Dispatch #$dispatchId: dispatch_code ist leer oder nicht vorhanden", 'WARNING');
                     }
 
                     // Verwende dispatch_issue für notes
                     if (!empty($dispatchData['dispatch_issue'])) {
                         $dispatchIssue = $dispatchData['dispatch_issue'];
+                        logSync("Dispatch #$dispatchId: dispatch_issue gefunden: " . substr($dispatchIssue, 0, 50) . "...", 'DEBUG');
+                    } else {
+                        logSync("Dispatch #$dispatchId: dispatch_issue ist leer oder nicht vorhanden", 'WARNING');
                     }
+                } else {
+                    logSync("Dispatch #$dispatchId: Keine dispatch_data vorhanden, verwende Fallbacks", 'WARNING');
                 }
 
                 // Erstelle notes mit dispatch_issue und System-Hinweis
