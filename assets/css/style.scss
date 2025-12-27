@@ -58,8 +58,8 @@
 }
 
 body {
-  --bs-body-font-family: "Rubik", system-ui, -apple-system, "Segoe UI",
-    Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif,
+  --bs-body-font-family: "Rubik", system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !important;
 }
 
@@ -255,8 +255,7 @@ body#dashboard::before {
   left: 0;
   width: 100%;
   height: 100%;
-  background: url("https://dev.intrarp.de/assets/img/wallpaper.webp") no-repeat
-    center center fixed;
+  background: url("/assets/img/wallpaper.webp") no-repeat center center fixed;
   background-size: cover;
   filter: blur(3px); /* Adjust the value (5px) to control the amount of blur */
   z-index: -1;
