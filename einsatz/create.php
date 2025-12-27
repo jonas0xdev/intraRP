@@ -59,6 +59,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $incident_number = trim($_POST['incident_number'] ?? '');
     $notes = trim($_POST['notes'] ?? '');
 
+    $caller_name = trim($_POST['caller_name'] ?? '');
+    $caller_contact = trim($_POST['caller_contact'] ?? '');
+
     $owner_name = trim($_POST['owner_name'] ?? '');
     $owner_contact = trim($_POST['owner_contact'] ?? '');
 
@@ -78,11 +81,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->beginTransaction();
 
             // Insert incident
-            $stmt = $pdo->prepare("INSERT INTO intra_fire_incidents (incident_number, location, keyword, started_at, leader_id, owner_type, owner_name, owner_contact, notes, status, created_by) VALUES (?,?,?,?,?,?,?,?,?, 'in_sichtung', ?)");
+            $stmt = $pdo->prepare("INSERT INTO intra_fire_incidents (incident_number, location, keyword, caller_name, caller_contact, started_at, leader_id, owner_type, owner_name, owner_contact, notes, status, created_by) VALUES (?,?,?,?,?,?,?,?,?,?,?, 'in_sichtung', ?)");
             $stmt->execute([
                 $incident_number,
                 $location,
                 $keyword,
+                $caller_name ?: null,
+                $caller_contact ?: null,
                 $started_at,
                 $leader_id,
                 null,
@@ -302,6 +307,17 @@ try {
                                     <option value="<?= (int)$l['id'] ?>"><?= htmlspecialchars($l['fullname']) ?></option>
                                 <?php endforeach; ?>
                             </select>
+                        </div>
+                        <div class="col-12">
+                            <hr>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Melder – Name</label>
+                            <input type="text" name="caller_name" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Melder – Kontakt</label>
+                            <input type="text" name="caller_contact" class="form-control">
                         </div>
                         <div class="col-12">
                             <hr>

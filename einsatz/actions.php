@@ -257,6 +257,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $date = $_POST['edit_date'] ?? '';
                 $time = $_POST['edit_time'] ?? '';
                 $leader = !empty($_POST['edit_leader_id']) ? (int)$_POST['edit_leader_id'] : null;
+                $caller_name = trim($_POST['edit_caller_name'] ?? '');
+                $caller_contact = trim($_POST['edit_caller_contact'] ?? '');
                 $owner_name = trim($_POST['edit_owner_name'] ?? '');
                 $owner_contact = trim($_POST['edit_owner_contact'] ?? '');
 
@@ -264,8 +266,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     Flash::error('Bitte alle Pflichtfelder ausfüllen (Nummer, Ort, Stichwort, Beginn, Einsatzleiter).');
                 } else {
                     $started = date('Y-m-d H:i:s', strtotime($date . ' ' . $time));
-                    $upd = $pdo->prepare("UPDATE intra_fire_incidents SET incident_number = ?, location = ?, keyword = ?, started_at = ?, leader_id = ?, owner_type = NULL, owner_name = ?, owner_contact = ?, updated_by = ?, updated_at = NOW() WHERE id = ?");
-                    $upd->execute([$incno, $loc, $keyw, $started, $leader, $owner_name ?: null, $owner_contact ?: null, $_SESSION['userid'] ?? null, $id]);
+                    $upd = $pdo->prepare("UPDATE intra_fire_incidents SET incident_number = ?, location = ?, keyword = ?, caller_name = ?, caller_contact = ?, started_at = ?, leader_id = ?, owner_type = NULL, owner_name = ?, owner_contact = ?, updated_by = ?, updated_at = NOW() WHERE id = ?");
+                    $upd->execute([$incno, $loc, $keyw, $caller_name ?: null, $caller_contact ?: null, $started, $leader, $owner_name ?: null, $owner_contact ?: null, $_SESSION['userid'] ?? null, $id]);
 
                     logAction(
                         $pdo,

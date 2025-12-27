@@ -456,6 +456,8 @@ try {
                 $location = 'BITTE ÄNDERN!';
                 $keyword = 'BITTE ÄNDERN!';
                 $dispatchIssue = '';
+                $callerName = '';
+                $callerContact = '';
 
                 logSync("Dispatch #$dispatchId: dispatch_data vorhanden: " . ($dispatchData ? 'JA' : 'NEIN'), 'DEBUG');
 
@@ -482,29 +484,41 @@ try {
                     if (!empty($dispatchData['dispatch_issue'])) {
                         $dispatchIssue = $dispatchData['dispatch_issue'];
                         logSync("Dispatch #$dispatchId: dispatch_issue gefunden: " . substr($dispatchIssue, 0, 50) . "...", 'DEBUG');
-                    } else {
-                        logSync("Dispatch #$dispatchId: dispatch_issue ist leer oder nicht vorhanden", 'WARNING');
+                    }
+
+                    // Verwende caller_name für Melder Name
+                    if (!empty($dispatchData['caller_name'])) {
+                        $callerName = $dispatchData['caller_name'];
+                        logSync("Dispatch #$dispatchId: caller_name gesetzt: $callerName", 'DEBUG');
+                    }
+
+                    // Verwende caller_phonenumber für Melder Kontakt
+                    if (!empty($dispatchData['caller_phonenumber'])) {
+                        $callerContact = $dispatchData['caller_phonenumber'];
+                        logSync("Dispatch #$dispatchId: caller_contact gesetzt: $callerContact", 'DEBUG');
                     }
                 } else {
                     logSync("Dispatch #$dispatchId: Keine dispatch_data vorhanden, verwende Fallbacks", 'WARNING');
                 }
 
                 // Erstelle notes mit dispatch_issue und System-Hinweis
-                $notes = $dispatchIssue;
-                if (!empty($notes)) {
-                    $notes .= "\n\n";
+                $notes = '';
+                if (!empty($dispatchIssue)) {
+                    $notes = 'EINSATZMELDUNG: ' . $dispatchIssue . "\n\n";
                 }
                 $notes .= 'Automatisch erstellt durch Synchronisation';
 
                 $insertFireIncidentStmt = $pdo->prepare("
                     INSERT INTO intra_fire_incidents 
-                    (incident_number, location, keyword, started_at, status, notes, created_by, created_at) 
-                    VALUES (:incident_number, :location, :keyword, :started_at, 'in_sichtung', :notes, NULL, :created_at)
+                    (incident_number, location, keyword, caller_name, caller_contact, started_at, status, notes, created_by, created_at) 
+                    VALUES (:incident_number, :location, :keyword, :caller_name, :caller_contact, :started_at, 'in_sichtung', :notes, NULL, :created_at)
                 ");
                 $insertFireIncidentStmt->execute([
                     ':incident_number' => (string)$dispatchId,
                     ':location' => $location,
                     ':keyword' => $keyword,
+                    ':caller_name' => $callerName ?: null,
+                    ':caller_contact' => $callerContact ?: null,
                     ':started_at' => $currentDateTime,
                     ':notes' => $notes,
                     ':created_at' => $currentDateTime

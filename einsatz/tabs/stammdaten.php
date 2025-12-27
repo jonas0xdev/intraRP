@@ -51,7 +51,17 @@ $startTime = $dtStart ? $dtStart->format('H:i') : '';
             </div>
             <div class="col-12">
                 <hr class="my-2">
-                <small class="text-muted">Optional: Angaben zum Geschädigten</small>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Melder – Name</label>
+                <input type="text" class="form-control" name="edit_caller_name" value="<?= htmlspecialchars($incident['caller_name'] ?? '') ?>" <?= $incident['finalized'] ? 'disabled' : '' ?>>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Melder – Kontakt</label>
+                <input type="text" class="form-control" name="edit_caller_contact" value="<?= htmlspecialchars($incident['caller_contact'] ?? '') ?>" <?= $incident['finalized'] ? 'disabled' : '' ?>>
+            </div>
+            <div class="col-12">
+                <hr class="my-2">
             </div>
             <div class="col-md-6">
                 <label class="form-label">Geschädigter – Name</label>
