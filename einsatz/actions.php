@@ -19,6 +19,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 use App\Auth\Permissions;
 use App\Helpers\Flash;
+use App\Utils\AuditLogger;
 
 require __DIR__ . '/../assets/config/database.php';
 
@@ -197,6 +198,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     "Einsatz zur QM-Sichtung freigegeben"
                 );
 
+                $auditLogger = new AuditLogger($pdo);
+                $auditLogger->log($_SESSION['userid'], 'Einsatz abgeschlossen [ID: ' . $id . ']', NULL, 'Feuerwehr', 1);
+
                 Flash::success('Protokoll zur QM-Sichtung markiert.');
             } else {
                 Flash::error('Pflichtangaben fehlen für Abschluss (inkl. Einsatzleiter).');
@@ -222,6 +226,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'status_changed',
                     "QM-Status geändert zu '" . ($statusLabels[$status] ?? $status) . "'"
                 );
+
+                $auditLogger = new AuditLogger($pdo);
+                $auditLogger->log($_SESSION['userid'], 'QM-Status geändert [ID: ' . $id . '] → ' . ($statusLabels[$status] ?? $status), NULL, 'Feuerwehr', 1);
 
                 Flash::success('Status aktualisiert.');
             }
@@ -374,6 +381,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     } catch (PDOException $e) {
         Flash::error('Fehler: ' . $e->getMessage());
+    }
+
+    // Archive incident (QM only)
+    if ($action === 'archive_incident') {
+        if (!Permissions::check(['admin', 'fire.incident.qm'])) {
+            Flash::error('Keine Berechtigung zum Archivieren von Einsätzen.');
+        } else {
+            try {
+                $stmt = $pdo->prepare("UPDATE intra_fire_incidents SET archived = 1, archived_at = NOW(), archived_by = ? WHERE id = ?");
+                $stmt->execute([$_SESSION['userid'] ?? null, $id]);
+
+                logAction(
+                    $pdo,
+                    $id,
+                    'archived',
+                    "Einsatz archiviert"
+                );
+
+                $auditLogger = new AuditLogger($pdo);
+                $auditLogger->log($_SESSION['userid'], 'Einsatz archiviert [ID: ' . $id . ']', NULL, 'Feuerwehr', 1);
+
+                Flash::success('Einsatz wurde archiviert.');
+                header('Location: ' . BASE_PATH . 'einsatz/admin/list.php');
+                exit();
+            } catch (PDOException $e) {
+                Flash::error('Fehler beim Archivieren: ' . $e->getMessage());
+            }
+        }
+    }
+
+    // Unarchive incident (QM only)
+    if ($action === 'unarchive_incident') {
+        if (!Permissions::check(['admin', 'fire.incident.qm'])) {
+            Flash::error('Keine Berechtigung zum Wiederherstellen von Einsätzen.');
+        } else {
+            try {
+                $stmt = $pdo->prepare("UPDATE intra_fire_incidents SET archived = 0, archived_at = NULL, archived_by = NULL WHERE id = ?");
+                $stmt->execute([$id]);
+
+                logAction(
+                    $pdo,
+                    $id,
+                    'unarchived',
+                    "Einsatz wiederhergestellt"
+                );
+
+                $auditLogger = new AuditLogger($pdo);
+                $auditLogger->log($_SESSION['userid'], 'Einsatz wiederhergestellt [ID: ' . $id . ']', NULL, 'Feuerwehr', 1);
+
+                Flash::success('Einsatz wurde wiederhergestellt.');
+                header('Location: ' . BASE_PATH . 'einsatz/admin/list.php');
+                exit();
+            } catch (PDOException $e) {
+                Flash::error('Fehler beim Wiederherstellen: ' . $e->getMessage());
+            }
+        }
     }
 
     post_done:

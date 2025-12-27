@@ -575,7 +575,7 @@ try {
                 ");
                 $insertLogStmt->execute([
                     ':incident_id' => $fireIncidentId,
-                    ':action_description' => 'Einsatz automatisch erstellt durch EMD-Synchronisation (System)'
+                    ':action_description' => 'Einsatz automatisch durch Sync erstellt'
                 ]);
 
                 $createdFireIncidents++;
@@ -627,7 +627,7 @@ try {
                             $insertLogStmt->execute([
                                 ':incident_id' => $fireIncidentId,
                                 ':vehicle_id' => $vehicleId,
-                                ':action_description' => "Fahrzeug {$fireVehicle['name']} durch EMD-Synchronisation hinzugefügt (System)"
+                                ':action_description' => "Fahrzeug {$fireVehicle['name']} durch Sync hinzugefügt"
                             ]);
 
                             logSync("Fahrzeug {$fireVehicle['name']} (ID: $vehicleId) zu bestehendem Fire Incident #$fireIncidentId hinzugefügt", 'INFO');
