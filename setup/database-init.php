@@ -372,7 +372,8 @@ $migrationFiles = [
     ['file' => 'alter_intra_fire_incident_log_27122025_created_by_nullable.php', 'type' => 'alter'],
     ['file' => 'alter_fire_incident_vehicles_27122025_add_status.php', 'type' => 'alter'],
     ['file' => 'alter_fire_incidents_27122025_add_caller_fields.php', 'type' => 'alter'],
-    ['file' => 'alter_fire_incidents_27122025_add_archived.php', 'type' => 'alter']
+    ['file' => 'alter_fire_incidents_27122025_add_archived.php', 'type' => 'alter'],
+    ['file' => 'alter_intra_fire_incidents_27122025_add_gta_coordinates.php', 'type' => 'alter']
 ];
 
 $executed = 0;

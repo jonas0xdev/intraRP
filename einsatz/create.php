@@ -65,6 +65,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $owner_name = trim($_POST['owner_name'] ?? '');
     $owner_contact = trim($_POST['owner_contact'] ?? '');
 
+    // GTA Coordinates (optional)
+    $location_x = !empty($_POST['location_x']) ? (float)$_POST['location_x'] : null;
+    $location_y = !empty($_POST['location_y']) ? (float)$_POST['location_y'] : null;
+
     if ($incident_number === '') $errors[] = 'Einsatznummer ist erforderlich.';
     if ($location === '') $errors[] = 'Einsatzort ist erforderlich.';
     if ($keyword === '') $errors[] = 'Einsatzstichwort ist erforderlich.';
@@ -81,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->beginTransaction();
 
             // Insert incident
-            $stmt = $pdo->prepare("INSERT INTO intra_fire_incidents (incident_number, location, keyword, caller_name, caller_contact, started_at, leader_id, owner_type, owner_name, owner_contact, notes, status, created_by) VALUES (?,?,?,?,?,?,?,?,?,?,?, 'in_sichtung', ?)");
+            $stmt = $pdo->prepare("INSERT INTO intra_fire_incidents (incident_number, location, keyword, caller_name, caller_contact, started_at, leader_id, owner_type, owner_name, owner_contact, notes, status, created_by, location_x, location_y) VALUES (?,?,?,?,?,?,?,?,?,?,?, 'in_sichtung', ?, ?, ?)");
             $stmt->execute([
                 $incident_number,
                 $location,
@@ -94,7 +98,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $owner_name ?: null,
                 $owner_contact ?: null,
                 $notes ?: null,
-                $_SESSION['userid'] ?? null
+                $_SESSION['userid'] ?? null,
+                $location_x,
+                $location_y
             ]);
 
             $incidentId = (int)$pdo->lastInsertId();
