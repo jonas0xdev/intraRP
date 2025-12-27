@@ -343,9 +343,11 @@ function fmt_elapsed(int|string $seconds): string
                                 ?>
                                 <span class="badge <?= $badge ?>"><?= htmlspecialchars($statusText) ?></span>
                             </span>
-                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#qmStatusModal">
-                                <i class="fa-solid fa-clipboard-check"></i> QM-Status ändern
-                            </button>
+                            <?php if ($incident['finalized']): ?>
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#qmStatusModal">
+                                    <i class="fa-solid fa-clipboard-check"></i> QM-Status ändern
+                                </button>
+                            <?php endif; ?>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -411,7 +413,6 @@ function fmt_elapsed(int|string $seconds): string
                                 <select name="status" class="form-select">
                                     <option value="in_sichtung" <?= $incident['status'] === 'in_sichtung' ? 'selected' : '' ?>>Ungesichtet</option>
                                     <option value="gesichtet" <?= $incident['status'] === 'gesichtet' ? 'selected' : '' ?>>Gesichtet</option>
-                                    <option value="negativ" <?= $incident['status'] === 'negativ' ? 'selected' : '' ?>>Negativ</option>
                                 </select>
                             </div>
                         </div>

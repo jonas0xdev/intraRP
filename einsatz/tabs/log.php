@@ -36,15 +36,16 @@ $actionTypeLabels = [
     'marker_deleted' => ['label' => 'Marker gelöscht', 'icon' => 'fa-map-marker-alt', 'color' => 'danger'],
     'zone_created' => ['label' => 'Zone erstellt', 'icon' => 'fa-draw-polygon', 'color' => 'info'],
     'zone_deleted' => ['label' => 'Zone gelöscht', 'icon' => 'fa-draw-polygon', 'color' => 'danger'],
+    'archived' => ['label' => 'Archiviert', 'icon' => 'fa-archive', 'color' => 'warning'],
+    'unarchived' => ['label' => 'Wiederhergestellt', 'icon' => 'fa-box-open', 'color' => 'success'],
 ];
 ?>
 
-<div class="card bg-dark border-secondary">
-    <div class="card-header bg-secondary d-flex align-items-center">
-        <i class="fas fa-history me-2"></i>
-        <h5 class="mb-0">Einsatzprotokoll (Audit-Log)</h5>
+<div class="intra__tile p-3 mb-3">
+    <div class="intra__tile-header">
+        <h4>Einsatzprotokoll (Log)</h4>
     </div>
-    <div class="card-body">
+    <div class="intra__tile-content">
         <?php if (empty($logEntries)): ?>
             <div class="alert alert-info mb-0">
                 <i class="fas fa-info-circle me-2"></i>
@@ -52,7 +53,7 @@ $actionTypeLabels = [
             </div>
         <?php else: ?>
             <div class="table-responsive">
-                <table class="table table-dark table-hover table-sm">
+                <table class="table table-hover table-sm">
                     <thead>
                         <tr>
                             <th style="width: 180px;">Zeitpunkt</th>
@@ -92,6 +93,14 @@ $actionTypeLabels = [
                                     <?php if ($entry['operator_name']): ?>
                                         <i class="fas fa-user me-1 text-muted"></i>
                                         <?= htmlspecialchars($entry['operator_name']) ?>
+                                    <?php elseif ($entry['created_by'] === null): ?>
+                                        <span class="badge system-badge">
+                                            <i class="fas fa-cog me-1"></i>
+                                            System
+                                        </span>
+                                    <?php elseif ($entry['created_by_name']): ?>
+                                        <i class="fas fa-user me-1 text-muted"></i>
+                                        <?= htmlspecialchars($entry['created_by_name']) ?>
                                     <?php else: ?>
                                         <span class="text-muted">—</span>
                                     <?php endif; ?>
@@ -120,5 +129,17 @@ $actionTypeLabels = [
     .badge {
         font-weight: 500;
         padding: 0.4em 0.6em;
+    }
+
+    .system-badge {
+        background: rgba(255, 0, 0, .3);
+        color: #ff0000;
+        font-weight: 600;
+        padding: 0.35em 0.65em;
+        border-radius: 0.25rem;
+    }
+
+    .system-badge i {
+        opacity: 0.9;
     }
 </style>

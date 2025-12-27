@@ -20,9 +20,17 @@ if (!Permissions::check(['admin', 'fire.incident.qm'])) {
 
 require __DIR__ . '/../../assets/config/database.php';
 
+$showArchived = isset($_GET['show_archived']) && $_GET['show_archived'] === '1';
+
 $incidents = [];
 try {
-    $stmt = $pdo->query("SELECT i.*, m.fullname AS leader_name FROM intra_fire_incidents i LEFT JOIN intra_mitarbeiter m ON i.leader_id = m.id ORDER BY i.created_at DESC");
+    if ($showArchived) {
+        // Zeige nur archivierte Einsätze
+        $stmt = $pdo->query("SELECT i.*, m.fullname AS leader_name FROM intra_fire_incidents i LEFT JOIN intra_mitarbeiter m ON i.leader_id = m.id WHERE i.archived = 1 ORDER BY i.archived_at DESC");
+    } else {
+        // Zeige nur nicht-archivierte Einsätze
+        $stmt = $pdo->query("SELECT i.*, m.fullname AS leader_name FROM intra_fire_incidents i LEFT JOIN intra_mitarbeiter m ON i.leader_id = m.id WHERE i.archived = 0 ORDER BY i.created_at DESC");
+    }
     $incidents = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
 }
@@ -39,9 +47,23 @@ try {
     <div class="container my-4">
         <div class="d-flex justify-content-between align-items-center">
             <h1>Einsatzprotokolle (QM)</h1>
-            <a href="<?= BASE_PATH ?>einsatz/create.php" class="btn btn-success"><i class="fa-solid fa-plus"></i> Neu</a>
+            <div>
+                <?php if ($showArchived): ?>
+                    <a href="<?= BASE_PATH ?>einsatz/admin/list.php" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Aktive Einsätze</a>
+                <?php else: ?>
+                    <a href="<?= BASE_PATH ?>einsatz/admin/list.php?show_archived=1" class="btn btn-secondary"><i class="fa-solid fa-archive"></i> Archiv</a>
+                    <a href="<?= BASE_PATH ?>einsatz/create.php" class="btn btn-success"><i class="fa-solid fa-plus"></i> Neu</a>
+                <?php endif; ?>
+            </div>
         </div>
         <?php App\Helpers\Flash::render(); ?>
+
+        <?php if ($showArchived): ?>
+            <div class="alert alert-info mb-3">
+                <i class="fa-solid fa-archive me-2"></i>
+                Sie sehen archivierte Einsätze. Diese sind aus den normalen Listen ausgeblendet.
+            </div>
+        <?php endif; ?>
 
         <div class="intra__tile p-3">
             <table class="table table-striped" id="table-incidents">
@@ -80,6 +102,23 @@ try {
                             <td><span class="badge <?= $badge ?>"><?= htmlspecialchars($statusText) ?></span></td>
                             <td>
                                 <a class="btn btn-sm btn-primary" href="<?= BASE_PATH ?>einsatz/view.php?id=<?= (int)$i['id'] ?>">Öffnen</a>
+                                <?php if ($showArchived): ?>
+                                    <form method="post" action="<?= BASE_PATH ?>einsatz/actions.php" class="d-inline">
+                                        <input type="hidden" name="action" value="unarchive_incident">
+                                        <input type="hidden" name="incident_id" value="<?= (int)$i['id'] ?>">
+                                        <button type="submit" class="btn btn-sm btn-success" title="Wiederherstellen">
+                                            <i class="fa-solid fa-box-open"></i>
+                                        </button>
+                                    </form>
+                                <?php else: ?>
+                                    <form method="post" action="<?= BASE_PATH ?>einsatz/actions.php" class="d-inline">
+                                        <input type="hidden" name="action" value="archive_incident">
+                                        <input type="hidden" name="incident_id" value="<?= (int)$i['id'] ?>">
+                                        <button type="button" class="btn btn-sm btn-warning" title="Archivieren" onclick="event.preventDefault(); showConfirm('Einsatz wirklich archivieren? Er wird aus allen Listen ausgeblendet.', {danger: true, confirmText: 'Archivieren', title: 'Einsatz archivieren'}).then(result => { if(result) this.closest('form').submit(); });">
+                                            <i class="fa-solid fa-archive"></i>
+                                        </button>
+                                    </form>
+                                <?php endif; ?>
                             </td>
                         </tr>
                     <?php endforeach; ?>

@@ -207,6 +207,51 @@ function handleStatusUpdates($data, $pdo)
                 logSync("Status $statusValue für Einsatz $enr war bereits gesetzt oder Spalte existiert nicht", 'WARNING');
             }
 
+            // Zusätzlich: Update Fire Incident Status für Feuerwehr-Fahrzeuge (rd_type = 3)
+            if ($rdType === 3) {
+                // Suche nach Fire Incident mit dieser Einsatznummer
+                $findFireIncidentStmt = $pdo->prepare("
+                    SELECT id FROM intra_fire_incidents 
+                    WHERE incident_number = :incident_number 
+                    LIMIT 1
+                ");
+                $findFireIncidentStmt->execute([':incident_number' => (string)$missionNumber]);
+                $fireIncidentRow = $findFireIncidentStmt->fetch(PDO::FETCH_ASSOC);
+
+                if ($fireIncidentRow) {
+                    $fireIncidentId = (int)$fireIncidentRow['id'];
+
+                    // Hole die vehicle_id aus der Datenbank
+                    $getVehicleIdStmt = $pdo->prepare("
+                        SELECT id FROM intra_fahrzeuge 
+                        WHERE identifier = :identifier 
+                        LIMIT 1
+                    ");
+                    $getVehicleIdStmt->execute([':identifier' => $vehicleIdentifier]);
+                    $vehicleIdRow = $getVehicleIdStmt->fetch(PDO::FETCH_ASSOC);
+
+                    if ($vehicleIdRow) {
+                        $vehicleId = (int)$vehicleIdRow['id'];
+
+                        // Update Status in intra_fire_incident_vehicles
+                        $updateFireStatusStmt = $pdo->prepare("
+                            UPDATE intra_fire_incident_vehicles 
+                            SET current_status = :status, status_updated_at = NOW() 
+                            WHERE incident_id = :incident_id AND vehicle_id = :vehicle_id
+                        ");
+                        $updateFireStatusStmt->execute([
+                            ':status' => (string)$statusValue,
+                            ':incident_id' => $fireIncidentId,
+                            ':vehicle_id' => $vehicleId
+                        ]);
+
+                        if ($updateFireStatusStmt->rowCount() > 0) {
+                            logSync("Fire Incident Status aktualisiert: Fahrzeug $sender (ID: $vehicleId) in Incident #$fireIncidentId auf Status $statusValue", 'INFO');
+                        }
+                    }
+                }
+            }
+
             // Nur zu successfulIds hinzufügen, wenn mindestens ein Update erfolgreich war
             if ($updatedThisStatus) {
                 $successfulIds[] = $statusId;
@@ -291,6 +336,7 @@ try {
     logSync('Es wurden ' . count($vehicles) . ' Fahrzeuge zur Verarbeitung empfangen', 'INFO');
 
     $vehiclesByDispatch = [];
+    $dispatchDataByDispatch = []; // Speichere dispatch_data für jeden Dispatch
 
     foreach ($vehicles as $vehicle) {
         $dispatchId = intval($vehicle['dispatch'] ?? 0);
@@ -304,6 +350,23 @@ try {
         }
 
         $vehiclesByDispatch[$dispatchId][] = $vehicle;
+
+        // Speichere dispatch_data (falls vorhanden)
+        if (isset($vehicle['dispatch_data']) && !isset($dispatchDataByDispatch[$dispatchId])) {
+            $dispatchDataByDispatch[$dispatchId] = $vehicle['dispatch_data'];
+            logSync("Dispatch-Data für Einsatz #$dispatchId empfangen: " . json_encode($vehicle['dispatch_data']), 'DEBUG');
+        }
+    }
+
+    // Debug: Zeige alle empfangenen dispatch_data
+    if (!empty($dispatchDataByDispatch)) {
+        logSync("Insgesamt " . count($dispatchDataByDispatch) . " Dispatch-Daten empfangen", 'INFO');
+    } else {
+        logSync("Keine dispatch_data in den Fahrzeugdaten gefunden - prüfe Datenstruktur", 'WARNING');
+        // Logge ein Beispiel-Fahrzeug zur Analyse
+        if (!empty($vehicles)) {
+            logSync("Beispiel-Fahrzeug-Datenstruktur: " . json_encode($vehicles[0]), 'DEBUG');
+        }
     }
 
     logSync('Es wurden ' . count($vehiclesByDispatch) . ' eindeutige Einsatznummern gefunden', 'INFO');
@@ -311,6 +374,7 @@ try {
     $processedDispatches = 0;
     $createdEntries = 0;
     $skippedDispatches = 0;
+    $createdFireIncidents = 0;
 
     $pdo->beginTransaction();
 
@@ -359,6 +423,219 @@ try {
         }
 
         logSync("Es wurden " . count($validVehicles) . " gültige RD-Fahrzeuge für Einsatz #$dispatchId gefunden", 'INFO');
+
+        // Prüfe ob es sich um einen Feuerwehreinsatz handelt (rd_type = 3)
+        $hasFireVehicle = false;
+        $fireVehicles = [];
+        foreach ($validVehicles as $vehicle) {
+            if ($vehicle['rd_type'] === 3) {
+                $hasFireVehicle = true;
+                $fireVehicles[] = $vehicle;
+            }
+        }
+
+        // Wenn Feuerwehreinsatz: Erstelle Fire Incident
+        if ($hasFireVehicle && count($fireVehicles) > 0) {
+            logSync("Feuerwehreinsatz erkannt (#$dispatchId) mit " . count($fireVehicles) . " Feuerwehrfahrzeugen", 'INFO');
+
+            // Prüfe ob bereits ein Fire Incident für diese Dispatch-ID existiert
+            $checkFireIncidentStmt = $pdo->prepare("
+                SELECT id FROM intra_fire_incidents 
+                WHERE incident_number = :incident_number
+                LIMIT 1
+            ");
+            $checkFireIncidentStmt->execute([':incident_number' => (string)$dispatchId]);
+            $existingFireIncident = $checkFireIncidentStmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$existingFireIncident) {
+                // Erstelle neuen Fire Incident
+                $currentDateTime = date('Y-m-d H:i:s');
+
+                // Hole dispatch_data falls vorhanden
+                $dispatchData = $dispatchDataByDispatch[$dispatchId] ?? null;
+                $location = 'BITTE ÄNDERN!';
+                $keyword = 'BITTE ÄNDERN!';
+                $dispatchIssue = '';
+                $callerName = '';
+                $callerContact = '';
+
+                logSync("Dispatch #$dispatchId: dispatch_data vorhanden: " . ($dispatchData ? 'JA' : 'NEIN'), 'DEBUG');
+
+                if ($dispatchData) {
+                    logSync("Dispatch #$dispatchId dispatch_data Inhalt: " . json_encode($dispatchData), 'DEBUG');
+
+                    // Verwende postal für location
+                    if (!empty($dispatchData['postal'])) {
+                        $location = $dispatchData['postal'];
+                        logSync("Dispatch #$dispatchId: Location aus postal gesetzt: $location", 'DEBUG');
+                    } else {
+                        logSync("Dispatch #$dispatchId: postal ist leer oder nicht vorhanden", 'WARNING');
+                    }
+
+                    // Verwende dispatch_code für keyword
+                    if (!empty($dispatchData['dispatch_code'])) {
+                        $keyword = $dispatchData['dispatch_code'];
+                        logSync("Dispatch #$dispatchId: Keyword aus dispatch_code gesetzt: $keyword", 'DEBUG');
+                    } else {
+                        logSync("Dispatch #$dispatchId: dispatch_code ist leer oder nicht vorhanden", 'WARNING');
+                    }
+
+                    // Verwende dispatch_issue für notes
+                    if (!empty($dispatchData['dispatch_issue'])) {
+                        $dispatchIssue = $dispatchData['dispatch_issue'];
+                        logSync("Dispatch #$dispatchId: dispatch_issue gefunden: " . substr($dispatchIssue, 0, 50) . "...", 'DEBUG');
+                    }
+
+                    // Verwende caller_name für Melder Name
+                    if (!empty($dispatchData['caller_name'])) {
+                        $callerName = $dispatchData['caller_name'];
+                        logSync("Dispatch #$dispatchId: caller_name gesetzt: $callerName", 'DEBUG');
+                    }
+
+                    // Verwende caller_phonenumber für Melder Kontakt
+                    if (!empty($dispatchData['caller_phonenumber'])) {
+                        $callerContact = $dispatchData['caller_phonenumber'];
+                        logSync("Dispatch #$dispatchId: caller_contact gesetzt: $callerContact", 'DEBUG');
+                    }
+                } else {
+                    logSync("Dispatch #$dispatchId: Keine dispatch_data vorhanden, verwende Fallbacks", 'WARNING');
+                }
+
+                // Erstelle notes mit dispatch_issue und System-Hinweis
+                $notes = '';
+                if (!empty($dispatchIssue)) {
+                    $notes = 'EINSATZMELDUNG: ' . $dispatchIssue . "\n\n";
+                }
+                $notes .= 'Automatisch erstellt durch Synchronisation';
+
+                $insertFireIncidentStmt = $pdo->prepare("
+                    INSERT INTO intra_fire_incidents 
+                    (incident_number, location, keyword, caller_name, caller_contact, started_at, status, notes, created_by, created_at) 
+                    VALUES (:incident_number, :location, :keyword, :caller_name, :caller_contact, :started_at, 'in_sichtung', :notes, NULL, :created_at)
+                ");
+                $insertFireIncidentStmt->execute([
+                    ':incident_number' => (string)$dispatchId,
+                    ':location' => $location,
+                    ':keyword' => $keyword,
+                    ':caller_name' => $callerName ?: null,
+                    ':caller_contact' => $callerContact ?: null,
+                    ':started_at' => $currentDateTime,
+                    ':notes' => $notes,
+                    ':created_at' => $currentDateTime
+                ]);
+
+                $fireIncidentId = (int)$pdo->lastInsertId();
+                logSync("Fire Incident #$fireIncidentId für Dispatch #$dispatchId erstellt (Location: $location, Keyword: $keyword)", 'INFO');
+
+                // Füge alle Feuerwehrfahrzeuge hinzu
+                foreach ($fireVehicles as $fireVehicle) {
+                    // Hole die vehicle_id aus der Datenbank
+                    $getVehicleIdStmt = $pdo->prepare("
+                        SELECT id FROM intra_fahrzeuge 
+                        WHERE identifier = :identifier 
+                        LIMIT 1
+                    ");
+                    $getVehicleIdStmt->execute([':identifier' => $fireVehicle['identifier']]);
+                    $vehicleIdRow = $getVehicleIdStmt->fetch(PDO::FETCH_ASSOC);
+
+                    if ($vehicleIdRow) {
+                        $vehicleId = (int)$vehicleIdRow['id'];
+
+                        // Prüfe ob Fahrzeug bereits zugeordnet ist
+                        $checkVehicleAssignmentStmt = $pdo->prepare("
+                            SELECT id FROM intra_fire_incident_vehicles 
+                            WHERE incident_id = :incident_id AND vehicle_id = :vehicle_id
+                            LIMIT 1
+                        ");
+                        $checkVehicleAssignmentStmt->execute([
+                            ':incident_id' => $fireIncidentId,
+                            ':vehicle_id' => $vehicleId
+                        ]);
+
+                        if (!$checkVehicleAssignmentStmt->fetch()) {
+                            $insertVehicleStmt = $pdo->prepare("
+                                INSERT INTO intra_fire_incident_vehicles 
+                                (incident_id, vehicle_id, from_other_org, created_by, created_at) 
+                                VALUES (:incident_id, :vehicle_id, 0, NULL, NOW())
+                            ");
+                            $insertVehicleStmt->execute([
+                                ':incident_id' => $fireIncidentId,
+                                ':vehicle_id' => $vehicleId
+                            ]);
+                            logSync("Fahrzeug {$fireVehicle['name']} (ID: $vehicleId) zu Fire Incident #$fireIncidentId hinzugefügt", 'INFO');
+                        }
+                    }
+                }
+
+                // Erstelle Log-Eintrag mit System als Benutzer (created_by = NULL)
+                $insertLogStmt = $pdo->prepare("
+                    INSERT INTO intra_fire_incident_log 
+                    (incident_id, action_type, action_description, vehicle_id, operator_id, created_by, created_at) 
+                    VALUES (:incident_id, 'created', :action_description, NULL, NULL, NULL, NOW())
+                ");
+                $insertLogStmt->execute([
+                    ':incident_id' => $fireIncidentId,
+                    ':action_description' => 'Einsatz automatisch durch Sync erstellt'
+                ]);
+
+                $createdFireIncidents++;
+                logSync("Fire Incident #$fireIncidentId erfolgreich erstellt mit " . count($fireVehicles) . " Fahrzeugen", 'INFO');
+            } else {
+                $fireIncidentId = (int)$existingFireIncident['id'];
+                logSync("Fire Incident #$fireIncidentId existiert bereits für Dispatch #$dispatchId", 'INFO');
+
+                // Füge neue Fahrzeuge hinzu, falls noch nicht vorhanden
+                foreach ($fireVehicles as $fireVehicle) {
+                    $getVehicleIdStmt = $pdo->prepare("
+                        SELECT id FROM intra_fahrzeuge 
+                        WHERE identifier = :identifier 
+                        LIMIT 1
+                    ");
+                    $getVehicleIdStmt->execute([':identifier' => $fireVehicle['identifier']]);
+                    $vehicleIdRow = $getVehicleIdStmt->fetch(PDO::FETCH_ASSOC);
+
+                    if ($vehicleIdRow) {
+                        $vehicleId = (int)$vehicleIdRow['id'];
+
+                        $checkVehicleAssignmentStmt = $pdo->prepare("
+                            SELECT id FROM intra_fire_incident_vehicles 
+                            WHERE incident_id = :incident_id AND vehicle_id = :vehicle_id
+                            LIMIT 1
+                        ");
+                        $checkVehicleAssignmentStmt->execute([
+                            ':incident_id' => $fireIncidentId,
+                            ':vehicle_id' => $vehicleId
+                        ]);
+
+                        if (!$checkVehicleAssignmentStmt->fetch()) {
+                            $insertVehicleStmt = $pdo->prepare("
+                                INSERT INTO intra_fire_incident_vehicles 
+                                (incident_id, vehicle_id, from_other_org, created_by, created_at) 
+                                VALUES (:incident_id, :vehicle_id, 0, NULL, NOW())
+                            ");
+                            $insertVehicleStmt->execute([
+                                ':incident_id' => $fireIncidentId,
+                                ':vehicle_id' => $vehicleId
+                            ]);
+
+                            // Log-Eintrag für hinzugefügtes Fahrzeug
+                            $insertLogStmt = $pdo->prepare("
+                                INSERT INTO intra_fire_incident_log 
+                                (incident_id, action_type, action_description, vehicle_id, operator_id, created_by, created_at) 
+                                VALUES (:incident_id, 'vehicle_added', :action_description, :vehicle_id, NULL, NULL, NOW())
+                            ");
+                            $insertLogStmt->execute([
+                                ':incident_id' => $fireIncidentId,
+                                ':vehicle_id' => $vehicleId,
+                                ':action_description' => "Fahrzeug {$fireVehicle['name']} durch Sync hinzugefügt"
+                            ]);
+
+                            logSync("Fahrzeug {$fireVehicle['name']} (ID: $vehicleId) zu bestehendem Fire Incident #$fireIncidentId hinzugefügt", 'INFO');
+                        }
+                    }
+                }
+            }
+        }
 
         $checkExistingStmt = $pdo->prepare("
             SELECT enr
@@ -457,7 +734,7 @@ try {
 
     $pdo->commit();
 
-    logSync("Synchronisation abgeschlossen: Einsätze=$processedDispatches, Einträge erstellt=$createdEntries, Übersprungen=$skippedDispatches", 'INFO');
+    logSync("Synchronisation abgeschlossen: Einsätze=$processedDispatches, Einträge erstellt=$createdEntries, Übersprungen=$skippedDispatches, Fire Incidents=$createdFireIncidents", 'INFO');
 
     echo json_encode([
         'success' => true,
@@ -467,7 +744,8 @@ try {
             'unique_dispatches' => count($vehiclesByDispatch),
             'processed_dispatches' => $processedDispatches,
             'created_entries' => $createdEntries,
-            'skipped_dispatches' => $skippedDispatches
+            'skipped_dispatches' => $skippedDispatches,
+            'created_fire_incidents' => $createdFireIncidents
         ]
     ]);
 } catch (PDOException $e) {
