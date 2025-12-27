@@ -46,7 +46,7 @@
                             '9' => ['text' => '9', 'bg' => '#798e6d', 'color' => '#000000'],
                             'N' => ['text' => 'N', 'bg' => '#e3050e', 'color' => '#ffff00'],
                             '#' => ['text' => '#', 'bg' => '#d0b352', 'color' => '#000000'],
-                            'C' => ['text' => 'C', 'bg' => '#e0050e', 'color' => '#ffffff'],
+                            'C' => ['text' => 'C', 'bg' => '#e6d611', 'color' => '#000000'],
                         ];
 
                         // Default: Keine Daten vom EMD-Sync
