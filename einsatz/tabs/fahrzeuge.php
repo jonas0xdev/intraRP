@@ -19,6 +19,7 @@
                     <tr>
                         <th>Art</th>
                         <th>Rufname</th>
+                        <th>Status</th>
                         <th>Identifier</th>
                         <th style="width: 120px;">Aktion</th>
                     </tr>
@@ -29,10 +30,41 @@
                         $art = $av['sys_type'] ?: ($av['vehicle_name'] ?? '-');
                         $ruf = $av['radio_name'] ?: ($av['vehicle_identifier'] ?? ($av['sys_name'] ?? '-'));
                         $ident = $av['vehicle_identifier'] ?? $av['sys_name'] ?? '-';
+                        $currentStatus = $av['current_status'] ?? null;
+
+                        // Status-Styling konfigurieren
+                        $statusConfig = [
+                            '0' => ['text' => '0', 'bg' => '#e0050e', 'color' => '#ffffff'],
+                            '1' => ['text' => '1', 'bg' => '#5adf07', 'color' => '#000000'],
+                            '2' => ['text' => '2', 'bg' => '#057b09', 'color' => '#ffffff'],
+                            '3' => ['text' => '3', 'bg' => '#e6d611', 'color' => '#000000'],
+                            '4' => ['text' => '4', 'bg' => '#832209', 'color' => '#ffffff'],
+                            '5' => ['text' => '5', 'bg' => '#e99610', 'color' => '#000000'],
+                            '6' => ['text' => '6', 'bg' => '#848292', 'color' => '#000000'],
+                            '7' => ['text' => '7', 'bg' => '#0adfe1', 'color' => '#000000'],
+                            '8' => ['text' => '8', 'bg' => '#69026a', 'color' => '#ffffff'],
+                            '9' => ['text' => '9', 'bg' => '#798e6d', 'color' => '#000000'],
+                            'N' => ['text' => 'N', 'bg' => '#e3050e', 'color' => '#ffff00'],
+                            '#' => ['text' => '#', 'bg' => '#d0b352', 'color' => '#000000'],
+                            'C' => ['text' => 'C', 'bg' => '#e0050e', 'color' => '#ffffff'],
+                        ];
+
+                        // Default: Keine Daten vom EMD-Sync
+                        $statusDisplay = $statusConfig['6']; // Default styling
+                        $statusDisplay['text'] = 'NG';
+
+                        if ($currentStatus !== null && isset($statusConfig[$currentStatus])) {
+                            $statusDisplay = $statusConfig[$currentStatus];
+                        }
                         ?>
                         <tr>
                             <td><?= htmlspecialchars($art) ?></td>
                             <td><?= htmlspecialchars($ruf) ?></td>
+                            <td>
+                                <div class="emd-status-box" style="background-color: <?= $statusDisplay['bg'] ?>; color: <?= $statusDisplay['color'] ?>;">
+                                    <?= htmlspecialchars($statusDisplay['text']) ?>
+                                </div>
+                            </td>
                             <td><?= htmlspecialchars($ident) ?></td>
                             <td class="text-end">
                                 <?php if (!$incident['finalized']): ?>
@@ -108,3 +140,17 @@
         </div>
     <?php endif; ?>
 </div>
+
+<style>
+    .emd-status-box {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 35px;
+        height: 35px;
+        font-weight: bold;
+        font-size: 14px;
+        border: 1px solid rgba(0, 0, 0, 0.2);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+</style>

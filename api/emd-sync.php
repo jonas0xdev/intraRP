@@ -207,6 +207,51 @@ function handleStatusUpdates($data, $pdo)
                 logSync("Status $statusValue für Einsatz $enr war bereits gesetzt oder Spalte existiert nicht", 'WARNING');
             }
 
+            // Zusätzlich: Update Fire Incident Status für Feuerwehr-Fahrzeuge (rd_type = 3)
+            if ($rdType === 3) {
+                // Suche nach Fire Incident mit dieser Einsatznummer
+                $findFireIncidentStmt = $pdo->prepare("
+                    SELECT id FROM intra_fire_incidents 
+                    WHERE incident_number = :incident_number 
+                    LIMIT 1
+                ");
+                $findFireIncidentStmt->execute([':incident_number' => (string)$missionNumber]);
+                $fireIncidentRow = $findFireIncidentStmt->fetch(PDO::FETCH_ASSOC);
+
+                if ($fireIncidentRow) {
+                    $fireIncidentId = (int)$fireIncidentRow['id'];
+
+                    // Hole die vehicle_id aus der Datenbank
+                    $getVehicleIdStmt = $pdo->prepare("
+                        SELECT id FROM intra_fahrzeuge 
+                        WHERE identifier = :identifier 
+                        LIMIT 1
+                    ");
+                    $getVehicleIdStmt->execute([':identifier' => $vehicleIdentifier]);
+                    $vehicleIdRow = $getVehicleIdStmt->fetch(PDO::FETCH_ASSOC);
+
+                    if ($vehicleIdRow) {
+                        $vehicleId = (int)$vehicleIdRow['id'];
+
+                        // Update Status in intra_fire_incident_vehicles
+                        $updateFireStatusStmt = $pdo->prepare("
+                            UPDATE intra_fire_incident_vehicles 
+                            SET current_status = :status, status_updated_at = NOW() 
+                            WHERE incident_id = :incident_id AND vehicle_id = :vehicle_id
+                        ");
+                        $updateFireStatusStmt->execute([
+                            ':status' => (string)$statusValue,
+                            ':incident_id' => $fireIncidentId,
+                            ':vehicle_id' => $vehicleId
+                        ]);
+
+                        if ($updateFireStatusStmt->rowCount() > 0) {
+                            logSync("Fire Incident Status aktualisiert: Fahrzeug $sender (ID: $vehicleId) in Incident #$fireIncidentId auf Status $statusValue", 'INFO');
+                        }
+                    }
+                }
+            }
+
             // Nur zu successfulIds hinzufügen, wenn mindestens ein Update erfolgreich war
             if ($updatedThisStatus) {
                 $successfulIds[] = $statusId;
