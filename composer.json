@@ -27,6 +27,9 @@
     "db:validate": "@php setup/validate-migrations.php",
     "post-install-cmd": [
       "@db:migrate"
+    ],
+    "post-update-cmd": [
+      "@db:migrate"
     ]
   }
 }
