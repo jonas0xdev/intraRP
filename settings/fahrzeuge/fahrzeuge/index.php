@@ -350,7 +350,7 @@ if (!Permissions::check(['admin', 'vehicles.view'])) {
                     document.getElementById('fahrzeug-veh_typ').value = this.dataset.type;
                     document.getElementById('fahrzeug-priority').value = this.dataset.priority;
                     document.getElementById('fahrzeug-identifier').value = this.dataset.identifier;
-                    document.getElementById('new-fahrzeug-rd_type').value = this.dataset.rdType || '0';
+                    document.getElementById('fahrzeug-rd_type').value = this.dataset.rd_type || '0';
                     document.getElementById('fahrzeug-active').checked = this.dataset.active == 1;
 
                     // Reset preview first
