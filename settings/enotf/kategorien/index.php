@@ -39,7 +39,7 @@ if (!Permissions::check(['admin', 'edivi.view'])) {
                 <div class="col mb-5">
                     <hr class="text-light my-3">
                     <div class="d-flex justify-content-between align-items-center mb-5">
-                        <h1 class="mb-0">eNOTF Kategorien Verwaltung</h1>
+                        <h1 class="mb-0">Schnellzugriff-Kategorien Verwaltung</h1>
 
                         <?php if (Permissions::check('admin')) : ?>
                             <div class="d-flex gap-2">
