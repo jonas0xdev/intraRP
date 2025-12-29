@@ -193,58 +193,69 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
                             </div>
                         </div>
                         <div class="col">
-                            <div class="row">
-                                <div class="col">
-                                    <div class="accordion" id="schnellzugriffAccordion" data-theme="dark">
-                                        <div class="accordion-item">
-                                            <h2 class="accordion-header" id="schnellzugriffHeading">
-                                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#schnellzugriffCollapse" aria-expanded="true" aria-controls="schnellzugriffCollapse">
-                                                    Schnellzugriff
-                                                </button>
-                                            </h2>
-                                            <div id="schnellzugriffCollapse" class="accordion-collapse collapse show" aria-labelledby="schnellzugriffHeading" data-bs-parent="#schnellzugriffAccordion">
-                                                <div class="accordion-body">
-                                                    <div class="row">
-                                                        <div class="col p-2">
-                                                            <a href="https://www.dgg.bam.de/quickinfo/de/" class="w-100 edivi__nidabutton" style="display:inline-block;text-align:center"><i class="fa-solid fa-radiation"></i> Datenb. Gefahrgut</a>
-                                                        </div>
-                                                        <div class="col p-2">
-                                                            <a href="https://www.openstreetmap.org/" class="w-100 edivi__nidabutton" style="display:inline-block;text-align:center"><i class="fa-solid fa-map"></i> Openstreetmap</a>
-                                                        </div>
-                                                    </div>
-                                                    <div class="row">
-                                                        <div class="col-6 p-2">
-                                                            <a href="fahrzeuginfo.php" class="w-100 edivi__nidabutton" style="display:inline-block;text-align:center"><i class="fa-solid fa-ambulance"></i> Fahrzeuginfo</a>
-                                                        </div>
+                            <?php
+                            // Load all active categories
+                            $stmt_categories = $pdo->prepare("SELECT * FROM intra_enotf_categories WHERE active = 1 ORDER BY sort_order ASC");
+                            $stmt_categories->execute();
+                            $all_categories = $stmt_categories->fetchAll(PDO::FETCH_ASSOC);
+
+                            foreach ($all_categories as $index => $category):
+                                $accordion_id = 'accordion' . $category['id'];
+                                $heading_id = 'heading' . $category['id'];
+                                $collapse_id = 'collapse' . $category['id'];
+                            ?>
+                                <div class="row <?= $index > 0 ? 'mt-2' : '' ?>">
+                                    <div class="col">
+                                        <div class="accordion" id="<?= $accordion_id ?>" data-theme="dark">
+                                            <div class="accordion-item">
+                                                <h2 class="accordion-header" id="<?= $heading_id ?>">
+                                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#<?= $collapse_id ?>" aria-expanded="true" aria-controls="<?= $collapse_id ?>">
+                                                        <?= htmlspecialchars($category['name']) ?>
+                                                    </button>
+                                                </h2>
+                                                <div id="<?= $collapse_id ?>" class="accordion-collapse collapse show" aria-labelledby="<?= $heading_id ?>" data-bs-parent="#<?= $accordion_id ?>">
+                                                    <div class="accordion-body">
+                                                        <?php
+                                                        // Load links for this category
+                                                        $stmt = $pdo->prepare("SELECT * FROM intra_enotf_quicklinks WHERE category_slug = :slug AND active = 1 ORDER BY sort_order ASC");
+                                                        $stmt->execute([':slug' => $category['slug']]);
+                                                        $quicklinks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                                                        $currentRow = [];
+                                                        foreach ($quicklinks as $link) {
+                                                            // Start a new row if current row is empty
+                                                            if (empty($currentRow)) {
+                                                                echo '<div class="row">';
+                                                            }
+
+                                                            $currentRow[] = $link;
+
+                                                            // Output the link
+                                                            echo '<div class="' . htmlspecialchars($link['col_width']) . ' p-2">';
+                                                            echo '<a href="' . htmlspecialchars($link['url']) . '" class="w-100 edivi__nidabutton" style="display:inline-block;text-align:center">';
+                                                            echo '<i class="' . htmlspecialchars($link['icon']) . '"></i> ' . htmlspecialchars($link['title']);
+                                                            echo '</a>';
+                                                            echo '</div>';
+
+                                                            // Close row after 2 items or if it's the last item
+                                                            if (count($currentRow) >= 2 || $link === end($quicklinks)) {
+                                                                echo '</div>';
+                                                                $currentRow = [];
+                                                            }
+                                                        }
+
+                                                        // If no links found, show a message
+                                                        if (empty($quicklinks)) {
+                                                            echo '<p class="text-muted">Keine Links verfügbar.</p>';
+                                                        }
+                                                        ?>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row mt-2">
-                                <div class="col">
-                                    <div class="accordion" id="verwaltungAccordion" data-theme="dark">
-                                        <div class="accordion-item">
-                                            <h2 class="accordion-header" id="verwaltungHeading">
-                                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#verwaltungCollapse" aria-expanded="true" aria-controls="verwaltungCollapse">
-                                                    Verwaltung
-                                                </button>
-                                            </h2>
-                                            <div id="verwaltungCollapse" class="accordion-collapse collapse show" aria-labelledby="verwaltungHeading" data-bs-parent="#verwaltungAccordion">
-                                                <div class="accordion-body">
-                                                    <div class="row">
-                                                        <div class="col-6 p-2">
-                                                            <a href="<?= BASE_PATH ?>index.php" class="w-100 edivi__nidabutton" style="display:inline-block;text-align:center"><i class="fa-solid fa-toolbox"></i> Administration</a>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <?php endforeach; ?>
                         </div>
                     </div>
                 </div>

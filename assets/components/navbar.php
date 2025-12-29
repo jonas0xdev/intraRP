@@ -512,6 +512,7 @@ try {
                                         <ul class="list-unstyled">
                                             <li><a href="<?= BASE_PATH ?>settings/pois/index.php"><i class="fa-solid fa-map-marker-alt"></i> POIs</a></li>
                                             <li><a href="<?= BASE_PATH ?>settings/medikamente/index.php"><i class="fa-solid fa-pills"></i> Medikamente</a></li>
+                                            <li><a href="<?= BASE_PATH ?>settings/enotf/index.php"><i class="fa-solid fa-link"></i> Schnellzugriff</a></li>
                                         </ul>
                                     </div>
                                 <?php endif; ?>
@@ -603,6 +604,7 @@ try {
                 <?php if (Permissions::check(['admin', 'edivi.view'])): ?>
                     <a href="<?= BASE_PATH ?>settings/pois/index.php" class="offcanvas-link"><i class="fa-solid fa-map-marker-alt"></i> POIs</a>
                     <a href="<?= BASE_PATH ?>settings/medikamente/index.php" class="offcanvas-link"><i class="fa-solid fa-pills"></i> Medikamente</a>
+                    <a href="<?= BASE_PATH ?>settings/enotf/index.php" class="offcanvas-link"><i class="fa-solid fa-link"></i> Schnellzugriff</a>
                 <?php endif; ?>
                 <?php if (Permissions::check(['admin', 'dashboard.manage'])): ?>
                     <a href="<?= BASE_PATH ?>settings/dashboard/index.php" class="offcanvas-link"><i class="fa-solid fa-table-columns"></i> Dashboard</a>

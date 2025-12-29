@@ -45,7 +45,7 @@
                     if (selectedOption && !selectedOption.disabled) {
                         isFilled = true;
                     }
-                } else if (input.value.trim() !== '') {
+                } else if (input.value && input.value.trim() !== '') {
                     isFilled = true;
                 }
 
