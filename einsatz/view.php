@@ -431,10 +431,10 @@ function fmt_elapsed(int|string $seconds): string
         // Initialize custom dropdowns when DOM is ready
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', function() {
-                eNotfCustomDropdown.init();
+                eNOTFCustomDropdown.init();
             });
         } else {
-            eNotfCustomDropdown.init();
+            eNOTFCustomDropdown.init();
         }
     </script>
 </body>

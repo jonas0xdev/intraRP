@@ -5,10 +5,10 @@
  * Usage:
  * 1. Add data-custom-dropdown="true" to select elements
  * 2. Set data-search-threshold="10" to enable search for dropdowns with more than 10 options (default: 10)
- * 3. Call eNotfCustomDropdown.init() when DOM is ready
+ * 3. Call eNOTFCustomDropdown.init() when DOM is ready
  */
 
-const eNotfCustomDropdown = {
+const eNOTFCustomDropdown = {
   // Configuration
   config: {
     defaultSearchThreshold: 10, // Auto-enable search for dropdowns with more than X options
@@ -517,8 +517,8 @@ const eNotfCustomDropdown = {
 // Auto-initialize when DOM is ready
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", () => {
-    eNotfCustomDropdown.init();
+    eNOTFCustomDropdown.init();
   });
 } else {
-  eNotfCustomDropdown.init();
+  eNOTFCustomDropdown.init();
 }

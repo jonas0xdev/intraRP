@@ -373,7 +373,14 @@ $migrationFiles = [
     ['file' => 'alter_fire_incident_vehicles_27122025_add_status.php', 'type' => 'alter'],
     ['file' => 'alter_fire_incidents_27122025_add_caller_fields.php', 'type' => 'alter'],
     ['file' => 'alter_fire_incidents_27122025_add_archived.php', 'type' => 'alter'],
-    ['file' => 'alter_intra_fire_incidents_27122025_add_gta_coordinates.php', 'type' => 'alter']
+    ['file' => 'alter_intra_fire_incidents_27122025_add_gta_coordinates.php', 'type' => 'alter'],
+
+    // 29.12.2025
+    ['file' => 'create_intra_enotf_quicklinks_29122025.php', 'type' => 'create'],
+    ['file' => 'insert_intra_enotf_quicklinks_29122025.php', 'type' => 'insert'],
+    ['file' => 'create_intra_enotf_categories_29122025.php', 'type' => 'create'],
+    ['file' => 'insert_intra_enotf_categories_29122025.php', 'type' => 'insert'],
+    ['file' => 'alter_intra_enotf_quicklinks_29122025_category_slug.php', 'type' => 'alter']
 ];
 
 $executed = 0;

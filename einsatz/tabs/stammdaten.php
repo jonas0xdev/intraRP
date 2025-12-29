@@ -39,7 +39,7 @@ $startTime = $dtStart ? $dtStart->format('H:i') : '';
             </div>
             <div class="col-md-4">
                 <label class="form-label">Einsatzleiter *</label>
-                <select class="form-select" name="edit_leader_id" <?= $incident['finalized'] ? 'disabled' : '' ?> required>
+                <select class="form-select" name="edit_leader_id" data-custom-dropdown="true" data-search-threshold="5" <?= $incident['finalized'] ? 'disabled' : '' ?> required>
                     <option value="">– auswählen –</option>
                     <?php
                     $leaders = $pdo->query("SELECT id, fullname FROM intra_mitarbeiter ORDER BY fullname ASC")->fetchAll(PDO::FETCH_ASSOC);
