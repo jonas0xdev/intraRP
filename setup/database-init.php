@@ -380,7 +380,10 @@ $migrationFiles = [
     ['file' => 'insert_intra_enotf_quicklinks_29122025.php', 'type' => 'insert'],
     ['file' => 'create_intra_enotf_categories_29122025.php', 'type' => 'create'],
     ['file' => 'insert_intra_enotf_categories_29122025.php', 'type' => 'insert'],
-    ['file' => 'alter_intra_enotf_quicklinks_29122025_category_slug.php', 'type' => 'alter']
+    ['file' => 'alter_intra_enotf_quicklinks_29122025_category_slug.php', 'type' => 'alter'],
+
+    // 30.12.2025
+    ['file' => 'alter_intra_edivi_30122025_billing.php', 'type' => 'alter']
 ];
 
 $executed = 0;
