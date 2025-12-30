@@ -150,49 +150,35 @@ function handleBillingRequest($data, $pdo)
 
 // Hauptlogik
 try {
-    // API-Key Validierung
-    $headers = getallheaders();
-    $apiKey = $headers['intraRP_API_Key'] ?? $_POST['intraRP_API_Key'] ?? $_GET['intraRP_API_Key'] ?? null;
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        http_response_code(405);
+        echo json_encode(['success' => false, 'error' => 'Methode nicht erlaubt']);
+        exit;
+    }
 
-    if (!$apiKey) {
-        logSync('API-Key fehlt', 'WARNING');
+    $rawInput = file_get_contents('php://input');
+    $receivedData = json_decode($rawInput, true);
+
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        logSync('Ungültiges JSON empfangen: ' . json_last_error_msg(), 'ERROR');
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'Ungültiges JSON']);
+        exit;
+    }
+
+    if (!isset($receivedData['intraRP_API_Key']) || $receivedData['intraRP_API_Key'] !== API_KEY) {
+        logSync('Unberechtigter Zugriffsversuch', 'WARNING');
         http_response_code(401);
         echo json_encode([
             'success' => false,
-            'error' => 'Unauthorized',
-            'message' => 'API-Key erforderlich'
+            'error' => 'Nicht autorisiert',
+            'hint' => 'API-Key stimmt nicht überein'
         ]);
         exit;
-    }
-
-    // Validiere API-Key gegen Config
-    if (!defined('API_KEY') || $apiKey !== API_KEY) {
-        logSync('Ungültiger API-Key: ' . substr($apiKey, 0, 10) . '...', 'WARNING');
-        http_response_code(403);
-        echo json_encode([
-            'success' => false,
-            'error' => 'Forbidden',
-            'message' => 'Ungültiger API-Key'
-        ]);
-        exit;
-    }
-
-    // Request-Body parsen
-    $requestBody = file_get_contents('php://input');
-    $data = json_decode($requestBody, true);
-
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        // Fallback auf POST-Parameter
-        $data = $_POST;
-    }
-
-    // Stelle sicher, dass API-Key auch im Body vorhanden ist
-    if (isset($data['intraRP_API_Key'])) {
-        unset($data['intraRP_API_Key']);
     }
 
     logSync('Verarbeite Billing-Request', 'INFO');
-    handleBillingRequest($data, $pdo);
+    handleBillingRequest($receivedData, $pdo);
 } catch (Exception $e) {
     logSync('Kritischer Fehler: ' . $e->getMessage(), 'ERROR');
     http_response_code(500);
