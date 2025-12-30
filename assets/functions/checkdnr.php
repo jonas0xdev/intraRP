@@ -5,14 +5,15 @@ require __DIR__ . '/../../assets/config/database.php';
 header('Content-Type: text/plain');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $dienstnr = $_POST['dienstnr'] ?? '';
+    $dienstnr = trim($_POST['dienstnr'] ?? '');
 
     if (empty($dienstnr)) {
         echo 'error';
         exit;
     }
 
-    if (!is_numeric($dienstnr)) {
+    // Validate format: allow letters, numbers, and hyphens, but require at least one number
+    if (!preg_match('/^(?=.*[0-9])[A-Za-z0-9\-]+$/', $dienstnr)) {
         echo 'error';
         exit;
     }

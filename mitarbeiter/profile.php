@@ -86,8 +86,16 @@ if (isset($_POST['new'])) {
         $dienstgrad = $_POST['dienstgrad'];
         $discordtag = $_POST['discordtag'];
         $telefonnr = $_POST['telefonnr'];
-        $dienstnr = $_POST['dienstnr'];
+        $dienstnr = trim($_POST['dienstnr']);
         $qualird = $_POST['qualird'];
+
+        // Validate dienstnr format: allow letters, numbers, and hyphens, but require at least one number
+        if (!empty($dienstnr) && !preg_match('/^(?=.*[0-9])[A-Za-z0-9\-]+$/', $dienstnr)) {
+            $_SESSION['message'] = 'Ungültiges Format für Dienstnummer. Muss mindestens eine Zahl enthalten (z.B. RD-001, BF01).';
+            $_SESSION['message_type'] = 'danger';
+            header("Location: " . BASE_PATH . "mitarbeiter/profile.php?id=" . $id);
+            exit;
+        }
         $qualifw2 = $_POST['qualifw2'];
         $geschlecht = $_POST['geschlecht'];
         $zusatzqual = $_POST['zusatzqual'];
@@ -378,7 +386,7 @@ if (isset($_POST['new'])) {
         if (!empty($discordtag)) {
             $notificationManager = new NotificationManager($pdo);
             $recipientUserId = $notificationManager->getUserIdByDiscordTag($discordtag);
-            
+
             if ($recipientUserId) {
                 $docTypeNames = [
                     1 => 'Beförderungsurkunde',
@@ -393,7 +401,7 @@ if (isset($_POST['new'])) {
                     10 => 'Dienstentfernung'
                 ];
                 $docTypeName = $docTypeNames[$docType] ?? 'Dokument';
-                
+
                 $notificationManager->create(
                     $recipientUserId,
                     'dokument',
@@ -619,7 +627,7 @@ if (isset($_POST['new'])) {
                                                 </tr>
                                                 <tr>
                                                     <td class="fw-bold">Dienstnummer</td>
-                                                    <td><input class="form-control" type="number" name="dienstnr" id="dienstnr" value="<?= $row['dienstnr'] ?>"></td>
+                                                    <td><input class="form-control" type="text" name="dienstnr" id="dienstnr" value="<?= $row['dienstnr'] ?>" pattern="^(?=.*[0-9])[A-Za-z0-9\-]+$" title="Muss mindestens eine Zahl enthalten. Buchstaben, Zahlen und Bindestriche erlaubt (z.B. RD-001, BF01)"></td>
                                                 </tr>
                                                 <tr>
                                                     <td class="fw-bold">Position</td>
@@ -652,7 +660,7 @@ if (isset($_POST['new'])) {
                                     <div class="log-container">
                                         <?php include __DIR__ . '/../assets/components/profiles/logs/main.php' ?>
                                     </div>
-                                </details>
+                                    </details>
                             </div>
                         </div>
                     </div>

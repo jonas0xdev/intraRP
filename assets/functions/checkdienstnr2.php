@@ -42,6 +42,12 @@ try {
 
     $dienstnr = trim($input['dienstnr']);
 
+    // Validate format: allow letters, numbers, and hyphens, but require at least one number
+    if (!preg_match('/^(?=.*[0-9])[A-Za-z0-9\-]+$/', $dienstnr)) {
+        echo json_encode(['error' => 'Ungültiges Format für Dienstnummer. Muss mindestens eine Zahl enthalten.']);
+        exit();
+    }
+
     // Dienstnummer in der Mitarbeiter-Tabelle suchen
     $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM intra_mitarbeiter WHERE dienstnr = :dienstnr");
     $stmt->execute(['dienstnr' => $dienstnr]);

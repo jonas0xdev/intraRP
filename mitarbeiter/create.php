@@ -69,10 +69,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $geschlecht = $_POST['geschlecht'] ?? '';
         $discordtag = $_POST['discordtag'] ?? '';
         $telefonnr = $_POST['telefonnr'] ?? '';
-        $dienstnr = $_POST['dienstnr'] ?? '';
+        $dienstnr = trim($_POST['dienstnr'] ?? '');
         $einstdatum = $_POST['einstdatum'] ?? '';
         $qualird = $resultr['id'];
         $qualifw = $resultf['id'];
+
+        // Validate dienstnr format: allow letters, numbers, and hyphens, but require at least one number
+        if (!empty($dienstnr) && !preg_match('/^(?=.*[0-9])[A-Za-z0-9\-]+$/', $dienstnr)) {
+            $response['message'] = "Ungültiges Format für Dienstnummer. Muss mindestens eine Zahl enthalten (z.B. RD-001, BF01).";
+            echo json_encode($response);
+            exit;
+        }
 
         $checkStmt = $pdo->prepare("SELECT COUNT(*) FROM intra_mitarbeiter WHERE dienstnr = :dienstnr");
         $checkStmt->execute(['dienstnr' => $dienstnr]);
@@ -313,9 +320,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                             value="<?= $fromBewerbung && !empty($bewerbungData['telefonnr']) ? htmlspecialchars($bewerbungData['telefonnr']) : '0176 00 00 00 0' ?>"></td>
                                                     <td class="fw-bold text-center">Dienstnummer</td>
                                                     <td class="dienstnr-container">
-                                                        <input class="form-control" type="number" name="dienstnr" id="dienstnr" value="<?= $fromBewerbung ? htmlspecialchars($bewerbungData['dienstnr']) : '' ?>" oninput="checkDienstnrAvailability()" required>
+                                                        <input class="form-control" type="text" name="dienstnr" id="dienstnr" value="<?= $fromBewerbung ? htmlspecialchars($bewerbungData['dienstnr']) : '' ?>" oninput="checkDienstnrAvailability()" pattern="^(?=.*[0-9])[A-Za-z0-9\-]+$" title="Muss mindestens eine Zahl enthalten. Buchstaben, Zahlen und Bindestriche erlaubt (z.B. RD-001, BF01)" required>
                                                         <div id="dienstnr-status" class="dienstnr-status"></div>
-                                                        <div class="invalid-feedback">Bitte gebe eine Dienstnummer ein.</div>
+                                                        <div class="invalid-feedback">Bitte gebe eine Dienstnummer mit mindestens einer Zahl ein (z.B. RD-001, RD001, BF01).</div>
                                                         <div id="dienstnr-feedback" class="text-danger small" style="display: none;"></div>
                                                     </td>
                                                 </tr>
@@ -363,6 +370,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 return;
             }
 
+            // Client-side validation: check if at least one number is present
+            const hasNumber = /[0-9]/.test(dienstnr);
+            const validFormat = /^[A-Za-z0-9\-]+$/.test(dienstnr);
+
+            if (!validFormat || !hasNumber) {
+                statusElement.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+                statusElement.classList.add('unavailable');
+                dienstnrInput.classList.add('invalid');
+                if (!hasNumber) {
+                    feedbackElement.textContent = 'Dienstnummer muss mindestens eine Zahl enthalten (z.B. RD-001, BF01).';
+                } else {
+                    feedbackElement.textContent = 'Nur Buchstaben, Zahlen und Bindestriche erlaubt.';
+                }
+                feedbackElement.style.display = 'block';
+                isDienstnrAvailable = false;
+                return;
+            }
+
             statusElement.innerHTML = '<div class="spinner"></div>';
             statusElement.classList.add('loading');
 
@@ -391,6 +416,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             statusElement.classList.add('available');
                             dienstnrInput.classList.add('valid');
                             isDienstnrAvailable = true;
+                        } else if (response === 'error') {
+                            statusElement.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+                            statusElement.classList.add('unavailable');
+                            dienstnrInput.classList.add('invalid');
+                            feedbackElement.textContent = 'Ungültiges Format. Dienstnummer muss mindestens eine Zahl enthalten.';
+                            feedbackElement.style.display = 'block';
+                            isDienstnrAvailable = false;
                         } else {
                             statusElement.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
                             statusElement.classList.add('unavailable');
