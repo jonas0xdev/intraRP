@@ -4,21 +4,9 @@
  * API for managing tactical map markers for fire incidents
  */
 
-// Session-Konfiguration für FiveM + CloudFlare
-ini_set('session.gc_maxlifetime', '86400');      // 24 Stunden
-ini_set('session.cookie_lifetime', '86400');     // 24 Stunden
-ini_set('session.use_strict_mode', '0');
-ini_set('session.cookie_path', '/');             // Global
-ini_set('session.cookie_httponly', '1');         // XSS-Schutz
-
-// HTTPS-Detection für SameSite=None
 if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
-    ini_set('session. cookie_samesite', 'None');
+    ini_set('session.cookie_samesite', 'None');
     ini_set('session.cookie_secure', '1');
-} else {
-    // Fallback für HTTP
-    ini_set('session.cookie_samesite', 'Lax');
-    ini_set('session.cookie_secure', '0');
 }
 
 session_start();
