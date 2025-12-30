@@ -85,6 +85,12 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
         .name-item:hover {
             background-color: #555;
         }
+
+        /* Fix padding for invalid qualification select fields */
+        select[name="fahrerquali"].is-invalid,
+        select[name="beifahrerquali"].is-invalid {
+            padding-right: 0.5rem !important;
+        }
     </style>
 </head>
 
@@ -254,15 +260,6 @@ $pinEnabled = (defined('ENOTF_USE_PIN') && ENOTF_USE_PIN === true) ? 'true' : 'f
 
             [fName.value, bName.value] = [bName.value, fName.value];
             [fQuali.value, bQuali.value] = [bQuali.value, fQuali.value];
-        });
-    </script>
-
-    <script>
-        var modalCloseButton = document.querySelector('#myModal4 .btn-close');
-        var freigeberInput = document.getElementById('freigeber');
-
-        modalCloseButton.addEventListener('click', function() {
-            freigeberInput.value = '';
         });
     </script>
     <script src="<?= BASE_PATH ?>assets/js/pin_activity.js"></script>
