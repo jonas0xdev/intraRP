@@ -71,19 +71,26 @@ function handleBillingRequest($data, $pdo)
 
         // Hole alle Protokolle, die noch nicht abgerechnet wurden (billing_sent = 0 oder NULL)
         // und die vor oder zum angegebenen Timestamp erstellt wurden
+        // Hole auch die Rufnamen der Fahrzeuge über JOIN
         $stmt = $pdo->prepare("
             SELECT 
-                id,
-                enr as missionNumber,
-                patname as name,
-                patgebdat as birthdate,
-                transportziel,
-                created_at
-            FROM intra_edivi 
-            WHERE (billing_sent IS NULL OR billing_sent = 0)
-            AND freigegeben = 1
-            AND created_at <= :date
-            ORDER BY created_at ASC
+                e.id,
+                e.enr as missionNumber,
+                e.patname as name,
+                e.patgebdat as birthdate,
+                e.transportziel,
+                e.prot_by,
+                e.fzg_transp,
+                e.fzg_na,
+                e.created_at,
+                COALESCE(fzg_t.name, fzg_na_tbl.name) as vehicle_callsign
+            FROM intra_edivi e
+            LEFT JOIN intra_edivi_fahrzeuge fzg_t ON e.fzg_transp = fzg_t.identifier
+            LEFT JOIN intra_edivi_fahrzeuge fzg_na_tbl ON e.fzg_na = fzg_na_tbl.identifier
+            WHERE (e.billing_sent IS NULL OR e.billing_sent = 0)
+            AND e.freigegeben = 1
+            AND e.created_at <= :date
+            ORDER BY e.created_at ASC
         ");
         $stmt->execute(['date' => $date]);
         $protocols = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -112,7 +119,9 @@ function handleBillingRequest($data, $pdo)
                 'name' => $protocol['name'] ?? '',
                 'birthdate' => $protocol['birthdate'] ?? '',
                 'transport' => $transport,
-                'missionNumber' => $protocol['missionNumber'] ?? ''
+                'missionNumber' => $protocol['missionNumber'] ?? '',
+                'protocolType' => (int)($protocol['prot_by'] ?? 0),
+                'vehicleCallsign' => $protocol['vehicle_callsign'] ?? ''
             ];
         }
 
